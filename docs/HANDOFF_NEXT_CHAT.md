@@ -1,6 +1,6 @@
 # Handoff — Shelly BLE management
 
-Status: **2026-09-26 — BLE read-only Device expansion software-complete and accepted on Samsung S22+**
+Status: **2026-09-26 — BLE read-only management + shared Plug dashboard UX accepted on Samsung S22+**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -25,7 +25,13 @@ Local Agent bindings are conversation-scoped. Always use the fresh bootstrap sup
 Exact product head installed for final S22+ hardware acceptance:
 
 ```text
-dfff96748e81f55baff22fa4b9d635b4e436e859
+4906c346ba7488c3943111137abe533719352294
+```
+
+Final APK SHA-256:
+
+```text
+c72110b8d4016cdb412711f5f42a196b83a90924bb1ba9d2bf62e4484e5e9524
 ```
 
 Latest read-only Device implementation checkpoint before final documentation/handoff commits:
@@ -68,6 +74,8 @@ Do not rebuild these slices without a concrete defect.
 - Locator replacement requires canonical `Shelly.GetDeviceInfo.id` match, persists only the refreshed BLE locator and retries the original read once.
 - Relay/settings/script/config mutations are outside rediscovery and are never automatically replayed after timeout/disconnect.
 - No automatic BLE↔Wi-Fi fallback or transport merging exists yet.
+- Plain saved Wi-Fi and BLE-only dashboard cards now share `PlugDashboardCardShell` for the common Plug icon/name/menu, telemetry, relay controls and automation-action slot. Configured Climate/Time automation cards intentionally remain specialized because they present automation metrics and AUTO/MANUAL state.
+- BLE-only uses the same automation-action slot as plain Wi-Fi but keeps `Add automation` disabled until a real BLE automation-install flow exists; it is not a fake action.
 
 ## New read-only Device slice
 
@@ -105,7 +113,10 @@ The read-only Device work passed:
 - `shelly-ble-device-readonly-full-gate-20260926-706`: full `pnpm check:full`, including mobile 355/355 at that checkpoint and responsive Playwright 36/36;
 - `shelly-ble-readonly-postcleanup-gate-20260926-710`: shelly-client 98/98, mobile 352/352 after obsolete Info-pipeline removal, both typechecks, repository/feature gates, Prettier and `git diff --check`;
 - `shelly-ble-readonly-focused-final-20260926-712`: latest LED/button/Cloud behavior, both typechecks, repository gates and Prettier all green;
-- `shelly-ble-readonly-final-full-gate-20260926-713` on exact head `fe478b6b5ffacb60124562cbfe339f2a9cde4ab5`: full `pnpm check:full` PASS with shelly-client 98/98, mobile 353/353, responsive Playwright 36/36, plus formatting, lint, UX/repository gates, workspace typecheck, core coverage and builds.
+- `shelly-ble-readonly-final-full-gate-20260926-713` on exact head `fe478b6b5ffacb60124562cbfe339f2a9cde4ab5`: full `pnpm check:full` PASS with shelly-client 98/98, mobile 353/353, responsive Playwright 36/36, plus formatting, lint, UX/repository gates, workspace typecheck, core coverage and builds;
+- `shelly-shared-plug-card-ui-gate-20260926-734`: focused mobile 39/39, the 17 directly affected Playwright LED/button/Cloud cases, mobile typecheck, UX/repository gates, Prettier and `git diff --check` all PASS;
+- `shelly-shared-plug-card-final-phone-20260926-735` on exact product head `4906c346ba7488c3943111137abe533719352294`: full `pnpm check:full` PASS, Android build/Gradle PASS, APK SHA-256 `c72110b8d4016cdb412711f5f42a196b83a90924bb1ba9d2bf62e4484e5e9524`, and install on `SM-S906B` PASS. The task later failed only because its first smoke harness incorrectly expected a `· Wi-Fi` accessibility suffix on the configured automation card, not because product/build validation failed;
+- `shelly-shared-plug-card-phone-smoke-20260926-737`: corrected real-phone smoke PASS using explicit `· Bluetooth` targeting and readiness polling.
 
 The varying mobile total reflects removal of the obsolete Info-only recovery test/pipeline and addition of the independent Device-section regression, not relaxed assertions or skipped production behavior.
 
@@ -137,6 +148,8 @@ The expanded BLE-only Device presentation is also accepted on the S22+ using exa
 
 The RPC trace completed the expected read-only sequence through `Cloud.GetStatus` and disconnected normally. After crossing the 30-second automatic refresh interval, a 42-second snapshot retained the same expected Device/Info rows with no `Refreshing` or connection-failure state. Logcat showed two BLE connect calls and two matching disconnect calls, with no app timeout/offline/failure/exception console error. No relay toggle and no settings/script/config mutation was performed during this Device acceptance.
 
+The final shared-dashboard UX was re-accepted on the same S22+ using exact head `4906c346ba7488c3943111137abe533719352294`. The configured Wi-Fi and BLE-only cards both presented `S3PL-00112EU`; the detail-menu targets were horizontally aligned at x `884..1005`, while Android UI Automator reported only a 3 px height rounding difference. BLE remained transport-disambiguated in accessibility as `Details: S3PL-00112EU · Bluetooth`. Its card showed `0.0 W · 246 V · 0 Wh · —` and the common `Add automation` slot disabled. Opening the exact BLE target reached the shared five-tab Detail; Device again showed `Power usage`, `100%`, night mode disabled, `Controls relay`, Cloud disabled / `Not connected`, no mutation controls, and the same stable state after the 30-second refresh interval. No relay/settings/script/config mutation was performed.
+
 Full dated evidence is recorded in `docs/testing/hardware-matrix.md`.
 
 ## Visual-contract debt
@@ -151,9 +164,10 @@ Legacy size hotspots remain outside this slice (`AutomationDashboardScreen.tsx`,
 
 ## Safe next work
 
-1. Only after explicit approval, design the first BLE **mutation** slice; preserve canonical identity verification and never auto-replay a timeout/disconnect mutation.
-2. Define pairing/bonding behavior only for firmware/platform combinations that actually require it.
-3. Consider a future dual-transport representation for one physical Plug before automatic transport selection/fallback.
-4. Keep script/config lifecycle changes separate from BLE transport work unless a product decision explicitly requires them.
+1. If continuing UX convergence, migrate the plain saved Wi-Fi Plug from the older standalone `PlugSettingsScreen` into the same five-tab Detail skeleton, while preserving the mature Wi-Fi mutation flows. Do not force configured automation cards into the plain-card shell.
+2. Only after explicit approval, design the first BLE **mutation** slice; preserve canonical identity verification and never auto-replay a timeout/disconnect mutation.
+3. Define pairing/bonding behavior only for firmware/platform combinations that actually require it.
+4. Consider a future dual-transport representation for one physical Plug before automatic transport selection/fallback.
+5. Keep script/config lifecycle changes separate from BLE transport work unless a product decision explicitly requires them.
 
 The old hardware-first BLE spike journal remains retired; durable conclusions live in Architecture, Roadmap and the hardware matrix, while detailed experiment history remains in Git history.
