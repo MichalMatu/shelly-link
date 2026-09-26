@@ -47,19 +47,18 @@ export const BleOnlyPlugCard = ({ plug, onNameChange, onOpen }: BleOnlyPlugCardP
         </span>
         <div className="automation-card__identity">
           <EditablePlugName name={plug.name} variant="card" onCommit={onNameChange} />
-          <p>
-            {t('common.bluetooth')} · {plug.model}
-          </p>
         </div>
-        <button
-          className="automation-card__menu"
-          type="button"
-          aria-label={`${t('common.info')}: ${plug.name}`}
-          title={t('common.info')}
-          onClick={onOpen}
-        >
-          <IconDotsVertical aria-hidden="true" />
-        </button>
+        <div className="automation-card__header-actions">
+          <button
+            className="automation-card__menu"
+            type="button"
+            aria-label={`${t('common.info')}: ${plug.name}`}
+            title={t('common.info')}
+            onClick={onOpen}
+          >
+            <IconDotsVertical className="automation-card__menu-icon" aria-hidden="true" />
+          </button>
+        </div>
       </header>
 
       <div
