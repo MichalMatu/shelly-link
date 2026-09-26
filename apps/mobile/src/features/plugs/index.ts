@@ -22,11 +22,7 @@ export {
   BlePlugDetailScreen,
   type BlePlugDetailScreenProps
 } from './screens/BlePlugDetailScreen.js';
-export {
-  WifiPlugDetailScreen,
-  type WifiPlugDetailDevice,
-  type WifiPlugDetailScreenProps
-} from './screens/WifiPlugDetailScreen.js';
+export { WifiPlugDetailScreen } from './screens/WifiPlugDetailScreen.js';
 export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
   buildVerifiedPlugBleCandidate,
