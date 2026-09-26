@@ -52,8 +52,8 @@ export const BleOnlyPlugCard = ({ plug, onNameChange, onOpen }: BleOnlyPlugCardP
           <button
             className="automation-card__menu"
             type="button"
-            aria-label={`${t('common.info')}: ${plug.name}`}
-            title={t('common.info')}
+            aria-label={`${t('dashboard.openSystem')}: ${plug.name}`}
+            title={t('dashboard.openSystem')}
             onClick={onOpen}
           >
             <IconDotsVertical className="automation-card__menu-icon" aria-hidden="true" />
