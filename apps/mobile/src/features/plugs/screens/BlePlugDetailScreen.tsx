@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { AppPageBack } from '../../../components/AppPageBack.js';
 import { BlePlugDeviceReadOnlyPanel } from '../components/BlePlugDeviceReadOnlyPanel.js';
+import { PlugDetailTabs, type PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
 import { useBlePlugReadOnlyDetailFlow } from '../flows/useBlePlugReadOnlyDetailFlow.js';
 import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
@@ -10,8 +12,11 @@ export type BlePlugDetailScreenProps = {
   onBack(): void;
 };
 
+const disabledBleDetailTabs: readonly PlugDetailTab[] = ['automation', 'ble', 'script'];
+
 export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenProps) => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<PlugDetailTab>('info');
   const plug = useSavedBlePlugStore((state) =>
     state.plugs.find((candidate) => candidate.physicalId === physicalId)
   );
@@ -38,44 +43,58 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
           {t('common.bluetooth')} · {plug.model}
         </p>
       </section>
-      <section className="plug-detail-surface">
-        {detailQuery.isPending && (
-          <section className="plug-detail-framed-section">
-            <h3 className="plug-detail-framed-section__title">
-              {t('hardware.shelly.settings')}
-            </h3>
-            <div className="plug-detail-loading" role="status">
-              <span className="plug-detail-loading__spinner" aria-hidden="true" />
-              <span>{t('common.refreshing')}</span>
-            </div>
-          </section>
-        )}
-        {detailQuery.isError && (
-          <section className="plug-detail-framed-section">
-            <h3 className="plug-detail-framed-section__title">
-              {t('hardware.shelly.settings')}
-            </h3>
-            <p className="plug-settings-feedback plug-settings-feedback--warning">
-              {t('dashboard.readFailed')}
-            </p>
-          </section>
-        )}
-        {detailQuery.data && (
+
+      <PlugDetailTabs
+        activeTab={activeTab}
+        disabledTabs={disabledBleDetailTabs}
+        onChange={setActiveTab}
+      />
+
+      <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
+        {activeTab === 'device' && (
           <>
-            <BlePlugDeviceReadOnlyPanel
-              settings={detailQuery.data.deviceSettings}
-              cloud={detailQuery.data.cloud}
-            />
-            <PlugInfoPanel
-              connection={{
-                transport: 'bluetooth',
-                bleDeviceId: plug.bleDeviceId,
-                advertisementName: plug.advertisementName
-              }}
-              information={detailQuery.data.information}
-              showResourceRows={false}
-            />
+            {detailQuery.isPending && (
+              <section className="plug-detail-framed-section">
+                <h3 className="plug-detail-framed-section__title">
+                  {t('hardware.shelly.settings')}
+                </h3>
+                <div className="plug-detail-loading" role="status">
+                  <span className="plug-detail-loading__spinner" aria-hidden="true" />
+                  <span>{t('common.refreshing')}</span>
+                </div>
+              </section>
+            )}
+            {detailQuery.isError && (
+              <section className="plug-detail-framed-section">
+                <h3 className="plug-detail-framed-section__title">
+                  {t('hardware.shelly.settings')}
+                </h3>
+                <p className="plug-settings-feedback plug-settings-feedback--warning">
+                  {t('dashboard.readFailed')}
+                </p>
+              </section>
+            )}
+            {detailQuery.data && (
+              <BlePlugDeviceReadOnlyPanel
+                settings={detailQuery.data.deviceSettings}
+                cloud={detailQuery.data.cloud}
+              />
+            )}
           </>
+        )}
+
+        {activeTab === 'info' && (
+          <PlugInfoPanel
+            connection={{
+              transport: 'bluetooth',
+              bleDeviceId: plug.bleDeviceId,
+              advertisementName: plug.advertisementName
+            }}
+            information={detailQuery.data?.information}
+            loading={detailQuery.isPending}
+            error={detailQuery.isError}
+            showResourceRows={false}
+          />
         )}
       </section>
     </main>
