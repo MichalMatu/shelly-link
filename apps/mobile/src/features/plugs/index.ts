@@ -14,9 +14,9 @@ export {
 } from './flows/usePlugInformationFlow.js';
 export {
   PlugInfoPanel,
-  type PlugInfoConnection,
-  type PlugInfoPanelProps
+  type PlugInfoConnection
 } from './components/PlugInfoPanel.js';
+export { PlugDetailIdentity } from './components/PlugDetailIdentity.js';
 export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.js';
 export {
   BlePlugDetailScreen,
