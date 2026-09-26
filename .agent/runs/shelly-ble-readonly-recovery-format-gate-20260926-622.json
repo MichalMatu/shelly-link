@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 7,
-  "command": "pnpm --filter @lcl/mobile typecheck && pnpm exec eslint apps/mobile/src/features/plugs/data/blePlugReadOnlyError.ts apps/mobile/src/features/plugs/data/plugReadOnlyManagementTarget.ts apps/mobile/src/features/plugs/data/plugReadOnlyManagementTarget.test.ts apps/mobile/src/features/plugs/data/plugInformation.ts apps/mobile/src/features/plugs/data/plugInformation.test.ts apps/mobile/src/features/plugs/flows/recoverSavedBlePlugLocator.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugInformation.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugInformation.test.ts apps/mobile/src/features/plugs/flows/useBlePlugInformationFlow.ts && pnpm quality:repo && git diff --check",
-  "pid": 20191,
+  "command": "pnpm check",
+  "pid": 21509,
   "timeout": 7200,
   "idle_timeout": 900,
   "memory_limit_mb": 4096,
-  "started_at": "2026-09-26T16:53:58.119936+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-09-26T16:54:38.868077+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 7,
   "stage_phase": "commands",
   "task_id": "shelly-ble-readonly-recovery-format-gate-20260926-622",
@@ -18,5 +18,5 @@
   "task_digest": "021a79152d7273954fa45a65931b94ab83036587cf37d5a4ff8a48b5e4c94462",
   "daemon_version": "4.18.25",
   "daemon_pid": 18436,
-  "updated_at": "2026-09-26T16:53:58.273901+00:00"
+  "updated_at": "2026-09-26T16:54:38.974395+00:00"
 }
