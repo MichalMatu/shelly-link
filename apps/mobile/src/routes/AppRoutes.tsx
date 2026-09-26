@@ -13,7 +13,11 @@ import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
-import { BlePlugDetailScreen, PlugBluetoothAddPage } from '../features/plugs/index.js';
+import {
+  BlePlugDetailScreen,
+  PlugBluetoothAddPage,
+  WifiPlugDetailScreen
+} from '../features/plugs/index.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import {
   automationDetailRoute,
@@ -24,7 +28,6 @@ import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { PlugBleDiscoveryScreen } from '../screens/PlugBleDiscoveryScreen.js';
-import { PlugSettingsScreen } from '../screens/PlugSettingsScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
 
 const HardwareSetupScreen = lazy(async () => {
@@ -71,6 +74,10 @@ export const AppRoutes = () => {
   );
   const loadClimateAutomationDraft = useHardwareSetupDraftStore(
     (state) => state.loadClimateAutomationDraft
+  );
+  const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
+  const removeShellyDevice = useHardwareSetupDraftStore(
+    (state) => state.removeShellyDevice
   );
   const [route, setRoute] = useState<AppRoute>({ type: 'dashboard' });
   const routeRef = useRef(route);
@@ -198,9 +205,20 @@ export const AppRoutes = () => {
       />
     );
   } else if (route.type === 'plug-settings') {
+    const savedPlug =
+      shellyDevices.find((candidate) => candidate.id === route.deviceId) ?? null;
     content = (
-      <PlugSettingsScreen
-        deviceId={route.deviceId}
+      <WifiPlugDetailScreen
+        device={
+          savedPlug
+            ? {
+                deviceId: savedPlug.id,
+                name: savedPlug.name,
+                baseUrl: savedPlug.baseUrl,
+                ...(savedPlug.model ? { model: savedPlug.model } : {})
+              }
+            : null
+        }
         onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onOpenBleDiscovery={(deviceId) =>
           navigate({
@@ -209,6 +227,7 @@ export const AppRoutes = () => {
             returnTo: { type: 'plug-settings', deviceId }
           })
         }
+        onRemove={removeShellyDevice}
       />
     );
   } else if (route.type === 'plug-ble-discovery') {
