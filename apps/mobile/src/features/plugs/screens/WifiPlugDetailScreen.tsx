@@ -53,7 +53,6 @@ export const WifiPlugDetailScreen = ({
       <PlugDetailTop
         plug={device}
         tabs={[activeTab, setActiveTab]}
-        onBack={onBack}
         disabledTabs={disabledWifiDetailTabs}
       />
 

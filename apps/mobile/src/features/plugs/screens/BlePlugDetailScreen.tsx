@@ -31,7 +31,6 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
         plug={plug}
         transport="bluetooth"
         tabs={[activeTab, setActiveTab]}
-        onBack={onBack}
         disabledTabs={disabledBleDetailTabs}
       />
 
