@@ -3,7 +3,7 @@ import { useTranslation } from '../../../app/i18n.js';
 type PlugDetailIdentityProps = {
   name: string;
   transport: 'wifi' | 'bluetooth';
-  model?: string;
+  model?: string | undefined;
 };
 
 export const PlugDetailIdentity = ({
