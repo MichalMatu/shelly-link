@@ -56,11 +56,11 @@ describe('BleOnlyPlugCard', () => {
 
   afterEach(() => setLocalePreference('system'));
 
-  it('shows normalized BLE runtime status and controls the relay', () => {
+  it('shows normalized BLE runtime status without transport metadata on the dashboard', () => {
     renderCard();
 
     expect(screen.getByText('BLE lamp')).toBeVisible();
-    expect(screen.getByText('Bluetooth · S3PL-00112EU')).toBeVisible();
+    expect(screen.queryByText('Bluetooth · S3PL-00112EU')).not.toBeInTheDocument();
     expect(screen.getByText('4.2 W')).toBeVisible();
     expect(screen.getByText('230 V')).toBeVisible();
     expect(screen.getByText('42 Wh')).toBeVisible();
