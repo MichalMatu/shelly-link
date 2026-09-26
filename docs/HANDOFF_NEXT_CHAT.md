@@ -1,14 +1,22 @@
-# Handoff — Shelly BLE management
+# Handoff — Shelly Plug BLE + shared Plug UX
 
-Status: **2026-09-26 — BLE read-only management + shared Plug dashboard UX accepted on Samsung S22+**
+Status: **2026-09-27 — implementation and focused/responsive UX validation complete; final full gate + final S22+ install/smoke still pending**
 
 Repository: `MichalMatu/shelly-link`
 
-Active branch: `work/shelly-ble-transport`
+Active product branch: `work/shelly-ble-transport`
 
-## Source of truth
+Current product HEAD at handoff:
 
-Read in this order before changing code:
+```text
+d8b7623ef55fc8ad33c94d9aeb228f218d4b8452
+```
+
+Do not treat this HEAD as final real-phone accepted yet. The last final full-gate/build/install task was prepared but never executed because the Local Agent stopped taking work.
+
+## Read first
+
+Before changing code, read:
 
 1. `AGENTS.md`;
 2. nearest directory-level `AGENTS.md`;
@@ -16,113 +24,44 @@ Read in this order before changing code:
 4. `docs/ROADMAP.md`;
 5. `docs/testing/hardware-matrix.md`;
 6. `docs/UX_VISUAL_CONTRACT.md`;
-7. this handoff for the current branch checkpoint.
+7. this file.
 
-Local Agent bindings are conversation-scoped. Always use the fresh bootstrap supplied to the active chat; never copy a binding from repository history.
+Local Agent bindings are conversation-scoped. Never reuse a binding copied from this handoff or old `.agent` history. A new chat must use its fresh bootstrap/binding if Local Agent is available.
 
-## Current software checkpoint
+Do not use GitHub Actions for this continuation. Do not run Codex locally. Prefer the Local Agent/Mac host for local tests/builds/device work when available.
 
-Exact product head installed for final S22+ hardware acceptance:
+## Repository / branch state
 
-```text
-4906c346ba7488c3943111137abe533719352294
-```
-
-Final APK SHA-256:
+Branches intentionally present at handoff:
 
 ```text
-c72110b8d4016cdb412711f5f42a196b83a90924bb1ba9d2bf62e4484e5e9524
+main                     d15d8cbdc63e8ab78bab94cf180dbf82612743eb
+work/shelly-ble-transport d8b7623ef55fc8ad33c94d9aeb228f218d4b8452  <-- active
+work/kvs-datalogger       fd149a782afd7e5925d5f5d867639295921f7429  <-- intentional parked work
+agent-control             technical Local Agent control branch
 ```
 
-Latest read-only Device implementation checkpoint before final documentation/handoff commits:
+Do not delete `work/kvs-datalogger`.
 
-```text
-8b240cfc925022020fed3ceb0d11321e3a7ef53a  Test independent BLE Device read-only sections
-```
+The stale, never-run final task `shelly-ux-final-full-gate-install-20260927-761` should not be resumed in a new chat; create fresh work using the new conversation binding instead.
 
-Relevant implementation / cleanup checkpoints in this continuation:
+## Product state already accepted
 
-```text
-9b8c1d01eb8e1bb1ea58ba5e77173f47b4248352  Show read-only Device data in BLE detail
-5ca6c3cd62c93c4cd441b3cd73c997323dac067c  Format BLE Device read-only panel
-e14e4c24bc803d6786c7a955f6ef7df7eb151611  Remove obsolete BLE Info recovery test
-8b240cfc925022020fed3ceb0d11321e3a7ef53a  Test independent BLE Device read-only sections
-```
+### BLE transport / management
 
-Earlier accepted checkpoints remain valid:
+The BLE management foundation is complete and real-device accepted on Samsung S22+ / Android 16:
 
-```text
-486db40f90ec16d9dceac7d6266eb50fdfc86064  Polish Plug add speed dial
-c3ffc6667f4f35b95091c740307dc9a29dc7bbcf  Add read-only BLE Plug detail
-aa3cd140e8378f5446ceefc9e8d9c172aea23fb4  Share BLE read-only locator recovery
-1db4d3fae8b889838cd25cba5dd4eb85b20b6fa6  Format BLE read-only recovery flow
-fcb6ded01a23490afd909f3aa8386c8fe72c4b4e  Consolidate BLE management documentation
-```
+- independent Bluetooth Add path;
+- canonical identity from normalized `Shelly.GetDeviceInfo.id`;
+- saved canonical `physicalId` plus replaceable BLE locator;
+- BLE-only dashboard status/read and relay control;
+- bounded stale-locator rediscovery with canonical identity verification;
+- combined read-only BLE Detail session for Device + Info;
+- stable 30-second read-only refresh;
+- no automatic BLE↔Wi-Fi fallback;
+- no replay of ambiguous mutations after timeout/disconnect.
 
-Do not rebuild these slices without a concrete defect.
-
-## Accepted product state
-
-- Wi-Fi/HTTP remains the stable management path and must not be refactored merely for BLE reuse.
-- BLE RPC transport/framing and Android/Capacitor GATT binding are implemented.
-- Bluetooth Add is independent of Wi-Fi Add and verifies canonical physical identity with normalized `Shelly.GetDeviceInfo.id`.
-- `SavedBlePlug` stores canonical `physicalId` plus replaceable `bleDeviceId`; advertisement name/RSSI are metadata/prioritization only.
-- BLE-only dashboard status and relay ON/OFF are hardware-accepted.
-- Add Plug speed-dial uses the accepted L layout: Wi-Fi above `+`, Bluetooth left, equal distance, transport actions accented while expanded, click-away/Escape/trigger collapse, reduced-motion support.
-- BLE-only Plug Detail is hardware-accepted as read-only and transport-aware; it does not fake an HTTP `baseUrl`.
-- Read-only dashboard runtime/status and BLE Detail share the same bounded stale-locator rediscovery primitive.
-- Locator replacement requires canonical `Shelly.GetDeviceInfo.id` match, persists only the refreshed BLE locator and retries the original read once.
-- Relay/settings/script/config mutations are outside rediscovery and are never automatically replayed after timeout/disconnect.
-- No automatic BLE↔Wi-Fi fallback or transport merging exists yet.
-- Plain saved Wi-Fi and BLE-only dashboard cards now share `PlugDashboardCardShell` for the common Plug icon/name/menu, telemetry, relay controls and automation-action slot. Configured Climate/Time automation cards intentionally remain specialized because they present automation metrics and AUTO/MANUAL state.
-- BLE-only uses the same automation-action slot as plain Wi-Fi but keeps `Add automation` disabled until a real BLE automation-install flow exists; it is not a fake action.
-
-## New read-only Device slice
-
-BLE-only Detail now uses one combined query/read model and one verified BLE transport session for Info + Device instead of opening independent GATT pipelines.
-
-The Device summary reads only user-meaningful Shelly-owned state:
-
-- `PLUGS_UI.GetConfig` — LED mode, power-mode brightness when present, night-mode enable/brightness/window and physical-button input mode;
-- `Cloud.GetConfig` + `Cloud.GetStatus` — Cloud enabled and connected state;
-- existing device identity/status data remains in Info.
-
-Important boundaries:
-
-- getter support is independent from setter support; `readConfig()` does not require the corresponding mutation RPC;
-- PLUGS_UI and Cloud presentation are independent, so support for one does not hide the other;
-- the read model stops on the first failed RPC instead of continuing unnecessary reads;
-- the existing 30-second Detail refresh cadence is preserved and is now accepted on real S22+ hardware;
-- one retryable BLE offline/timeout failure may invoke the existing bounded stale-locator recovery, then retry the combined read exactly once;
-- the old Info-only BLE query/recovery pipeline was removed after grep proved it had no production consumer;
-- no LED, button, Cloud, script or config mutation surface was added;
-- Wi-Fi Device mutation flows remain unchanged and separate.
-
-A transport-neutral read model is worthwhile at the **read/session boundary**, not as a forced rewrite of all Wi-Fi Device flows. Share package RPC schemas/clients and verified read transport ownership; keep mature Wi-Fi mutation flows intact until a real product need justifies convergence.
-
-## What is intentionally not shown on BLE Device
-
-Do not expand Device just because an RPC getter exists. The current product decision is to omit low-value technical/configuration data such as Wi-Fi credentials/config, BLE radio config, Cloud server endpoint, MQTT/WebSocket configuration, system location and general system config. Those belong in diagnostics or a future explicitly designed surface if a real user need appears.
-
-## Software evidence
-
-Repository/hygiene audit `shelly-ble-reaudit-hygiene-20260926-702` confirmed no untracked garbage, TODO/FIXME/HACK/XXX backlog or new raw BLE/fetch ownership escape in the Plug presentation boundary. The empty root `dummy` and obsolete pre-v1 `pomysly.txt` scratchpad were retired; intentional UX/hardware artifact placeholders were preserved.
-
-The read-only Device work passed:
-
-- `shelly-ble-device-readonly-full-gate-20260926-706`: full `pnpm check:full`, including mobile 355/355 at that checkpoint and responsive Playwright 36/36;
-- `shelly-ble-readonly-postcleanup-gate-20260926-710`: shelly-client 98/98, mobile 352/352 after obsolete Info-pipeline removal, both typechecks, repository/feature gates, Prettier and `git diff --check`;
-- `shelly-ble-readonly-focused-final-20260926-712`: latest LED/button/Cloud behavior, both typechecks, repository gates and Prettier all green;
-- `shelly-ble-readonly-final-full-gate-20260926-713` on exact head `fe478b6b5ffacb60124562cbfe339f2a9cde4ab5`: full `pnpm check:full` PASS with shelly-client 98/98, mobile 353/353, responsive Playwright 36/36, plus formatting, lint, UX/repository gates, workspace typecheck, core coverage and builds;
-- `shelly-shared-plug-card-ui-gate-20260926-734`: focused mobile 39/39, the 17 directly affected Playwright LED/button/Cloud cases, mobile typecheck, UX/repository gates, Prettier and `git diff --check` all PASS;
-- `shelly-shared-plug-card-final-phone-20260926-735` on exact product head `4906c346ba7488c3943111137abe533719352294`: full `pnpm check:full` PASS, Android build/Gradle PASS, APK SHA-256 `c72110b8d4016cdb412711f5f42a196b83a90924bb1ba9d2bf62e4484e5e9524`, and install on `SM-S906B` PASS. The task later failed only because its first smoke harness incorrectly expected a `· Wi-Fi` accessibility suffix on the configured automation card, not because product/build validation failed;
-- `shelly-shared-plug-card-phone-smoke-20260926-737`: corrected real-phone smoke PASS using explicit `· Bluetooth` targeting and readiness polling.
-
-The varying mobile total reflects removal of the obsolete Info-only recovery test/pipeline and addition of the independent Device-section regression, not relaxed assertions or skipped production behavior.
-
-## Real-device evidence accepted
-
-Factory-fresh BLE-only Plug used for transport/runtime and final Device acceptance:
+Factory BLE Plug used for acceptance:
 
 ```text
 physicalId        = shellyplugsg3-e4b063e3e298
@@ -130,44 +69,281 @@ bleDeviceId       = E4:B0:63:E3:E2:9A
 advertisementName = ShellyPlugSG3-E4B063E3E298
 model             = S3PL-00112EU
 generation        = 3
-firmwareId         = 20240820-134301/1.2.3-plugsg3prod0-gec79607
+firmwareId        = 20240820-134301/1.2.3-plugsg3prod0-gec79607
 ```
 
-Samsung S22+ / Android 16 hardware acceptance already passed for BLE Add/runtime, status/read, relay control and stale-locator recovery. The saved locator was deliberately changed to `02:00:00:00:00:01`; read-only recovery restored `E4:B0:63:E3:E2:9A`, preserved canonical identity/metadata and made no settings/script/config mutation. Final relay state for that lifecycle acceptance was OFF.
-
-The expanded BLE-only Device presentation is also accepted on the S22+ using exact product head `dfff96748e81f55baff22fa4b9d635b4e436e859`, installed with `adb install -r` so app data remained intact. A clean Detail load showed the full read-only state within 5 seconds:
+Expanded BLE Device read-only state accepted on the phone:
 
 - LED mode `Power usage`;
-- power-mode brightness `100%`;
+- power brightness `100%`;
 - night mode disabled;
-- physical button mode `Controls relay`;
-- Shelly Cloud disabled and `Not connected`;
-- model `S3PL-00112EU`, gen 3;
-- firmware `20240820-134301/1.2.3-plugsg3prod0-gec79607`;
-- Bluetooth locator/advertisement `E4:B0:63:E3:E2:9A · ShellyPlugSG3-E4B063E3E298`.
+- physical button `Controls relay`;
+- Shelly Cloud disabled / `Not connected`;
+- correct model, generation, firmware and BLE locator/advertisement.
 
-The RPC trace completed the expected read-only sequence through `Cloud.GetStatus` and disconnected normally. After crossing the 30-second automatic refresh interval, a 42-second snapshot retained the same expected Device/Info rows with no `Refreshing` or connection-failure state. Logcat showed two BLE connect calls and two matching disconnect calls, with no app timeout/offline/failure/exception console error. No relay toggle and no settings/script/config mutation was performed during this Device acceptance.
+No LED/button/Cloud/script/config mutations were added to BLE Detail.
 
-The final shared-dashboard UX was re-accepted on the same S22+ using exact head `4906c346ba7488c3943111137abe533719352294`. The configured Wi-Fi and BLE-only cards both presented `S3PL-00112EU`; the detail-menu targets were horizontally aligned at x `884..1005`, while Android UI Automator reported only a 3 px height rounding difference. BLE remained transport-disambiguated in accessibility as `Details: S3PL-00112EU · Bluetooth`. Its card showed `0.0 W · 246 V · 0 Wh · —` and the common `Add automation` slot disabled. Opening the exact BLE target reached the shared five-tab Detail; Device again showed `Power usage`, `100%`, night mode disabled, `Controls relay`, Cloud disabled / `Not connected`, no mutation controls, and the same stable state after the 30-second refresh interval. No relay/settings/script/config mutation was performed.
+### Dashboard card convergence
 
-Full dated evidence is recorded in `docs/testing/hardware-matrix.md`.
+Plain saved Wi-Fi and BLE-only Plugs share the same dashboard shell (`PlugDashboardCardShell`) for the common structure:
 
-## Visual-contract debt
+- Plug icon;
+- title;
+- three-dot detail action;
+- separator;
+- telemetry;
+- relay controls;
+- automation-action slot.
 
-The canonical browser visual contract still contains the existing 19 deterministic states and does not have a native-GATT BLE-only Detail state. The new Device panel reuses the accepted `plug-detail-framed-section` / diagnostic-row hierarchy. Real-phone inspection is now complete; do not create a fake browser GATT harness merely to manufacture a screenshot baseline. Add a deterministic seam only if future BLE Detail work makes that worthwhile.
+The BLE dashboard no longer shows the old technical `Bluetooth · model` subtitle. Factory BLE advertisement names are presented more like Wi-Fi while user-assigned names are preserved. The BLE `Add automation` slot exists only as a disabled placeholder until a real BLE automation installation flow is implemented.
 
-## Repository / branch hygiene
+Configured Climate/Time automation cards intentionally remain specialized because they present automation metrics and AUTO/MANUAL state. Do not force them into the plain Plug card shell.
 
-The branch audit found only `main`, active `work/shelly-ble-transport`, intentionally parked `work/kvs-datalogger`, and technical `agent-control`. Do not delete `work/kvs-datalogger`; Roadmap preserves it as source material for the future datalogger redesign.
+### Detail convergence
 
-Legacy size hotspots remain outside this slice (`AutomationDashboardScreen.tsx`, `InstallationDetailScreen.tsx`, global `theme.css` and several large test files). Treat file size as an alarm only when those areas are materially touched; do not expand this BLE task into mechanical splitting.
+The main UX pass in this continuation moved all physical Plug Detail variants toward the same presentation contract.
 
-## Safe next work
+Shared components now include:
 
-1. If continuing UX convergence, migrate the plain saved Wi-Fi Plug from the older standalone `PlugSettingsScreen` into the same five-tab Detail skeleton, while preserving the mature Wi-Fi mutation flows. Do not force configured automation cards into the plain-card shell.
-2. Only after explicit approval, design the first BLE **mutation** slice; preserve canonical identity verification and never auto-replay a timeout/disconnect mutation.
-3. Define pairing/bonding behavior only for firmware/platform combinations that actually require it.
-4. Consider a future dual-transport representation for one physical Plug before automatic transport selection/fallback.
-5. Keep script/config lifecycle changes separate from BLE transport work unless a product decision explicitly requires them.
+- `PlugDetailIdentity`;
+- `PlugDetailTop` — shared Back + identity + five-tab chrome;
+- `PlugDetailNotFound`;
+- `PlugDetailTabs`.
 
-The old hardware-first BLE spike journal remains retired; durable conclusions live in Architecture, Roadmap and the hardware matrix, while detailed experiment history remains in Git history.
+Plain saved Wi-Fi no longer uses the legacy standalone `PlugSettingsScreen`. The legacy screen was removed. Plain Wi-Fi now uses `WifiPlugDetailScreen` with the same five slots:
+
+1. Automation;
+2. Bluetooth;
+3. Device;
+4. Script;
+5. Info.
+
+For plain Wi-Fi, existing mature Wi-Fi mutation components remain unchanged in ownership and behavior:
+
+- LED settings;
+- physical-button mode;
+- Shelly Cloud.
+
+Automation and Script remain disabled placeholders until those features have real ownership for a plain Plug. Bluetooth routes into the existing Shelly-side BLE discovery path.
+
+BLE Detail uses the same top/tab skeleton. Device + Info are real read-only features; unavailable Automation/Bluetooth/Script slots remain visibly disabled rather than being faked.
+
+Configured Wi-Fi automation Detail now also uses the shared top chrome:
+
+- Back to Plugs;
+- Plug name;
+- `Wi-Fi · model` identity line;
+- the same five Plug tabs.
+
+Configured Wi-Fi dashboard accessibility is transport-disambiguated as `Details/Szczegóły: <name> · Wi-Fi`; BLE uses the corresponding `· Bluetooth` suffix.
+
+The large `InstallationDetailScreen.tsx` quality budget was **not raised**. Instead duplicated missing-state/detail chrome was extracted so repository quality gates remain valid.
+
+## Validation already completed for the current UX implementation
+
+The following evidence is current and should not be repeated unless a later change invalidates it.
+
+### Source / architecture gates
+
+Task `shelly-detail-top-clean-pass-20260926-755` produced commit:
+
+```text
+f2078bdc0eeccd3264fc46e9bceac35bb2cf5f54
+```
+
+PASS:
+
+- mobile typecheck;
+- repository quality gate;
+- feature-boundary gate;
+- quality self-test;
+- targeted ESLint;
+- UX quality gate;
+- `git diff --check`.
+
+### Focused behavior tests
+
+Task `shelly-detail-top-test-contracts-20260926-757` produced commit:
+
+```text
+53e8b9a14b29814320edb949788707923cf31260
+```
+
+Focused Vitest result:
+
+```text
+7 test files passed
+49 tests passed
+```
+
+Covered configured Wi-Fi dashboard/detail, routing, BLE-only dashboard, shared tabs and BLE Device panel.
+
+### Responsive functional contract
+
+Task `shelly-detail-top-responsive-nonvisual-20260926-759` produced commit:
+
+```text
+89d8425d3ed2fd0e331b1ed26b0d4fa2ba49a235
+```
+
+Playwright responsive contract excluding the visual phone-large snapshot case:
+
+```text
+16 / 16 passed
+```
+
+Accepted on phone-small, phone, tablet and desktop with the new shared Back/header hierarchy.
+
+### Visual contract
+
+Task `shelly-detail-top-visual-baselines-20260926-760` produced the current handoff HEAD:
+
+```text
+d8b7623ef55fc8ad33c94d9aeb228f218d4b8452
+```
+
+Exactly five configured-Wi-Fi Detail screenshots changed because the shared identity/top chrome is now visible on every tab:
+
+```text
+02-climate-automation
+03-climate-ble
+05-climate-device
+06-climate-script
+07-climate-info
+```
+
+The task regenerated only those five files, verified no other files changed, then reran the phone-large test **without** `--update-snapshots`; it passed.
+
+Do not regenerate unrelated screenshots.
+
+## Earlier full/hardware evidence that remains valid
+
+The previous shared-dashboard UX checkpoint `4906c346ba7488c3943111137abe533719352294` passed full `pnpm check:full`, Android build and install on Samsung S22+. A corrected real-phone smoke then accepted the configured Wi-Fi vs BLE card geometry and BLE five-tab Detail. The hardware matrix records the exact evidence.
+
+The current HEAD `d8b7623...` only changes the subsequent Detail convergence/header/tests/visual baselines. It still needs one final full gate and one final S22+ installation/smoke before this UX pass is called completely hardware-accepted.
+
+## Exact remaining work — start here in the next chat
+
+Do **not** repeat the architecture audit or earlier BLE hardware tests unless a concrete failure appears.
+
+### 1. Verify branch and clean checkout
+
+Use the fresh Local Agent binding if available, then verify:
+
+```bash
+git rev-parse HEAD
+# must be d8b7623ef55fc8ad33c94d9aeb228f218d4b8452
+
+git status --short
+# must be empty
+```
+
+If remote HEAD moved, inspect why before running acceptance.
+
+### 2. Run the final full software gate
+
+```bash
+pnpm check:full
+```
+
+No GitHub Actions.
+
+### 3. Build the Android APK from the same exact HEAD
+
+Use the existing Android flow, preserving the exact source commit. Equivalent manual path:
+
+```bash
+pnpm --filter @lcl/mobile build
+cd apps/mobile
+pnpm exec cap sync android
+cd android
+./gradlew assembleDebug
+```
+
+Record SHA-256 of:
+
+```text
+apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### 4. Install in-place on the S22+
+
+Phone:
+
+```text
+Samsung SM-S906B / S22+
+adb serial: RFCT70L7E8J
+Android 16
+package: app.shellylink.mobile
+activity: app.shellylink.mobile/.MainActivity
+```
+
+Preserve app data:
+
+```bash
+adb -s RFCT70L7E8J install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Do not use a clean uninstall for this presentation acceptance.
+
+### 5. Final read-only phone smoke
+
+Do not toggle relay and do not save LED/button/Cloud/script/config changes.
+
+On the dashboard verify both real devices are still visible and the menu/header treatment is coherent.
+
+Configured Wi-Fi card:
+
+- detail action is transport-disambiguated with `· Wi-Fi`;
+- three-dot control remains geometrically aligned with BLE;
+- open Detail;
+- shared Back is visible;
+- Plug name is visible;
+- identity line is `Wi-Fi · S3PL-00112EU` for the current configured Plug;
+- five tabs remain present;
+- Automation, Bluetooth, Device, Script and Info still behave as before.
+
+BLE-only card:
+
+- detail action uses `· Bluetooth`;
+- open exact BLE target, not the Wi-Fi card;
+- shared Back/name/`Bluetooth · S3PL-00112EU` header is visible;
+- same five-tab skeleton is present;
+- Device still shows the accepted read-only LED/button/Cloud values;
+- Info still shows correct identity/firmware/locator;
+- no mutation controls appear for BLE Device.
+
+A short stability check across the normal Detail refresh boundary is useful if convenient, but do not rerun destructive stale-locator or relay tests merely to close this presentation pass.
+
+### 6. Close documentation only after PASS
+
+If final full gate + APK install + phone smoke pass:
+
+- add a new dated row to `docs/testing/hardware-matrix.md` for **final shared Plug Detail UX acceptance on exact `d8b7623...` (or the exact later doc-free product commit if source changes)**;
+- update this handoff from `pending final acceptance` to `accepted`;
+- record APK SHA-256 and exact installed product commit;
+- run a lightweight documentation gate (`prettier/quality:repo/git diff --check`) if only docs changed afterward.
+
+If the final phone smoke finds a real product defect, fix only that defect and rerun the smallest invalidated gates before the final full gate.
+
+## Mutation / safety boundaries
+
+During this final UX acceptance:
+
+- do not click relay ON/OFF;
+- do not save LED/button/Cloud changes;
+- do not change scripts or schedules;
+- do not pair/bond unless a separately approved test explicitly requires it;
+- do not implement automatic BLE↔Wi-Fi fallback;
+- do not replay mutations after timeout/disconnect.
+
+## Likely next product work after this handoff is closed
+
+After final acceptance, discuss the next UX/feature slice before coding. Reasonable candidates:
+
+1. continue filling the disabled BLE Detail slots with real transport-owned functionality, one method family at a time;
+2. design the first BLE mutation slice with explicit identity/mutation safety rules;
+3. further converge plain/configured Plug Detail internals only where it reduces duplication without forcing mature Wi-Fi mutation flows through a generic transport abstraction;
+4. design dual-transport representation for one physical Plug before any automatic transport preference/fallback.
+
+Do not start these until the final `d8b7623...` acceptance above is closed.
