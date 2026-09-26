@@ -62,7 +62,10 @@ export const PlugDashboardCardShell = ({
   }`;
 
   return (
-    <article className="automation-card plug-card plug-card--unconfigured" aria-busy={busy}>
+    <article
+      className="automation-card plug-card plug-card--unconfigured"
+      aria-busy={busy}
+    >
       <header className="automation-card__header">
         <span
           className={`automation-card__leading-icon${
@@ -83,7 +86,10 @@ export const PlugDashboardCardShell = ({
             title={t('dashboard.openSystem')}
             onClick={onOpenDetails}
           >
-            <IconDotsVertical className="automation-card__menu-icon" aria-hidden="true" />
+            <IconDotsVertical
+              className="automation-card__menu-icon"
+              aria-hidden="true"
+            />
           </button>
         </div>
       </header>
