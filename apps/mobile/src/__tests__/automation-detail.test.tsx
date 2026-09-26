@@ -423,7 +423,12 @@ describe('InstallationDetailScreen', () => {
     installShellyFetchMock();
     renderDetail(saved.id);
 
-    expect(screen.getByRole('button', { name: 'Wstecz: Gniazdka' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Wstecz: Gniazdka' })).toBeNull();
+    const detailShell = document.querySelector('.installation-detail-shell');
+    const detailTabs = detailShell?.querySelector('.plug-detail-tabs');
+    const detailIdentity = detailShell?.querySelector('.installation-detail-identity');
+    expect(detailShell?.firstElementChild).toBe(detailTabs);
+    expect(detailTabs?.nextElementSibling).toBe(detailIdentity);
     expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
       'aria-current',
       'page'

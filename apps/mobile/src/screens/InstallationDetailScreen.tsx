@@ -253,11 +253,7 @@ const ClimateInstallationDetail = ({
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <PlugDetailTop
-        plug={installation.shelly}
-        tabs={[activeTab, setActiveTab]}
-        onBack={onBack}
-      />
+      <PlugDetailTop plug={installation.shelly} tabs={[activeTab, setActiveTab]} />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
         {activeTab === 'automation' && (

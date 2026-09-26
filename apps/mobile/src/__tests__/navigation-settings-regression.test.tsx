@@ -155,7 +155,12 @@ describe('navigation and settings regression coverage', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(await screen.findByRole('heading', { name: 'Nawilżacz' })).toBeVisible();
     expect(screen.getByText('Wi-Fi · S3PL-00112EU')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Wstecz: Gniazdka' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Wstecz: Gniazdka' })).toBeNull();
+    const detailShell = document.querySelector('.installation-detail-shell');
+    const detailTabs = detailShell?.querySelector('.plug-detail-tabs');
+    const detailIdentity = detailShell?.querySelector('.installation-detail-identity');
+    expect(detailShell?.firstElementChild).toBe(detailTabs);
+    expect(detailTabs?.nextElementSibling).toBe(detailIdentity);
     expect(screen.getByRole('button', { name: 'Automatyka' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Skrypt' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toHaveAttribute(
@@ -197,8 +202,5 @@ describe('navigation and settings regression coverage', () => {
     expect(
       screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
     ).toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Gniazdka' }));
-    expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
   });
 });

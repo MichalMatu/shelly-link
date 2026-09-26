@@ -13,7 +13,8 @@ type DeviceTimeCopy = {
 
 const en: DeviceTimeCopy = {
   title: 'Device time',
-  description: 'Set the Shelly system clock to the current time from this phone over Bluetooth.',
+  description:
+    'Set the Shelly system clock to the current time from this phone over Bluetooth.',
   currentTime: 'Current device time',
   sync: 'Sync with phone',
   syncing: 'Syncing…',

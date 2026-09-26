@@ -1,9 +1,6 @@
 import type { Result, ShellyClientError, ShellyRpcTransport } from '@lcl/shelly-client';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  syncBlePlugTime,
-  type BlePlugTimeSyncDependencies
-} from './blePlugTimeSync.js';
+import { syncBlePlugTime, type BlePlugTimeSyncDependencies } from './blePlugTimeSync.js';
 
 const success = <T>(value: T): Result<T> => ({ ok: true, value });
 
