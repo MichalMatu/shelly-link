@@ -474,7 +474,7 @@ test('plain saved Plug exposes the same LED settings without an installed automa
   await mockShelly(page, 'time');
   await page.goto('/');
 
-  await page.getByRole('button', { name: 'Ustawienia gniazdka: Salon' }).click();
+  await page.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }).click();
   await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
   await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
