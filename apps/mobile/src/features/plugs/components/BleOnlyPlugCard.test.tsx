@@ -72,24 +72,29 @@ describe('BleOnlyPlugCard', () => {
     expect(runtime.turnRelayOff).not.toHaveBeenCalled();
   });
 
-  it('shows the model like Wi-Fi cards when the saved name is still the factory advertisement', () => {
-    renderCard(vi.fn(), {
-      ...plug,
-      name: 'ShellyPlugSG3-Demo'
-    });
+  it(
+    'shows the model like Wi-Fi cards when the saved name is still the factory advertisement',
+    () => {
+      renderCard(vi.fn(), {
+        ...plug,
+        name: 'ShellyPlugSG3-Demo'
+      });
 
-    expect(screen.getByText('S3PL-00112EU')).toBeVisible();
-    expect(screen.queryByText('ShellyPlugSG3-Demo')).not.toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Details: S3PL-00112EU · Bluetooth' })
-    ).toBeVisible();
-  });
+      expect(screen.getByText('S3PL-00112EU')).toBeVisible();
+      expect(screen.queryByText('ShellyPlugSG3-Demo')).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Details: S3PL-00112EU · Bluetooth' })
+      ).toBeVisible();
+    }
+  );
 
   it('opens the read-only Plug detail from the same Details menu used by Wi-Fi cards', () => {
     const onOpen = vi.fn();
     renderCard(onOpen);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Details: BLE lamp · Bluetooth' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Details: BLE lamp · Bluetooth' })
+    );
     expect(onOpen).toHaveBeenCalledOnce();
   });
 
