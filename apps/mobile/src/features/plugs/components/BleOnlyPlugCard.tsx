@@ -24,12 +24,20 @@ const formatEnergy = (value: number | null | undefined): string => {
   return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
 };
 
+const dashboardName = (plug: SavedBlePlug): string => {
+  const savedName = plug.name.trim();
+  const advertisementName = plug.advertisementName.trim();
+  const model = plug.model.trim();
+  return savedName === advertisementName && model ? model : plug.name;
+};
+
 export const BleOnlyPlugCard = ({ plug, onNameChange, onOpen }: BleOnlyPlugCardProps) => {
   const { t } = useTranslation();
   const runtime = useSavedBlePlugRuntime(plug);
   const relayState = runtime.status?.relayOn;
   const isBusy = runtime.isPending || runtime.isRelayPending || runtime.status === null;
   const hasError = runtime.isError || runtime.isRelayError;
+  const displayName = dashboardName(plug);
 
   return (
     <article
@@ -46,13 +54,13 @@ export const BleOnlyPlugCard = ({ plug, onNameChange, onOpen }: BleOnlyPlugCardP
           <IconPlug className="automation-card__icon" />
         </span>
         <div className="automation-card__identity">
-          <EditablePlugName name={plug.name} variant="card" onCommit={onNameChange} />
+          <EditablePlugName name={displayName} variant="card" onCommit={onNameChange} />
         </div>
         <div className="automation-card__header-actions">
           <button
             className="automation-card__menu"
             type="button"
-            aria-label={`${t('dashboard.openSystem')}: ${plug.name}`}
+            aria-label={`${t('dashboard.openSystem')}: ${displayName}`}
             title={t('dashboard.openSystem')}
             onClick={onOpen}
           >
