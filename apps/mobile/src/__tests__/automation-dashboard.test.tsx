@@ -370,7 +370,7 @@ describe('AutomationDashboardScreen', () => {
     const card = screen.getByText('Nawilżacz').closest('article');
     expect(card).not.toBeNull();
     const plugCard = card as HTMLElement;
-    expect(within(plugCard).getByText('Brak automatyzacji')).toBeVisible();
+    expect(within(plugCard).queryByText('Brak automatyzacji')).toBeNull();
     fireEvent.click(within(plugCard).getByRole('button', { name: 'Nazwa gniazdka' }));
     const nameInput = within(plugCard).getByRole('textbox', { name: 'Nazwa gniazdka' });
     fireEvent.change(nameInput, { target: { value: 'Nawilżacz salon' } });
@@ -386,7 +386,7 @@ describe('AutomationDashboardScreen', () => {
 
     fireEvent.click(
       within(plugCard).getByRole('button', {
-        name: 'Ustawienia gniazdka: Nawilżacz salon'
+        name: 'Szczegóły: Nawilżacz salon · Wi-Fi'
       })
     );
     expect(onOpenPlugSettings).toHaveBeenCalledWith('http://192.168.0.30/');
