@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-recovery-format-diff-20260926-513",
+  "task_digest": "fcd519d0f1040fb67f204823e41d1864655c661b50e9026b0eabc7cc23733fd4",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T04:37:45.014201+00:00",
+  "attempt_id": "e2aed75a667c87a4aaf4b26a",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 9687,
+  "updated_at": "2026-09-26T04:37:45.304717+00:00",
+  "pid": 9687
+}

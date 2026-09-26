@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-recovery-format-preview-20260926-512",
+  "task_digest": "c8f8ba101a6b73783b7dfb8ab2a58c15e9d0a43559f339181b1c084ceb1ed0cd",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T04:36:42.831965+00:00",
+  "attempt_id": "080c928b1be86a83d5f15e9a",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 8281,
+  "updated_at": "2026-09-26T04:36:43.090197+00:00",
+  "pid": 8281
+}

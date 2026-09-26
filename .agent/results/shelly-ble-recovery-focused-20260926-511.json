@@ -1,0 +1,89 @@
+{
+  "id": "shelly-ble-recovery-focused-20260926-511",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "started_at": "2026-09-26T04:35:35.347571+00:00",
+  "command_timeout": 3600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; git fetch origin work/shelly-ble-transport; git checkout --detach origin/work/shelly-ble-transport; test \"$(git rev-parse HEAD)\" = '4adb8bbb6ff836a759d0fc6084d9aaacd43b8ba9'; git status --short --branch",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/shelly-ble-transport -> FETCH_HEAD\nHEAD is now at 4adb8bbb6 Recover stale BLE plug locators on reads\n## HEAD (no branch)\n",
+      "elapsed_seconds": 1.042,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 2.03,
+      "output_policy": "stream",
+      "captured_output_chars": 198,
+      "output_truncated": false,
+      "current_rss_mb": 2.03,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 9,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "pnpm exec prettier --check apps/mobile/src/features/plugs/data/blePlugRuntime.ts apps/mobile/src/features/plugs/data/blePlugRuntime.test.ts apps/mobile/src/features/plugs/flows/inspectPlugBleCandidate.ts apps/mobile/src/features/plugs/flows/inspectPlugBleCandidate.test.ts apps/mobile/src/features/plugs/state/savedBlePlugStore.ts apps/mobile/src/features/plugs/state/savedBlePlugStore.test.ts apps/mobile/src/features/plugs/flows/useSavedBlePlugRuntime.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts",
+      "exit_code": 1,
+      "output": "Checking formatting...\n[warn] apps/mobile/src/features/plugs/flows/useSavedBlePlugRuntime.ts\n[warn] apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts\n[warn] apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts\n[warn] Code style issues found in 3 files. Run Prettier with --write to fix.\n",
+      "elapsed_seconds": 1.46,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 0.31,
+      "output_policy": "stream",
+      "captured_output_chars": 329,
+      "output_truncated": false,
+      "current_rss_mb": 0.31,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 9,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 9,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.042
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 9,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 1.46
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.114
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.308
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T04:35:40.083906+00:00",
+  "task_digest": "4780348f7ebff3a1546888ad2fb082fd84275833bb830e0570b6ecf0ed745a1f",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 4096,
+  "attempt_id": "00e019a4d2d3aabf1218679c",
+  "daemon_version": "4.18.25"
+}

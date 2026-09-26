@@ -1,0 +1,60 @@
+{
+  "id": "shelly-ble-phase0-push-20260926-510",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": true,
+  "started_at": "2026-09-26T04:28:34.120875+00:00",
+  "command_timeout": 600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; git cat-file -e 9feadd7be^{commit}; git show --stat --oneline --summary 9feadd7be; git push --no-verify origin 9feadd7be:work/shelly-ble-transport",
+      "exit_code": 0,
+      "output": "9feadd7be Polish BLE plug discovery UX\n .../plugs/components/BleOnlyPlugCard.test.tsx      |  15 ++-\n .../features/plugs/components/BleOnlyPlugCard.tsx  |   7 +-\n .../features/plugs/components/PlugAddSpeedDial.css |  34 +++---\n .../plugs/components/PlugAddSpeedDial.test.tsx     |  13 +++\n .../features/plugs/components/PlugAddSpeedDial.tsx |   2 +\n .../plugs/components/PlugBluetoothAddPage.test.tsx | 110 +++++++++++++++++++\n .../plugs/components/PlugBluetoothAddPage.tsx      |  20 +---\n .../components/PlugBluetoothAddPanel.test.tsx      |  85 +++++++++------\n .../plugs/components/PlugBluetoothAddPanel.tsx     | 121 +++++++++++++--------\n .../src/features/plugs/data/plugBleOnboarding.ts   |   9 ++\n .../plugs/flows/inspectPlugBleCandidate.test.ts    |  47 ++++++--\n .../plugs/flows/inspectPlugBleCandidate.ts         |  31 +++++-\n .../plugs/flows/scanPlugBleCandidates.test.ts      |  27 ++---\n .../features/plugs/flows/scanPlugBleCandidates.ts  |   8 +-\n .../features/plugs/flows/usePlugBleAddFlow.test.ts |  94 ++++++++++------\n .../src/features/plugs/flows/usePlugBleAddFlow.ts  |  81 +++++++++-----\n 16 files changed, 479 insertions(+), 225 deletions(-)\n create mode 100644 apps/mobile/src/features/plugs/components/PlugBluetoothAddPage.test.tsx\nTo https://github.com/MichalMatu/shelly-link.git\n   025a2df04..9feadd7be  9feadd7be -> work/shelly-ble-transport\n",
+      "elapsed_seconds": 2.117,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 1.88,
+      "output_policy": "stream",
+      "captured_output_chars": 1370,
+      "output_truncated": false,
+      "current_rss_mb": 1.88,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 2.117
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.097
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.076
+  },
+  "finished_at": "2026-09-26T04:28:38.003608+00:00",
+  "task_digest": "014028804d07d7c281153e3d79aa893d9f5101d98b8405fe9c541bd1c51b9b21",
+  "idle_timeout": 300,
+  "task_timeout": 1200,
+  "memory_limit_mb": 2048,
+  "attempt_id": "c26e7d40eb0730673b99b33d",
+  "daemon_version": "4.18.25"
+}

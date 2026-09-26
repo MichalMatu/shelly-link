@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-recovery-focused-20260926-514",
+  "task_digest": "f8953d4a6044bb23a0959a1d3ac16a7103defa6ebd8a24a4a4e5ff8cf0830b51",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T04:40:47.272142+00:00",
+  "attempt_id": "59422ee83d5e86d337875998",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 13694,
+  "updated_at": "2026-09-26T04:40:47.563049+00:00",
+  "pid": 13694
+}

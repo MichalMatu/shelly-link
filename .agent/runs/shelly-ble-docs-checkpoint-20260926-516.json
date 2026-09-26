@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-docs-checkpoint-20260926-516",
+  "task_digest": "a778e6323c9e4029ac8d727507b69b5ca8b7d43e8e8defbf1ed8d794ca426d62",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T04:45:25.236860+00:00",
+  "attempt_id": "d3e7de7ed5605b7f7c9d4504",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 20103,
+  "updated_at": "2026-09-26T04:45:25.511293+00:00",
+  "pid": 20103
+}

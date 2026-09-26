@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-phase0-stabilize-tests-20260926-508",
+  "task_digest": "d00c8789f6a360429d2bfe960398172d4400864243437f476192c9c466ed2c87",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-26T04:21:56.883714+00:00",
+  "attempt_id": "91b8bbfa5dd3a7500bc13c8d",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 84585,
+  "updated_at": "2026-09-26T04:21:57.677876+00:00",
+  "pid": 84585
+}

@@ -1,0 +1,116 @@
+{
+  "id": "shelly-ble-recovery-format-preview-20260926-512",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "started_at": "2026-09-26T04:36:36.584668+00:00",
+  "command_timeout": 600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; git fetch origin work/shelly-ble-transport; git checkout --detach origin/work/shelly-ble-transport; pnpm exec prettier apps/mobile/src/features/plugs/flows/useSavedBlePlugRuntime.ts",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/shelly-ble-transport -> FETCH_HEAD\nHEAD is now at 4adb8bbb6 Recover stale BLE plug locators on reads\nimport { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';\nimport type { SavedBlePlug } from '../data/savedBlePlug.js';\nimport { setBlePlugRelay, type BlePlugRuntimeStatus } from '../data/blePlugRuntime.js';\nimport { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';\nimport { readSavedBlePlugRuntimeStatus } from './readSavedBlePlugRuntimeStatus.js';\n\nexport const SAVED_BLE_PLUG_RUNTIME_REFRESH_MS = 5_000;\n\nexport const savedBlePlugRuntimeQueryKey = (\n  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>\n) => ['saved-ble-plug-runtime', plug.physicalId, plug.bleDeviceId] as const;\n\ntype SavedBlePlugRuntimeOptions = {\n  enabled?: boolean;\n  refetchIntervalMs?: number;\n};\n\nexport const useSavedBlePlugRuntime = (\n  plug: SavedBlePlug,\n  options: SavedBlePlugRuntimeOptions = {}\n) => {\n  const queryClient = useQueryClient();\n  const replaceLocator = useSavedBlePlugStore((state) => state.replaceLocator);\n  const queryKey = savedBlePlugRuntimeQueryKey(plug);\n  const query = useQuery({\n    queryKey,\n    queryFn: () =>\n      readSavedBlePlugRuntimeStatus(plug, {\n        persistLocator: replaceLocator\n      }),\n    enabled: options.enabled ?? true,\n    retry: false,\n    refetchInterval: options.refetchIntervalMs ?? SAVED_BLE_PLUG_RUNTIME_REFRESH_MS,\n    refetchIntervalInBackground: false,\n    refetchOnMount: 'always',\n    refetchOnWindowFocus: true,\n    refetchOnReconnect: true\n  });\n\n  const relayMutation = useMutation({\n    mutationFn: async (relayOn: boolean) => {\n      await setBlePlugRelay(plug, relayOn);\n      return relayOn;\n    },\n    retry: false,\n    onMutate: async (relayOn) => {\n      await queryClient.cancelQueries({ queryKey });\n      const previous = queryClient.getQueryData<BlePlugRuntimeStatus>(queryKey);\n      if (previous) {\n        queryClient.setQueryData<BlePlugRuntimeStatus>(queryKey, {\n          ...previous,\n          relayOn\n        });\n      }\n      return { previous };\n    },\n    onError: (_error, _relayOn, context) => {\n      if (context?.previous) {\n        queryClient.setQueryData(queryKey, context.previous);\n      }\n    },\n    onSettled: () => {\n      void queryClient.invalidateQueries({ queryKey });\n    }\n  });\n\n  return {\n    status: query.data ?? null,\n    isPending: query.isPending,\n    isFetching: query.isFetching,\n    isError: query.isError,\n    statusError: query.error ?? null,\n    isRelayPending: relayMutation.isPending,\n    isRelayError: relayMutation.isError,\n    relayError: relayMutation.error ?? null,\n    turnRelayOn: () => relayMutation.mutate(true),\n    turnRelayOff: () => relayMutation.mutate(false)\n  };\n};\n",
+      "elapsed_seconds": 2.103,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 3.0,
+      "output_policy": "stream",
+      "captured_output_chars": 2798,
+      "output_truncated": false,
+      "current_rss_mb": 3.0,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 3,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "pnpm exec prettier apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts",
+      "exit_code": 0,
+      "output": "import { Capacitor } from '@capacitor/core';\nimport { CapacitorBleScanner } from '@lcl/ble-core';\nimport { normalizeShellyDeviceId } from '@lcl/shelly-client';\nimport {\n  isRecoverableBlePlugRuntimeReadError,\n  readBlePlugRuntimeStatus,\n  type BlePlugRuntimeStatus\n} from '../data/blePlugRuntime.js';\nimport type {\n  PlugBleAdvertisement,\n  VerifiedPlugBleCandidate\n} from '../data/plugBleOnboarding.js';\nimport type { SavedBlePlug } from '../data/savedBlePlug.js';\nimport { inspectPlugBleCandidate } from './inspectPlugBleCandidate.js';\nimport {\n  DEFAULT_PLUG_BLE_SCAN_TIMEOUT_MS,\n  scanPlugBleCandidates\n} from './scanPlugBleCandidates.js';\n\nexport const PLUG_BLE_LOCATOR_RECOVERY_MAX_CANDIDATES = 6;\n\nexport type SavedBlePlugRuntimeRecoveryOptions = {\n  persistLocator(physicalId: string, bleDeviceId: string): void;\n};\n\nexport type SavedBlePlugRuntimeRecoveryDependencies = {\n  readStatus?(plug: Pick<SavedBlePlug, 'bleDeviceId'>): Promise<BlePlugRuntimeStatus>;\n  scanCandidates?(): Promise<PlugBleAdvertisement[]>;\n  inspectCandidate?(candidate: PlugBleAdvertisement): Promise<VerifiedPlugBleCandidate>;\n};\n\ntype RecoveryReadStatus = NonNullable<\n  SavedBlePlugRuntimeRecoveryDependencies['readStatus']\n>;\ntype RecoveryScanCandidates = NonNullable<\n  SavedBlePlugRuntimeRecoveryDependencies['scanCandidates']\n>;\ntype RecoveryInspectCandidate = NonNullable<\n  SavedBlePlugRuntimeRecoveryDependencies['inspectCandidate']\n>;\n\nconst recoveryByPhysicalId = new Map<string, Promise<BlePlugRuntimeStatus>>();\n\nconst defaultScanCandidates: RecoveryScanCandidates = async () =>\n  scanPlugBleCandidates({\n    scanner: new CapacitorBleScanner({ platform: Capacitor.getPlatform() }),\n    timeoutMs: DEFAULT_PLUG_BLE_SCAN_TIMEOUT_MS\n  });\n\nconst defaultInspectCandidate: RecoveryInspectCandidate = (candidate) =>\n  inspectPlugBleCandidate(candidate, { includePreview: false });\n\nconst prioritizeCandidates = (\n  plug: SavedBlePlug,\n  candidates: readonly PlugBleAdvertisement[]\n): PlugBleAdvertisement[] => {\n  const savedAdvertisementName = plug.advertisementName.trim().toLowerCase();\n  return candidates\n    .map((candidate, index) => ({\n      candidate,\n      index,\n      nameMatch:\n        savedAdvertisementName.length > 0 &&\n        candidate.name.trim().toLowerCase() === savedAdvertisementName\n    }))\n    .sort((left, right) => {\n      const namePriority = Number(right.nameMatch) - Number(left.nameMatch);\n      if (namePriority !== 0) return namePriority;\n      const rssiPriority = (right.candidate.rssi ?? -999) - (left.candidate.rssi ?? -999);\n      if (rssiPriority !== 0) return rssiPriority;\n      return left.index - right.index;\n    })\n    .slice(0, PLUG_BLE_LOCATOR_RECOVERY_MAX_CANDIDATES)\n    .map(({ candidate }) => candidate);\n};\n\nconst recoverLocatorAndRead = async (\n  plug: SavedBlePlug,\n  options: SavedBlePlugRuntimeRecoveryOptions,\n  readStatus: RecoveryReadStatus,\n  scanCandidates: RecoveryScanCandidates,\n  inspectCandidate: RecoveryInspectCandidate\n): Promise<BlePlugRuntimeStatus> => {\n  const canonicalPhysicalId = normalizeShellyDeviceId(plug.physicalId);\n  const candidates = prioritizeCandidates(plug, await scanCandidates());\n\n  for (const candidate of candidates) {\n    let verified: VerifiedPlugBleCandidate;\n    try {\n      verified = await inspectCandidate(candidate);\n    } catch {\n      continue;\n    }\n\n    if (normalizeShellyDeviceId(verified.physicalId) !== canonicalPhysicalId) {\n      continue;\n    }\n\n    options.persistLocator(plug.physicalId, verified.bleDeviceId);\n    return readStatus({ bleDeviceId: verified.bleDeviceId });\n  }\n\n  throw new Error('Saved Shelly Plug could not be rediscovered over Bluetooth.');\n};\n\nconst runRecoverySingleFlight = (\n  plug: SavedBlePlug,\n  options: SavedBlePlugRuntimeRecoveryOptions,\n  readStatus: RecoveryReadStatus,\n  scanCandidates: RecoveryScanCandidates,\n  inspectCandidate: RecoveryInspectCandidate\n): Promise<BlePlugRuntimeStatus> => {\n  const key = normalizeShellyDeviceId(plug.physicalId);\n  const existing = recoveryByPhysicalId.get(key);\n  if (existing) return existing;\n\n  const recovery = recoverLocatorAndRead(\n    plug,\n    options,\n    readStatus,\n    scanCandidates,\n    inspectCandidate\n  );\n  recoveryByPhysicalId.set(key, recovery);\n\n  const cleanup = () => {\n    if (recoveryByPhysicalId.get(key) === recovery) {\n      recoveryByPhysicalId.delete(key);\n    }\n  };\n  void recovery.then(cleanup, cleanup);\n  return recovery;\n};\n\nexport const readSavedBlePlugRuntimeStatus = async (\n  plug: SavedBlePlug,\n  options: SavedBlePlugRuntimeRecoveryOptions,\n  dependencies: SavedBlePlugRuntimeRecoveryDependencies = {}\n): Promise<BlePlugRuntimeStatus> => {\n  const readStatus = dependencies.readStatus ?? readBlePlugRuntimeStatus;\n  const scanCandidates = dependencies.scanCandidates ?? defaultScanCandidates;\n  const inspectCandidate = dependencies.inspectCandidate ?? defaultInspectCandidate;\n\n  try {\n    return await readStatus(plug);\n  } catch (error) {\n    if (!isRecoverableBlePlugRuntimeReadError(error)) {\n      throw error;\n    }\n  }\n\n  return runRecoverySingleFlight(\n    plug,\n    options,\n    readStatus,\n    scanCandidates,\n    inspectCandidate\n  );\n};\n",
+      "elapsed_seconds": 1.151,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 0.97,
+      "output_policy": "stream",
+      "captured_output_chars": 5167,
+      "output_truncated": false,
+      "current_rss_mb": 0.97,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 3,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "pnpm exec prettier apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts",
+      "exit_code": 0,
+      "output": "import { describe, expect, it, vi } from 'vitest';\nimport {\n  BlePlugRuntimeReadError,\n  type BlePlugRuntimeStatus\n} from '../data/blePlugRuntime.js';\nimport type {\n  PlugBleAdvertisement,\n  VerifiedPlugBleCandidate\n} from '../data/plugBleOnboarding.js';\nimport type { SavedBlePlug } from '../data/savedBlePlug.js';\nimport {\n  PLUG_BLE_LOCATOR_RECOVERY_MAX_CANDIDATES,\n  readSavedBlePlugRuntimeStatus\n} from './readSavedBlePlugRuntimeStatus.js';\n\nconst plug: SavedBlePlug = {\n  physicalId: 'shellyplugsg3-aabbccddeeff',\n  name: 'Growbox fan',\n  bleDeviceId: 'stale-locator',\n  advertisementName: 'ShellyPlugSG3-AABBCCDDEEFF',\n  model: 'S3PL-00112EU',\n  generation: 3,\n  firmwareId: '1.7.5',\n  matterEnabled: false\n};\n\nconst status: BlePlugRuntimeStatus = {\n  relayOn: false,\n  telemetry: { powerW: 4.2, voltageV: 230, energyWh: 42 },\n  clock: { localTime: '12:34', timeSynced: true }\n};\n\nconst advertisement = (\n  deviceId: string,\n  name = `ShellyPlugSG3-${deviceId}`,\n  rssi = -50\n): PlugBleAdvertisement => ({ deviceId, name, rssi });\n\nconst verified = (\n  bleDeviceId: string,\n  physicalId = plug.physicalId\n): VerifiedPlugBleCandidate => ({\n  bleDeviceId,\n  advertisementName: `ShellyPlugSG3-${bleDeviceId}`,\n  rssi: -45,\n  physicalId,\n  model: 'S3PL-00112EU',\n  generation: 3,\n  firmwareId: '1.7.5',\n  matterEnabled: false\n});\n\nconst readError = (\n  kind: 'shelly-offline' | 'timeout' | 'unknown' | 'validation-failed' = 'shelly-offline',\n  retryable = true\n): BlePlugRuntimeReadError =>\n  new BlePlugRuntimeReadError({\n    kind,\n    userMessageKey: kind === 'timeout' ? 'errors.timeout' : 'errors.shellyOffline',\n    technicalMessage: `${kind} read failure`,\n    retryable\n  });\n\ndescribe('readSavedBlePlugRuntimeStatus', () => {\n  it('uses a healthy saved locator without scanning', async () => {\n    const readStatus = vi.fn(async () => status);\n    const scanCandidates = vi.fn(async () => [] as PlugBleAdvertisement[]);\n    const inspectCandidate = vi.fn();\n    const persistLocator = vi.fn();\n\n    await expect(\n      readSavedBlePlugRuntimeStatus(\n        plug,\n        { persistLocator },\n        { readStatus, scanCandidates, inspectCandidate }\n      )\n    ).resolves.toEqual(status);\n\n    expect(readStatus).toHaveBeenCalledOnce();\n    expect(scanCandidates).not.toHaveBeenCalled();\n    expect(inspectCandidate).not.toHaveBeenCalled();\n    expect(persistLocator).not.toHaveBeenCalled();\n  });\n\n  it('recovers a stale locator only after canonical physical identity matches', async () => {\n    const events: string[] = [];\n    const misleading = advertisement('wrong-locator', plug.advertisementName, -30);\n    const matching = advertisement('fresh-locator', 'ShellyPlugSG3-FRESH', -60);\n    const readStatus = vi.fn(async (target: Pick<SavedBlePlug, 'bleDeviceId'>) => {\n      events.push(`read:${target.bleDeviceId}`);\n      if (target.bleDeviceId === plug.bleDeviceId) throw readError();\n      return status;\n    });\n    const scanCandidates = vi.fn(async () => {\n      events.push('scan');\n      return [matching, misleading];\n    });\n    const inspectCandidate = vi.fn(async (candidate: PlugBleAdvertisement) => {\n      events.push(`inspect:${candidate.deviceId}`);\n      return candidate.deviceId === misleading.deviceId\n        ? verified(candidate.deviceId, 'shellyplugsg3-not-the-saved-device')\n        : verified(candidate.deviceId);\n    });\n    const persistLocator = vi.fn((physicalId: string, bleDeviceId: string) => {\n      events.push(`persist:${physicalId}:${bleDeviceId}`);\n    });\n\n    await expect(\n      readSavedBlePlugRuntimeStatus(\n        plug,\n        { persistLocator },\n        { readStatus, scanCandidates, inspectCandidate }\n      )\n    ).resolves.toEqual(status);\n\n    expect(events).toEqual([\n      'read:stale-locator',\n      'scan',\n      'inspect:wrong-locator',\n      'inspect:fresh-locator',\n      `persist:${plug.physicalId}:fresh-locator`,\n      'read:fresh-locator'\n    ]);\n    expect(persistLocator).toHaveBeenCalledOnce();\n  });\n\n  it('leaves the locator unchanged when no candidate matches canonical identity', async () => {\n    const readStatus = vi.fn(async () => {\n      throw readError();\n    });\n    const scanCandidates = vi.fn(async () => [advertisement('wrong')]);\n    const inspectCandidate = vi.fn(async () =>\n      verified('wrong', 'shellyplugsg3-another-device')\n    );\n    const persistLocator = vi.fn();\n\n    await expect(\n      readSavedBlePlugRuntimeStatus(\n        plug,\n        { persistLocator },\n        { readStatus, scanCandidates, inspectCandidate }\n      )\n    ).rejects.toThrow('could not be rediscovered');\n\n    expect(persistLocator).not.toHaveBeenCalled();\n    expect(readStatus).toHaveBeenCalledOnce();\n  });\n\n  it('leaves the locator unchanged when scanning fails', async () => {\n    const readStatus = vi.fn(async () => {\n      throw readError('timeout');\n    });\n    const scanCandidates = vi.fn(async () => {\n      throw new Error('scan unavailable');\n    });\n    const persistLocator = vi.fn();\n\n    await expect(\n      readSavedBlePlugRuntimeStatus(\n        plug,\n        { persistLocator },\n        { readStatus, scanCandidates, inspectCandidate: vi.fn() }\n      )\n    ).rejects.toThrow('scan unavailable');\n\n    expect(persistLocator).not.toHaveBeenCalled();\n  });\n\n  it('continues conservatively after one candidate identity inspection fails', async () => {\n    const broken = advertisement('broken', plug.advertisementName);\n    const matching = advertisement('fresh-locator', 'ShellyPlugSG3-FRESH');\n    const readStatus = vi.fn(async (target: Pick<SavedBlePlug, 'bleDeviceId'>) => {\n      if (target.bleDeviceId === plug.bleDeviceId) throw readError();\n      return status;\n    });\n    const inspectCandidate = vi.fn(async (candidate: PlugBleAdvertisement) => {\n      if (candidate.deviceId === broken.deviceId) throw new Error('GATT inspect failed');\n      return verified(candidate.deviceId);\n    });\n    const persistLocator = vi.fn();\n\n    await expect(\n      readSavedBlePlugRuntimeStatus(\n        plug,\n        { persistLocator },\n        {\n          readStatus,\n          scanCandidates: async () => [matching, broken],\n          inspectCandidate\n        }\n      )\n    ).resolves.toEqual(status);\n\n    expect(inspectCandidate).toHaveBeenCalledTimes(2);\n    expect(persistLocator).toHaveBeenCalledWith(plug.physicalId, 'fresh-locator');\n  });\n\n  it.each([\n    ['unknown', true],\n    ['validation-failed', false],\n    ['timeout', false]\n  ] as const)(\n    'does not rediscover for non-locator read error %s retryable=%s',\n    async (kind, retryable) => {\n      const error = readError(kind, retryable);\n      const scanCandidates = vi.fn(async () => [] as PlugBleAdvertisement[]);\n\n      await expect(\n        readSavedBlePlugRuntimeStatus(\n          plug,\n          { persistLocator: vi.fn() },\n          {\n            readStatus: async () => {\n              throw error;\n            },\n            scanCandidates,\n            inspectCandidate: vi.fn()\n          }\n        )\n      ).rejects.toBe(error);\n\n      expect(scanCandidates).not.toHaveBeenCalled();\n    }\n  );\n\n  it('retries the read once after a match without starting a second recovery cycle', async () => {\n    const readStatus = vi.fn(async () => {\n      throw readError();\n    });\n    const scanCandidates = vi.fn(async () => [advertisement('fresh-locator')]);\n    const inspectCandidate = vi.fn(async () => verified('fresh-locator'));\n    const persistLocator = vi.fn();\n\n    await expect(\n      readSavedBlePlugRuntimeStatus(\n        plug,\n        { persistLocator },\n        { readStatus, scanCandidates, inspectCandidate }\n      )\n    ).rejects.toBeInstanceOf(BlePlugRuntimeReadError);\n\n    expect(readStatus).toHaveBeenCalledTimes(2);\n    expect(scanCandidates).toHaveBeenCalledOnce();\n    expect(inspectCandidate).toHaveBeenCalledOnce();\n    expect(persistLocator).toHaveBeenCalledOnce();\n  });\n\n  it('single-flights concurrent rediscovery for the same physical Plug', async () => {\n    const readStatus = vi.fn(async (target: Pick<SavedBlePlug, 'bleDeviceId'>) => {\n      if (target.bleDeviceId === plug.bleDeviceId) throw readError();\n      return status;\n    });\n    const scanCandidates = vi.fn(async () => [advertisement('fresh-locator')]);\n    const inspectCandidate = vi.fn(async () => verified('fresh-locator'));\n    const persistLocator = vi.fn();\n    const dependencies = { readStatus, scanCandidates, inspectCandidate };\n    const options = { persistLocator };\n\n    const [first, second] = await Promise.all([\n      readSavedBlePlugRuntimeStatus(plug, options, dependencies),\n      readSavedBlePlugRuntimeStatus(plug, options, dependencies)\n    ]);\n\n    expect(first).toEqual(status);\n    expect(second).toEqual(status);\n    expect(scanCandidates).toHaveBeenCalledOnce();\n    expect(inspectCandidate).toHaveBeenCalledOnce();\n    expect(persistLocator).toHaveBeenCalledOnce();\n    expect(readStatus).toHaveBeenCalledTimes(3);\n  });\n\n  it('bounds identity inspection even when many Shelly advertisements are present', async () => {\n    const candidates = Array.from(\n      { length: PLUG_BLE_LOCATOR_RECOVERY_MAX_CANDIDATES + 3 },\n      (_, index) =>\n        advertisement(`candidate-${index}`, `ShellyPlugSG3-${index}`, -40 - index)\n    );\n    const inspectCandidate = vi.fn(async (candidate: PlugBleAdvertisement) =>\n      verified(candidate.deviceId, `shellyplugsg3-wrong-${candidate.deviceId}`)\n    );\n\n    await expect(\n      readSavedBlePlugRuntimeStatus(\n        plug,\n        { persistLocator: vi.fn() },\n        {\n          readStatus: async () => {\n            throw readError();\n          },\n          scanCandidates: async () => candidates,\n          inspectCandidate\n        }\n      )\n    ).rejects.toThrow('could not be rediscovered');\n\n    expect(inspectCandidate).toHaveBeenCalledTimes(\n      PLUG_BLE_LOCATOR_RECOVERY_MAX_CANDIDATES\n    );\n  });\n});\n",
+      "elapsed_seconds": 1.163,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 0.17,
+      "output_policy": "stream",
+      "captured_output_chars": 9850,
+      "output_truncated": false,
+      "current_rss_mb": 0.17,
+      "stage_name": "command-3",
+      "stage_index": 3,
+      "stage_total": 3,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 3,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 2.103
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 3,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.151
+    },
+    {
+      "stage_name": "command-3",
+      "stage_index": 3,
+      "stage_total": 3,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 1.163
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.097
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.073
+  },
+  "finished_at": "2026-09-26T04:36:42.831965+00:00",
+  "task_digest": "c8f8ba101a6b73783b7dfb8ab2a58c15e9d0a43559f339181b1c084ceb1ed0cd",
+  "idle_timeout": 300,
+  "task_timeout": 1200,
+  "memory_limit_mb": 2048,
+  "attempt_id": "080c928b1be86a83d5f15e9a",
+  "daemon_version": "4.18.25"
+}

@@ -1,0 +1,60 @@
+{
+  "id": "shelly-ble-recovery-format-diff-20260926-513",
+  "status": "done",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "started_at": "2026-09-26T04:37:39.431775+00:00",
+  "command_timeout": 600,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; git fetch origin work/shelly-ble-transport; git checkout --detach origin/work/shelly-ble-transport; for f in apps/mobile/src/features/plugs/flows/useSavedBlePlugRuntime.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts; do echo \"=== $f ===\"; tmp=$(mktemp); pnpm exec prettier \"$f\" > \"$tmp\"; diff -u \"$f\" \"$tmp\" || true; rm -f \"$tmp\"; done",
+      "exit_code": 0,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/shelly-ble-transport -> FETCH_HEAD\nHEAD is now at 4adb8bbb6 Recover stale BLE plug locators on reads\n=== apps/mobile/src/features/plugs/flows/useSavedBlePlugRuntime.ts ===\n--- apps/mobile/src/features/plugs/flows/useSavedBlePlugRuntime.ts\t2026-09-26 06:35:36\n+++ /var/folders/y2/pbpz4k894kb10_gl3v69kbgm0000gn/T/tmp.JFvHdr3IvJ\t2026-09-26 06:37:42\n@@ -1,9 +1,6 @@\n import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';\n import type { SavedBlePlug } from '../data/savedBlePlug.js';\n-import {\n-  setBlePlugRelay,\n-  type BlePlugRuntimeStatus\n-} from '../data/blePlugRuntime.js';\n+import { setBlePlugRelay, type BlePlugRuntimeStatus } from '../data/blePlugRuntime.js';\n import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';\n import { readSavedBlePlugRuntimeStatus } from './readSavedBlePlugRuntimeStatus.js';\n \n=== apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts ===\n--- apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.ts\t2026-09-26 06:35:36\n+++ /var/folders/y2/pbpz4k894kb10_gl3v69kbgm0000gn/T/tmp.40AohOf8s0\t2026-09-26 06:37:43\n@@ -66,8 +66,7 @@\n     .sort((left, right) => {\n       const namePriority = Number(right.nameMatch) - Number(left.nameMatch);\n       if (namePriority !== 0) return namePriority;\n-      const rssiPriority =\n-        (right.candidate.rssi ?? -999) - (left.candidate.rssi ?? -999);\n+      const rssiPriority = (right.candidate.rssi ?? -999) - (left.candidate.rssi ?? -999);\n       if (rssiPriority !== 0) return rssiPriority;\n       return left.index - right.index;\n     })\n=== apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts ===\n--- apps/mobile/src/features/plugs/flows/readSavedBlePlugRuntimeStatus.test.ts\t2026-09-26 06:35:36\n+++ /var/folders/y2/pbpz4k894kb10_gl3v69kbgm0000gn/T/tmp.fQLswY8zGG\t2026-09-26 06:37:44\n@@ -272,7 +272,8 @@\n   it('bounds identity inspection even when many Shelly advertisements are present', async () => {\n     const candidates = Array.from(\n       { length: PLUG_BLE_LOCATOR_RECOVERY_MAX_CANDIDATES + 3 },\n-      (_, index) => advertisement(`candidate-${index}`, `ShellyPlugSG3-${index}`, -40 - index)\n+      (_, index) =>\n+        advertisement(`candidate-${index}`, `ShellyPlugSG3-${index}`, -40 - index)\n     );\n     const inspectCandidate = vi.fn(async (candidate: PlugBleAdvertisement) =>\n       verified(candidate.deviceId, `shellyplugsg3-wrong-${candidate.deviceId}`)\n",
+      "elapsed_seconds": 3.639,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 158.14,
+      "output_policy": "stream",
+      "captured_output_chars": 2515,
+      "output_truncated": false,
+      "current_rss_mb": 158.14,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 1,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 3.639
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.106
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.078
+  },
+  "finished_at": "2026-09-26T04:37:45.014201+00:00",
+  "task_digest": "fcd519d0f1040fb67f204823e41d1864655c661b50e9026b0eabc7cc23733fd4",
+  "idle_timeout": 300,
+  "task_timeout": 1200,
+  "memory_limit_mb": 2048,
+  "attempt_id": "e2aed75a667c87a4aaf4b26a",
+  "daemon_version": "4.18.25"
+}

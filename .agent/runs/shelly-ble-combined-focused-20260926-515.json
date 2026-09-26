@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ble-combined-focused-20260926-515",
+  "task_digest": "038d5f00bacbc72018b09b4eba74ea440705317f8e86f0f0c525e2f514ad6107",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-09-26T04:43:27.290935+00:00",
+  "attempt_id": "1d7d96783fe380e7e2ebc1a6",
+  "daemon_version": "4.18.25",
+  "daemon_pid": 16811,
+  "updated_at": "2026-09-26T04:43:27.801489+00:00",
+  "pid": 16811
+}
