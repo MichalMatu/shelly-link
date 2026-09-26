@@ -25,14 +25,14 @@ describe('PlugDetailTabs', () => {
     expect(screen.getByRole('button', { name: 'Automation' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Bluetooth' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Script' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Device settings' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Plug settings' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Info' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Info' })).toHaveAttribute(
       'aria-current',
       'page'
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Device settings' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Plug settings' }));
     expect(onChange).toHaveBeenCalledWith('device');
   });
 });
