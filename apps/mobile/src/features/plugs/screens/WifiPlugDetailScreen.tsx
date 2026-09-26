@@ -6,8 +6,8 @@ import { AppPageBack } from '../../../components/AppPageBack.js';
 import { PlugButtonModeSettingsCard } from '../components/PlugButtonModeSettingsCard.js';
 import { PlugCloudSettingsCard } from '../components/PlugCloudSettingsCard.js';
 import { PlugDeleteConfirmModal } from '../components/PlugDeleteConfirmModal.js';
-import { PlugDetailIdentity } from '../components/PlugDetailIdentity.js';
-import { PlugDetailTabs, type PlugDetailTab } from '../components/PlugDetailTabs.js';
+import { PlugDetailTop } from '../components/PlugDetailTop.js';
+import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
 import { PlugLedSettingsCard } from '../components/PlugLedSettingsCard.js';
 import { usePlugInformationFlow } from '../flows/usePlugInformationFlow.js';
@@ -60,13 +60,11 @@ export const WifiPlugDetailScreen = ({
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
-      <PlugDetailIdentity name={device.name} transport="wifi" model={device.model} />
-
-      <PlugDetailTabs
-        activeTab={activeTab}
+      <PlugDetailTop
+        plug={device}
+        tabs={[activeTab, setActiveTab]}
+        onBack={onBack}
         disabledTabs={disabledWifiDetailTabs}
-        onChange={setActiveTab}
       />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
