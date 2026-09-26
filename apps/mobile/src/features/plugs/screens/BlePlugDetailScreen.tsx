@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { AppPageBack } from '../../../components/AppPageBack.js';
 import { BlePlugDeviceReadOnlyPanel } from '../components/BlePlugDeviceReadOnlyPanel.js';
-import { PlugDetailIdentity } from '../components/PlugDetailIdentity.js';
-import { PlugDetailTabs, type PlugDetailTab } from '../components/PlugDetailTabs.js';
+import { PlugDetailTop } from '../components/PlugDetailTop.js';
+import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
 import { useBlePlugReadOnlyDetailFlow } from '../flows/useBlePlugReadOnlyDetailFlow.js';
 import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
@@ -37,13 +37,12 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
-      <PlugDetailIdentity name={plug.name} transport="bluetooth" model={plug.model} />
-
-      <PlugDetailTabs
-        activeTab={activeTab}
+      <PlugDetailTop
+        plug={plug}
+        transport="bluetooth"
+        tabs={[activeTab, setActiveTab]}
+        onBack={onBack}
         disabledTabs={disabledBleDetailTabs}
-        onChange={setActiveTab}
       />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
