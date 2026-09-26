@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import { AppPageBack } from '../../../components/AppPageBack.js';
 import { BlePlugDeviceReadOnlyPanel } from '../components/BlePlugDeviceReadOnlyPanel.js';
+import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
 import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
@@ -23,17 +23,7 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
   );
   const detailQuery = useBlePlugReadOnlyDetailFlow(plug);
 
-  if (!plug) {
-    return (
-      <main className="demo-shell installation-detail-shell">
-        <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
-        <section className="automation-card installation-detail-identity">
-          <h1>{t('detail.notFoundTitle')}</h1>
-          <p className="installation-detail-note">{t('detail.notFoundDescription')}</p>
-        </section>
-      </main>
-    );
-  }
+  if (!plug) return <PlugDetailNotFound onBack={onBack} />;
 
   return (
     <main className="demo-shell installation-detail-shell">
