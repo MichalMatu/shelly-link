@@ -417,13 +417,13 @@ describe('InstallationDetailScreen', () => {
     expect(screen.queryByRole('button', { name: 'Edytuj' })).toBeNull();
   });
 
-  it('uses one detail surface without child-page Back chrome', async () => {
+  it('uses the shared Plug detail top chrome', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     installShellyFetchMock();
     renderDetail(saved.id);
 
-    expect(screen.queryByRole('button', { name: 'Wstecz: Gniazdka' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Wstecz: Gniazdka' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
       'aria-current',
       'page'
@@ -434,7 +434,7 @@ describe('InstallationDetailScreen', () => {
     expect(screen.getByRole('button', { name: 'Informacje' })).toBeVisible();
   });
 
-  it('does not repeat the dashboard name, rename control, or climate-purpose heading', async () => {
+  it('shows shared Plug identity without duplicating rename or climate-purpose controls', async () => {
     const saved = installation();
     useHardwareSetupDraftStore.getState().upsertShellyDevice({
       id: saved.shelly.deviceId,
@@ -447,7 +447,8 @@ describe('InstallationDetailScreen', () => {
 
     renderDetail(saved.id);
 
-    expect(screen.queryByRole('heading', { name: 'Salon' })).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Salon' })).toBeVisible();
+    expect(screen.getByText('Wi-Fi · S3PL-00112EU')).toBeVisible();
     expect(screen.queryByRole('button', { name: 'Nazwa gniazdka' })).toBeNull();
     expect(screen.queryByText('Sterowanie temperaturą')).toBeNull();
   });

@@ -548,7 +548,9 @@ describe('AutomationDashboardScreen', () => {
       screen.getByRole('button', { name: 'Skanuj termometry BLE telefonem' })
     ).toBeVisible();
     rerenderKind('climate');
-    expect(screen.getByRole('button', { name: 'Szczegóły: Salon' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' })
+    ).toBeVisible();
     expect(
       document.querySelector('.automation-card__menu svg.tabler-icon')
     ).not.toBeNull();
