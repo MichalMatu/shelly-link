@@ -125,6 +125,7 @@ export const RPC_METHODS = {
   ShellyGetDeviceInfo: 'Shelly.GetDeviceInfo',
   ShellyGetStatus: 'Shelly.GetStatus',
   SysGetStatus: 'Sys.GetStatus',
+  SysSetTime: 'Sys.SetTime',
   ShellyListMethods: 'Shelly.ListMethods',
   ScriptList: 'Script.List',
   ScriptCreate: 'Script.Create',

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { BlePlugDeviceReadOnlyPanel } from '../components/BlePlugDeviceReadOnlyPanel.js';
+import { BlePlugTimeSyncCard } from '../components/BlePlugTimeSyncCard.js';
 import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
 import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
@@ -59,10 +60,16 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
               </section>
             )}
             {detailQuery.data && (
-              <BlePlugDeviceReadOnlyPanel
-                settings={detailQuery.data.deviceSettings}
-                cloud={detailQuery.data.cloud}
-              />
+              <>
+                <BlePlugDeviceReadOnlyPanel
+                  settings={detailQuery.data.deviceSettings}
+                  cloud={detailQuery.data.cloud}
+                />
+                <BlePlugTimeSyncCard
+                  plug={plug}
+                  clock={detailQuery.data.information.status.clock}
+                />
+              </>
             )}
           </>
         )}
