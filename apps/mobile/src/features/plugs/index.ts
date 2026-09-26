@@ -80,6 +80,12 @@ export {
   type BleOnlyPlugDashboardCardsProps
 } from './components/BleOnlyPlugDashboardCards.js';
 export {
+  PlugDashboardCardShell,
+  type PlugDashboardAutomationAction,
+  type PlugDashboardCardShellProps,
+  type PlugDashboardTelemetry
+} from './components/PlugDashboardCardShell.js';
+export {
   PlugAddSpeedDial,
   type PlugAddSpeedDialProps,
   type PlugAddTransport
