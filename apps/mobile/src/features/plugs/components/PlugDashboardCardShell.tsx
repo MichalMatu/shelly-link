@@ -4,10 +4,10 @@ import { useTranslation } from '../../../app/i18n.js';
 import { EditablePlugName } from '../../../components/EditablePlugName.js';
 
 export type PlugDashboardTelemetry = {
-  powerW?: number | null;
-  voltageV?: number | null;
-  energyWh?: number | null;
-  localTime?: string | null;
+  powerW: number | null | undefined;
+  voltageV: number | null | undefined;
+  energyWh: number | null | undefined;
+  localTime: string | null | undefined;
 };
 
 export type PlugDashboardAutomationAction = {
