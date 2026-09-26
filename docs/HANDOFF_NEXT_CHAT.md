@@ -1,6 +1,6 @@
 # Handoff — Shelly BLE management
 
-Status: **2026-09-26 — BLE read-only Device expansion software-complete; real-phone Device acceptance pending**
+Status: **2026-09-26 — BLE read-only Device expansion software-complete and accepted on Samsung S22+**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -22,7 +22,13 @@ Local Agent bindings are conversation-scoped. Always use the fresh bootstrap sup
 
 ## Current software checkpoint
 
-Latest read-only Device implementation head before documentation updates:
+Exact product head installed for final S22+ hardware acceptance:
+
+```text
+dfff96748e81f55baff22fa4b9d635b4e436e859
+```
+
+Latest read-only Device implementation checkpoint before final documentation/handoff commits:
 
 ```text
 8b240cfc925022020fed3ceb0d11321e3a7ef53a  Test independent BLE Device read-only sections
@@ -57,7 +63,7 @@ Do not rebuild these slices without a concrete defect.
 - `SavedBlePlug` stores canonical `physicalId` plus replaceable `bleDeviceId`; advertisement name/RSSI are metadata/prioritization only.
 - BLE-only dashboard status and relay ON/OFF are hardware-accepted.
 - Add Plug speed-dial uses the accepted L layout: Wi-Fi above `+`, Bluetooth left, equal distance, transport actions accented while expanded, click-away/Escape/trigger collapse, reduced-motion support.
-- BLE-only Plug Detail remains read-only and transport-aware; it does not fake an HTTP `baseUrl`.
+- BLE-only Plug Detail is hardware-accepted as read-only and transport-aware; it does not fake an HTTP `baseUrl`.
 - Read-only dashboard runtime/status and BLE Detail share the same bounded stale-locator rediscovery primitive.
 - Locator replacement requires canonical `Shelly.GetDeviceInfo.id` match, persists only the refreshed BLE locator and retries the original read once.
 - Relay/settings/script/config mutations are outside rediscovery and are never automatically replayed after timeout/disconnect.
@@ -78,7 +84,7 @@ Important boundaries:
 - getter support is independent from setter support; `readConfig()` does not require the corresponding mutation RPC;
 - PLUGS_UI and Cloud presentation are independent, so support for one does not hide the other;
 - the read model stops on the first failed RPC instead of continuing unnecessary reads;
-- the existing 30-second Detail refresh cadence is preserved;
+- the existing 30-second Detail refresh cadence is preserved and is now accepted on real S22+ hardware;
 - one retryable BLE offline/timeout failure may invoke the existing bounded stale-locator recovery, then retry the combined read exactly once;
 - the old Info-only BLE query/recovery pipeline was removed after grep proved it had no production consumer;
 - no LED, button, Cloud, script or config mutation surface was added;
@@ -103,9 +109,9 @@ The read-only Device work passed:
 
 The varying mobile total reflects removal of the obsolete Info-only recovery test/pipeline and addition of the independent Device-section regression, not relaxed assertions or skipped production behavior.
 
-## Real-device evidence already accepted
+## Real-device evidence accepted
 
-Factory-fresh BLE-only Plug used for the existing transport/runtime acceptance:
+Factory-fresh BLE-only Plug used for transport/runtime and final Device acceptance:
 
 ```text
 physicalId        = shellyplugsg3-e4b063e3e298
@@ -114,33 +120,28 @@ advertisementName = ShellyPlugSG3-E4B063E3E298
 model             = S3PL-00112EU
 generation        = 3
 firmwareId         = 20240820-134301/1.2.3-plugsg3prod0-gec79607
-matterEnabled      = true
 ```
 
-Samsung S22+ hardware acceptance already passed for BLE Add/runtime, status/read, relay control and stale-locator recovery. The saved locator was deliberately changed to `02:00:00:00:00:01`; read-only recovery restored `E4:B0:63:E3:E2:9A`, preserved canonical identity/metadata and made no settings/script/config mutation. Final relay state was OFF.
+Samsung S22+ / Android 16 hardware acceptance already passed for BLE Add/runtime, status/read, relay control and stale-locator recovery. The saved locator was deliberately changed to `02:00:00:00:00:01`; read-only recovery restored `E4:B0:63:E3:E2:9A`, preserved canonical identity/metadata and made no settings/script/config mutation. Final relay state for that lifecycle acceptance was OFF.
 
-Full dated evidence belongs in `docs/testing/hardware-matrix.md`.
+The expanded BLE-only Device presentation is also accepted on the S22+ using exact product head `dfff96748e81f55baff22fa4b9d635b4e436e859`, installed with `adb install -r` so app data remained intact. A clean Detail load showed the full read-only state within 5 seconds:
 
-## Pending real-device acceptance
+- LED mode `Power usage`;
+- power-mode brightness `100%`;
+- night mode disabled;
+- physical button mode `Controls relay`;
+- Shelly Cloud disabled and `Not connected`;
+- model `S3PL-00112EU`, gen 3;
+- firmware `20240820-134301/1.2.3-plugsg3prod0-gec79607`;
+- Bluetooth locator/advertisement `E4:B0:63:E3:E2:9A · ShellyPlugSG3-E4B063E3E298`.
 
-The **expanded BLE-only Device presentation** added in this continuation has not yet been inspected on the Samsung S22+ because the phone was unavailable during the autonomous work period.
+The RPC trace completed the expected read-only sequence through `Cloud.GetStatus` and disconnected normally. After crossing the 30-second automatic refresh interval, a 42-second snapshot retained the same expected Device/Info rows with no `Refreshing` or connection-failure state. Logcat showed two BLE connect calls and two matching disconnect calls, with no app timeout/offline/failure/exception console error. No relay toggle and no settings/script/config mutation was performed during this Device acceptance.
 
-When the phone is available, install the exact current branch with app data preserved if possible and verify, read-only:
-
-1. BLE-only Detail opens normally for `shellyplugsg3-e4b063e3e298`;
-2. Device shows the actual LED mode and any supported brightness/night-mode values;
-3. Device shows the actual physical-button mode;
-4. Device shows Shelly Cloud enabled/connected state when supported;
-5. Info remains correct and the BLE locator/advertisement rows remain transport-aware;
-6. 30-second/background refresh does not cause duplicate visible sessions or unstable loading;
-7. deliberately stale locator recovery still returns to the same Device/Info state if that scenario is repeated;
-8. no relay toggle and no settings/script/config mutation occurs during this acceptance.
-
-No new hardware-matrix PASS should be added until that check is actually performed.
+Full dated evidence is recorded in `docs/testing/hardware-matrix.md`.
 
 ## Visual-contract debt
 
-The canonical browser visual contract still contains the existing 19 deterministic states and does not have a native-GATT BLE-only Detail state. The new Device panel reuses the accepted `plug-detail-framed-section` / diagnostic-row hierarchy and did not introduce a new surface role, but real-phone visual inspection is still required. Do not create a fake browser GATT harness merely to manufacture a screenshot baseline; add a deterministic seam only if future BLE Detail work makes that worthwhile.
+The canonical browser visual contract still contains the existing 19 deterministic states and does not have a native-GATT BLE-only Detail state. The new Device panel reuses the accepted `plug-detail-framed-section` / diagnostic-row hierarchy. Real-phone inspection is now complete; do not create a fake browser GATT harness merely to manufacture a screenshot baseline. Add a deterministic seam only if future BLE Detail work makes that worthwhile.
 
 ## Repository / branch hygiene
 
@@ -150,10 +151,9 @@ Legacy size hotspots remain outside this slice (`AutomationDashboardScreen.tsx`,
 
 ## Safe next work
 
-1. Complete the real S22+ read-only Device acceptance above and record it in `docs/testing/hardware-matrix.md`.
-2. Only after explicit approval, design the first BLE **mutation** slice; preserve canonical identity verification and never auto-replay a timeout/disconnect mutation.
-3. Define pairing/bonding behavior only for firmware/platform combinations that actually require it.
-4. Consider a future dual-transport representation for one physical Plug before automatic transport selection/fallback.
-5. Keep script/config lifecycle changes separate from BLE transport work unless a product decision explicitly requires them.
+1. Only after explicit approval, design the first BLE **mutation** slice; preserve canonical identity verification and never auto-replay a timeout/disconnect mutation.
+2. Define pairing/bonding behavior only for firmware/platform combinations that actually require it.
+3. Consider a future dual-transport representation for one physical Plug before automatic transport selection/fallback.
+4. Keep script/config lifecycle changes separate from BLE transport work unless a product decision explicitly requires them.
 
 The old hardware-first BLE spike journal remains retired; durable conclusions live in Architecture, Roadmap and the hardware matrix, while detailed experiment history remains in Git history.
