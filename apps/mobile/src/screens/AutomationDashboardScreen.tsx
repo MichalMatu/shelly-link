@@ -11,6 +11,7 @@ import {
   BleOnlyPlugDashboardCards,
   isSameShellyDevice,
   PlugAddSpeedDial,
+  PlugDashboardCardShell,
   useSavedBlePlugStore,
   type PlugAddTransport
 } from '../features/plugs/index.js';
@@ -365,85 +366,27 @@ const PlainPlugCard = ({
   onOpenSettings(): void;
   onNameChange(value: string): void;
 }) => {
-  const { t } = useTranslation();
   const { status, isRelayPending, turnRelayOn, turnRelayOff } =
     usePlainShellyRuntime(device);
-  const relayState = status?.relayOn;
-  const isBusy = isRelayPending;
 
   return (
-    <article className="automation-card plug-card plug-card--unconfigured">
-      <header className="automation-card__header">
-        <span
-          className={`automation-card__leading-icon${
-            relayState === true ? ' automation-card__leading-icon--active' : ''
-          }`}
-          aria-hidden="true"
-        >
-          <IconPlug className="automation-card__icon" />
-        </span>
-        <div className="automation-card__identity">
-          <EditablePlugName name={device.name} variant="card" onCommit={onNameChange} />
-          <p>{t('dashboard.emptyCategory')}</p>
-        </div>
-        <button
-          className="automation-card__menu"
-          type="button"
-          aria-label={`${t('hardware.shelly.settings')}: ${device.name}`}
-          title={t('hardware.shelly.settings')}
-          onClick={onOpenSettings}
-        >
-          <IconDotsVertical aria-hidden="true" />
-        </button>
-      </header>
-
-      <div
-        className="automation-card__plug-runtime"
-        aria-label={t('hardware.shelly.statusMetricsLabel')}
-      >
-        <span>{formatInstallationMetric(status?.telemetry.powerW, ' W', 1)}</span>
-        <span>{formatInstallationMetric(status?.telemetry.voltageV, ' V', 0)}</span>
-        <span>{formatPlugEnergy(status?.telemetry.energyWh)}</span>
-        <span>{status?.clock.localTime ?? '—'}</span>
-      </div>
-
-      <div
-        className="automation-relay-actions automation-card__relay-actions"
-        role="group"
-        aria-label={t('dashboard.output')}
-      >
-        <button
-          className="automation-relay-button"
-          type="button"
-          aria-pressed={relayState === true}
-          disabled={isBusy}
-          onClick={() => {
-            if (relayState !== true) turnRelayOn();
-          }}
-        >
-          ON
-        </button>
-        <button
-          className="automation-relay-button"
-          type="button"
-          aria-pressed={relayState === false}
-          disabled={isBusy}
-          onClick={() => {
-            if (relayState !== false) turnRelayOff();
-          }}
-        >
-          OFF
-        </button>
-      </div>
-
-      <button
-        className="primary-action plug-card__automation-action"
-        type="button"
-        onClick={onAddAutomation}
-      >
-        {t('dashboard.addAutomation')}
-      </button>
-    </article>
+    <PlugDashboardCardShell
+      name={device.name}
+      relayState={status?.relayOn}
+      busy={isRelayPending}
+      telemetry={{
+        powerW: status?.telemetry.powerW,
+        voltageV: status?.telemetry.voltageV,
+        energyWh: status?.telemetry.energyWh,
+        localTime: status?.clock.localTime
+      }}
+      automationAction={{ disabled: false, onClick: onAddAutomation }}
+      detailContext="Wi-Fi"
+      onNameChange={onNameChange}
+      onOpenDetails={onOpenSettings}
+      onTurnRelayOn={turnRelayOn}
+      onTurnRelayOff={turnRelayOff}
+    />
   );
 };
 
