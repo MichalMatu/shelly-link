@@ -88,13 +88,13 @@ describe('BLE-only dashboard integration', () => {
     setLocalePreference('system');
   });
 
-  it('shows a saved BLE-only Plug with runtime status', () => {
+  it('shows a saved BLE-only Plug with runtime status and keeps transport metadata out of the card header', () => {
     saveBlePlug('shellyplugsg3-ble-only-1', 'BLE lamp');
 
     renderDashboard();
 
     expect(screen.getByText('BLE lamp')).toBeVisible();
-    expect(screen.getByText('Bluetooth · S3PL-00112EU')).toBeVisible();
+    expect(screen.queryByText('Bluetooth · S3PL-00112EU')).not.toBeInTheDocument();
     expect(screen.getByText('4.2 W')).toBeVisible();
     expect(screen.getByRole('button', { name: 'ON' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'OFF' })).toBeVisible();
