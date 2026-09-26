@@ -56,7 +56,7 @@ describe('BleOnlyPlugCard', () => {
 
   afterEach(() => setLocalePreference('system'));
 
-  it('shows normalized BLE runtime status without transport metadata on the dashboard', () => {
+  it('shows the shared Plug card skeleton without visible transport metadata', () => {
     renderCard();
 
     expect(screen.getByText('BLE lamp')).toBeVisible();
@@ -65,6 +65,7 @@ describe('BleOnlyPlugCard', () => {
     expect(screen.getByText('230 V')).toBeVisible();
     expect(screen.getByText('42 Wh')).toBeVisible();
     expect(screen.getByText('12:34')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Add automation' })).toBeDisabled();
 
     fireEvent.click(screen.getByRole('button', { name: 'ON' }));
     expect(runtime.turnRelayOn).toHaveBeenCalledOnce();
@@ -79,14 +80,16 @@ describe('BleOnlyPlugCard', () => {
 
     expect(screen.getByText('S3PL-00112EU')).toBeVisible();
     expect(screen.queryByText('ShellyPlugSG3-Demo')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Details: S3PL-00112EU' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Details: S3PL-00112EU · Bluetooth' })
+    ).toBeVisible();
   });
 
   it('opens the read-only Plug detail from the same Details menu used by Wi-Fi cards', () => {
     const onOpen = vi.fn();
     renderCard(onOpen);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Details: BLE lamp' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Details: BLE lamp · Bluetooth' }));
     expect(onOpen).toHaveBeenCalledOnce();
   });
 
