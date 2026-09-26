@@ -86,10 +86,7 @@ export const PlugDashboardCardShell = ({
             title={t('dashboard.openSystem')}
             onClick={onOpenDetails}
           >
-            <IconDotsVertical
-              className="automation-card__menu-icon"
-              aria-hidden="true"
-            />
+            <IconDotsVertical className="automation-card__menu-icon" aria-hidden="true" />
           </button>
         </div>
       </header>
