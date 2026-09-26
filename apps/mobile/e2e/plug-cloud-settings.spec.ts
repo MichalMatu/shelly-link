@@ -152,7 +152,7 @@ const expectNoHorizontalOverflow = async (page: Page) => {
 
 const openPlugSettings = async (page: Page) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Ustawienia gniazdka: Salon' }).click();
+  await page.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }).click();
   await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Shelly Cloud' })).toBeVisible();
 };
