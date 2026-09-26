@@ -479,7 +479,7 @@ const expectClimateDetailHierarchy = async (page: Page) => {
   expect(surfaceBox.width).toBeGreaterThan(0);
   expect(Math.abs(tabsBox.x - surfaceBox.x)).toBeLessThanOrEqual(2);
   expect(Math.abs(tabsBox.width - surfaceBox.width)).toBeLessThanOrEqual(2);
-  await expect(page.locator('.app-page-back-row')).toHaveCount(1);
+  await expect(page.locator('.app-page-back-row')).toHaveCount(0);
   await expect(page.locator('.installation-detail-live')).toHaveCount(0);
   await expect(page.locator('.app-bottom-nav')).toBeVisible();
   await expect(
@@ -636,7 +636,7 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }).click();
     await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Wstecz: Gniazdka' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Wstecz: Gniazdka' })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
     await expect(page.getByText('Wi-Fi · S3PL-00112EU')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Automatyka' })).toHaveCount(0);
