@@ -12,10 +12,8 @@ export {
   usePlugInformationFlow,
   plugInformationQueryKey
 } from './flows/usePlugInformationFlow.js';
-export {
-  PlugInfoPanel,
-  type PlugInfoConnection
-} from './components/PlugInfoPanel.js';
+export { PlugInfoPanel } from './components/PlugInfoPanel.js';
+export { PlugDetailNotFound } from './components/PlugDetailNotFound.js';
 export { PlugDetailTop } from './components/PlugDetailTop.js';
 export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.js';
 export {
