@@ -6,6 +6,7 @@ import { AppPageBack } from '../../../components/AppPageBack.js';
 import { PlugButtonModeSettingsCard } from '../components/PlugButtonModeSettingsCard.js';
 import { PlugCloudSettingsCard } from '../components/PlugCloudSettingsCard.js';
 import { PlugDeleteConfirmModal } from '../components/PlugDeleteConfirmModal.js';
+import { PlugDetailIdentity } from '../components/PlugDetailIdentity.js';
 import { PlugDetailTabs, type PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
 import { PlugLedSettingsCard } from '../components/PlugLedSettingsCard.js';
@@ -60,12 +61,7 @@ export const WifiPlugDetailScreen = ({
   return (
     <main className="demo-shell installation-detail-shell">
       <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
-      <section className="automation-card installation-detail-identity">
-        <h1>{device.name}</h1>
-        <p className="installation-detail-note">
-          Wi-Fi{device.model ? ` · ${device.model}` : ''}
-        </p>
-      </section>
+      <PlugDetailIdentity name={device.name} transport="wifi" model={device.model} />
 
       <PlugDetailTabs
         activeTab={activeTab}
