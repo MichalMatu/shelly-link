@@ -71,11 +71,11 @@ describe('BleOnlyPlugCard', () => {
     expect(runtime.turnRelayOff).not.toHaveBeenCalled();
   });
 
-  it('opens the read-only Plug detail from the card menu', () => {
+  it('opens the read-only Plug detail from the same Details menu used by Wi-Fi cards', () => {
     const onOpen = vi.fn();
     renderCard(onOpen);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Info: BLE lamp' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Details: BLE lamp' }));
     expect(onOpen).toHaveBeenCalledOnce();
   });
 
