@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { AppPageBack } from '../../../components/AppPageBack.js';
 import { BlePlugDeviceReadOnlyPanel } from '../components/BlePlugDeviceReadOnlyPanel.js';
+import { PlugDetailIdentity } from '../components/PlugDetailIdentity.js';
 import { PlugDetailTabs, type PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
 import { useBlePlugReadOnlyDetailFlow } from '../flows/useBlePlugReadOnlyDetailFlow.js';
@@ -37,12 +38,7 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
   return (
     <main className="demo-shell installation-detail-shell">
       <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
-      <section className="automation-card installation-detail-identity">
-        <h1>{plug.name}</h1>
-        <p className="installation-detail-note">
-          {t('common.bluetooth')} · {plug.model}
-        </p>
-      </section>
+      <PlugDetailIdentity name={plug.name} transport="bluetooth" model={plug.model} />
 
       <PlugDetailTabs
         activeTab={activeTab}
