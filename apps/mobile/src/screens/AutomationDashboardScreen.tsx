@@ -208,7 +208,7 @@ const ClimateAutomationCard = ({
           <button
             className="automation-card__menu"
             type="button"
-            aria-label={`${t('dashboard.openSystem')}: ${installation.shelly.name}`}
+            aria-label={`${t('dashboard.openSystem')}: ${installation.shelly.name} · Wi-Fi`}
             title={t('dashboard.openSystem')}
             onClick={() => onOpen(installation.id)}
           >
