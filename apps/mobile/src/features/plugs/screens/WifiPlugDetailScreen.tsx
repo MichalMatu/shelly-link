@@ -2,10 +2,10 @@ import { DiagnosticRow } from '@lcl/ui';
 import { IconBluetooth, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import { AppPageBack } from '../../../components/AppPageBack.js';
 import { PlugButtonModeSettingsCard } from '../components/PlugButtonModeSettingsCard.js';
 import { PlugCloudSettingsCard } from '../components/PlugCloudSettingsCard.js';
 import { PlugDeleteConfirmModal } from '../components/PlugDeleteConfirmModal.js';
+import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
 import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
@@ -44,17 +44,7 @@ export const WifiPlugDetailScreen = ({
     enabled: device !== null && (activeTab === 'ble' || activeTab === 'info')
   });
 
-  if (!device) {
-    return (
-      <main className="demo-shell installation-detail-shell">
-        <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
-        <section className="automation-card installation-detail-identity">
-          <h1>{t('detail.notFoundTitle')}</h1>
-          <p className="installation-detail-note">{t('detail.notFoundDescription')}</p>
-        </section>
-      </main>
-    );
-  }
+  if (!device) return <PlugDetailNotFound onBack={onBack} />;
 
   const bluetoothState = informationQuery.data?.status.bluetooth;
 
