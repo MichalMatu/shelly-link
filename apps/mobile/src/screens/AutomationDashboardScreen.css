@@ -152,6 +152,11 @@
   padding-top: var(--lcl-spacing-sm);
 }
 
+.dashboard-shell .plug-card--unconfigured .automation-card__plug-runtime {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  padding-top: var(--lcl-spacing-sm);
+}
+
 .automation-card__primary-metric,
 .automation-card__secondary-metrics,
 .automation-card__secondary-metrics > div {
