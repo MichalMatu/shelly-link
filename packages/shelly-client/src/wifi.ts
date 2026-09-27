@@ -28,6 +28,20 @@ const wifiStatusSchema = z
   })
   .passthrough();
 
+const wifiScanEntrySchema = z
+  .object({
+    ssid: z.string().nullable(),
+    bssid: z.string(),
+    auth: z.number().int().nonnegative(),
+    channel: z.number().int().optional(),
+    rssi: z.number().optional()
+  })
+  .passthrough();
+
+const wifiScanResponseSchema = z.object({
+  results: z.array(wifiScanEntrySchema)
+});
+
 const wifiStationProvisioningSchema = z.object({
   ssid: z.string().refine((value) => value.trim().length > 0, {
     message: 'SSID must not be blank.'
@@ -43,6 +57,7 @@ const setConfigResponseSchema = z.object({
 export type ShellyWifiStationConfig = z.infer<typeof wifiStationConfigSchema>;
 export type ShellyWifiConfig = z.infer<typeof wifiConfigSchema>;
 export type ShellyWifiStatus = z.infer<typeof wifiStatusSchema>;
+export type ShellyWifiScanEntry = z.infer<typeof wifiScanEntrySchema>;
 export type ShellyWifiStationProvisioning = z.input<typeof wifiStationProvisioningSchema>;
 export type ShellyWifiSetResult = z.infer<typeof setConfigResponseSchema>;
 
@@ -65,6 +80,21 @@ const parseResponse = <T>(response: Result<unknown>, schema: z.ZodType<T>): Resu
 export class RpcShellyWifiClient {
   constructor(private readonly transport: ShellyRpcTransport) {}
 
+  async scan(): Promise<Result<ShellyWifiScanEntry[]>> {
+    const response = parseResponse(
+      await this.transport.call<unknown>({ method: RPC_METHODS.WifiScan }),
+      wifiScanResponseSchema
+    );
+    return response.ok ? { ok: true, value: response.value.results } : response;
+  }
+
+  async getStatus(): Promise<Result<ShellyWifiStatus>> {
+    return parseResponse(
+      await this.transport.call<unknown>({ method: RPC_METHODS.WifiGetStatus }),
+      wifiStatusSchema
+    );
+  }
+
   async read(): Promise<Result<ShellyWifiReadResult>> {
     const config = parseResponse(
       await this.transport.call<unknown>({ method: RPC_METHODS.WifiGetConfig }),
@@ -74,10 +104,7 @@ export class RpcShellyWifiClient {
       return config;
     }
 
-    const status = parseResponse(
-      await this.transport.call<unknown>({ method: RPC_METHODS.WifiGetStatus }),
-      wifiStatusSchema
-    );
+    const status = await this.getStatus();
     if (!status.ok) {
       return status;
     }
