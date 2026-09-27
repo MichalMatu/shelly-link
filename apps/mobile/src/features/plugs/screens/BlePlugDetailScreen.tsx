@@ -6,6 +6,7 @@ import { BlePlugWifiProvisioningCard } from '../components/BlePlugWifiProvisioni
 import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
 import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
+import { PlugFirmwareUpdateCard } from '../components/PlugFirmwareUpdateCard.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
 import { useBlePlugReadOnlyDetailFlow } from '../flows/useBlePlugReadOnlyDetailFlow.js';
 import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
@@ -26,6 +27,12 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
   const detailQuery = useBlePlugReadOnlyDetailFlow(plug);
 
   if (!plug) return <PlugDetailNotFound onBack={onBack} />;
+
+  const currentFirmware =
+    detailQuery.data?.information.deviceInfo.firmwareId ?? plug.firmwareId ?? undefined;
+  const firmwareTarget = plug.wifiBaseUrl
+    ? { physicalId: plug.physicalId, baseUrl: plug.wifiBaseUrl }
+    : undefined;
 
   return (
     <main className="demo-shell installation-detail-shell">
@@ -77,17 +84,23 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
         )}
 
         {activeTab === 'info' && (
-          <PlugInfoPanel
-            connection={{
-              transport: 'bluetooth',
-              bleDeviceId: plug.bleDeviceId,
-              advertisementName: plug.advertisementName
-            }}
-            information={detailQuery.data?.information}
-            loading={detailQuery.isPending}
-            error={detailQuery.isError}
-            showResourceRows={false}
-          />
+          <>
+            <PlugInfoPanel
+              connection={{
+                transport: 'bluetooth',
+                bleDeviceId: plug.bleDeviceId,
+                advertisementName: plug.advertisementName
+              }}
+              information={detailQuery.data?.information}
+              loading={detailQuery.isPending}
+              error={detailQuery.isError}
+              showResourceRows={false}
+            />
+            <PlugFirmwareUpdateCard
+              currentFirmware={currentFirmware}
+              target={firmwareTarget}
+            />
+          </>
         )}
       </section>
     </main>
