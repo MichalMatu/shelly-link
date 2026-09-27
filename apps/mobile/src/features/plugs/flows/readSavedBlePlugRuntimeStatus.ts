@@ -16,7 +16,9 @@ export type SavedBlePlugRuntimeRecoveryOptions = SavedBlePlugLocatorRecoveryOpti
 
 export type SavedBlePlugRuntimeRecoveryDependencies =
   SavedBlePlugLocatorRecoveryDependencies & {
-    readStatus?(plug: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>): Promise<BlePlugRuntimeStatus>;
+    readStatus?(
+      plug: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>
+    ): Promise<BlePlugRuntimeStatus>;
   };
 
 export const readSavedBlePlugRuntimeStatus = async (

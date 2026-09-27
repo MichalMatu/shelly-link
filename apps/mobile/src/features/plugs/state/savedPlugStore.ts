@@ -19,7 +19,10 @@ export type SavedPlugState = {
   saveWifiDevice(device: VerifiedWifiPlug): void;
   replaceBleLocator(physicalId: string, bleDeviceId: string): void;
   setWifiLocator(physicalId: string, wifiBaseUrl: string): void;
-  setDeviceMetadata(physicalId: string, metadata: { model: string; generation: number }): void;
+  setDeviceMetadata(
+    physicalId: string,
+    metadata: { model: string; generation: number }
+  ): void;
   setScriptId(physicalId: string, scriptIdInput: string): void;
   updateFirmware(physicalId: string, firmwareId: string): void;
   renamePlug(physicalId: string, name: string): void;
@@ -40,7 +43,9 @@ const updatePlug = (
   update: (plug: SavedPlug) => SavedPlug
 ): SavedPlugState => {
   const normalizedId = normalizeId(physicalId);
-  const existing = state.plugs.find((plug) => normalizeId(plug.physicalId) === normalizedId);
+  const existing = state.plugs.find(
+    (plug) => normalizeId(plug.physicalId) === normalizedId
+  );
   if (!existing) return state;
   const next = update(existing);
   if (next === existing) return state;
@@ -88,7 +93,8 @@ export const useSavedPlugStore = create<SavedPlugState>((set) => ({
   setDeviceMetadata: (physicalId, metadata) =>
     set((state) =>
       updatePlug(state, physicalId, (plug) => {
-        if (plug.model === metadata.model && plug.generation === metadata.generation) return plug;
+        if (plug.model === metadata.model && plug.generation === metadata.generation)
+          return plug;
         return savedPlugSchema.parse({
           ...plug,
           model: metadata.model,

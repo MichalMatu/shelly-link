@@ -18,9 +18,7 @@ import {
   type PlugAddTransport
 } from '../features/plugs/index.js';
 import { isDashboardRuntimeQuery } from '../features/dashboard/index.js';
-import {
-  type ShellyDraftDevice
-} from '../flows/hardware-setup/setupDraftStore.js';
+import { type ShellyDraftDevice } from '../flows/hardware-setup/setupDraftStore.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation

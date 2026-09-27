@@ -3,7 +3,9 @@ import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { useSavedPlugStore } from '../state/savedPlugStore.js';
 import { readSavedBlePlugReadOnlyDetail } from './readSavedBlePlugReadOnlyDetail.js';
 
-export const blePlugReadOnlyDetailQueryKey = (plug: SavedPlugWithBleLocator | undefined) =>
+export const blePlugReadOnlyDetailQueryKey = (
+  plug: SavedPlugWithBleLocator | undefined
+) =>
   [
     'ble-plug-read-only-detail',
     plug?.physicalId ?? 'missing',
@@ -11,7 +13,9 @@ export const blePlugReadOnlyDetailQueryKey = (plug: SavedPlugWithBleLocator | un
     plug?.wifiBaseUrl ?? 'no-wifi'
   ] as const;
 
-export const useBlePlugReadOnlyDetailFlow = (plug: SavedPlugWithBleLocator | undefined) => {
+export const useBlePlugReadOnlyDetailFlow = (
+  plug: SavedPlugWithBleLocator | undefined
+) => {
   const replaceBleLocator = useSavedPlugStore((state) => state.replaceBleLocator);
 
   return useQuery({

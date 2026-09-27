@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
 import { resetSavedPlugStore, useSavedPlugStore } from './savedPlugStore.js';
 
-const candidate = (patch: Partial<VerifiedPlugBleCandidate> = {}): VerifiedPlugBleCandidate => ({
+const candidate = (
+  patch: Partial<VerifiedPlugBleCandidate> = {}
+): VerifiedPlugBleCandidate => ({
   bleDeviceId: 'temporary-handle-a',
   advertisementName: 'ShellyPlugSG3-AABB',
   rssi: -42,
@@ -45,7 +47,9 @@ describe('saved physical Plug store', () => {
   it('merges BLE-first and verified Wi-Fi promotion without changing identity or name', () => {
     useSavedPlugStore.getState().saveBleCandidate(candidate());
     useSavedPlugStore.getState().renamePlug('shellyplugsg3-aabb', 'Custom name');
-    useSavedPlugStore.getState().setWifiLocator('SHELLYPLUGSG3-AABB', 'http://192.168.0.17/');
+    useSavedPlugStore
+      .getState()
+      .setWifiLocator('SHELLYPLUGSG3-AABB', 'http://192.168.0.17/');
 
     expect(useSavedPlugStore.getState().plugs).toEqual([
       expect.objectContaining({
@@ -59,7 +63,9 @@ describe('saved physical Plug store', () => {
 
   it('updates locators and metadata independently of physical identity', () => {
     useSavedPlugStore.getState().saveBleCandidate(candidate());
-    useSavedPlugStore.getState().replaceBleLocator('SHELLYPLUGSG3-AABB', 'temporary-handle-b');
+    useSavedPlugStore
+      .getState()
+      .replaceBleLocator('SHELLYPLUGSG3-AABB', 'temporary-handle-b');
     useSavedPlugStore
       .getState()
       .setDeviceMetadata('shellyplugsg3-aabb', { model: 'S3PL-00112EU', generation: 3 });

@@ -12,11 +12,13 @@ export const BleOnlyPlugDashboardCards = ({
   onNameChange,
   onOpen
 }: BleOnlyPlugDashboardCardsProps) =>
-  plugs.filter(hasBleLocator).map((plug) => (
-    <BleOnlyPlugCard
-      key={`ble-plug:${plug.physicalId}`}
-      plug={plug}
-      onNameChange={(value) => onNameChange(plug.physicalId, value)}
-      onOpen={() => onOpen(plug.physicalId)}
-    />
-  ));
+  plugs
+    .filter(hasBleLocator)
+    .map((plug) => (
+      <BleOnlyPlugCard
+        key={`ble-plug:${plug.physicalId}`}
+        plug={plug}
+        onNameChange={(value) => onNameChange(plug.physicalId, value)}
+        onOpen={() => onOpen(plug.physicalId)}
+      />
+    ));

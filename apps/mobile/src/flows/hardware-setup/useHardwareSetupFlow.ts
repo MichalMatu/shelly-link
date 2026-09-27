@@ -28,10 +28,11 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const saveWifiDevice = useSavedPlugStore((state) => state.saveWifiDevice);
   const setScriptId = useSavedPlugStore((state) => state.setScriptId);
   const shellyDevices = useMemo(
-    () => savedPlugs.flatMap((plug) => {
-      const device = savedPlugToWifiDevice(plug);
-      return device ? [device] : [];
-    }),
+    () =>
+      savedPlugs.flatMap((plug) => {
+        const device = savedPlugToWifiDevice(plug);
+        return device ? [device] : [];
+      }),
     [savedPlugs]
   );
   const selectedShellyId = useHardwareSetupDraftStore((state) => state.selectedShellyId);

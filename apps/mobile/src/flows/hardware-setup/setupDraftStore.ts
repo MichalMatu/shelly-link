@@ -214,7 +214,10 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
         generation: installation.shelly.gen
       });
       set((state) => ({
-        ...persistPatch(state, createClimateAutomationEditDraftPatch(state, installation)),
+        ...persistPatch(
+          state,
+          createClimateAutomationEditDraftPatch(state, installation)
+        ),
         sensorMembershipEditStarted: false
       }));
     },

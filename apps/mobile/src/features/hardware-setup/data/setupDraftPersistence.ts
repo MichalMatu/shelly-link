@@ -101,9 +101,13 @@ const createStoredHardwareSetupDraft = (
   sensorNameInput: fallback.sensorNameInput,
   sensorDevices: patch.sensorDevices ?? state.sensorDevices,
   selectedShellyId:
-    'selectedShellyId' in patch ? (patch.selectedShellyId ?? null) : state.selectedShellyId,
+    'selectedShellyId' in patch
+      ? (patch.selectedShellyId ?? null)
+      : state.selectedShellyId,
   selectedSensorId:
-    'selectedSensorId' in patch ? (patch.selectedSensorId ?? null) : state.selectedSensorId,
+    'selectedSensorId' in patch
+      ? (patch.selectedSensorId ?? null)
+      : state.selectedSensorId,
   additionalSensorIds: patch.additionalSensorIds ?? state.additionalSensorIds,
   inheritedSensorIds: patch.inheritedSensorIds ?? state.inheritedSensorIds,
   inheritedSensorSourceId:

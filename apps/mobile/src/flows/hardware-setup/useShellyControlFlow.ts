@@ -88,7 +88,9 @@ export const shellyControlStatusFromSetupStatus = (
 export const useShellyControlFlow = () => {
   const shellyNameInput = useHardwareSetupDraftStore((state) => state.shellyNameInput);
   const shellyUrlInput = useHardwareSetupDraftStore((state) => state.shellyUrlInput);
-  const selectShellyDevice = useHardwareSetupDraftStore((state) => state.selectShellyDevice);
+  const selectShellyDevice = useHardwareSetupDraftStore(
+    (state) => state.selectShellyDevice
+  );
   const saveWifiDevice = useSavedPlugStore((state) => state.saveWifiDevice);
   const setDeviceMetadata = useSavedPlugStore((state) => state.setDeviceMetadata);
   const mergeRecoveredSensorDevices = useHardwareSetupDraftStore(
@@ -192,7 +194,9 @@ export const useShellyControlFlow = () => {
         wifiBaseUrl: status.checkedDevice.baseUrl,
         scriptIdInput: status.checkedDevice.scriptIdInput,
         ...(status.checkedDevice.model ? { model: status.checkedDevice.model } : {}),
-        ...(status.checkedDevice.gen !== undefined ? { generation: status.checkedDevice.gen } : {})
+        ...(status.checkedDevice.gen !== undefined
+          ? { generation: status.checkedDevice.gen }
+          : {})
       });
       selectShellyDevice(status.checkedDevice.id);
       mergeRecoveredSensorDevices(status.recoveredSensors);

@@ -61,20 +61,26 @@ const resolveBrowserStorage = (): SavedPlugStorageAdapter | null =>
   typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
 
 const warnStorageFailure = (operation: string, error: unknown): void => {
-  if (typeof console !== 'undefined') console.warn(`Saved plugs storage ${operation} failed.`, error);
+  if (typeof console !== 'undefined')
+    console.warn(`Saved plugs storage ${operation} failed.`, error);
 };
 
 const normalizedId = (value: string): string => normalizeShellyDeviceId(value);
 const looksLikeLocator = (value: string): boolean => /^https?:\/\//i.test(value.trim());
 
-const existingFor = (plugs: readonly SavedPlug[], physicalId: string): SavedPlug | undefined => {
+const existingFor = (
+  plugs: readonly SavedPlug[],
+  physicalId: string
+): SavedPlug | undefined => {
   const key = normalizedId(physicalId);
   return plugs.find((plug) => normalizedId(plug.physicalId) === key);
 };
 
 const replaceByIdentity = (plugs: SavedPlug[], next: SavedPlug): SavedPlug[] => [
   next,
-  ...plugs.filter((plug) => normalizedId(plug.physicalId) !== normalizedId(next.physicalId))
+  ...plugs.filter(
+    (plug) => normalizedId(plug.physicalId) !== normalizedId(next.physicalId)
+  )
 ];
 
 const migrateLegacy = (storage: SavedPlugStorageAdapter): SavedPlug[] => {
@@ -118,9 +124,15 @@ const migrateLegacy = (storage: SavedPlugStorageAdapter): SavedPlug[] => {
           firmwareId: legacy.firmwareId,
           matterEnabled: legacy.matterEnabled
         };
-        let next = savedPlugFromBleCandidate(candidate, existingFor(plugs, legacy.physicalId));
+        let next = savedPlugFromBleCandidate(
+          candidate,
+          existingFor(plugs, legacy.physicalId)
+        );
         if (legacy.wifiBaseUrl && !next.wifiBaseUrl) {
-          next = savedPlugSchema.parse({ ...next, wifiBaseUrl: legacy.wifiBaseUrl }) as typeof next;
+          next = savedPlugSchema.parse({
+            ...next,
+            wifiBaseUrl: legacy.wifiBaseUrl
+          }) as typeof next;
         }
         plugs = replaceByIdentity(plugs, next);
       }
@@ -129,7 +141,9 @@ const migrateLegacy = (storage: SavedPlugStorageAdapter): SavedPlug[] => {
 
   storage.setItem(
     SAVED_PLUGS_STORAGE_KEY,
-    JSON.stringify(persistedSavedPlugsSchema.parse({ version: SAVED_PLUG_VERSION, plugs }))
+    JSON.stringify(
+      persistedSavedPlugsSchema.parse({ version: SAVED_PLUG_VERSION, plugs })
+    )
   );
   storage.removeItem(LEGACY_BLE_PLUGS_STORAGE_KEY);
   if (storage.getItem(CURRENT_HARDWARE_DRAFT_STORAGE_KEY) !== null) {
@@ -158,7 +172,10 @@ export const createSavedPlugRepository = (
   save: (plugs) => {
     if (!storage) return;
     try {
-      const payload = persistedSavedPlugsSchema.parse({ version: SAVED_PLUG_VERSION, plugs });
+      const payload = persistedSavedPlugsSchema.parse({
+        version: SAVED_PLUG_VERSION,
+        plugs
+      });
       storage.setItem(SAVED_PLUGS_STORAGE_KEY, JSON.stringify(payload));
     } catch (error) {
       warnStorageFailure('write', error);

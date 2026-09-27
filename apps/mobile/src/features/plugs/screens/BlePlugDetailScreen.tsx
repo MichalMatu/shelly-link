@@ -23,7 +23,9 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('info');
   const plug = useSavedPlugStore((state) =>
-    state.plugs.filter(hasBleLocator).find((candidate) => candidate.physicalId === physicalId)
+    state.plugs
+      .filter(hasBleLocator)
+      .find((candidate) => candidate.physicalId === physicalId)
   );
   const detailQuery = useBlePlugReadOnlyDetailFlow(plug);
 
