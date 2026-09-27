@@ -1,6 +1,6 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
-import { restorePlugButtonAfterManagedAutomation } from '../../features/plugs/data/plugButtonModeSettings.js';
+import { restorePlugButtonAfterManagedAutomation } from '../../features/plugs/index.js';
 import { normalizeShellyDeviceId, RpcShellyClient } from '@lcl/shelly-client';
 import { readShellySetupStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
