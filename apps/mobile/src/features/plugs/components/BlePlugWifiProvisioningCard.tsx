@@ -1,3 +1,4 @@
+import { SelectField } from '@lcl/ui';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceWifiCopy } from '../../../app/locales/deviceWifi.js';
@@ -29,7 +30,6 @@ export const BlePlugWifiProvisioningCard = ({
   const [selectedSsid, setSelectedSsid] = useState('');
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
-  const networkId = useId();
   const passwordId = useId();
 
   const selected = networks.find((network) => network.ssid === selectedSsid);
@@ -91,30 +91,27 @@ export const BlePlugWifiProvisioningCard = ({
 
       {networks.length > 0 && (
         <div className="plug-settings-fields">
-          <label className="field" htmlFor={networkId}>
-            {copy.network}
-            <select
-              id={networkId}
+          <div className="field">
+            <span>{copy.network}</span>
+            <SelectField
+              ariaLabel={copy.network}
               value={selectedSsid}
+              placeholder={copy.selectNetwork}
               disabled={busy}
-              onChange={(event) => {
-                setSelectedSsid(event.currentTarget.value);
+              options={networks.map((network) => ({
+                value: network.ssid,
+                label: network.ssid,
+                meta: `${network.rssi === undefined ? '—' : `${network.rssi} dBm`} · ${
+                  network.auth === 0 ? copy.open : copy.secured
+                }`
+              }))}
+              onChange={(value) => {
+                setSelectedSsid(value);
                 setPassword('');
                 setFeedback(null);
               }}
-            >
-              <option value="" disabled>
-                {copy.selectNetwork}
-              </option>
-              {networks.map((network) => (
-                <option key={network.ssid} value={network.ssid}>
-                  {network.ssid}
-                  {network.rssi === undefined ? '' : ` · ${network.rssi} dBm`}
-                  {` · ${network.auth === 0 ? copy.open : copy.secured}`}
-                </option>
-              ))}
-            </select>
-          </label>
+            />
+          </div>
 
           {selected && secured && (
             <label className="field" htmlFor={passwordId}>

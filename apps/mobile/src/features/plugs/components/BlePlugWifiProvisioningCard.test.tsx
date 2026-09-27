@@ -64,7 +64,10 @@ describe('BlePlugWifiProvisioningCard', () => {
     renderCard();
 
     fireEvent.click(screen.getByRole('button', { name: 'Scan networks' }));
-    expect(screen.getByRole('option', { name: /Home/ })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Network' }));
+    const homeOption = screen.getByRole('option', { name: 'Home' });
+    expect(homeOption).toBeVisible();
+    fireEvent.click(homeOption);
 
     fireEvent.change(screen.getByLabelText('Password'), {
       target: { value: 'wifi-secret' }
