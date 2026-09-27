@@ -20,7 +20,9 @@ export type SavedPlugTimeSyncDependencies = {
   }): Promise<ShellyRpcTransport>;
   supportsSetTime(transport: ShellyRpcTransport): Promise<boolean>;
   setTime(transport: ShellyRpcTransport, unixTimeSec: number): Promise<Result<null>>;
-  syncBle(plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>): Promise<BlePlugTimeSyncResult>;
+  syncBle(
+    plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>
+  ): Promise<BlePlugTimeSyncResult>;
   nowMs(): number;
 };
 
@@ -28,7 +30,9 @@ const defaultDependencies: SavedPlugTimeSyncDependencies = {
   createWifiTransport: createVerifiedPlugSettingsTransport,
   supportsSetTime: async (transport) => {
     const response = unwrapShellyResult(
-      await transport.call<{ methods?: unknown }>({ method: RPC_METHODS.ShellyListMethods })
+      await transport.call<{ methods?: unknown }>({
+        method: RPC_METHODS.ShellyListMethods
+      })
     );
     return (
       Array.isArray(response.methods) && response.methods.includes(RPC_METHODS.SysSetTime)

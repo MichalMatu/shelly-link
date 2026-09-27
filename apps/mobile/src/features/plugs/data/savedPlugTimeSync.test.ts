@@ -34,7 +34,14 @@ const createDependencies = () => {
     syncBle,
     nowMs: () => 1_800_000_000_987
   };
-  return { dependencies, transport, createWifiTransport, supportsSetTime, setTime, syncBle };
+  return {
+    dependencies,
+    transport,
+    createWifiTransport,
+    supportsSetTime,
+    setTime,
+    syncBle
+  };
 };
 
 describe('syncSavedPlugTime', () => {
