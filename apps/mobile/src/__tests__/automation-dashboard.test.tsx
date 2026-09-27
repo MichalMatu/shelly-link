@@ -360,7 +360,7 @@ describe('AutomationDashboardScreen', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     useSavedPlugStore.getState().saveWifiDevice({
-      physicalId: 'http://192.168.0.30/',
+      physicalId: 'shellyplugsg3-dashboard-30',
       name: 'Nawilżacz',
       wifiBaseUrl: 'http://192.168.0.30/',
       scriptIdInput: '1'
@@ -387,7 +387,7 @@ describe('AutomationDashboardScreen', () => {
         name: 'Szczegóły: Nawilżacz salon · Wi-Fi'
       })
     );
-    expect(onOpenPlugSettings).toHaveBeenCalledWith('http://192.168.0.30/');
+    expect(onOpenPlugSettings).toHaveBeenCalledWith('shellyplugsg3-dashboard-30');
     expect(screen.queryByRole('dialog')).toBeNull();
 
     const onButton = within(plugCard).getByRole('button', { name: 'ON' });
@@ -406,7 +406,7 @@ describe('AutomationDashboardScreen', () => {
     ).toBe(true);
 
     fireEvent.click(within(plugCard).getByRole('button', { name: 'Dodaj automatykę' }));
-    expect(onAddAutomation).toHaveBeenCalledWith('climate', 'http://192.168.0.30/');
+    expect(onAddAutomation).toHaveBeenCalledWith('climate', 'shellyplugsg3-dashboard-30');
   });
 
   it('refreshes plain plug power after relay telemetry settles without remounting', async () => {
@@ -452,7 +452,7 @@ describe('AutomationDashboardScreen', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     useSavedPlugStore.getState().saveWifiDevice({
-      physicalId: 'http://192.168.0.31/',
+      physicalId: 'shellyplugsg3-dashboard-31',
       name: 'Lampa testowa',
       wifiBaseUrl: 'http://192.168.0.31/',
       scriptIdInput: '1'

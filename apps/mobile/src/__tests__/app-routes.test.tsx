@@ -231,7 +231,7 @@ describe('AppRoutes navigation shell', () => {
 
   it('starts climate setup from a saved plug with fixed Shelly context', async () => {
     useSavedPlugStore.getState().saveWifiDevice({
-      physicalId: 'http://192.168.0.30/',
+      physicalId: 'shellyplugsg3-route-30',
       name: 'Nawilżacz',
       wifiBaseUrl: 'http://192.168.0.30/',
       scriptIdInput: '1'
@@ -244,12 +244,12 @@ describe('AppRoutes navigation shell', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
-    expect(screen.getByText('mock-fixed-shelly-http://192.168.0.30/')).toBeVisible();
+    expect(screen.getByText('mock-fixed-shelly-shellyplugsg3-route-30')).toBeVisible();
   });
 
   it('starts time setup from a saved plug and keeps that Shelly context', async () => {
     useSavedPlugStore.getState().saveWifiDevice({
-      physicalId: 'http://192.168.0.33/',
+      physicalId: 'shellyplugsg3-route-33',
       name: 'Lampa',
       wifiBaseUrl: 'http://192.168.0.33/',
       scriptIdInput: '1'
@@ -263,14 +263,14 @@ describe('AppRoutes navigation shell', () => {
     expect(screen.getByRole('button', { name: /Sterować według czasu/ })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
-    expect(screen.getByText('mock-fixed-shelly-http://192.168.0.33/')).toBeVisible();
+    expect(screen.getByText('mock-fixed-shelly-shellyplugsg3-route-33')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
   });
 
   it('keeps Settings available from per-plug Add automation intent', () => {
     useSavedPlugStore.getState().saveWifiDevice({
-      physicalId: 'http://192.168.0.31/',
+      physicalId: 'shellyplugsg3-route-31',
       name: 'Wentylator',
       wifiBaseUrl: 'http://192.168.0.31/',
       scriptIdInput: '1'
@@ -291,7 +291,7 @@ describe('AppRoutes navigation shell', () => {
   it('returns from Android setup through intent and dashboard before exiting', async () => {
     nativeAppMocks.getPlatform.mockReturnValue('android');
     useSavedPlugStore.getState().saveWifiDevice({
-      physicalId: 'http://192.168.0.32/',
+      physicalId: 'shellyplugsg3-route-32',
       name: 'Grzejnik',
       wifiBaseUrl: 'http://192.168.0.32/',
       scriptIdInput: '1'
@@ -394,7 +394,7 @@ describe('AppRoutes navigation shell', () => {
 
   it('completes per-plug Time setup back to the Plugs dashboard', async () => {
     useSavedPlugStore.getState().saveWifiDevice({
-      physicalId: 'http://192.168.0.34/',
+      physicalId: 'shellyplugsg3-route-34',
       name: 'Pompa',
       wifiBaseUrl: 'http://192.168.0.34/',
       scriptIdInput: '1'

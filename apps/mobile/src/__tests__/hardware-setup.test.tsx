@@ -807,7 +807,7 @@ describe('HardwareSetupScreen', () => {
 
   it('opens saved Shelly settings and BLE discovery as nested child pages', async () => {
     useSavedPlugStore.getState().saveWifiDevice({
-      physicalId: 'http://192.168.0.20/',
+      physicalId: 'shellyplugsg3-setup-20',
       name: 'Salon',
       wifiBaseUrl: 'http://192.168.0.20',
       scriptIdInput: '1'
