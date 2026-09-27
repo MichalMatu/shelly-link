@@ -1,65 +1,96 @@
-# Handoff — Plug provisioning, OTA and transport promotion
+# Handoff — clean product checkpoint
 
-Status: **2026-09-27 — hardware accepted and final full software gate passed**
+Status: **2026-09-27 — current BLE/Plug-management iteration accepted; closeout/merge in progress**
 
 Repository: `MichalMatu/shelly-link`
 
-Active branch: `work/shelly-ble-transport`
+Closeout branch: `work/shelly-ble-transport`
 
-## Accepted evidence
+## Product direction
+
+Shelly Link is **climate/grow-first with a reusable local Shelly management platform underneath it**.
+
+Do not expand device management merely because an RPC exists. Prioritize platform work when it enables a concrete climate/grow use case, improves safety/reliability, reduces setup friction or provides useful operational diagnostics.
+
+The previously proposed zero-friction onboarding orchestrator is **deferred**, not the next automatic task.
+
+## Accepted foundation
+
+The current product baseline includes:
+
+- local `climate-engine-v1` automation with safe-OFF behavior;
+- 1–4 supported BLE thermometers with aggregation and per-sensor diagnostics;
+- Climate temperature/humidity/VPD configuration;
+- Time automation through native Shelly schedules;
+- physical Plug lifecycle/recovery with canonical identity verification;
+- five-section Plug Detail UX: Automation, BLE, Device, Script, Info;
+- Shelly management over HTTP and BLE;
+- bounded stale BLE-locator recovery for read-only access;
+- BLE Wi-Fi provisioning and verified promotion to HTTP;
+- explicit firmware check/update with read-only post-reboot verification;
+- capability-aware device-time synchronization;
+- real-device evidence on Samsung SM-S906B / Android 16 and Shelly Plug S Gen3.
+
+Detailed dated hardware evidence belongs in `docs/testing/hardware-matrix.md`.
+
+## Most recent hardware acceptance
 
 Real-device provisioning/OTA/time-sync source: `21d8675470a3d6425b0733cc708bdff55cb0d2cd`.
 
 APK SHA-256: `59c0bcbdc4122c565df43f3918437410ccca27a079acb790e634e7803dbd2c35`.
 
-Installed in-place with `adb install -r` on Samsung SM-S906B / Android 16, preserving app data. Factory Plug: `shellyplugsg3-e4b063e3e298`, model `S3PL-00112EU`.
-
-Accepted hardware flow:
+Accepted real flow:
 
 ```text
-BLE discovery
--> canonical Shelly.GetDeviceInfo.id verification
--> Shelly.ListMethods
--> Wifi.Scan over BLE
+BLE identity/capabilities
+-> Wifi.Scan
 -> one Wifi.SetConfig
--> read-only Wifi.GetStatus polling
--> persist verified wifiBaseUrl on the same Plug
--> promote normal management to verified HTTP
+-> Wifi.GetStatus
+-> verified HTTP locator on the same physical Plug
+-> HTTP identity verification
 -> Shelly.CheckForUpdate
--> one Shelly.Update(stage=stable)
--> read-only reconnect after reboot
--> verify same physicalId and expected firmware
--> refresh capabilities
--> Sys.SetTime over preferred verified transport
+-> one Shelly.Update
+-> read-only reboot/reconnect verification
+-> capability refresh
+-> Sys.SetTime when advertised
 ```
 
-Observed result: firmware `1.2.3` did not advertise `Sys.SetTime`; Wi-Fi provisioning succeeded and reported `192.168.0.17`; HTTP verification matched the same canonical id; stable `2.0.1` was offered; one explicit update produced `fw_id=20260923-075613/2.0.1-ge1a198b`; post-update `Shelly.CheckForUpdate` was empty; `Sys.SetTime` then appeared in `Shelly.ListMethods`; the user confirmed time synchronization works. No relay mutation was performed.
+The factory Plug moved from firmware `1.2.3` to `2.0.1`; `Sys.SetTime` was absent before the update and advertised afterward. The user confirmed time synchronization works. No automatic mutation replay occurred and no relay mutation was part of that acceptance.
 
-## Current source state
+## Durable safety/architecture contracts
 
-After hardware acceptance, repository-gate cleanup changed only formatting/test typing plus the Wi-Fi network picker from native `<select>` to shared `@lcl/ui SelectField`. Final software-gated source: `5059feaaa654a2522f65b57bd0918652ac9a46ca`. Do not claim that later selector presentation was separately re-accepted on hardware.
+- Canonical Plug identity is normalized `Shelly.GetDeviceInfo.id`.
+- Wi-Fi and BLE addresses are replaceable transport locators, never identity.
+- Identity is verified before destructive/device mutations.
+- Optional behavior is capability-driven via `Shelly.ListMethods`.
+- Ambiguous mutations are never automatically replayed after timeout/disconnect.
+- BLE read-only locator recovery is bounded and accepts only a canonical-id match.
+- Once a verified HTTP locator exists, normal management prefers HTTP; this is explicit transport promotion, not blind fallback.
+- The phone configures/manages/diagnoses; Shelly executes installed automation locally.
+- Page-level duplicate Back navigation remains absent from Plug Detail; the five tabs are first content.
 
-`pnpm check:full` on `5059feaaa...` passed: mobile 84/84 files and 381/381 tests; automation-core 3/3 files and 86/86 tests; script coverage 10/10 files and 138/138 tests; responsive E2E 36/36. Format, lint, UX/repository/feature gates, typechecks, coverage and builds passed. Existing React `act(...)` and Node localStorage warnings are non-failing.
+## Known architecture debt — next bounded cleanup
 
-## Product contracts
+Two durable Plug registries remain from historical Wi-Fi and BLE flows. The dashboard prevents a duplicate visual card for the same physical identity, but duplicate durable records may still exist if the same Plug is independently added through both paths.
 
-- Canonical identity is normalized `Shelly.GetDeviceInfo.id`; BLE/Wi-Fi addresses are locators.
-- One saved Plug may carry `bleDeviceId` and optional verified `wifiBaseUrl`; provisioning enriches the same logical Plug.
-- BLE is the bootstrap channel. After verified Wi-Fi provisioning, normal management prefers HTTP. This is explicit transport promotion, not blind fallback.
-- Optional features are gated by `Shelly.ListMethods`.
-- `Wifi.SetConfig`, `Shelly.Update` and `Sys.SetTime` are sent once and are never automatically replayed after an ambiguous failure.
-- Firmware reboot ambiguity is resolved by read-only reconnect/identity/firmware verification, not mutation replay.
-- BLE LED/button/Cloud state remains read-only.
-- Page-level Plug Detail Back remains absent; five tabs are first content, identity follows.
-- Raw advertised `OTA.*` methods remain unsupported because they are undocumented.
+The next structural slice should create **one canonical physical Plug registry** with independent Wi-Fi/BLE locator metadata. Do not solve this with more cross-registry guards or transport-specific identity rules.
 
-## Next slice
+## Next product decision
 
-Build the zero-friction onboarding orchestrator from the accepted primitives:
+After the physical Plug registry cleanup, choose one main product milestone rather than developing both in parallel:
 
-```text
-Found Plug -> identity/capabilities -> Wi-Fi if needed -> HTTP handoff
--> firmware check/update if needed -> reconnect/verify -> final configuration -> Ready
-```
+1. **History / Datalogger** — operational history of climate/VPD/relay behavior, using `work/kvs-datalogger` only as parked source material and redesigning lifecycle ownership first.
+2. **Richer climate rules** — minimum ON/OFF, cooldown/debounce, time windows and reusable condition operators with explicit safety precedence.
 
-Do not redo broad BLE/OTA discovery. Persistent BLE pairing/bonding on firmware 2.x and offline OTA are separate later slices.
+Broad general-purpose Shelly management, persistent BLE pairing and offline OTA remain later/explicitly approved work.
+
+## Closeout rule
+
+Before retiring `work/shelly-ble-transport`:
+
+- run the final full repository gate on the exact source candidate;
+- merge to `main` only after it passes;
+- verify merged `main`;
+- update this handoff to the final `main` SHA/checkpoint;
+- delete the completed work branch;
+- preserve `work/kvs-datalogger` as an intentionally parked research branch.
