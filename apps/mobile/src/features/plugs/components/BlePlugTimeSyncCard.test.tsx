@@ -27,7 +27,7 @@ const plug: SavedBlePlug = {
   matterEnabled: false
 };
 
-const renderCard = (localTime: string | undefined = '18:42') => {
+const renderCard = (localTime: string | null = '18:42') => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   });
@@ -69,7 +69,7 @@ describe('BlePlugTimeSyncCard', () => {
 
   it('shows an unset clock and firmware-specific unsupported feedback', async () => {
     vi.mocked(syncBlePlugTime).mockRejectedValue(new BlePlugTimeSyncUnsupportedError());
-    renderCard(undefined);
+    renderCard(null);
 
     expect(screen.getByText(copy.unavailable)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: copy.sync }));
