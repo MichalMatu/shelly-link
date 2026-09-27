@@ -2,7 +2,7 @@ import {
   shellyThermostatConfigSchema,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
-import type { ShellyDeviceInfo } from '@lcl/shelly-client';
+import type { ShellyDeviceInfo, ShellyPlugsUiButtonInputMode } from '@lcl/shelly-client';
 import { z } from 'zod';
 import {
   dailyTimeAutomationConfigSchema,
@@ -37,10 +37,13 @@ const installedScheduleSchema = z.object({
   offJobId: z.number().int().nonnegative()
 });
 
+const buttonInputModeSchema = z.enum(['momentary', 'detached']);
+
 export const climateInstalledAutomationSchema = installationBaseSchema.extend({
   kind: z.literal('climate'),
   script: installedScriptSchema,
-  config: shellyThermostatConfigSchema
+  config: shellyThermostatConfigSchema,
+  buttonInputModeBeforeInstall: buttonInputModeSchema.optional()
 });
 
 export const timeInstalledAutomationSchema = installationBaseSchema.extend({
@@ -104,6 +107,7 @@ export const createInstalledAutomation = ({
   scriptId,
   scriptHash,
   config,
+  buttonInputModeBeforeInstall,
   nowMs = Date.now()
 }: {
   shelly: ShellyDeviceInfo;
@@ -112,6 +116,7 @@ export const createInstalledAutomation = ({
   scriptId: number;
   scriptHash: string;
   config: ShellyThermostatConfig;
+  buttonInputModeBeforeInstall?: ShellyPlugsUiButtonInputMode;
   nowMs?: number;
 }): ClimateInstalledAutomation => {
   const identity = stableShellyIdentity({ shelly, shellyName, baseUrl });
@@ -126,6 +131,7 @@ export const createInstalledAutomation = ({
       hash: scriptHash
     },
     config,
+    ...(buttonInputModeBeforeInstall ? { buttonInputModeBeforeInstall } : {}),
     installedAtMs: nowMs,
     updatedAtMs: nowMs
   });
