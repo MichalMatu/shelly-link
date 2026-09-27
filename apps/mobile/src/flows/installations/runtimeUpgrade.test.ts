@@ -1,6 +1,7 @@
 import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import type * as ShellyClientModule from '@lcl/shelly-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type * as PlugFeatureModule from '../../features/plugs/index.js';
 import type * as RuntimeStatusModule from './runtimeStatus.js';
 import { createInstalledAutomation } from './model.js';
 
@@ -9,7 +10,8 @@ const mocks = vi.hoisted(() => ({
   installScript: vi.fn(),
   setRelayOff: vi.fn(),
   getStatus: vi.fn(),
-  readInstalledStatus: vi.fn()
+  readInstalledStatus: vi.fn(),
+  detachButton: vi.fn()
 }));
 
 vi.mock('@lcl/shelly-client', async (importOriginal) => {
@@ -25,6 +27,14 @@ vi.mock('@lcl/shelly-client', async (importOriginal) => {
   };
 });
 
+vi.mock('../../features/plugs/index.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof PlugFeatureModule>();
+  return {
+    ...actual,
+    detachPlugButtonForManagedAutomation: mocks.detachButton
+  };
+});
+
 vi.mock('./runtimeStatus.js', async (importOriginal) => {
   const actual = await importOriginal<typeof RuntimeStatusModule>();
   return { ...actual, readInstalledAutomationControlStatus: mocks.readInstalledStatus };
@@ -36,6 +46,17 @@ import {
 } from './runtimeUpgrade.js';
 
 const installation = createInstalledAutomation({
+  shelly: { id: 'shelly-a', model: 'S3PL-00112EU', gen: 3 },
+  shellyName: 'Salon',
+  baseUrl: 'http://192.168.0.20/',
+  scriptId: 7,
+  scriptHash: 'stale-development-hash',
+  config: createDefaultShellyThermostatConfig(),
+  buttonInputModeBeforeInstall: 'momentary',
+  nowMs: 1000
+});
+
+const legacyInstallation = createInstalledAutomation({
   shelly: { id: 'shelly-a', model: 'S3PL-00112EU', gen: 3 },
   shellyName: 'Salon',
   baseUrl: 'http://192.168.0.20/',
@@ -71,6 +92,7 @@ describe('installed automation runtime replacement', () => {
       ok: true,
       value: { scriptId: 11, scriptHash: 'fresh-code-hash', running: true }
     });
+    mocks.detachButton.mockResolvedValue('momentary');
   });
 
   it('rejects runtime preparation before any mutation on a different physical Shelly', async () => {
@@ -82,6 +104,7 @@ describe('installed automation runtime replacement', () => {
     await expect(ensureInstalledAutomationRuntimeCurrent(installation)).rejects.toThrow(
       'Shelly identity does not match the installed automation.'
     );
+    expect(mocks.detachButton).not.toHaveBeenCalled();
     expect(mocks.readInstalledStatus).not.toHaveBeenCalled();
     expect(mocks.setRelayOff).not.toHaveBeenCalled();
     expect(mocks.installScript).not.toHaveBeenCalled();
@@ -96,6 +119,7 @@ describe('installed automation runtime replacement', () => {
     await expect(recoverInstalledAutomationRuntime(installation)).rejects.toThrow(
       'Shelly identity does not match the installed automation.'
     );
+    expect(mocks.detachButton).not.toHaveBeenCalled();
     expect(mocks.setRelayOff).not.toHaveBeenCalled();
     expect(mocks.installScript).not.toHaveBeenCalled();
   });
@@ -110,6 +134,21 @@ describe('installed automation runtime replacement', () => {
       status: runtimeStatus(7, 'auto'),
       upgraded: false
     });
+    expect(mocks.detachButton).toHaveBeenCalledWith({
+      deviceId: 'shelly-a',
+      baseUrl: 'http://192.168.0.20/'
+    });
+    expect(mocks.installScript).not.toHaveBeenCalled();
+  });
+
+  it('captures the pre-install button mode for a legacy managed runtime', async () => {
+    mocks.readInstalledStatus.mockResolvedValue(runtimeStatus(7, 'auto'));
+
+    const result = await ensureInstalledAutomationRuntimeCurrent(legacyInstallation);
+
+    expect(result.installation.buttonInputModeBeforeInstall).toBe('momentary');
+    expect(result.installation.updatedAtMs).toBeGreaterThan(legacyInstallation.updatedAtMs);
+    expect(result.upgraded).toBe(true);
     expect(mocks.installScript).not.toHaveBeenCalled();
   });
 
