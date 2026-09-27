@@ -13,9 +13,11 @@ import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import { useInstalledAutomationStore } from '../features/automations/index.js';
 import {
   BlePlugDetailScreen,
   PlugBluetoothAddPage,
+  isSameShellyDevice,
   savedPlugToWifiDevice,
   useSavedPlugStore,
   WifiPlugDetailScreen
@@ -78,6 +80,7 @@ export const AppRoutes = () => {
     (state) => state.loadClimateAutomationDraft
   );
   const savedPlugs = useSavedPlugStore((state) => state.plugs);
+  const installations = useInstalledAutomationStore((state) => state.installations);
   const removeShellyDevice = useSavedPlugStore((state) => state.removePlug);
   const [route, setRoute] = useState<AppRoute>({ type: 'dashboard' });
   const routeRef = useRef(route);
@@ -208,6 +211,13 @@ export const AppRoutes = () => {
     const savedPlug =
       savedPlugs.find((candidate) => candidate.physicalId === route.deviceId) ?? null;
     const wifiDevice = savedPlug ? savedPlugToWifiDevice(savedPlug) : null;
+    const buttonModeLocked = wifiDevice
+      ? installations.some(
+          (installation) =>
+            installation.kind === 'climate' &&
+            isSameShellyDevice(installation.shelly.deviceId, wifiDevice.id)
+        )
+      : false;
     content = (
       <WifiPlugDetailScreen
         device={
@@ -220,6 +230,7 @@ export const AppRoutes = () => {
               }
             : null
         }
+        buttonModeLocked={buttonModeLocked}
         onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onOpenBleDiscovery={(deviceId) =>
           navigate({

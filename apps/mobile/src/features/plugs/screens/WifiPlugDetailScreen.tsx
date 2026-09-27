@@ -24,6 +24,7 @@ export type WifiPlugDetailScreenProps = {
   onBack(): void;
   onOpenBleDiscovery(deviceId: string): void;
   onRemove(deviceId: string): void;
+  buttonModeLocked?: boolean;
 };
 
 const disabledWifiDetailTabs: readonly PlugDetailTab[] = ['automation', 'script'];
@@ -32,7 +33,8 @@ export const WifiPlugDetailScreen = ({
   device,
   onBack,
   onOpenBleDiscovery,
-  onRemove
+  onRemove,
+  buttonModeLocked = false
 }: WifiPlugDetailScreenProps) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('device');
@@ -102,7 +104,7 @@ export const WifiPlugDetailScreen = ({
         {activeTab === 'device' && (
           <div className="plug-settings-surface">
             <PlugLedSettingsCard target={target} />
-            <PlugButtonModeSettingsCard target={target} />
+            <PlugButtonModeSettingsCard target={target} locked={buttonModeLocked} />
             <PlugCloudSettingsCard target={target} />
           </div>
         )}

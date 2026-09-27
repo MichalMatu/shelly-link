@@ -37,14 +37,14 @@ const leds = {
   night_mode: { enable: false, brightness: 100, active_between: [] }
 };
 
-const renderCard = () => {
+const renderCard = (locked = false) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   });
   const rendered = render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
-        <PlugButtonModeSettingsCard target={target} />
+        <PlugButtonModeSettingsCard target={target} locked={locked} />
       </QueryClientProvider>
     </I18nProvider>
   );
@@ -116,6 +116,34 @@ describe('PlugButtonModeSettingsCard', () => {
       }
     ]);
     expect(JSON.stringify(setConfigs)).not.toContain('"leds"');
+    expect(save).toBeDisabled();
+  });
+
+  it('keeps button mode read-only while a managed climate automation owns the Plug', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as {
+          id?: number | string;
+          method?: string;
+        };
+        const result =
+          body.method === 'Shelly.GetDeviceInfo'
+            ? deviceInfo()
+            : body.method === 'Shelly.ListMethods'
+              ? { methods: ['PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig'] }
+              : body.method === 'PLUGS_UI.GetConfig'
+                ? { leds, controls: { 'switch:0': { in_mode: 'detached' } } }
+                : {};
+        return jsonResponse({ id: body.id ?? 1, result });
+      })
+    );
+
+    renderCard(true);
+    const modeSelect = await screen.findByRole('button', { name: copy.currentMode });
+    const save = screen.getByRole('button', { name: copy.save });
+    expect(modeSelect).toHaveTextContent(copy.detached);
+    expect(modeSelect).toBeDisabled();
     expect(save).toBeDisabled();
   });
 

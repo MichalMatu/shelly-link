@@ -38,6 +38,7 @@ const installation = () => {
         displayName: 'Przedpokój'
       }
     },
+    buttonInputModeBeforeInstall: 'momentary',
     nowMs: 1000
   });
 };
@@ -81,6 +82,7 @@ const installShellyDeleteMock = (
   options: { failDelete?: boolean; deviceId?: string } = {}
 ) => {
   let relayOn = true;
+  let buttonMode: 'momentary' | 'detached' = 'detached';
   let scripts: ScriptEntry[] = [
     { id: 1, name: SHELLY_LINK_SCRIPT_NAME, enable: true, running: true },
     { id: 77, name: 'Arbitrary development script', enable: true, running: true }
@@ -100,7 +102,11 @@ const installShellyDeleteMock = (
       const body = JSON.parse(String(init?.body ?? '{}')) as {
         id?: number | string;
         method?: ShellyRpcMethod;
-        params?: { id?: number; on?: boolean };
+        params?: {
+          id?: number;
+          on?: boolean;
+          config?: { controls?: { 'switch:0'?: { in_mode?: 'momentary' | 'detached' } } };
+        };
       };
       if (!body.method) {
         return jsonResponse({ id: body.id ?? 1, result: {} });
@@ -119,6 +125,21 @@ const installShellyDeleteMock = (
             gen: 3
           };
           break;
+        case 'Shelly.ListMethods':
+          result = { methods: ['PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig'] };
+          break;
+        case 'PLUGS_UI.GetConfig':
+          result = {
+            leds: { mode: 'switch' },
+            controls: { 'switch:0': { in_mode: buttonMode } }
+          };
+          break;
+        case 'PLUGS_UI.SetConfig': {
+          const nextMode = body.params?.config?.controls?.['switch:0']?.in_mode;
+          if (nextMode) buttonMode = nextMode;
+          result = { restart_required: false };
+          break;
+        }
         case 'Shelly.GetStatus':
           result = {
             matter: { enabled: false },
@@ -251,7 +272,7 @@ describe('climate automation delete', () => {
     const dialog = await screen.findByRole('dialog');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Potwierdź usuń' }));
 
-    await waitFor(() => expect(onBack).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onBack).toHaveBeenCalledTimes(1), { timeout: 3_000 });
     expect(
       useInstalledAutomationStore
         .getState()
@@ -259,6 +280,9 @@ describe('climate automation delete', () => {
     ).toBe(false);
     expect(shelly.relayOn).toBe(false);
     expect(shelly.scripts).toEqual([]);
+    expect(shelly.rpcCalls).toContainEqual(
+      expect.objectContaining({ method: 'PLUGS_UI.SetConfig' })
+    );
   });
 
   it('keeps the local entry when Shelly script deletion fails', async () => {

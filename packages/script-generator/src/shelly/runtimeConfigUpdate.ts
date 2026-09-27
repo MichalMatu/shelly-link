@@ -9,5 +9,5 @@ export const generateShellyRuntimeConfigUpdateEval = (input: unknown): string =>
   const storageKey = JSON.stringify(SHELLY_RUNTIME_CONFIG_STORAGE_KEY);
   const storageValue = JSON.stringify(configJson);
 
-  return `(function(){var N=${configJson},M=R.m,O=R.on;if(typeof vc!=="function"||!vc(N))return"iv";if(typeof Script==="undefined"||!Script.storage||!Script.storage.setItem)return"ns";Script.storage.setItem(${storageKey},${storageValue});C=N;R.ls=null;R.l=0;R.t=null;R.h=null;R.tt=null;R.ht=null;R.b=null;R.r=null;R.on=O;R.rs="cu";R.ds="boot";R.lc=nw();R.os=O?R.lc:null;R.nh=0;R.fh=0;R.cv=null;R.vp=null;R.eo=null;R.ef=null;R.m=M;R.a=false;R.sa=0;R.u=[];R.fc=0;return C.k;})()`;
+  return `(function(){var N=${configJson},M=R.m,O=R.on,A=R.a;if(typeof vc!=="function"||!vc(N))return"iv";if(typeof Script==="undefined"||!Script.storage||!Script.storage.setItem)return"ns";Script.storage.setItem(${storageKey},${storageValue});C=N;R.ls=null;R.l=0;R.t=null;R.h=null;R.tt=null;R.ht=null;R.b=null;R.r=null;R.on=O;R.rs="cu";R.ds="boot";R.lc=nw();R.os=O?R.lc:null;R.nh=0;R.fh=0;R.cv=null;R.vp=null;R.eo=null;R.ef=null;R.m=M;R.a=A;R.sa=0;R.u=[];R.fc=0;return C.k;})()`;
 };

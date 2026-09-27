@@ -342,7 +342,7 @@ const ClimateInstallationDetail = ({
         {activeTab === 'device' && (
           <div className="plug-settings-surface">
             <PlugLedSettingsCard target={installation.shelly} />
-            <PlugButtonModeSettingsCard target={installation.shelly} />
+            <PlugButtonModeSettingsCard target={installation.shelly} locked />
             <PlugCloudSettingsCard target={installation.shelly} />
           </div>
         )}

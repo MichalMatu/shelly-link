@@ -138,26 +138,47 @@ export const diagnosticSnapshotSchema = z
       ])
       .nullable(),
     d: z.array(perSensorDiagnosticSchema).optional(),
-    g: z.tuple([
-      z.number().nullable(),
-      z.number().nullable(),
-      z.number().nullable(),
-      z.number().nullable(),
-      z.number().nullable(),
-      z.boolean(),
-      z.string(),
-      z.number().nullable(),
-      z.number().nullable(),
-      z.number(),
-      z.number(),
-      z.number().nullable(),
-      z.number().nullable(),
-      z.number().nullable(),
-      z.number().nullable(),
-      z.number().nullable(),
-      z.string(),
-      runtimeControlModeCodeSchema.optional(),
-      z.boolean().optional()
+    g: z.union([
+      z.tuple([
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.boolean(),
+        z.string(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number(),
+        z.number(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.string()
+      ]),
+      z.tuple([
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.boolean(),
+        z.string(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number(),
+        z.number(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.string(),
+        runtimeControlModeCodeSchema,
+        z.boolean()
+      ])
     ])
   })
   .transform((snapshot) => ({

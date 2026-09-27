@@ -422,6 +422,7 @@ describe('HardwareSetupScreen', () => {
     document.documentElement.removeAttribute('data-lcl-theme');
     window.history.replaceState(null, '', '/');
     let relayOn = false;
+    let buttonMode: 'momentary' | 'detached' = 'momentary';
     let thermostatScriptId = 1;
     let thermostatExists = true;
     let thermostatRunning = true;
@@ -515,6 +516,27 @@ describe('HardwareSetupScreen', () => {
                 aenergy: { total: 1234 }
               }
             });
+          case 'Shelly.ListMethods':
+            return rpcResult({ methods: ['PLUGS_UI.GetConfig', 'PLUGS_UI.SetConfig'] });
+          case 'PLUGS_UI.GetConfig':
+            return rpcResult({
+              leds: { mode: 'switch' },
+              controls: { 'switch:0': { in_mode: buttonMode } }
+            });
+          case 'PLUGS_UI.SetConfig': {
+            const params = body.params as
+              | {
+                  config?: {
+                    controls?: {
+                      'switch:0'?: { in_mode?: 'momentary' | 'detached' };
+                    };
+                  };
+                }
+              | undefined;
+            const nextMode = params?.config?.controls?.['switch:0']?.in_mode;
+            if (nextMode) buttonMode = nextMode;
+            return rpcResult({ restart_required: false });
+          }
           case 'Schedule.List':
             return rpcResult({ jobs: [], rev: 0 });
           case 'Script.List':
