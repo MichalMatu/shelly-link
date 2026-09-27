@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { readShellyResourceDiagnostics } from '../hardware-setup/resourceDiagnostics.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import {
+  enterInstalledAutomationManualMode,
   pauseInstalledAutomation,
   readInstalledAutomationControlStatus,
   recoverInstalledAutomation,
@@ -98,7 +99,12 @@ export const useInstalledAutomationControl = (
   });
 
 export type InstalledAutomationControlAction =
-  'auto' | 'manual' | 'on' | 'off' | 'recover';
+  | 'auto'
+  | 'manual'
+  | 'pause'
+  | 'on'
+  | 'off'
+  | 'recover';
 
 export const useInstalledAutomationActions = (
   installation: ClimateInstalledAutomation
@@ -114,6 +120,8 @@ export const useInstalledAutomationActions = (
         case 'auto':
           return resumeInstalledAutomation(installation);
         case 'manual':
+          return enterInstalledAutomationManualMode(installation);
+        case 'pause':
           return pauseInstalledAutomation(installation);
         case 'on':
           return setInstalledAutomationRelayState(installation, true);
