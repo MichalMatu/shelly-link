@@ -20,6 +20,7 @@ import {
   useInstalledAutomationStore,
   type ClimateInstalledAutomation
 } from '../../features/automations/index.js';
+import { useSavedPlugStore } from '../../features/plugs/index.js';
 import { forceRelayOffAndConfirm } from '../installations/relaySafety.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
 import { cleanupStaleShellyBleDiscoveryScripts } from './shellyRequests.js';
@@ -91,9 +92,7 @@ export const useClimateAutomationInstallFlow = ({
       ) ?? null)
     : null;
   const isEditingClimateAutomation = editInstallationId !== undefined;
-  const setShellyScriptIdDraft = useHardwareSetupDraftStore(
-    (state) => state.setShellyScriptId
-  );
+  const setShellyScriptId = useSavedPlugStore((state) => state.setScriptId);
   const commitClimateAutomationDraft = useHardwareSetupDraftStore(
     (state) => state.commitClimateAutomationDraft
   );
@@ -207,7 +206,7 @@ export const useClimateAutomationInstallFlow = ({
       };
     },
     onSuccess: ({ install, installation, shellyDraftId, requiresSafeRelayTest }) => {
-      setShellyScriptIdDraft(shellyDraftId, String(install.scriptId));
+      setShellyScriptId(shellyDraftId, String(install.scriptId));
       upsertInstalledAutomation(installation);
       commitClimateAutomationDraft(installation.id);
       setLastInstallState({
