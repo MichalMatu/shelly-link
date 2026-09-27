@@ -51,9 +51,9 @@ Climate runtime invariants:
 - stale or unusable sensor data fails OFF;
 - identity is verified before destructive/runtime mutation;
 - install/edit/recover forces relay OFF before replacing managed runtime state;
-- current Climate install owns the Shelly Scripts namespace and converges it to exactly one managed runtime;
+- current Climate install owns the full Shelly Scripts namespace and converges it to exactly one managed runtime;
 - uninstall forces relay OFF, removes managed script state and verifies the resulting device state before deleting local ownership;
-- display names, old script IDs and old hashes are not authorization evidence;
+- script hashes describe generated code only; display names, old script IDs and old hashes are not authorization evidence;
 - hardware tests that exercise relay mutation finish with an explicitly known relay state.
 
 Passive recovery may recognize and reconstruct valid Shelly Link-managed state, but passive reconciliation does not silently rewrite a valid runtime. Explicit install/edit/recover is the convergence boundary.
