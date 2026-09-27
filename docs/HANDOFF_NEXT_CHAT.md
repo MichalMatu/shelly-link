@@ -1,6 +1,6 @@
 # Handoff — runtime arbitration checkpoint
 
-Status: **2026-09-27 — Runtime control/state arbitration completed; History / Datalogger is next**
+Status: **2026-09-27 — Climate runtime simplified to AUTO/MANUAL with separate fault and safety axes; History / Datalogger is next**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -11,14 +11,16 @@ Shelly Link remains climate/grow-first and local-first: the phone configures, ma
 Current accepted foundation:
 
 - one canonical physical Plug registry keyed by normalized `Shelly.GetDeviceInfo.id`; BLE and HTTP addresses are locators, not identity;
-- local `climate-engine-v1` with safe boot OFF, stale-data OFF and 1–4 BLE thermometers;
-- Climate runtime arbitration with priority `FAULT > PAUSED > MANUAL > AUTO`;
-- diagnostics expose control mode, automation-requested relay state, final relay state, reason, last relay-change uptime and last control-mode transition uptime;
-- managed manual control is `MANUAL_OFF` / `MANUAL_ON`; entering manual is safe OFF, relay ON/OFF is allowed only while manual, and return to AUTO is explicit;
-- PAUSED is safe OFF; FAULT cannot silently resume; safety/fault can override manual ON;
-- managed Climate control changes mode through `Script.Eval`, not raw relay RPC from presentation;
+- local `climate-engine-v1` with safe boot OFF, AUTO stale-data OFF and 1–4 BLE thermometers;
+- Climate user control modes are only `AUTO` and `MANUAL`;
+- entering MANUAL always starts safe OFF; explicit relay ON/OFF is allowed only in MANUAL; return to AUTO is explicit and starts safe OFF;
+- automation sensor/runtime faults are tracked separately from control mode; in AUTO they force safe OFF, while MANUAL remains explicit user control;
+- hard safety lockout is a separate higher-priority axis that forces OFF in AUTO and MANUAL and requires deliberate recovery;
+- diagnostics expose control mode, manual request, automation-requested relay state, automation fault, safety lockout, final relay state, reason, last relay-change uptime and last control-mode transition uptime;
+- managed Climate control changes state through `Script.Eval`, not raw relay RPC from presentation;
+- temporary BLE discovery preserves/restores Climate runtime control state around its short-lived script lifecycle and falls back safe OFF if restoration fails;
 - install/update converges Plug S Gen3 button mode to `detached`; uninstall restores the pre-install mode after safe script removal;
-- Time automation remains native Shelly Schedule ownership, separate from the Climate runtime;
+- Time automation remains native Shelly Schedule ownership, separate from the Climate runtime. Its `paused` schedule state is not a Climate control mode;
 - BLE-only Plug Detail exposes the same local forget/remove action as the Wi-Fi Plug surface.
 
 ## Plug S Gen3 physical-button capability
@@ -44,8 +46,9 @@ History should explain why the relay changed. At minimum preserve:
 - temperature, humidity and VPD;
 - automation-requested and final relay state;
 - control mode;
+- manual request;
 - reason/trigger code;
-- safety/fault context;
+- automation-fault and hard-safety context;
 - useful power/current data when available.
 
 History failure must never compromise Climate safety or relay control.
@@ -54,6 +57,9 @@ History failure must never compromise Climate safety or relay control.
 
 - one managed automation owner per Plug relay;
 - one final Climate relay-decision owner;
+- AUTO sensor loss fails OFF;
+- MANUAL starts OFF but retains explicit user ON/OFF even if automation sensor data is stale/unavailable;
+- hard safety lockout overrides both AUTO and MANUAL;
 - identity verification before destructive/runtime mutation;
 - passive recovery does not silently rewrite a valid runtime;
 - UI presents state; flows own RPC side effects and lifecycle;

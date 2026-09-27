@@ -138,6 +138,7 @@ export const pl = {
     resume: 'Wznów automatykę',
     changingState: 'Zmieniam stan…',
     pauseSuccess: 'Automatyka zatrzymana, wyjście potwierdzone jako OFF.',
+    recoverySuccess: 'Automatyka odzyskana i gotowa do sterowania.',
     resumeSuccess: 'Automatyka uruchomiona.',
     actionFailed: 'Nie udało się bezpiecznie zmienić stanu automatyki.',
     scriptNeedsAttention:

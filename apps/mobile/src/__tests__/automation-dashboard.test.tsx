@@ -704,7 +704,9 @@ describe('AutomationDashboardScreen', () => {
         method?: string;
       };
       const result =
-        body.method === 'Script.Eval' ? { result: '1' } : controlRpcResult(body.method);
+        body.method === 'Script.Eval'
+          ? { result: '[1,0,null,0,null]' }
+          : controlRpcResult(body.method);
       return jsonResponse({ id: body.id ?? 1, result });
     });
     vi.stubGlobal('fetch', fetchMock);

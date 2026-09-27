@@ -1,3 +1,4 @@
+import { climateRuntimeControlModeFromCode } from '@lcl/script-generator';
 import type {
   ShellyDeviceInfo,
   ShellyScriptListEntry,
@@ -92,24 +93,7 @@ const perSensorDiagnosticSchema = z
     fresh: diagnostic[6] === 1
   }));
 
-const runtimeControlModeCodeSchema = z.union([
-  z.literal(0),
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4)
-]);
-
-const runtimeControlModeFromCode = (
-  code: z.infer<typeof runtimeControlModeCodeSchema> | undefined
-): 'auto' | 'manual-off' | 'manual-on' | 'paused' | 'fault' | null => {
-  if (code === 0) return 'auto';
-  if (code === 1) return 'manual-off';
-  if (code === 2) return 'manual-on';
-  if (code === 3) return 'paused';
-  if (code === 4) return 'fault';
-  return null;
-};
+const runtimeControlModeCodeSchema = z.union([z.literal(0), z.literal(1)]);
 
 export const diagnosticSnapshotSchema = z
   .object({
@@ -177,29 +161,12 @@ export const diagnosticSnapshotSchema = z
         z.number().nullable(),
         z.string(),
         runtimeControlModeCodeSchema,
-        z.boolean()
-      ]),
-      z.tuple([
-        z.number().nullable(),
-        z.number().nullable(),
-        z.number().nullable(),
-        z.number().nullable(),
+        z.boolean(),
         z.number().nullable(),
         z.boolean(),
-        z.string(),
-        z.number().nullable(),
-        z.number().nullable(),
-        z.number(),
-        z.number(),
-        z.number().nullable(),
-        z.number().nullable(),
-        z.number().nullable(),
-        z.number().nullable(),
-        z.number().nullable(),
-        z.string(),
-        runtimeControlModeCodeSchema,
+        z.string().nullable(),
         z.boolean(),
-        z.number().nullable()
+        z.string().nullable()
       ])
     ])
   })
@@ -259,9 +226,13 @@ export const diagnosticSnapshotSchema = z
       lastEffectiveOffThreshold: snapshot.g[14],
       lastPacketSeenUptimeMs: snapshot.g[15],
       dataState: snapshot.g[16],
-      controlMode: runtimeControlModeFromCode(snapshot.g[17]),
+      controlMode: climateRuntimeControlModeFromCode(snapshot.g[17]),
       automationRequestedRelayState: snapshot.g[18] ?? null,
-      lastControlTransitionUptimeMs: snapshot.g[19] ?? null
+      lastControlTransitionUptimeMs: snapshot.g[19] ?? null,
+      manualRequestedRelayState: snapshot.g[20] ?? null,
+      automationFault: snapshot.g[21] ?? null,
+      safetyLockout: snapshot.g[22] ?? false,
+      safetyReason: snapshot.g[23] ?? null
     }
   }));
 

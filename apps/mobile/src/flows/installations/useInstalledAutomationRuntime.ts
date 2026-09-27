@@ -3,10 +3,9 @@ import { readShellyResourceDiagnostics } from '../hardware-setup/resourceDiagnos
 import type { ClimateInstalledAutomation } from './model.js';
 import {
   enterInstalledAutomationManualMode,
-  pauseInstalledAutomation,
   readInstalledAutomationControlStatus,
   recoverInstalledAutomation,
-  resumeInstalledAutomation,
+  enterInstalledAutomationAutoMode,
   setInstalledAutomationRelayState
 } from './runtimeControl.js';
 import { fetchInstalledAutomationDiagnostics } from './runtimeDiagnostics.js';
@@ -99,7 +98,7 @@ export const useInstalledAutomationControl = (
   });
 
 export type InstalledAutomationControlAction =
-  'auto' | 'manual' | 'pause' | 'on' | 'off' | 'recover';
+  'auto' | 'manual' | 'on' | 'off' | 'recover';
 
 export const useInstalledAutomationActions = (
   installation: ClimateInstalledAutomation
@@ -113,11 +112,9 @@ export const useInstalledAutomationActions = (
     mutationFn: (action: InstalledAutomationControlAction) => {
       switch (action) {
         case 'auto':
-          return resumeInstalledAutomation(installation);
+          return enterInstalledAutomationAutoMode(installation);
         case 'manual':
           return enterInstalledAutomationManualMode(installation);
-        case 'pause':
-          return pauseInstalledAutomation(installation);
         case 'on':
           return setInstalledAutomationRelayState(installation, true);
         case 'off':

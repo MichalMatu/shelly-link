@@ -1,17 +1,19 @@
+import {
+  climateRuntimeSetControlModeEvalCode,
+  climateRuntimeSetManualRelayEvalCode,
+  createDefaultShellyThermostatConfig
+} from '@lcl/script-generator';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import { createInstalledAutomation } from './model.js';
 
 const mocks = vi.hoisted(() => ({ call: vi.fn() }));
-
-vi.mock('../../platform/shellyHttpTransport.js', () => {
-  return {
-    createShellyTransport: vi.fn(() => ({ call: mocks.call }))
-  };
-});
+vi.mock('../../platform/shellyHttpTransport.js', () => ({
+  createShellyTransport: vi.fn(() => ({ call: mocks.call }))
+}));
 
 import {
   readInstalledAutomationRuntimeMode,
+  setInstalledAutomationManualRelayRequest,
   setInstalledAutomationRuntimeMode
 } from './runtimeModeTransport.js';
 
@@ -25,55 +27,69 @@ const installation = createInstalledAutomation({
   nowMs: 1000
 });
 
-describe('runtime mode Script.Eval transport', () => {
+describe('runtime control Script.Eval transport', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('tracks control-mode transition uptime without reusing relay-change timing', async () => {
+  it('uses the centralized protocol helper for MANUAL mode', async () => {
     mocks.call.mockResolvedValue({ ok: true, value: { result: '1' } });
 
-    await setInstalledAutomationRuntimeMode(installation, 'manual-off');
-
-    const request = mocks.call.mock.calls.at(-1)?.[0] as
-      { params?: { code?: string } } | undefined;
-    const code = request?.params?.code ?? '';
-    expect(code).toContain('R.mt');
-    expect(code).not.toContain('R.lc=nw()');
-  });
-
-  it('sets MANUAL_OFF inside the running script and verifies the eval result', async () => {
-    mocks.call.mockResolvedValue({ ok: true, value: { result: '1' } });
-
-    await setInstalledAutomationRuntimeMode(installation, 'manual-off');
+    await setInstalledAutomationRuntimeMode(installation, 'manual');
 
     expect(mocks.call).toHaveBeenCalledWith({
       method: 'Script.Eval',
       params: {
         id: 7,
-        code: expect.stringContaining('R.m=1')
+        code: climateRuntimeSetControlModeEvalCode('manual')
       }
     });
   });
 
-  it('reads live MANUAL_OFF/AUTO state without using Script.Stop', async () => {
-    mocks.call.mockResolvedValueOnce({ ok: true, value: { result: '1' } });
-    await expect(readInstalledAutomationRuntimeMode(installation)).resolves.toEqual({
-      mode: 'manual-off',
-      supported: true
-    });
+  it('reads control mode, manual request, automation fault and safety separately', async () => {
+    mocks.call.mockResolvedValue({ ok: true, value: { result: '[1,1,"st",0,null]' } });
 
-    mocks.call.mockResolvedValueOnce({ ok: true, value: { result: '0' } });
     await expect(readInstalledAutomationRuntimeMode(installation)).resolves.toEqual({
-      mode: 'auto',
+      mode: 'manual',
+      manualRequestOn: true,
+      automationFault: 'st',
+      safetyLockout: false,
+      safetyReason: null,
       supported: true
     });
   });
 
-  it('marks an older running runtime as unsupported instead of calling it MANUAL', async () => {
+  it('marks an older runtime protocol as unsupported', async () => {
     mocks.call.mockResolvedValue({ ok: true, value: { result: '-1' } });
 
     await expect(readInstalledAutomationRuntimeMode(installation)).resolves.toEqual({
       mode: 'auto',
+      manualRequestOn: false,
+      automationFault: null,
+      safetyLockout: false,
+      safetyReason: null,
       supported: false
     });
+  });
+
+  it('uses the centralized helper for manual relay requests', async () => {
+    mocks.call.mockResolvedValue({ ok: true, value: { result: '1' } });
+
+    await setInstalledAutomationManualRelayRequest(installation, true);
+
+    expect(mocks.call).toHaveBeenCalledWith({
+      method: 'Script.Eval',
+      params: {
+        id: 7,
+        code: climateRuntimeSetManualRelayEvalCode(true)
+      }
+    });
+  });
+
+  it('reports hard safety lockout separately from automation sensor health', async () => {
+    mocks.call.mockResolvedValueOnce({ ok: true, value: { result: '-2' } });
+    await expect(
+      setInstalledAutomationManualRelayRequest(installation, true)
+    ).rejects.toThrow('safety lockout');
+
+    expect(climateRuntimeSetManualRelayEvalCode(true)).not.toContain('if(R.af)');
   });
 });

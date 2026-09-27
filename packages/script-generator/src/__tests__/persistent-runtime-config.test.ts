@@ -104,13 +104,14 @@ describe('persistent Shelly runtime config', () => {
     expect(decodeShellyThermostatScript(script, '{bad')).toBeNull();
   });
 
-  it('generates an in-place config update that preserves runtime control mode, output and requested state', () => {
+  it('preserves MANUAL request across config update while invalidating automation data', () => {
     const config = createDefaultShellyThermostatConfig(
       'tp357_custom_v1',
       'dehumidifying'
     );
     const code = generateShellyRuntimeConfigUpdateEval(config);
     const storage = new Map<string, string>();
+    const switchCalls: boolean[] = [];
     const runtimeState = {
       ls: 1,
       l: 2,
@@ -133,16 +134,29 @@ describe('persistent Shelly runtime config', () => {
       ef: 12,
       m: 1,
       a: true,
+      mn: true,
+      af: null as string | null,
+      lk: false,
+      mt: 14,
       sa: 13,
       u: [[21.5, 55, 1000, 1000, 88, -60, 'A4C1384F24CD']],
       fc: 1
     };
-    const evaluate = new Function('C', 'R', 'vc', 'Script', 'nw', `return ${code};`) as (
+    const evaluate = new Function(
+      'C',
+      'R',
+      'vc',
+      'Script',
+      'nw',
+      's',
+      `return ${code};`
+    ) as (
       currentConfig: Record<string, unknown>,
       runtime: typeof runtimeState,
       validate: (value: unknown) => boolean,
       scriptApi: { storage: { setItem: (key: string, value: string) => void } },
-      now: () => number
+      now: () => number,
+      setRelay: (on: boolean) => void
     ) => string;
 
     const result = evaluate(
@@ -150,13 +164,15 @@ describe('persistent Shelly runtime config', () => {
       runtimeState,
       () => true,
       { storage: { setItem: (key, value) => storage.set(key, value) } },
-      () => 1234
+      () => 1234,
+      (on) => switchCalls.push(on)
     );
 
     expect(result).toBe(configHash(config));
     expect(storage.get(SHELLY_RUNTIME_CONFIG_STORAGE_KEY)).toBe(
       serializeShellyRuntimeConfig(config)
     );
+    expect(switchCalls).toEqual([true]);
     expect(runtimeState).toMatchObject({
       ls: null,
       l: 0,
@@ -167,7 +183,7 @@ describe('persistent Shelly runtime config', () => {
       b: null,
       r: null,
       on: true,
-      rs: 'cu',
+      rs: 'mn',
       ds: 'boot',
       lc: 1234,
       os: 1234,
@@ -178,10 +194,70 @@ describe('persistent Shelly runtime config', () => {
       eo: null,
       ef: null,
       m: 1,
-      a: true,
+      a: false,
+      mn: true,
+      af: 'st',
+      lk: false,
+      mt: 14,
       sa: 0,
       u: [],
       fc: 0
+    });
+  });
+
+  it('forces AUTO config update OFF until fresh automation data arrives', () => {
+    const config = createDefaultShellyThermostatConfig();
+    const code = generateShellyRuntimeConfigUpdateEval(config);
+    const switchCalls: boolean[] = [];
+    const runtimeState: Record<string, unknown> = {
+      on: true,
+      rs: 'old',
+      ds: 'old',
+      m: 0,
+      mn: false,
+      a: true,
+      af: null,
+      lk: false,
+      mt: 14
+    };
+    const evaluate = new Function(
+      'C',
+      'R',
+      'vc',
+      'Script',
+      'nw',
+      's',
+      `return ${code};`
+    ) as (
+      currentConfig: Record<string, unknown>,
+      runtime: Record<string, unknown>,
+      validate: (value: unknown) => boolean,
+      scriptApi: { storage: { setItem: (key: string, value: string) => void } },
+      now: () => number,
+      setRelay: (on: boolean) => void
+    ) => string;
+
+    expect(
+      evaluate(
+        {},
+        runtimeState,
+        () => true,
+        { storage: { setItem: () => undefined } },
+        () => 1234,
+        (on) => switchCalls.push(on)
+      )
+    ).toBe(configHash(config));
+
+    expect(switchCalls).toEqual([false]);
+    expect(runtimeState).toMatchObject({
+      on: false,
+      os: null,
+      rs: 'cu',
+      m: 0,
+      mn: false,
+      a: false,
+      af: 'st',
+      lk: false
     });
   });
 

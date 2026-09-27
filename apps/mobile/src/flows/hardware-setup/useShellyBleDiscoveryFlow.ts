@@ -1,5 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
-import { generateShellyBleDiscoveryScript } from '@lcl/script-generator';
+import {
+  generateShellyBleDiscoveryScript,
+  type ClimateRuntimeControlState
+} from '@lcl/script-generator';
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { BleDiscoverySnapshot } from './schemas.js';
@@ -18,6 +21,7 @@ export type BleDiscoverySession = {
   discoveryScriptId: number;
   automationScriptId: number | null;
   automationWasRunning: boolean;
+  automationControlState: ClimateRuntimeControlState | null;
 };
 
 type StartBleDiscoveryResult = {
@@ -29,7 +33,8 @@ const stopBleDiscoverySession = (session: BleDiscoverySession): Promise<void> =>
   stopShellyBleDiscovery(session.baseUrl, {
     discoveryScriptId: session.discoveryScriptId,
     automationScriptId: session.automationScriptId,
-    restartAutomation: session.automationWasRunning
+    restartAutomation: session.automationWasRunning,
+    automationControlState: session.automationControlState
   });
 
 export const useShellyBleDiscoveryFlow = () => {
@@ -73,7 +78,8 @@ export const useShellyBleDiscoveryFlow = () => {
           baseUrl: device.baseUrl,
           discoveryScriptId: installResult.scriptId,
           automationScriptId: preparation.automationScriptId,
-          automationWasRunning: preparation.automationWasRunning
+          automationWasRunning: preparation.automationWasRunning,
+          automationControlState: preparation.automationControlState
         };
         const snapshot = await readShellyBleDiscoverySnapshot(
           device.baseUrl,
@@ -87,7 +93,8 @@ export const useShellyBleDiscoveryFlow = () => {
             await stopShellyBleDiscovery(device.baseUrl, {
               discoveryScriptId,
               automationScriptId: preparation.automationScriptId,
-              restartAutomation: preparation.automationWasRunning
+              restartAutomation: preparation.automationWasRunning,
+              automationControlState: preparation.automationControlState
             });
           } catch (cleanupError) {
             const message =

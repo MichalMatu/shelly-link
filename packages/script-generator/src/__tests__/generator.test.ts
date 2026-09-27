@@ -245,6 +245,10 @@ describe('generateShellyThermostatScript', () => {
         'boot',
         0,
         false,
+        null,
+        false,
+        'st',
+        false,
         null
       ],
       d: [['A4C1384F24CD', null, null, null, null, null, 0]]
@@ -391,7 +395,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('function ad(d)');
     expect(script).toContain('function r2(d,o,s)');
     expect(script).toContain('Shelly.call("Switch.Set"');
-    expect(script).toContain('function nw(){return Shelly.getUptimeMs();}');
+    expect(script).toContain('function nw(){return Shelly.getUptimeMs()}');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
     expect(script).toContain('interval_ms:241,window_ms:61,rssi_thr:0');
     expect(script).toContain('nw()-(R.l||R.sa)>9e4');
@@ -884,7 +888,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('function mf(d)');
     expect(script).toContain('"tm"');
     expect(script).toContain('Shelly.call("Switch.Set"');
-    expect(script).toContain('function nw(){return Shelly.getUptimeMs();}');
+    expect(script).toContain('function nw(){return Shelly.getUptimeMs()}');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
     expect(script).not.toContain('Date.now()');
     expect(script).toContain('R.vp');

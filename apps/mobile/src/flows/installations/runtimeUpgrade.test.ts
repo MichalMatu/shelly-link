@@ -69,15 +69,28 @@ const legacyInstallation = createInstalledAutomation({
 
 const runtimeStatus = (
   scriptId: number | null,
-  mode: 'auto' | 'manual-off' | 'manual-on' | 'paused' | 'fault' | 'missing'
+  mode: 'auto' | 'manual' | 'stopped' | 'missing',
+  options: {
+    relayOn?: boolean;
+    manualRequestOn?: boolean;
+    automationFault?: string | null;
+    safetyLockout?: boolean;
+    safetyReason?: string | null;
+    runtimeModeSupported?: boolean;
+  } = {}
 ) => ({
-  relayOn: false,
+  relayOn: options.relayOn ?? false,
   automationMode: mode,
   automationScriptId: scriptId,
   firmwareId: '1.0.0',
   telemetry: {},
   clock: { timeSynced: false },
-  runtimeModeSupported: mode !== 'missing'
+  runtimeModeSupported:
+    options.runtimeModeSupported ?? (mode === 'auto' || mode === 'manual'),
+  manualRequestOn: options.manualRequestOn ?? false,
+  automationFault: options.automationFault ?? null,
+  safetyLockout: options.safetyLockout ?? false,
+  safetyReason: options.safetyReason ?? null
 });
 
 describe('installed automation runtime replacement', () => {
@@ -125,7 +138,7 @@ describe('installed automation runtime replacement', () => {
     expect(mocks.installScript).not.toHaveBeenCalled();
   });
 
-  it('keeps a healthy current runtime without replacing it', async () => {
+  it('keeps a healthy AUTO runtime without replacing it', async () => {
     mocks.readInstalledStatus.mockResolvedValue(runtimeStatus(7, 'auto'));
 
     const result = await ensureInstalledAutomationRuntimeCurrent(installation);
@@ -139,6 +152,36 @@ describe('installed automation runtime replacement', () => {
       deviceId: 'shelly-a',
       baseUrl: 'http://192.168.0.20/'
     });
+    expect(mocks.installScript).not.toHaveBeenCalled();
+  });
+
+  it('keeps a valid MANUAL runtime and its pending request without replacing it', async () => {
+    const manual = runtimeStatus(7, 'manual', {
+      relayOn: true,
+      manualRequestOn: true
+    });
+    mocks.readInstalledStatus.mockResolvedValue(manual);
+
+    const result = await ensureInstalledAutomationRuntimeCurrent(installation);
+
+    expect(result.status).toEqual(manual);
+    expect(result.upgraded).toBe(false);
+    expect(mocks.installScript).not.toHaveBeenCalled();
+    expect(mocks.setRelayOff).not.toHaveBeenCalled();
+  });
+
+  it('does not silently reinstall a valid runtime that is hard safety locked', async () => {
+    const locked = runtimeStatus(7, 'manual', {
+      manualRequestOn: true,
+      safetyLockout: true,
+      safetyReason: 'mx'
+    });
+    mocks.readInstalledStatus.mockResolvedValue(locked);
+
+    const result = await ensureInstalledAutomationRuntimeCurrent(installation);
+
+    expect(result.status).toEqual(locked);
+    expect(result.upgraded).toBe(false);
     expect(mocks.installScript).not.toHaveBeenCalled();
   });
 
@@ -188,7 +231,7 @@ describe('installed automation runtime replacement', () => {
     expect(mocks.setRelayOff).toHaveBeenCalledTimes(2);
   });
 
-  it('explicit recovery replaces the runtime even when the stored id is obsolete', async () => {
+  it('explicit recovery replaces a locked runtime and returns verified AUTO safe OFF', async () => {
     mocks.readInstalledStatus.mockResolvedValue(runtimeStatus(11, 'auto'));
 
     const result = await recoverInstalledAutomationRuntime({
@@ -197,6 +240,8 @@ describe('installed automation runtime replacement', () => {
     });
 
     expect(result.installation.script).toEqual({ id: 11, hash: 'fresh-code-hash' });
+    expect(result.status).toEqual(runtimeStatus(11, 'auto'));
     expect(mocks.installScript).toHaveBeenCalledTimes(1);
+    expect(mocks.setRelayOff).toHaveBeenCalledTimes(2);
   });
 });

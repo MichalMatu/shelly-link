@@ -45,7 +45,9 @@ The phone owns configuration, persistence, presentation and diagnostics. Shelly 
 Climate runtime invariants:
 
 - boot starts safe OFF;
-- stale or unusable sensor data fails OFF;
+- stale or unusable sensor data makes AUTO fail OFF;
+- MANUAL starts safe OFF and remains explicit user control even when automation sensor data is unavailable;
+- hard safety lockout overrides AUTO and MANUAL and forces OFF;
 - identity is verified before destructive/runtime mutation;
 - install/edit/recover forces relay OFF before replacing managed runtime state;
 - current Climate install owns the full Shelly Scripts namespace and converges it to exactly one managed runtime;
@@ -55,22 +57,36 @@ Climate runtime invariants:
 
 Passive recovery may recognize and reconstruct valid Shelly Link-managed state, but passive reconciliation does not silently rewrite a valid runtime. Explicit install/edit/recover is the convergence boundary.
 
-Temporary BLE discovery is the exception to exclusive long-lived script ownership. It is short-lived, disabled for run-on-boot, pauses the managed automation when needed, cleans itself up and restores the automation path without redefining ownership.
+Temporary BLE discovery is the exception to exclusive long-lived script ownership. It is short-lived, disabled for run-on-boot, stops the managed automation when needed, cleans itself up and restores the prior Climate control state without redefining ownership. A failed restore remains safe OFF.
 
 Native Time automation uses Shelly schedules rather than the Climate script runtime.
 
 ### Climate runtime control arbiter
 
-Managed Climate relay control uses one runtime arbitration model:
+Managed Climate control has two user control modes and separate health/safety axes:
 
 ```text
-FAULT / safety
-    > PAUSED
-        > MANUAL
-            > AUTO
+controlMode = AUTO | MANUAL
+manualRequest = OFF | ON
+automationRequest = OFF | ON
+automationFault = null | sensor/runtime fault
+safetyLockout = false | true
 ```
 
-`AUTO` records the automation-requested relay state and may drive the relay. `MANUAL_OFF`, `MANUAL_ON` and `PAUSED` block normal automation output; `FAULT` remains the highest-priority safe-OFF state. Returning to `AUTO` is explicit. The mobile app changes managed runtime modes through `Script.Eval`; it does not bypass the runtime with raw `Switch.Set`. Diagnostics expose the current control mode, automation-requested relay state, final relay state, reason code, last relay-change uptime and last control-mode transition uptime.
+Final relay ownership is deterministic:
+
+```text
+hard safety lockout -> OFF
+MANUAL              -> manual request
+AUTO + fault        -> OFF
+AUTO                 -> automation request
+```
+
+Entering `MANUAL` always starts safe OFF. Explicit ON/OFF is allowed only while MANUAL. Sensor loss remains an automation fault and is visible in diagnostics, but it does not revoke explicit MANUAL control. Returning to `AUTO` is explicit, starts safe OFF and requires fresh usable automation input before AUTO may energize the relay again.
+
+A hard safety lockout is different from automation health. It forces OFF in both AUTO and MANUAL and requires deliberate recovery. Maximum continuous ON and relay-control failure are current hard-safety examples; additional power/current/device-temperature supervision belongs to the safety supervisor slice.
+
+The mobile app changes managed runtime state through `Script.Eval`; it does not bypass the runtime with raw `Switch.Set`. Diagnostics expose control mode, manual request, automation-requested relay state, automation fault, hard safety lockout, final relay state, reason code, last relay-change uptime and last control-mode transition uptime.
 
 While a Climate automation owns a Plug S Gen3, the app converges `PLUGS_UI.controls.switch:0.in_mode` to `detached` and restores the previous mode on uninstall. Real-device acceptance on Plug S Gen3 firmware 1.7.5 confirmed that this model exposes no physical `Input`/`Button` component for its built-in button while detached. Therefore physical-button takeover is not part of the Plug S Gen3 runtime contract; manual takeover is app-driven. Future device profiles may enable physical takeover only when a real local input/button event capability is verified.
 
@@ -101,7 +117,7 @@ A Climate automation supports 1–4 thermometers with `avg`, `min`, `max` or `fi
 
 Normalized physical BLE `runtimeAddress` is the logical thermometer identity at the mobile/runtime boundary. Phone discovery, Plug discovery, installed config and recovery converge on that identity.
 
-Freshness is evaluated independently per sensor. Stale/unusable members do not contribute; if no configured member remains usable, safe OFF wins. Incomplete advertisements must not make old temperature/humidity values fresh.
+Freshness is evaluated independently per sensor. Stale/unusable members do not contribute; if no configured member remains usable, AUTO records an automation fault and safe OFF wins. Incomplete advertisements must not make old temperature/humidity values fresh. MANUAL does not use thermometer data to authorize explicit relay ON/OFF; hard safety remains independent and higher priority.
 
 Runtime diagnostics expose one compact record per configured thermometer. Phone BLE and Plug BLE are live-reading sources; recovered identity provenance is tracked separately from live readings.
 

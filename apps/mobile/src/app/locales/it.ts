@@ -140,6 +140,7 @@ export const it = {
     resume: 'Riprendi automazione',
     changingState: 'Cambio stato…',
     pauseSuccess: 'Automazione in pausa e uscita confermata OFF.',
+    recoverySuccess: 'Automazione ripristinata e pronta al controllo.',
     resumeSuccess: 'Automazione ripresa.',
     actionFailed: 'Impossibile cambiare in sicurezza lo stato dell’automazione.',
     scriptNeedsAttention:

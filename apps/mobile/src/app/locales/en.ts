@@ -139,6 +139,7 @@ export const en = {
     resume: 'Resume automation',
     changingState: 'Changing state…',
     pauseSuccess: 'Automation paused and output confirmed OFF.',
+    recoverySuccess: 'Automation recovered and ready for control.',
     resumeSuccess: 'Automation resumed.',
     actionFailed: 'Could not safely change automation state.',
     scriptNeedsAttention:

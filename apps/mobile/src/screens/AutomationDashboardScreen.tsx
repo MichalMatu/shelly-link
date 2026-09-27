@@ -128,13 +128,11 @@ const ClimateAutomationCard = ({
   const runtimeMode = controlStatus?.automationMode;
   const runtimeControllable =
     controlsVerified &&
-    runtimeMode !== 'fault' &&
     runtimeMode !== 'stopped' &&
-    runtimeMode !== 'missing';
+    runtimeMode !== 'missing' &&
+    controlStatus?.safetyLockout !== true;
   const automationRunning = controlsVerified && runtimeMode === 'auto';
-  const manualControl =
-    controlsVerified && (runtimeMode === 'manual-off' || runtimeMode === 'manual-on');
-  const automationPaused = controlsVerified && runtimeMode === 'paused';
+  const manualControl = controlsVerified && runtimeMode === 'manual';
   const relayState =
     snapshot?.plug?.relayState ??
     controlStatus?.relayOn ??
@@ -271,17 +269,6 @@ const ClimateAutomationCard = ({
           >
             MANUAL
           </button>
-          <button
-            className="automation-control-button"
-            type="button"
-            aria-pressed={automationPaused}
-            disabled={action.isPending || !runtimeControllable}
-            onClick={() => {
-              if (!automationPaused) action.mutate('pause');
-            }}
-          >
-            PAUSED
-          </button>
         </div>
       </div>
 
@@ -306,7 +293,7 @@ const ClimateAutomationCard = ({
           aria-pressed={relayState === true}
           disabled={action.isPending || !manualControl}
           onClick={() => {
-            if (runtimeMode !== 'manual-on') action.mutate('on');
+            if (controlStatus?.manualRequestOn !== true) action.mutate('on');
           }}
         >
           ON
@@ -317,7 +304,7 @@ const ClimateAutomationCard = ({
           aria-pressed={relayState === false}
           disabled={action.isPending || !manualControl}
           onClick={() => {
-            if (runtimeMode !== 'manual-off') action.mutate('off');
+            if (controlStatus?.manualRequestOn !== false) action.mutate('off');
           }}
         >
           OFF

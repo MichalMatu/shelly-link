@@ -44,7 +44,9 @@ const snapshot = (
       20,
       960_000,
       overrides.dataState ?? 'ok',
-      ...(overrides.includeArbitrationDiagnostics === false ? [] : [2, true, 925_000])
+      ...(overrides.includeArbitrationDiagnostics === false
+        ? []
+        : [1, true, 925_000, true, null, false, null])
     ]
   });
 
@@ -67,11 +69,15 @@ describe('installedAutomationHealth', () => {
     expect(snapshot({ includeSensorDiagnostics: false }).sensorDiagnostics).toEqual([]);
   });
 
-  it('parses runtime control mode and automation-requested output', () => {
+  it('parses mode, requests, fault and safety as independent diagnostics', () => {
     expect(snapshot().diagnostics).toEqual(
       expect.objectContaining({
-        controlMode: 'manual-on',
+        controlMode: 'manual',
         automationRequestedRelayState: true,
+        manualRequestedRelayState: true,
+        automationFault: null,
+        safetyLockout: false,
+        safetyReason: null,
         lastReason: 'ok',
         lastChangeUptimeMs: 900_000,
         lastControlTransitionUptimeMs: 925_000
@@ -84,6 +90,10 @@ describe('installedAutomationHealth', () => {
       expect.objectContaining({
         controlMode: null,
         automationRequestedRelayState: null,
+        manualRequestedRelayState: null,
+        automationFault: null,
+        safetyLockout: false,
+        safetyReason: null,
         lastControlTransitionUptimeMs: null
       })
     );

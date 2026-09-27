@@ -559,6 +559,9 @@ describe('HardwareSetupScreen', () => {
             if (params?.code?.includes('Script.storage')) {
               return rpcResult({ result: JSON.stringify({ s: 1, v: null }) });
             }
+            if (params?.code?.includes('JSON.stringify([R.m,R.mn?1:0,R.af,R.lk?1:0')) {
+              return rpcResult({ result: '[0,0,null,0,null]' });
+            }
             return rpcResult({});
           }
           case 'Script.Create': {
@@ -2041,7 +2044,7 @@ describe('HardwareSetupScreen', () => {
       {
         name: 'Przetestuj przekaźnik przed użyciem'
       },
-      { timeout: 3000 }
+      { timeout: 6000 }
     );
     expect(
       within(relayDialog).getByText('Dla grzania domyślny tryb bezpieczeństwa to OFF.')

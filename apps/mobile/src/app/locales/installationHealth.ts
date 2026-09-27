@@ -33,6 +33,12 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
         description: 'Shelly nie otrzymuje świeżych danych z przypisanego czujnika BLE.',
         action: 'Sprawdź ponownie'
       },
+      'safety-lockout': {
+        title: 'Blokada bezpieczeństwa',
+        description:
+          'Runtime wymusił OFF z powodu zabezpieczenia. Przed ponownym sterowaniem zresetuj blokadę.',
+        action: 'Resetuj blokadę'
+      },
       'ownership-problem': {
         title: 'Problem właściciela wyjścia',
         description:
@@ -60,6 +66,12 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
         title: 'No fresh sensor data',
         description: 'Shelly is not receiving fresh data from the assigned BLE sensor.',
         action: 'Check again'
+      },
+      'safety-lockout': {
+        title: 'Safety lockout',
+        description:
+          'The runtime forced the output OFF for safety. Reset the lockout before controlling the relay again.',
+        action: 'Reset safety'
       },
       'ownership-problem': {
         title: 'Output ownership problem',
@@ -89,6 +101,12 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
         description: 'Shelly empfängt keine aktuellen Daten vom zugewiesenen BLE-Sensor.',
         action: 'Erneut prüfen'
       },
+      'safety-lockout': {
+        title: 'Sicherheitsverriegelung',
+        description:
+          'Die Laufzeit hat den Ausgang aus Sicherheitsgründen ausgeschaltet. Setze die Verriegelung zurück, bevor du erneut steuerst.',
+        action: 'Sicherheit zurücksetzen'
+      },
       'ownership-problem': {
         title: 'Problem mit der Ausgangssteuerung',
         description:
@@ -116,6 +134,12 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
         title: 'Sin datos recientes del sensor',
         description: 'Shelly no está recibiendo datos recientes del sensor BLE asignado.',
         action: 'Comprobar de nuevo'
+      },
+      'safety-lockout': {
+        title: 'Bloqueo de seguridad',
+        description:
+          'El runtime forzó la salida a OFF por seguridad. Restablece el bloqueo antes de volver a controlar el relé.',
+        action: 'Restablecer seguridad'
       },
       'ownership-problem': {
         title: 'Problema de control de la salida',
@@ -145,6 +169,12 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
         description: 'Shelly ne reçoit pas de données récentes du capteur BLE assigné.',
         action: 'Vérifier à nouveau'
       },
+      'safety-lockout': {
+        title: 'Verrouillage de sécurité',
+        description:
+          'Le runtime a forcé la sortie sur OFF pour des raisons de sécurité. Réinitialisez le verrouillage avant de reprendre le contrôle.',
+        action: 'Réinitialiser la sécurité'
+      },
       'ownership-problem': {
         title: 'Problème de contrôle de la sortie',
         description:
@@ -172,6 +202,12 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
         title: 'Nessun dato recente dal sensore',
         description: 'Shelly non riceve dati recenti dal sensore BLE assegnato.',
         action: 'Controlla di nuovo'
+      },
+      'safety-lockout': {
+        title: 'Blocco di sicurezza',
+        description:
+          'Il runtime ha forzato l’uscita su OFF per sicurezza. Reimposta il blocco prima di controllare di nuovo il relè.',
+        action: 'Reimposta sicurezza'
       },
       'ownership-problem': {
         title: "Problema di controllo dell'uscita",
@@ -201,6 +237,12 @@ export const installationHealthCopy: Record<Locale, InstallationHealthCopy> = {
         description:
           'O Shelly não está recebendo dados recentes do sensor BLE atribuído.',
         action: 'Verificar novamente'
+      },
+      'safety-lockout': {
+        title: 'Bloqueio de segurança',
+        description:
+          'O runtime forçou a saída para OFF por segurança. Redefina o bloqueio antes de controlar o relé novamente.',
+        action: 'Redefinir segurança'
       },
       'ownership-problem': {
         title: 'Problema de controle da saída',

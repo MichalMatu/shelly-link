@@ -77,6 +77,8 @@ const mockShellyRpc = async (page: Page) => {
   let scriptRunning = true;
   let relayOn = true;
   let runtimeMode = 0;
+  let manualRequestOn = false;
+  let automationFault: string | null = null;
   let buttonMode: 'momentary' | 'detached' = 'momentary';
 
   const handleRpc = async (route: Route) => {
@@ -245,19 +247,46 @@ const mockShellyRpc = async (page: Page) => {
         break;
       case 'Script.Eval': {
         const code = requestBody.params?.code ?? '';
-        if (code.includes('R.m=1')) {
+        const encodedState = () =>
+          JSON.stringify([
+            runtimeMode,
+            manualRequestOn ? 1 : 0,
+            automationFault,
+            0,
+            null
+          ]);
+        if (code.includes('JSON.stringify([R.m,R.mn?1:0,R.af,R.lk?1:0')) {
+          result = { result: encodedState() };
+        } else if (code.includes('R.m=1')) {
           runtimeMode = 1;
+          manualRequestOn = false;
           relayOn = false;
-        } else if (code.includes('R.m=2')) {
-          runtimeMode = 2;
-          relayOn = true;
-        } else if (code.includes('R.m=3')) {
-          runtimeMode = 3;
-          relayOn = false;
+          result = { result: '1' };
         } else if (code.includes('R.m=0')) {
           runtimeMode = 0;
+          manualRequestOn = false;
+          automationFault = 'st';
+          relayOn = false;
+          result = { result: '0' };
+        } else if (code.includes('R.mn=true')) {
+          if (runtimeMode !== 1) {
+            result = { result: '-1' };
+          } else {
+            manualRequestOn = true;
+            relayOn = true;
+            result = { result: '1' };
+          }
+        } else if (code.includes('R.mn=false')) {
+          if (runtimeMode !== 1) {
+            result = { result: '-1' };
+          } else {
+            manualRequestOn = false;
+            relayOn = false;
+            result = { result: '0' };
+          }
+        } else {
+          result = { result: '' };
         }
-        result = { result: String(runtimeMode) };
         break;
       }
       case 'Script.Stop':
@@ -766,7 +795,7 @@ for (const viewport of viewports) {
   });
 }
 
-test('installed automation dashboard safely switches AUTO and MANUAL on phone', async ({
+test('installed automation dashboard safely switches AUTO and MANUAL on narrow phone', async ({
   page
 }) => {
   const consoleProblems: string[] = [];
@@ -777,18 +806,25 @@ test('installed automation dashboard safely switches AUTO and MANUAL on phone', 
   });
   page.on('pageerror', (error) => consoleProblems.push(error.message));
 
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width: 360, height: 800 });
   await seedInstalledAutomation(page);
   await mockShellyRpc(page);
   await page.goto('/');
 
   const auto = page.getByRole('button', { name: 'AUTO', exact: true });
   const manual = page.getByRole('button', { name: 'MANUAL', exact: true });
+  const on = page.getByRole('button', { name: 'ON', exact: true });
   const off = page.getByRole('button', { name: 'OFF', exact: true });
+  await expect(page.getByRole('button', { name: 'PAUSED', exact: true })).toHaveCount(0);
   await expect(auto).toHaveAttribute('aria-pressed', 'true');
 
   await manual.click();
   await expect(manual).toHaveAttribute('aria-pressed', 'true');
+  await expect(off).toHaveAttribute('aria-pressed', 'true');
+
+  await on.click();
+  await expect(on).toHaveAttribute('aria-pressed', 'true');
+  await off.click();
   await expect(off).toHaveAttribute('aria-pressed', 'true');
 
   await auto.click();

@@ -1,86 +1,143 @@
-import { unwrapShellyResult } from '../../platform/shellyResult.js';
-import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
-import { RPC_METHODS } from '@lcl/shelly-client';
+import {
+  climateRuntimeControlStateEvalCode,
+  climateRuntimeRestoreControlStateEvalCode,
+  climateRuntimeSetControlModeEvalCode,
+  climateRuntimeSetManualRelayEvalCode,
+  decodeClimateRuntimeControlState,
+  type ClimateRuntimeControlMode,
+  type ClimateRuntimeControlState
+} from '@lcl/script-generator';
+import { RPC_METHODS, type FetchShellyRpcTransport } from '@lcl/shelly-client';
 import { z } from 'zod';
 
+import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
+import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import type { ClimateInstalledAutomation } from './model.js';
 
-export type InstalledAutomationRuntimeMode =
-  'auto' | 'manual-off' | 'manual-on' | 'paused' | 'fault';
+export type InstalledAutomationRuntimeMode = ClimateRuntimeControlMode;
 
-export type SettableInstalledAutomationRuntimeMode = Exclude<
-  InstalledAutomationRuntimeMode,
-  'fault'
->;
-
-export type InstalledAutomationRuntimeModeState = {
-  mode: InstalledAutomationRuntimeMode;
+export type InstalledAutomationRuntimeModeState = ClimateRuntimeControlState & {
   supported: boolean;
 };
 
 const scriptEvalResponseSchema = z.object({ result: z.string() });
 
-const runtimeModeCode: Record<InstalledAutomationRuntimeMode, number> = {
-  auto: 0,
-  'manual-off': 1,
-  'manual-on': 2,
-  paused: 3,
-  fault: 4
-};
+const unsupportedRuntimeState = (): InstalledAutomationRuntimeModeState => ({
+  mode: 'auto',
+  manualRequestOn: false,
+  automationFault: null,
+  safetyLockout: false,
+  safetyReason: null,
+  supported: false
+});
 
-const runtimeModeEvalCode: Record<SettableInstalledAutomationRuntimeMode, string> = {
-  'manual-off':
-    '(function(){if(R.m===4)return R.m;if(R.m!==1)R.mt=nw();R.m=1;R.nh=R.fh=0;R.rs="mn";if(R.on)sw(false,"mn",1);return R.m})()',
-  'manual-on':
-    '(function(){if(R.m===4)return R.m;var n=nw();if(!R.ls||n-R.ls>C.s){ft("st");return R.m}if(R.m!==2)R.mt=n;R.m=2;R.nh=R.fh=0;R.rs="mn";if(!R.on)sw(true,"mn",1);return R.m})()',
-  paused:
-    '(function(){if(R.m===4)return R.m;if(R.m!==3)R.mt=nw();R.m=3;R.nh=R.fh=0;R.rs="pa";if(R.on)sw(false,"pa",1);return R.m})()',
-  auto: '(function(){if(R.m===4)return R.m;if(R.m!==0)R.mt=nw();R.m=0;R.nh=R.fh=0;R.rs="ar";return R.m})()'
-};
-
-const readModeEvalCode = 'typeof R==="object"&&typeof R.m==="number"?R.m:-1';
-
-const evaluateRuntime = async (
-  installation: ClimateInstalledAutomation,
+const evaluateRuntimeTransport = async (
+  transport: FetchShellyRpcTransport,
+  scriptId: number,
   code: string
 ): Promise<string> => {
-  const transport = createShellyTransport(installation.shelly.baseUrl);
   const payload = unwrapShellyResult(
     await transport.call<unknown>({
       method: RPC_METHODS.ScriptEval,
-      params: { id: installation.script.id, code }
+      params: { id: scriptId, code }
     })
   );
   return scriptEvalResponseSchema.parse(payload).result;
 };
 
-const runtimeModeFromResult = (result: string): InstalledAutomationRuntimeMode | null => {
-  const entry = Object.entries(runtimeModeCode).find(
-    ([, value]) => String(value) === result
+const evaluateRuntime = async (
+  installation: ClimateInstalledAutomation,
+  code: string
+): Promise<string> =>
+  evaluateRuntimeTransport(
+    createShellyTransport(installation.shelly.baseUrl),
+    installation.script.id,
+    code
   );
-  return (entry?.[0] as InstalledAutomationRuntimeMode | undefined) ?? null;
+
+export const readClimateRuntimeControlState = async (
+  transport: FetchShellyRpcTransport,
+  scriptId: number
+): Promise<ClimateRuntimeControlState> => {
+  const state = decodeClimateRuntimeControlState(
+    await evaluateRuntimeTransport(
+      transport,
+      scriptId,
+      climateRuntimeControlStateEvalCode
+    )
+  );
+  if (!state) {
+    throw new Error(
+      'Managed automation runtime does not support safe state preservation.'
+    );
+  }
+  return state;
+};
+
+export const restoreClimateRuntimeControlState = async (
+  transport: FetchShellyRpcTransport,
+  scriptId: number,
+  expected: ClimateRuntimeControlState
+): Promise<void> => {
+  const restored = decodeClimateRuntimeControlState(
+    await evaluateRuntimeTransport(
+      transport,
+      scriptId,
+      climateRuntimeRestoreControlStateEvalCode(expected)
+    )
+  );
+  if (
+    !restored ||
+    restored.mode !== expected.mode ||
+    restored.manualRequestOn !== expected.manualRequestOn ||
+    restored.automationFault !== expected.automationFault ||
+    restored.safetyLockout !== expected.safetyLockout ||
+    restored.safetyReason !== expected.safetyReason
+  ) {
+    throw new Error('Shelly did not restore the managed automation control state.');
+  }
 };
 
 export const readInstalledAutomationRuntimeMode = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationRuntimeModeState> => {
-  const result = await evaluateRuntime(installation, readModeEvalCode);
-  const mode = runtimeModeFromResult(result);
-  return mode ? { mode, supported: true } : { mode: 'auto', supported: false };
+  const result = await evaluateRuntime(installation, climateRuntimeControlStateEvalCode);
+  const state = decodeClimateRuntimeControlState(result);
+  return state ? { ...state, supported: true } : unsupportedRuntimeState();
 };
 
 export const setInstalledAutomationRuntimeMode = async (
   installation: ClimateInstalledAutomation,
-  mode: SettableInstalledAutomationRuntimeMode
+  mode: InstalledAutomationRuntimeMode
 ): Promise<void> => {
-  const result = await evaluateRuntime(installation, runtimeModeEvalCode[mode]);
-  const expected = String(runtimeModeCode[mode]);
+  const result = await evaluateRuntime(
+    installation,
+    climateRuntimeSetControlModeEvalCode(mode)
+  );
+  const expected = mode === 'auto' ? '0' : '1';
+  if (result === '-2') {
+    throw new Error('Shelly runtime safety lockout must be recovered first.');
+  }
   if (result !== expected) {
-    const actual = runtimeModeFromResult(result);
-    throw new Error(
-      actual === 'fault'
-        ? `Shelly runtime entered FAULT while requesting ${mode.toUpperCase()}.`
-        : `Shelly did not confirm ${mode.toUpperCase()} runtime mode.`
-    );
+    throw new Error(`Shelly did not confirm ${mode.toUpperCase()} runtime mode.`);
+  }
+};
+
+export const setInstalledAutomationManualRelayRequest = async (
+  installation: ClimateInstalledAutomation,
+  on: boolean
+): Promise<void> => {
+  const result = await evaluateRuntime(
+    installation,
+    climateRuntimeSetManualRelayEvalCode(on)
+  );
+  if (result === '-2') {
+    throw new Error('Shelly runtime safety lockout must be recovered first.');
+  }
+  if (result === '-1') {
+    throw new Error('Manual relay control requires MANUAL runtime mode.');
+  }
+  if (result !== (on ? '1' : '0')) {
+    throw new Error(`Shelly did not confirm manual relay ${on ? 'ON' : 'OFF'}.`);
   }
 };

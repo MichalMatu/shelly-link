@@ -6,12 +6,11 @@ import { readShellySetupStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
 import {
-  setInstalledAutomationRuntimeMode,
-  type SettableInstalledAutomationRuntimeMode
+  setInstalledAutomationManualRelayRequest,
+  setInstalledAutomationRuntimeMode
 } from './runtimeModeTransport.js';
 import {
   readInstalledAutomationControlStatus,
-  type InstalledAutomationControlMode,
   type InstalledAutomationControlStatus
 } from './runtimeStatus.js';
 import {
@@ -47,9 +46,7 @@ export const installedAutomationScriptMatch = (
   installation: ClimateInstalledAutomation,
   status: Pick<InstalledAutomationControlStatus, 'automationScriptId'>
 ): InstalledAutomationScriptMatch => {
-  if (status.automationScriptId === null) {
-    return 'missing';
-  }
+  if (status.automationScriptId === null) return 'missing';
   return status.automationScriptId === installation.script.id ? 'matched' : 'mismatch';
 };
 
@@ -65,82 +62,69 @@ const verifyRuntimeState = async (
 
 const verifyRuntimeMode = async (
   installation: ClimateInstalledAutomation,
-  expectedMode: InstalledAutomationControlMode,
-  expectedRelayOn?: boolean
+  expectedMode: 'auto' | 'manual',
+  expectedRelayOn?: boolean,
+  expectedManualRequestOn?: boolean
 ): Promise<InstalledAutomationControlStatus> => {
   const status = await verifyRuntimeState(installation);
   if (status.automationMode !== expectedMode || !status.runtimeModeSupported) {
     throw new Error(`Shelly did not confirm ${expectedMode.toUpperCase()} runtime mode.`);
+  }
+  if (status.safetyLockout) {
+    throw new Error('Shelly runtime safety lockout must be recovered first.');
   }
   if (expectedRelayOn !== undefined && status.relayOn !== expectedRelayOn) {
     throw new Error(
       `Shelly did not confirm relay ${expectedRelayOn ? 'ON' : 'OFF'} in ${expectedMode.toUpperCase()}.`
     );
   }
+  if (
+    expectedManualRequestOn !== undefined &&
+    status.manualRequestOn !== expectedManualRequestOn
+  ) {
+    throw new Error(
+      `Shelly did not confirm manual relay request ${
+        expectedManualRequestOn ? 'ON' : 'OFF'
+      }.`
+    );
+  }
   return status;
 };
 
-const isManualMode = (mode: InstalledAutomationControlMode): boolean =>
-  mode === 'manual-off' || mode === 'manual-on';
-
-const setAndVerifyRuntimeMode = async (
-  installation: ClimateInstalledAutomation,
-  mode: SettableInstalledAutomationRuntimeMode,
-  relayOn?: boolean
-): Promise<InstalledAutomationControlStatus> => {
-  await setInstalledAutomationRuntimeMode(installation, mode);
-  return verifyRuntimeMode(installation, mode, relayOn);
+const assertRuntimeNotLocked = (status: InstalledAutomationControlStatus): void => {
+  if (status.safetyLockout) {
+    throw new Error('Automation runtime safety lockout must be recovered first.');
+  }
 };
 
 export const enterInstalledAutomationManualMode = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationActionResult> => {
   const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
-  if (prepared.status.automationMode === 'fault') {
-    throw new Error('Automation runtime is in FAULT and must be recovered first.');
-  }
+  assertRuntimeNotLocked(prepared.status);
 
   const nextInstallation = prepared.installation;
+  await setInstalledAutomationRuntimeMode(nextInstallation, 'manual');
   return {
     installation: nextInstallation,
-    status: await setAndVerifyRuntimeMode(nextInstallation, 'manual-off', false)
+    status: await verifyRuntimeMode(nextInstallation, 'manual', false, false)
   };
 };
 
-export const pauseInstalledAutomation = async (
+export const enterInstalledAutomationAutoMode = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationActionResult> => {
   const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
-  if (prepared.status.automationMode === 'fault') {
-    throw new Error('Automation runtime is in FAULT and must be recovered first.');
+  assertRuntimeNotLocked(prepared.status);
+  if (prepared.status.automationMode !== 'manual') {
+    throw new Error('Automation must be in MANUAL before it can return to AUTO.');
   }
 
   const nextInstallation = prepared.installation;
+  await setInstalledAutomationRuntimeMode(nextInstallation, 'auto');
   return {
     installation: nextInstallation,
-    status: await setAndVerifyRuntimeMode(nextInstallation, 'paused', false)
-  };
-};
-
-export const resumeInstalledAutomation = async (
-  installation: ClimateInstalledAutomation
-): Promise<InstalledAutomationActionResult> => {
-  const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
-  if (
-    prepared.status.automationMode !== 'paused' &&
-    !isManualMode(prepared.status.automationMode)
-  ) {
-    throw new Error('Automation must be PAUSED or MANUAL before it can return to AUTO.');
-  }
-
-  const nextInstallation = prepared.installation;
-  if (prepared.status.automationMode === 'manual-on') {
-    await setAndVerifyRuntimeMode(nextInstallation, 'manual-off', false);
-  }
-
-  return {
-    installation: nextInstallation,
-    status: await setAndVerifyRuntimeMode(nextInstallation, 'auto', false)
+    status: await verifyRuntimeMode(nextInstallation, 'auto', false, false)
   };
 };
 
@@ -157,17 +141,18 @@ export const setInstalledAutomationRelayState = async (
 ): Promise<InstalledAutomationActionResult> => {
   const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
   const nextInstallation = prepared.installation;
+  assertRuntimeNotLocked(prepared.status);
   if (
-    !isManualMode(prepared.status.automationMode) ||
+    prepared.status.automationMode !== 'manual' ||
     !prepared.status.runtimeModeSupported
   ) {
     throw new Error('Manual relay control requires a live MANUAL automation runtime.');
   }
 
-  const mode = on ? 'manual-on' : 'manual-off';
+  await setInstalledAutomationManualRelayRequest(nextInstallation, on);
   return {
     installation: nextInstallation,
-    status: await setAndVerifyRuntimeMode(nextInstallation, mode, on)
+    status: await verifyRuntimeMode(nextInstallation, 'manual', on, on)
   };
 };
 

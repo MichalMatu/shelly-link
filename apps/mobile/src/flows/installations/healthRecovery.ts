@@ -3,9 +3,13 @@ import type { InstalledAutomationHealth } from './runtimeDiagnostics.js';
 import type { InstalledAutomationScriptMatch } from './runtimeControl.js';
 
 export type InstallationRecoveryIssue =
-  'offline' | 'script-stopped' | 'sensor-missing' | 'ownership-problem';
+  | 'offline'
+  | 'script-stopped'
+  | 'sensor-missing'
+  | 'safety-lockout'
+  | 'ownership-problem';
 
-export type InstallationRecoveryAction = 'refresh' | 'resume';
+export type InstallationRecoveryAction = 'refresh' | 'recover';
 
 export type InstallationRecoveryState = {
   issue: InstallationRecoveryIssue;
@@ -18,6 +22,7 @@ type InstallationRecoveryInput = {
   scriptMatch: InstalledAutomationScriptMatch | null;
   automationMode: InstalledAutomationControlMode | null;
   runtimeHealth: InstalledAutomationHealth | null;
+  safetyLockout: boolean;
 };
 
 export const installationRecoveryState = ({
@@ -25,7 +30,8 @@ export const installationRecoveryState = ({
   controlError,
   scriptMatch,
   automationMode,
-  runtimeHealth
+  runtimeHealth,
+  safetyLockout
 }: InstallationRecoveryInput): InstallationRecoveryState | null => {
   if (diagnosticsError && controlError) {
     return { issue: 'offline', action: 'refresh' };
@@ -36,7 +42,11 @@ export const installationRecoveryState = ({
   }
 
   if (scriptMatch === 'matched' && automationMode === 'stopped') {
-    return { issue: 'script-stopped', action: 'resume' };
+    return { issue: 'script-stopped', action: 'recover' };
+  }
+
+  if (safetyLockout) {
+    return { issue: 'safety-lockout', action: 'recover' };
   }
 
   if (runtimeHealth === 'stale') {

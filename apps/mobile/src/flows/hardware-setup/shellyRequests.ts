@@ -1,3 +1,4 @@
+import type { ClimateRuntimeControlState } from '@lcl/script-generator';
 import {
   SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME,
   type FetchShellyRpcTransport,
@@ -22,6 +23,10 @@ import {
   shellyResultErrorMessage as resultErrorMessage,
   unwrapShellyResult
 } from '../../platform/shellyResult.js';
+import {
+  readClimateRuntimeControlState,
+  restoreClimateRuntimeControlState
+} from '../installations/runtimeModeTransport.js';
 
 const shellyOutOfMemoryMessage = (): string => t('hardware.shelly.outOfMemory');
 
@@ -36,6 +41,7 @@ export type ShellySetupScanResult = {
 export type ShellyBleDiscoveryPreparation = {
   automationScriptId: number | null;
   automationWasRunning: boolean;
+  automationControlState: ClimateRuntimeControlState | null;
 };
 
 export type ShellyRuntimeStatus = {
@@ -193,18 +199,24 @@ export const prepareShellyBleDiscovery = async (
 ): Promise<ShellyBleDiscoveryPreparation> => {
   const transport = createShellyTransport(baseUrl);
   const client = new RpcShellyClient(transport);
-  unwrapShellyResult(await client.setRelayOff());
-
+  const initialScripts = await readScriptList(transport);
+  await deleteBleDiscoveryScripts(client, initialScripts);
   const scripts = await readScriptList(transport);
-  await deleteBleDiscoveryScripts(client, scripts);
   const automationScript = findAutomationScript(scripts);
-  if (automationScript?.running) {
+  const automationControlState = automationScript?.running
+    ? await readClimateRuntimeControlState(transport, automationScript.id)
+    : null;
+  unwrapShellyResult(await client.setRelayOff());
+  if (automationScript?.running)
     unwrapShellyResult(await client.stopScript(automationScript.id));
-  }
-
+  unwrapShellyResult(await client.setRelayOff());
+  const status = unwrapShellyResult(await client.getStatus());
+  if (status.relayOn)
+    throw new Error('Shelly relay did not confirm OFF before BLE discovery.');
   return {
     automationScriptId: automationScript?.id ?? null,
-    automationWasRunning: automationScript?.running ?? false
+    automationWasRunning: automationScript?.running ?? false,
+    automationControlState
   };
 };
 
@@ -254,12 +266,13 @@ export const stopShellyBleDiscovery = async (
     discoveryScriptId: number | null;
     automationScriptId: number | null;
     restartAutomation: boolean;
+    automationControlState: ClimateRuntimeControlState | null;
   }
 ): Promise<void> => {
-  const client = new RpcShellyClient(createShellyTransport(baseUrl));
+  const transport = createShellyTransport(baseUrl);
+  const client = new RpcShellyClient(transport);
   let stopError: Error | null = null;
   let discoveryStopped = options.discoveryScriptId === null;
-
   if (options.discoveryScriptId !== null) {
     try {
       unwrapShellyResult(await client.stopScript(options.discoveryScriptId));
@@ -272,16 +285,34 @@ export const stopShellyBleDiscovery = async (
           : new Error(t('hardware.shelly.deleteScannerFailed'));
     }
   }
-
   if (
     options.restartAutomation &&
     options.automationScriptId !== null &&
     discoveryStopped
   ) {
-    unwrapShellyResult(await client.startScript(options.automationScriptId));
+    try {
+      if (!options.automationControlState)
+        throw new Error(
+          'Managed automation state was not captured before BLE discovery.'
+        );
+      unwrapShellyResult(await client.startScript(options.automationScriptId));
+      await restoreClimateRuntimeControlState(
+        transport,
+        options.automationScriptId,
+        options.automationControlState
+      );
+    } catch (error) {
+      try {
+        unwrapShellyResult(await client.setRelayOff());
+        unwrapShellyResult(await client.stopScript(options.automationScriptId));
+      } catch {
+        // Preserve the original restore failure while cleanup remains best effort.
+      }
+      stopError =
+        error instanceof Error
+          ? error
+          : new Error('Managed automation could not be restored after BLE discovery.');
+    }
   }
-
-  if (stopError) {
-    throw stopError;
-  }
+  if (stopError) throw stopError;
 };

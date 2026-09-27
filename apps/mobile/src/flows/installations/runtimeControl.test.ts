@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   getStatus: vi.fn(),
   readStatus: vi.fn(),
   setRuntimeMode: vi.fn(),
+  setManualRelay: vi.fn(),
   ensureCurrent: vi.fn(),
   recoverRuntime: vi.fn()
 }));
@@ -29,17 +30,18 @@ vi.mock('@lcl/shelly-client', async (importOriginal) => {
     }))
   };
 });
-
 vi.mock('./runtimeModeTransport.js', async (importOriginal) => {
   const actual = await importOriginal<typeof RuntimeModeModule>();
-  return { ...actual, setInstalledAutomationRuntimeMode: mocks.setRuntimeMode };
+  return {
+    ...actual,
+    setInstalledAutomationRuntimeMode: mocks.setRuntimeMode,
+    setInstalledAutomationManualRelayRequest: mocks.setManualRelay
+  };
 });
-
 vi.mock('./runtimeStatus.js', async (importOriginal) => {
   const actual = await importOriginal<typeof RuntimeStatusModule>();
   return { ...actual, readInstalledAutomationControlStatus: mocks.readStatus };
 });
-
 vi.mock('./runtimeUpgrade.js', async (importOriginal) => {
   const actual = await importOriginal<typeof RuntimeUpgradeModule>();
   return {
@@ -52,8 +54,7 @@ vi.mock('./runtimeUpgrade.js', async (importOriginal) => {
 import {
   installedAutomationScriptMatch,
   enterInstalledAutomationManualMode,
-  pauseInstalledAutomation,
-  resumeInstalledAutomation,
+  enterInstalledAutomationAutoMode,
   setInstalledAutomationRelayState
 } from './runtimeControl.js';
 
@@ -68,9 +69,15 @@ const installation = createInstalledAutomation({
 });
 
 const status = (
-  mode: 'auto' | 'manual-off' | 'manual-on' | 'paused' | 'fault' | 'stopped' | 'missing',
+  mode: 'auto' | 'manual' | 'stopped' | 'missing',
   relayOn = false,
-  scriptId: number | null = mode === 'missing' ? null : 7
+  scriptId: number | null = mode === 'missing' ? null : 7,
+  options: {
+    manualRequestOn?: boolean;
+    automationFault?: string | null;
+    safetyLockout?: boolean;
+    safetyReason?: string | null;
+  } = {}
 ) => ({
   relayOn,
   automationMode: mode,
@@ -78,7 +85,11 @@ const status = (
   firmwareId: '1.0.0',
   telemetry: {},
   clock: { timeSynced: false },
-  runtimeModeSupported: !['stopped', 'missing'].includes(mode)
+  runtimeModeSupported: mode === 'auto' || mode === 'manual',
+  manualRequestOn: options.manualRequestOn ?? false,
+  automationFault: options.automationFault ?? null,
+  safetyLockout: options.safetyLockout ?? false,
+  safetyReason: options.safetyReason ?? null
 });
 
 describe('installed automation runtime control', () => {
@@ -93,7 +104,7 @@ describe('installed automation runtime control', () => {
     mocks.getStatus.mockResolvedValue({ ok: true, value: { relayOn: false } });
   });
 
-  it('uses stored script id matching only as a diagnostic state', () => {
+  it('uses stored script id matching only as diagnostic state', () => {
     expect(installedAutomationScriptMatch(installation, status('auto'))).toBe('matched');
     expect(installedAutomationScriptMatch(installation, status('missing'))).toBe(
       'missing'
@@ -103,92 +114,93 @@ describe('installed automation runtime control', () => {
     );
   });
 
-  it('enters MANUAL_OFF through the converged live runtime', async () => {
+  it('enters MANUAL safe OFF through the live runtime', async () => {
     mocks.ensureCurrent.mockResolvedValue({
       installation,
       status: status('auto'),
       upgraded: false
     });
-    mocks.readStatus.mockResolvedValue(status('manual-off'));
-
+    mocks.readStatus.mockResolvedValue(status('manual'));
     const result = await enterInstalledAutomationManualMode(installation);
-
-    expect(mocks.setRuntimeMode).toHaveBeenCalledWith(installation, 'manual-off');
-    expect(result.status.automationMode).toBe('manual-off');
+    expect(mocks.setRuntimeMode).toHaveBeenCalledWith(installation, 'manual');
+    expect(result.status.automationMode).toBe('manual');
     expect(result.status.relayOn).toBe(false);
+    expect(result.status.manualRequestOn).toBe(false);
   });
 
-  it('enters PAUSED through the converged live runtime', async () => {
+  it('returns MANUAL to AUTO safe OFF', async () => {
     mocks.ensureCurrent.mockResolvedValue({
       installation,
-      status: status('auto'),
-      upgraded: false
-    });
-    mocks.readStatus.mockResolvedValue(status('paused'));
-
-    const result = await pauseInstalledAutomation(installation);
-
-    expect(mocks.setRuntimeMode).toHaveBeenCalledWith(installation, 'paused');
-    expect(result.status.automationMode).toBe('paused');
-    expect(result.status.relayOn).toBe(false);
-  });
-
-  it('returns to AUTO through the converged live runtime', async () => {
-    mocks.ensureCurrent.mockResolvedValue({
-      installation,
-      status: status('manual-off'),
+      status: status('manual'),
       upgraded: false
     });
     mocks.readStatus.mockResolvedValue(status('auto'));
-
-    const result = await resumeInstalledAutomation(installation);
-
+    const result = await enterInstalledAutomationAutoMode(installation);
     expect(mocks.setRuntimeMode).toHaveBeenCalledWith(installation, 'auto');
     expect(result.status.automationMode).toBe('auto');
     expect(result.status.relayOn).toBe(false);
   });
 
-  it('uses the replacement installation returned by convergence for manual relay control', async () => {
-    const replacedInstallation = {
-      ...installation,
-      script: { id: 11, hash: 'new-code-hash' }
-    };
+  it('routes MANUAL relay request through the replacement runtime', async () => {
+    const replaced = { ...installation, script: { id: 11, hash: 'new-code-hash' } };
     mocks.ensureCurrent.mockResolvedValue({
-      installation: replacedInstallation,
-      status: status('manual-off', false, 11),
+      installation: replaced,
+      status: status('manual', false, 11),
       upgraded: true
     });
-    mocks.readStatus.mockResolvedValue(status('manual-on', true, 11));
-
+    mocks.readStatus.mockResolvedValue(
+      status('manual', true, 11, { manualRequestOn: true })
+    );
     const result = await setInstalledAutomationRelayState(installation, true);
-
-    expect(mocks.setRuntimeMode).toHaveBeenCalledWith(replacedInstallation, 'manual-on');
+    expect(mocks.setManualRelay).toHaveBeenCalledWith(replaced, true);
+    expect(mocks.setRuntimeMode).not.toHaveBeenCalled();
     expect(mocks.setRelayOn).not.toHaveBeenCalled();
-    expect(result.installation.script.id).toBe(11);
     expect(result.status.relayOn).toBe(true);
+    expect(result.status.manualRequestOn).toBe(true);
+    expect(result.status.automationFault).toBeNull();
   });
 
-  it('does not mutate the relay when runtime convergence rejects physical identity', async () => {
+  it('does not mutate relay when runtime convergence rejects physical identity', async () => {
     mocks.ensureCurrent.mockRejectedValue(
       new Error('Shelly identity does not match the installed automation.')
     );
-
     await expect(setInstalledAutomationRelayState(installation, true)).rejects.toThrow(
-      'Shelly identity does not match the installed automation.'
+      'Shelly identity does not match'
     );
+    expect(mocks.setManualRelay).not.toHaveBeenCalled();
     expect(mocks.setRelayOn).not.toHaveBeenCalled();
   });
 
-  it('rejects direct relay control unless the converged runtime is MANUAL', async () => {
+  it('rejects manual relay request unless runtime is MANUAL', async () => {
     mocks.ensureCurrent.mockResolvedValue({
       installation,
       status: status('auto'),
       upgraded: false
     });
-
     await expect(setInstalledAutomationRelayState(installation, true)).rejects.toThrow(
       'live MANUAL automation runtime'
     );
-    expect(mocks.setRelayOn).not.toHaveBeenCalled();
+    expect(mocks.setManualRelay).not.toHaveBeenCalled();
+  });
+
+  it('hard safety lockout overrides both mode changes and manual relay requests', async () => {
+    const locked = status('manual', false, 7, {
+      manualRequestOn: true,
+      safetyLockout: true,
+      safetyReason: 'mx'
+    });
+    mocks.ensureCurrent.mockResolvedValue({
+      installation,
+      status: locked,
+      upgraded: false
+    });
+    await expect(enterInstalledAutomationManualMode(installation)).rejects.toThrow(
+      'safety lockout'
+    );
+    await expect(setInstalledAutomationRelayState(installation, true)).rejects.toThrow(
+      'safety lockout'
+    );
+    expect(mocks.setRuntimeMode).not.toHaveBeenCalled();
+    expect(mocks.setManualRelay).not.toHaveBeenCalled();
   });
 });

@@ -138,6 +138,7 @@ export const ptBr = {
     resume: 'Retomar automação',
     changingState: 'Alterando estado…',
     pauseSuccess: 'Automação pausada e saída confirmada como OFF.',
+    recoverySuccess: 'Automação recuperada e pronta para controle.',
     resumeSuccess: 'Automação retomada.',
     actionFailed: 'Não foi possível alterar o estado da automação com segurança.',
     scriptNeedsAttention:

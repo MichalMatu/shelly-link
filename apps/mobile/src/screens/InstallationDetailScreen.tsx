@@ -179,7 +179,8 @@ const ClimateInstallationDetail = ({
     controlError: controlQuery.isError,
     scriptMatch,
     automationMode: control?.automationMode ?? null,
-    runtimeHealth: snapshot ? installedAutomationHealth(snapshot) : null
+    runtimeHealth: snapshot ? installedAutomationHealth(snapshot) : null,
+    safetyLockout: control?.safetyLockout ?? false
   });
   const recoveryCopy = recovery
     ? installationHealthCopy[locale].issues[recovery.issue]
@@ -262,23 +263,23 @@ const ClimateInstallationDetail = ({
                 title={recoveryCopy.title}
                 description={recoveryCopy.description}
                 actionLabel={
-                  recovery.action === 'resume' && automationAction.isPending
+                  recovery.action === 'recover' && automationAction.isPending
                     ? t('detail.changingState')
                     : recovery.action === 'refresh' &&
                         (diagnosticsQuery.isFetching || controlQuery.isFetching)
                       ? t('common.refreshing')
                       : recoveryCopy.action
                 }
-                primary={recovery.action === 'resume'}
+                primary={recovery.action === 'recover'}
                 busy={
-                  recovery.action === 'resume'
+                  recovery.action === 'recover'
                     ? automationAction.isPending
                     : diagnosticsQuery.isFetching || controlQuery.isFetching
                 }
                 onAction={() => {
-                  if (recovery.action === 'resume') {
+                  if (recovery.action === 'recover') {
                     automationAction.mutate('recover', {
-                      onSuccess: () => pushToast('ok', t('detail.resumeSuccess'))
+                      onSuccess: () => pushToast('ok', t('detail.recoverySuccess'))
                     });
                   } else {
                     void Promise.allSettled([

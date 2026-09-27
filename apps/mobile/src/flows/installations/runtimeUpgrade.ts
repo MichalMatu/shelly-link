@@ -78,6 +78,7 @@ const reinstallCurrentRuntime = async (
     status.automationScriptId !== upgradedInstallation.script.id ||
     status.automationMode !== 'auto' ||
     !status.runtimeModeSupported ||
+    status.safetyLockout ||
     status.relayOn
   ) {
     throw new Error('Shelly did not confirm the replaced automation runtime.');

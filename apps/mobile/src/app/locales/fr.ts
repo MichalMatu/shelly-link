@@ -143,6 +143,7 @@ export const fr = {
     resume: 'Reprendre l’automatisation',
     changingState: 'Changement d’état…',
     pauseSuccess: 'Automatisation en pause et sortie confirmée sur OFF.',
+    recoverySuccess: 'Automatisation rétablie et prête à être contrôlée.',
     resumeSuccess: 'Automatisation reprise.',
     actionFailed: 'Impossible de modifier l’état de l’automatisation en toute sécurité.',
     scriptNeedsAttention:

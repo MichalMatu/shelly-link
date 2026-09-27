@@ -31,6 +31,14 @@ const device = {
   scriptIdInput: '1'
 };
 
+const manualControlState = {
+  mode: 'manual' as const,
+  manualRequestOn: true,
+  automationFault: 'st',
+  safetyLockout: false,
+  safetyReason: null
+};
+
 const createWrapper =
   (queryClient: QueryClient) =>
   ({ children }: PropsWithChildren) =>
@@ -79,12 +87,13 @@ describe('useShellyBleDiscoveryFlow lifecycle', () => {
     }
   });
 
-  it('still stops a remotely started discovery session when cleanup was requested before a late success', async () => {
+  it('preserves MANUAL control state when a remotely started discovery is cleaned up after late success', async () => {
     const queryClient = createQueryClient();
     let resolveSnapshot: ((snapshot: unknown) => void) | undefined;
     prepareShellyBleDiscoveryMock.mockResolvedValueOnce({
       automationScriptId: 4,
-      automationWasRunning: true
+      automationWasRunning: true,
+      automationControlState: manualControlState
     });
     installShellyBleDiscoveryScriptMock.mockResolvedValueOnce({ scriptId: 7 });
     readShellyBleDiscoverySnapshotMock.mockImplementationOnce(
@@ -113,7 +122,8 @@ describe('useShellyBleDiscoveryFlow lifecycle', () => {
       expect(stopShellyBleDiscoveryMock).toHaveBeenCalledWith(device.baseUrl, {
         discoveryScriptId: 7,
         automationScriptId: 4,
-        restartAutomation: true
+        restartAutomation: true,
+        automationControlState: manualControlState
       })
     );
     queryClient.clear();

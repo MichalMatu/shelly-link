@@ -1,6 +1,11 @@
 import {
+  climateRuntimeControlStateEvalCode,
+  climateRuntimeSetControlModeEvalCode,
+  climateRuntimeSetManualRelayEvalCode,
   createDefaultShellyThermostatConfig,
-  generateShellyThermostatScript
+  decodeClimateRuntimeControlState,
+  generateShellyThermostatScript,
+  type ClimateRuntimeControlState
 } from '../index.js';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -61,6 +66,10 @@ const createRuntime = (script: string) => {
     }
   };
   const timer = { set: () => undefined };
+  const enterManualCode = climateRuntimeSetControlModeEvalCode('manual');
+  const enterAutoCode = climateRuntimeSetControlModeEvalCode('auto');
+  const manualOnCode = climateRuntimeSetManualRelayEvalCode(true);
+  const manualOffCode = climateRuntimeSetManualRelayEvalCode(false);
   const runtime = new Function(
     'Shelly',
     'BLE',
@@ -68,25 +77,37 @@ const createRuntime = (script: string) => {
     `${script}
 return {
   diag:function(){return JSON.parse(diag());},
-  mode:function(){return R.m;},
-  setMode:function(m){
-    R.m=m;
-    if(m===1||m===3||m===4){if(R.on)sw(false,"ts",true);}
-    else if(m===2){if(!R.on)sw(true,"ts",true);}
-  },
+  controlState:function(){return ${climateRuntimeControlStateEvalCode};},
+  enterManual:function(){return ${enterManualCode};},
+  enterAuto:function(){return ${enterAutoCode};},
+  manualOn:function(){return ${manualOnCode};},
+  manualOff:function(){return ${manualOffCode};},
+  hardLock:function(){ft("mx");},
   stale:stale
 };`
   )(shelly, ble, timer) as {
     diag: () => { g: unknown[] };
-    mode: () => number;
-    setMode: (mode: number) => void;
+    controlState: () => string;
+    enterManual: () => number;
+    enterAuto: () => number;
+    manualOn: () => number;
+    manualOff: () => number;
+    hardLock: () => void;
     stale: () => void;
   };
 
   if (!scanner) throw new Error('Generated runtime did not subscribe to BLE.');
 
+  const controlState = (): ClimateRuntimeControlState => {
+    const state = decodeClimateRuntimeControlState(runtime.controlState());
+    if (!state)
+      throw new Error('Generated runtime did not expose a valid control state.');
+    return state;
+  };
+
   return {
     runtime,
+    controlState,
     switchCalls,
     scan: (temperatureC: number, humidityPct: number) =>
       scanner?.('scan-result', {
@@ -119,7 +140,7 @@ describe('generated runtime control arbitration', () => {
     expect(script).not.toContain('Shelly.addEventHandler');
   });
 
-  it('MANUAL_OFF blocks automation and explicit MANUAL_ON controls the relay', () => {
+  it('MANUAL starts safe OFF and explicit manual request controls the relay', () => {
     let nowMs = 1_000_000;
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
     try {
@@ -127,8 +148,13 @@ describe('generated runtime control arbitration', () => {
       runtime.scan(18, 50);
       expect(runtime.physicalRelayOn()).toBe(true);
 
-      runtime.runtime.setMode(1);
-      expect(runtime.runtime.mode()).toBe(1);
+      expect(runtime.runtime.enterManual()).toBe(1);
+      expect(runtime.controlState()).toMatchObject({
+        mode: 'manual',
+        manualRequestOn: false,
+        automationFault: null,
+        safetyLockout: false
+      });
       expect(runtime.physicalRelayOn()).toBe(false);
 
       const calls = runtime.switchCalls.length;
@@ -137,56 +163,128 @@ describe('generated runtime control arbitration', () => {
       expect(runtime.switchCalls).toHaveLength(calls);
       expect(runtime.physicalRelayOn()).toBe(false);
 
-      runtime.runtime.setMode(2);
-      expect(runtime.runtime.mode()).toBe(2);
+      expect(runtime.runtime.manualOn()).toBe(1);
+      expect(runtime.controlState().manualRequestOn).toBe(true);
       expect(runtime.physicalRelayOn()).toBe(true);
-      runtime.runtime.setMode(1);
-      expect(runtime.runtime.mode()).toBe(1);
+
+      expect(runtime.runtime.manualOff()).toBe(0);
+      expect(runtime.controlState().manualRequestOn).toBe(false);
       expect(runtime.physicalRelayOn()).toBe(false);
     } finally {
       nowSpy.mockRestore();
     }
   });
 
-  it('PAUSED remains OFF and blocks automation output', () => {
-    const runtime = createHeatingRuntime();
-    runtime.scan(18, 50);
-    expect(runtime.physicalRelayOn()).toBe(true);
+  it('returns from MANUAL to AUTO safe OFF without a third PAUSED mode', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const runtime = createHeatingRuntime();
+      runtime.scan(18, 50);
+      expect(runtime.physicalRelayOn()).toBe(true);
 
-    runtime.runtime.setMode(3);
-    expect(runtime.runtime.mode()).toBe(3);
-    expect(runtime.physicalRelayOn()).toBe(false);
-    const calls = runtime.switchCalls.length;
-    runtime.scan(18, 50);
-    expect(runtime.switchCalls).toHaveLength(calls);
-    expect(runtime.physicalRelayOn()).toBe(false);
+      runtime.runtime.enterManual();
+      runtime.runtime.manualOn();
+      expect(runtime.physicalRelayOn()).toBe(true);
+
+      expect(runtime.runtime.enterAuto()).toBe(0);
+      expect(runtime.controlState()).toMatchObject({
+        mode: 'auto',
+        manualRequestOn: false,
+        automationFault: 'st',
+        safetyLockout: false
+      });
+      expect(runtime.physicalRelayOn()).toBe(false);
+
+      nowMs += 1_000;
+      runtime.scan(18, 50);
+      expect(runtime.controlState().automationFault).toBeNull();
+      expect(runtime.physicalRelayOn()).toBe(true);
+    } finally {
+      nowSpy.mockRestore();
+    }
   });
 
-  it('stale safety overrides MANUAL_ON and latches FAULT', () => {
+  it('keeps sensor fault fail-safe in AUTO without taking control away from MANUAL', () => {
     let nowMs = 1_000_000;
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
     try {
       const runtime = createHeatingRuntime();
       runtime.scan(23.5, 50);
-      runtime.runtime.setMode(2);
-      expect(runtime.runtime.mode()).toBe(2);
+      expect(runtime.controlState().automationFault).toBeNull();
+
+      runtime.runtime.enterManual();
+      expect(runtime.runtime.manualOn()).toBe(1);
       expect(runtime.physicalRelayOn()).toBe(true);
 
+      const callsBeforeStale = runtime.switchCalls.length;
       nowMs += 700_000;
       runtime.runtime.stale();
-      expect(runtime.runtime.mode()).toBe(4);
+      expect(runtime.switchCalls).toHaveLength(callsBeforeStale);
+      expect(runtime.controlState()).toMatchObject({
+        mode: 'manual',
+        manualRequestOn: true,
+        automationFault: 'st',
+        safetyLockout: false
+      });
+      expect(runtime.physicalRelayOn()).toBe(true);
+
+      expect(runtime.runtime.manualOff()).toBe(0);
+      expect(runtime.physicalRelayOn()).toBe(false);
+      expect(runtime.runtime.manualOn()).toBe(1);
+      expect(runtime.physicalRelayOn()).toBe(true);
+
+      expect(runtime.runtime.enterAuto()).toBe(0);
+      expect(runtime.controlState()).toMatchObject({
+        mode: 'auto',
+        manualRequestOn: false,
+        automationFault: 'st',
+        safetyLockout: false
+      });
+      expect(runtime.physicalRelayOn()).toBe(false);
+
+      nowMs += 1_000;
+      runtime.scan(23.5, 50);
+      expect(runtime.controlState().automationFault).toBeNull();
       expect(runtime.physicalRelayOn()).toBe(false);
     } finally {
       nowSpy.mockRestore();
     }
   });
 
-  it('exposes mode and automation-requested output in diagnostics', () => {
+  it('hard safety lockout stays OFF until explicit recovery', () => {
+    const runtime = createHeatingRuntime();
+    runtime.scan(23.5, 50);
+    runtime.runtime.enterManual();
+    runtime.runtime.manualOn();
+    expect(runtime.physicalRelayOn()).toBe(true);
+
+    runtime.runtime.hardLock();
+    expect(runtime.controlState()).toMatchObject({
+      mode: 'manual',
+      manualRequestOn: true,
+      safetyLockout: true,
+      safetyReason: 'mx'
+    });
+    expect(runtime.physicalRelayOn()).toBe(false);
+    expect(runtime.runtime.manualOn()).toBe(-2);
+
+    runtime.scan(23.5, 50);
+    expect(runtime.physicalRelayOn()).toBe(false);
+    expect(runtime.controlState().safetyLockout).toBe(true);
+  });
+
+  it('exposes independent mode, request, fault and safety axes in diagnostics', () => {
     const runtime = createRuntime(
       generateShellyThermostatScript(createDefaultShellyThermostatConfig())
     );
     const g = runtime.runtime.diag().g;
     expect(g[17]).toBe(0);
     expect(g[18]).toBe(false);
+    expect(g[19]).toBeNull();
+    expect(g[20]).toBe(false);
+    expect(g[21]).toBe('st');
+    expect(g[22]).toBe(false);
+    expect(g[23]).toBeNull();
   });
 });
