@@ -9,12 +9,7 @@ import {
 import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
 
 export type PlugFirmwareUpdatePhase =
-  | 'idle'
-  | 'starting'
-  | 'reconnecting'
-  | 'verifying'
-  | 'complete'
-  | 'failed';
+  'idle' | 'starting' | 'reconnecting' | 'verifying' | 'complete' | 'failed';
 
 export const plugFirmwareUpdateQueryKey = (
   target: PlugFirmwareUpdateTarget | undefined

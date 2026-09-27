@@ -92,10 +92,7 @@ describe('saved BLE plug store', () => {
 
     useSavedBlePlugStore
       .getState()
-      .updateFirmware(
-        'SHELLYPLUGSG3-AABB',
-        '20260923-075613/2.0.1-ge1a198b'
-      );
+      .updateFirmware('SHELLYPLUGSG3-AABB', '20260923-075613/2.0.1-ge1a198b');
 
     expect(useSavedBlePlugStore.getState().plugs).toEqual([
       expect.objectContaining({
