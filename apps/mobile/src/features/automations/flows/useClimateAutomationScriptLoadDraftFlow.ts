@@ -12,7 +12,6 @@ type LoadedStatus = ClimateAutomationScriptLoadResult['state']['status'];
 type LoadedSensor = LoadedSettings['sensors'][number];
 
 type ClimateScriptLoadDraftActions = {
-  setShellyScriptId(id: string, scriptIdInput: string): void;
   selectSensorDevice(id: string): void;
   setAdditionalSensorIds(ids: readonly string[]): void;
   setSensorAggregation(value: LoadedSettings['aggregation']): void;
@@ -29,6 +28,7 @@ type ClimateScriptLoadDraftActions = {
 
 type LoadDraftFlowInput = {
   getDraftActions(): ClimateScriptLoadDraftActions;
+  setShellyScriptId(id: string, scriptIdInput: string): void;
   upsertSensorDevice(device: {
     id: string;
     name: string;
@@ -46,6 +46,7 @@ type LoadDraftFlowInput = {
 
 export const useClimateAutomationScriptLoadDraftFlow = ({
   getDraftActions,
+  setShellyScriptId,
   upsertSensorDevice,
   resetInstallState,
   applyControlStatus,
@@ -55,7 +56,7 @@ export const useClimateAutomationScriptLoadDraftFlow = ({
     onSuccess: ({ device, state, decoded }) => {
       const draft = getDraftActions();
       const settings = decoded.settings;
-      draft.setShellyScriptId(device.id, String(state.script.id));
+      setShellyScriptId(device.id, String(state.script.id));
       settings.sensors.forEach((sensor) => {
         upsertSensorDevice({
           id: sensor.runtimeAddress,

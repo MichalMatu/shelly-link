@@ -9,7 +9,8 @@ import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugFirmwareUpdateCard } from '../components/PlugFirmwareUpdateCard.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
 import { useBlePlugReadOnlyDetailFlow } from '../flows/useBlePlugReadOnlyDetailFlow.js';
-import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
+import { hasBleLocator } from '../data/savedPlug.js';
+import { useSavedPlugStore } from '../state/savedPlugStore.js';
 
 export type BlePlugDetailScreenProps = {
   physicalId: string;
@@ -21,8 +22,8 @@ const disabledBleDetailTabs: readonly PlugDetailTab[] = ['automation', 'ble', 's
 export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenProps) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('info');
-  const plug = useSavedBlePlugStore((state) =>
-    state.plugs.find((candidate) => candidate.physicalId === physicalId)
+  const plug = useSavedPlugStore((state) =>
+    state.plugs.find((candidate) => candidate.physicalId === physicalId && hasBleLocator(candidate))
   );
   const detailQuery = useBlePlugReadOnlyDetailFlow(plug);
 

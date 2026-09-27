@@ -6,7 +6,7 @@ import {
   waitForPlugFirmwareUpdate,
   type PlugFirmwareUpdateTarget
 } from '../data/plugFirmwareUpdate.js';
-import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
+import { useSavedPlugStore } from '../state/savedPlugStore.js';
 
 export type PlugFirmwareUpdatePhase =
   'idle' | 'starting' | 'reconnecting' | 'verifying' | 'complete' | 'failed';
@@ -25,7 +25,7 @@ export const usePlugFirmwareUpdateFlow = (
   currentFirmware: string | undefined
 ) => {
   const queryClient = useQueryClient();
-  const updateFirmware = useSavedBlePlugStore((state) => state.updateFirmware);
+  const updateFirmware = useSavedPlugStore((state) => state.updateFirmware);
   const [updatePhase, setUpdatePhase] = useState<PlugFirmwareUpdatePhase>('idle');
   const queryKey = plugFirmwareUpdateQueryKey(target);
   const query = useQuery({

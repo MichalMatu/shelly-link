@@ -5,11 +5,13 @@ import {
 } from '@lcl/script-generator';
 import { z } from 'zod';
 
-export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v9';
+export const HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v10';
+const LEGACY_HARDWARE_SETUP_DRAFT_STORAGE_KEY = 'lcl.hardwareSetupDraft.v9';
+const SAVED_PLUGS_STORAGE_KEY = 'lcl.savedPlugs.v1';
 
 const rulePresetSchema = z.enum(['heating', 'cooling', 'humidifying', 'dehumidifying']);
 
-const shellyDraftDeviceSchema = z.object({
+export const shellyDraftDeviceSchema = z.object({
   id: z.string(),
   name: z.string(),
   baseUrl: z.string(),
@@ -31,7 +33,6 @@ const hardwareSetupDraftSchema = z.object({
   sensorProfileInput: sensorProfileIdSchema,
   sensorMacInput: z.string(),
   sensorNameInput: z.string(),
-  shellyDevices: z.array(shellyDraftDeviceSchema),
   sensorDevices: z.array(sensorDraftDeviceSchema),
   selectedShellyId: z.string().nullable(),
   selectedSensorId: z.string().nullable(),
@@ -57,30 +58,34 @@ export type HardwareSetupDraft = z.infer<typeof hardwareSetupDraftSchema>;
 const isStorageAvailable = (): boolean =>
   typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 
-export const readStoredHardwareSetupDraft = (
-  fallback: HardwareSetupDraft
-): HardwareSetupDraft => {
-  if (!isStorageAvailable()) {
-    return fallback;
-  }
-
-  try {
-    const stored = window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY);
-    return stored ? hardwareSetupDraftSchema.parse(JSON.parse(stored)) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
 const saveHardwareSetupDraft = (draft: HardwareSetupDraft): void => {
-  if (!isStorageAvailable()) {
-    return;
-  }
-
+  if (!isStorageAvailable()) return;
   try {
     window.localStorage.setItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY, JSON.stringify(draft));
   } catch {
     return;
+  }
+};
+
+export const readStoredHardwareSetupDraft = (
+  fallback: HardwareSetupDraft
+): HardwareSetupDraft => {
+  if (!isStorageAvailable()) return fallback;
+
+  try {
+    const current = window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY);
+    if (current) return hardwareSetupDraftSchema.parse(JSON.parse(current));
+
+    const legacy = window.localStorage.getItem(LEGACY_HARDWARE_SETUP_DRAFT_STORAGE_KEY);
+    if (!legacy) return fallback;
+    const migrated = hardwareSetupDraftSchema.parse(JSON.parse(legacy));
+    saveHardwareSetupDraft(migrated);
+    if (window.localStorage.getItem(SAVED_PLUGS_STORAGE_KEY) !== null) {
+      window.localStorage.removeItem(LEGACY_HARDWARE_SETUP_DRAFT_STORAGE_KEY);
+    }
+    return migrated;
+  } catch {
+    return fallback;
   }
 };
 
@@ -94,16 +99,11 @@ const createStoredHardwareSetupDraft = (
   sensorProfileInput: patch.sensorProfileInput ?? fallback.sensorProfileInput,
   sensorMacInput: fallback.sensorMacInput,
   sensorNameInput: fallback.sensorNameInput,
-  shellyDevices: patch.shellyDevices ?? state.shellyDevices,
   sensorDevices: patch.sensorDevices ?? state.sensorDevices,
   selectedShellyId:
-    'selectedShellyId' in patch
-      ? (patch.selectedShellyId ?? null)
-      : state.selectedShellyId,
+    'selectedShellyId' in patch ? (patch.selectedShellyId ?? null) : state.selectedShellyId,
   selectedSensorId:
-    'selectedSensorId' in patch
-      ? (patch.selectedSensorId ?? null)
-      : state.selectedSensorId,
+    'selectedSensorId' in patch ? (patch.selectedSensorId ?? null) : state.selectedSensorId,
   additionalSensorIds: patch.additionalSensorIds ?? state.additionalSensorIds,
   inheritedSensorIds: patch.inheritedSensorIds ?? state.inheritedSensorIds,
   inheritedSensorSourceId:
@@ -134,5 +134,6 @@ export const persistHardwareSetupDraftPatch = (
 export const clearStoredHardwareSetupDraft = (): void => {
   if (isStorageAvailable()) {
     window.localStorage.removeItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY);
+    window.localStorage.removeItem(LEGACY_HARDWARE_SETUP_DRAFT_STORAGE_KEY);
   }
 };

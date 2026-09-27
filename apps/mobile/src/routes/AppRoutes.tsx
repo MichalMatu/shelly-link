@@ -16,6 +16,8 @@ import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import {
   BlePlugDetailScreen,
   PlugBluetoothAddPage,
+  savedPlugToWifiDevice,
+  useSavedPlugStore,
   WifiPlugDetailScreen
 } from '../features/plugs/index.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
@@ -75,10 +77,8 @@ export const AppRoutes = () => {
   const loadClimateAutomationDraft = useHardwareSetupDraftStore(
     (state) => state.loadClimateAutomationDraft
   );
-  const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
-  const removeShellyDevice = useHardwareSetupDraftStore(
-    (state) => state.removeShellyDevice
-  );
+  const savedPlugs = useSavedPlugStore((state) => state.plugs);
+  const removeShellyDevice = useSavedPlugStore((state) => state.removePlug);
   const [route, setRoute] = useState<AppRoute>({ type: 'dashboard' });
   const routeRef = useRef(route);
   const navigate = useCallback((nextRoute: AppRoute) => {
@@ -206,16 +206,17 @@ export const AppRoutes = () => {
     );
   } else if (route.type === 'plug-settings') {
     const savedPlug =
-      shellyDevices.find((candidate) => candidate.id === route.deviceId) ?? null;
+      savedPlugs.find((candidate) => candidate.physicalId === route.deviceId) ?? null;
+    const wifiDevice = savedPlug ? savedPlugToWifiDevice(savedPlug) : null;
     content = (
       <WifiPlugDetailScreen
         device={
-          savedPlug
+          wifiDevice
             ? {
-                deviceId: savedPlug.id,
-                name: savedPlug.name,
-                baseUrl: savedPlug.baseUrl,
-                ...(savedPlug.model ? { model: savedPlug.model } : {})
+                deviceId: wifiDevice.id,
+                name: wifiDevice.name,
+                baseUrl: wifiDevice.baseUrl,
+                ...(wifiDevice.model ? { model: wifiDevice.model } : {})
               }
             : null
         }

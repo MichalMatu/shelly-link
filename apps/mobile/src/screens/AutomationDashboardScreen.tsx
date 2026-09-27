@@ -9,15 +9,16 @@ import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { EditablePlugName } from '../components/EditablePlugName.js';
 import {
   BleOnlyPlugDashboardCards,
+  hasBleLocator,
   isSameShellyDevice,
   PlugAddSpeedDial,
   PlugDashboardCardShell,
-  useSavedBlePlugStore,
+  savedPlugToWifiDevice,
+  useSavedPlugStore,
   type PlugAddTransport
 } from '../features/plugs/index.js';
 import { isDashboardRuntimeQuery } from '../features/dashboard/index.js';
 import {
-  useHardwareSetupDraftStore,
   type ShellyDraftDevice
 } from '../flows/hardware-setup/setupDraftStore.js';
 import type {
@@ -414,12 +415,20 @@ export const AutomationDashboardScreen = ({
   const renameShellyDevice = useInstalledAutomationStore(
     (state) => state.renameShellyDevice
   );
-  const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
-  const setShellyDeviceName = useHardwareSetupDraftStore(
-    (state) => state.setShellyDeviceName
+  const savedPlugs = useSavedPlugStore((state) => state.plugs);
+  const renameSavedPlug = useSavedPlugStore((state) => state.renamePlug);
+  const shellyDevices = savedPlugs.flatMap((plug) => {
+    const device = savedPlugToWifiDevice(plug);
+    return device ? [device] : [];
+  });
+  const bleOnlyPlugs = savedPlugs.filter(
+    (plug) =>
+      hasBleLocator(plug) &&
+      !plug.wifiBaseUrl &&
+      !installations.some((installation) =>
+        isSameShellyDevice(installation.shelly.deviceId, plug.physicalId)
+      )
   );
-  const savedBlePlugs = useSavedBlePlugStore((state) => state.plugs);
-  const renameSavedBlePlug = useSavedBlePlugStore((state) => state.renamePlug);
   const queryClient = useQueryClient();
   const activeKind = initialKind ?? 'climate';
   useEffect(() => {
@@ -447,12 +456,7 @@ export const AutomationDashboardScreen = ({
 
   const renameInstalledPlug = (installation: InstalledAutomation, value: string) => {
     renameShellyDevice(installation.shelly.deviceId, value);
-    const savedDevice = shellyDevices.find((device) =>
-      isSameShellyDevice(device.id, installation.shelly.deviceId)
-    );
-    if (savedDevice) {
-      setShellyDeviceName(savedDevice.id, value);
-    }
+    renameSavedPlug(installation.shelly.deviceId, value);
   };
   const matchedInstallationIds = new Set<string>();
   const plugEntries = shellyDevices.map((device) => {
@@ -469,7 +473,7 @@ export const AutomationDashboardScreen = ({
   const hasPlugEntries =
     plugEntries.length > 0 ||
     unmatchedInstallations.length > 0 ||
-    savedBlePlugs.length > 0;
+    bleOnlyPlugs.length > 0;
 
   return (
     <main
@@ -497,7 +501,7 @@ export const AutomationDashboardScreen = ({
                   device={device}
                   onAddAutomation={() => onAddAutomation('climate', device.id)}
                   onOpenSettings={() => onOpenPlugSettings(device.id)}
-                  onNameChange={(value) => setShellyDeviceName(device.id, value)}
+                  onNameChange={(value) => renameSavedPlug(device.id, value)}
                 />
               )
             )}
@@ -510,12 +514,8 @@ export const AutomationDashboardScreen = ({
               />
             ))}
             <BleOnlyPlugDashboardCards
-              plugs={savedBlePlugs}
-              representedPhysicalIds={[
-                ...shellyDevices.map((device) => device.id),
-                ...installations.map((installation) => installation.shelly.deviceId)
-              ]}
-              onNameChange={renameSavedBlePlug}
+              plugs={bleOnlyPlugs}
+              onNameChange={renameSavedPlug}
               onOpen={onOpenBlePlug}
             />
           </>

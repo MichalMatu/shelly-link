@@ -4,7 +4,7 @@ import {
   readPlugReadOnlyDetailFromTarget,
   type PlugReadOnlyDetail
 } from '../data/plugReadOnlyDetail.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import {
   recoverSavedBlePlugLocator,
   type SavedBlePlugLocatorRecoveryDependencies,
@@ -14,22 +14,22 @@ import {
 export type SavedBlePlugReadOnlyDetailRecoveryDependencies =
   SavedBlePlugLocatorRecoveryDependencies & {
     readDetail?(
-      plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>
+      plug: Pick<SavedPlugWithBleLocator, 'physicalId' | 'bleDeviceId'>
     ): Promise<PlugReadOnlyDetail>;
     readWifiDetail?(
-      plug: Pick<SavedBlePlug, 'physicalId' | 'wifiBaseUrl'>
+      plug: Pick<SavedPlugWithBleLocator, 'physicalId' | 'wifiBaseUrl'>
     ): Promise<PlugReadOnlyDetail>;
   };
 
 export const readSavedBlePlugReadOnlyDetail = async (
-  plug: SavedBlePlug,
+  plug: SavedPlugWithBleLocator,
   options: SavedBlePlugLocatorRecoveryOptions,
   dependencies: SavedBlePlugReadOnlyDetailRecoveryDependencies = {}
 ): Promise<PlugReadOnlyDetail> => {
   if (plug.wifiBaseUrl) {
     const readWifiDetail =
       dependencies.readWifiDetail ??
-      ((target: Pick<SavedBlePlug, 'physicalId' | 'wifiBaseUrl'>) =>
+      ((target: Pick<SavedPlugWithBleLocator, 'physicalId' | 'wifiBaseUrl'>) =>
         readPlugReadOnlyDetailFromTarget({
           transport: 'wifi',
           physicalId: target.physicalId,

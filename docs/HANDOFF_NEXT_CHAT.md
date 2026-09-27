@@ -44,13 +44,13 @@ Detailed dated hardware evidence belongs in `docs/testing/hardware-matrix.md`.
 - Once a verified HTTP locator exists, normal management prefers HTTP; this is explicit transport promotion, not blind fallback.
 - The phone configures/manages/diagnoses; Shelly executes installed automation locally.
 
-## Next bounded structural cleanup
+## Current structural foundation
 
-Create **one canonical physical Plug registry** with independent Wi-Fi/BLE locator metadata. The current Wi-Fi and BLE registries may represent the same physical Plug twice. Do not fix this with more cross-registry guards.
+The saved Plug registry is canonical by normalized physical identity. BLE and verified Wi-Fi/HTTP locators enrich the same durable record; hardware-setup keeps workflow draft state rather than a second Plug registry.
 
 ## Agreed v1 implementation sequence
 
-After the unified registry, work in this order rather than in parallel:
+Continue in this order rather than in parallel:
 
 1. **Runtime control/state arbitration** — freeze AUTO/MANUAL/PAUSED/FAULT semantics, one final relay-decision owner, stable reason codes and last-transition state. Physical button takeover belongs here: first press in AUTO always enters safe `MANUAL_OFF`; subsequent presses toggle manual OFF/ON; return to AUTO is explicit.
 2. **History / Datalogger** — resume from `work/kvs-datalogger` as source material, not a mechanical merge. Use the frozen control/reason vocabulary so History records measurements plus relay state, mode, trigger/reason, manual takeover and future safety context.

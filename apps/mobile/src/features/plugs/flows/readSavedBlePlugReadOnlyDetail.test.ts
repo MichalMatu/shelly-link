@@ -5,10 +5,10 @@ import type {
   PlugBleAdvertisement,
   VerifiedPlugBleCandidate
 } from '../data/plugBleOnboarding.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { readSavedBlePlugReadOnlyDetail } from './readSavedBlePlugReadOnlyDetail.js';
 
-const plug: SavedBlePlug = {
+const plug: SavedPlugWithBleLocator = {
   physicalId: 'shellyplugsg3-aabbccddeeff',
   name: 'Growbox fan',
   bleDeviceId: 'stale-locator',
@@ -94,7 +94,7 @@ describe('readSavedBlePlugReadOnlyDetail', () => {
 
   it('recovers a stale locator and retries the combined read exactly once', async () => {
     const readDetail = vi.fn(
-      async (target: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>) => {
+      async (target: Pick<SavedPlugWithBleLocator, 'physicalId' | 'bleDeviceId'>) => {
         if (target.bleDeviceId === plug.bleDeviceId) throw staleReadError();
         return detail;
       }

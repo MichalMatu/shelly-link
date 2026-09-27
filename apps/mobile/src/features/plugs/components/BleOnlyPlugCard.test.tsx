@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { BleOnlyPlugCard } from './BleOnlyPlugCard.js';
 
 const runtime = vi.hoisted(() => ({
@@ -25,7 +25,7 @@ vi.mock('../flows/useSavedBlePlugRuntime.js', () => ({
   useSavedBlePlugRuntime: () => runtime
 }));
 
-const plug: SavedBlePlug = {
+const plug: SavedPlugWithBleLocator = {
   physicalId: 'shellyplugsg3-demo',
   name: 'BLE lamp',
   bleDeviceId: 'BLE-LOCATOR',

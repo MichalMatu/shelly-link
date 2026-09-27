@@ -7,7 +7,7 @@ import {
   BlePlugTimeSyncUnsupportedError,
   syncBlePlugTime
 } from '../data/blePlugTimeSync.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { BlePlugTimeSyncCard } from './BlePlugTimeSyncCard.js';
 
 type BlePlugTimeSyncModule = {
@@ -21,7 +21,7 @@ vi.mock('../data/blePlugTimeSync.js', async (importOriginal) => {
 });
 
 const copy = deviceTimeCopy.pl;
-const plug: SavedBlePlug = {
+const plug: SavedPlugWithBleLocator = {
   physicalId: 'shellyplugsg3-demo',
   name: 'Grow Plug',
   bleDeviceId: 'BLE-LOCATOR',

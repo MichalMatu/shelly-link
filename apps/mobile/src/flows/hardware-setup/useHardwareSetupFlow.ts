@@ -7,6 +7,7 @@ import {
 } from './ruleConfigDerivation.js';
 import { useClimateAutomationInstallFlow } from './useClimateAutomationInstallFlow.js';
 import { useClimateAutomationScriptLoadDraftFlow } from '../../features/automations/index.js';
+import { savedPlugToWifiDevice, useSavedPlugStore } from '../../features/plugs/index.js';
 import { useSensorSetupFlow } from './usePhoneSensorFlow.js';
 import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
@@ -21,20 +22,23 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const setShellyUrlInputDraft = useHardwareSetupDraftStore(
     (state) => state.setShellyUrlInput
   );
-  const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
+  const savedPlugs = useSavedPlugStore((state) => state.plugs);
+  const renamePlug = useSavedPlugStore((state) => state.renamePlug);
+  const removePlug = useSavedPlugStore((state) => state.removePlug);
+  const saveWifiDevice = useSavedPlugStore((state) => state.saveWifiDevice);
+  const setScriptId = useSavedPlugStore((state) => state.setScriptId);
+  const shellyDevices = useMemo(
+    () => savedPlugs.flatMap((plug) => {
+      const device = savedPlugToWifiDevice(plug);
+      return device ? [device] : [];
+    }),
+    [savedPlugs]
+  );
   const selectedShellyId = useHardwareSetupDraftStore((state) => state.selectedShellyId);
   const selectShellyDeviceDraft = useHardwareSetupDraftStore(
     (state) => state.selectShellyDevice
   );
-  const setShellyDeviceName = useHardwareSetupDraftStore(
-    (state) => state.setShellyDeviceName
-  );
-  const removeShellyDeviceDraft = useHardwareSetupDraftStore(
-    (state) => state.removeShellyDevice
-  );
-  const upsertShellyDevice = useHardwareSetupDraftStore(
-    (state) => state.upsertShellyDevice
-  );
+  const setShellyDeviceName = renamePlug;
   const selectedSensorId = useHardwareSetupDraftStore((state) => state.selectedSensorId);
   const selectSensorDeviceDraft = useHardwareSetupDraftStore(
     (state) => state.selectSensorDevice
@@ -219,6 +223,7 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const { loadAutomationScriptMutation, loadAutomationScript } =
     useClimateAutomationScriptLoadDraftFlow({
       getDraftActions: useHardwareSetupDraftStore.getState,
+      setShellyScriptId: setScriptId,
       upsertSensorDevice,
       resetInstallState,
       applyControlStatus,
@@ -246,8 +251,24 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     resetInstallState();
   };
 
+  const upsertShellyDevice = (device: (typeof shellyDevices)[number]) => {
+    saveWifiDevice({
+      physicalId: device.id,
+      name: device.name,
+      wifiBaseUrl: device.baseUrl,
+      scriptIdInput: device.scriptIdInput,
+      ...(device.model ? { model: device.model } : {}),
+      ...(device.gen !== undefined ? { generation: device.gen } : {})
+    });
+    selectShellyDeviceDraft(device.id);
+  };
+
   const removeShellyDevice = (id: string) => {
-    removeShellyDeviceDraft(id);
+    removePlug(id);
+    if (selectedShellyId === id) {
+      const next = shellyDevices.find((device) => device.id !== id);
+      selectShellyDeviceDraft(next?.id ?? null);
+    }
     removeShellyControlState(id);
     resetShellySetupStatus();
     resetInstallState();

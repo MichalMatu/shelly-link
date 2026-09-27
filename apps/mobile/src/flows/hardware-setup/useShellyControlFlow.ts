@@ -18,6 +18,7 @@ import {
   type SensorDraftDevice,
   type ShellyDraftDevice
 } from './setupDraftStore.js';
+import { useSavedPlugStore } from '../../features/plugs/index.js';
 
 export type ShellyControlAction = 'status' | 'on' | 'off';
 
@@ -87,12 +88,9 @@ export const shellyControlStatusFromSetupStatus = (
 export const useShellyControlFlow = () => {
   const shellyNameInput = useHardwareSetupDraftStore((state) => state.shellyNameInput);
   const shellyUrlInput = useHardwareSetupDraftStore((state) => state.shellyUrlInput);
-  const upsertShellyDevice = useHardwareSetupDraftStore(
-    (state) => state.upsertShellyDevice
-  );
-  const setShellyDeviceMetadata = useHardwareSetupDraftStore(
-    (state) => state.setShellyDeviceMetadata
-  );
+  const selectShellyDevice = useHardwareSetupDraftStore((state) => state.selectShellyDevice);
+  const saveWifiDevice = useSavedPlugStore((state) => state.saveWifiDevice);
+  const setDeviceMetadata = useSavedPlugStore((state) => state.setDeviceMetadata);
   const mergeRecoveredSensorDevices = useHardwareSetupDraftStore(
     (state) => state.mergeRecoveredSensorDevices
   );
@@ -188,7 +186,15 @@ export const useShellyControlFlow = () => {
     },
     onSuccess: (status) => {
       setSetupStatus(status);
-      upsertShellyDevice(status.checkedDevice);
+      saveWifiDevice({
+        physicalId: status.checkedDevice.id,
+        name: status.checkedDevice.name,
+        wifiBaseUrl: status.checkedDevice.baseUrl,
+        scriptIdInput: status.checkedDevice.scriptIdInput,
+        ...(status.checkedDevice.model ? { model: status.checkedDevice.model } : {}),
+        ...(status.checkedDevice.gen !== undefined ? { generation: status.checkedDevice.gen } : {})
+      });
+      selectShellyDevice(status.checkedDevice.id);
       mergeRecoveredSensorDevices(status.recoveredSensors);
       applyControlStatus(
         status.checkedDevice,
@@ -204,9 +210,9 @@ export const useShellyControlFlow = () => {
       readShellySetupStatus(device.baseUrl),
     onSuccess: (status, device) => {
       setSetupStatus(status);
-      setShellyDeviceMetadata(device.id, {
+      setDeviceMetadata(device.id, {
         model: status.deviceInfo.model,
-        gen: status.deviceInfo.gen
+        generation: status.deviceInfo.gen
       });
       applyControlStatus(device, shellyControlStatusFromSetupStatus(status), null);
     },

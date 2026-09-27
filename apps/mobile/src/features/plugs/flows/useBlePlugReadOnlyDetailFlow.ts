@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
-import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
+import { useSavedPlugStore } from '../state/savedPlugStore.js';
 import { readSavedBlePlugReadOnlyDetail } from './readSavedBlePlugReadOnlyDetail.js';
 
-export const blePlugReadOnlyDetailQueryKey = (plug: SavedBlePlug | undefined) =>
+export const blePlugReadOnlyDetailQueryKey = (plug: SavedPlugWithBleLocator | undefined) =>
   [
     'ble-plug-read-only-detail',
     plug?.physicalId ?? 'missing',
@@ -11,14 +11,14 @@ export const blePlugReadOnlyDetailQueryKey = (plug: SavedBlePlug | undefined) =>
     plug?.wifiBaseUrl ?? 'no-wifi'
   ] as const;
 
-export const useBlePlugReadOnlyDetailFlow = (plug: SavedBlePlug | undefined) => {
-  const replaceLocator = useSavedBlePlugStore((state) => state.replaceLocator);
+export const useBlePlugReadOnlyDetailFlow = (plug: SavedPlugWithBleLocator | undefined) => {
+  const replaceBleLocator = useSavedPlugStore((state) => state.replaceBleLocator);
 
   return useQuery({
     queryKey: blePlugReadOnlyDetailQueryKey(plug),
     queryFn: () => {
       if (!plug) throw new Error('Saved BLE Plug is missing.');
-      return readSavedBlePlugReadOnlyDetail(plug, { persistLocator: replaceLocator });
+      return readSavedBlePlugReadOnlyDetail(plug, { persistLocator: replaceBleLocator });
     },
     enabled: Boolean(plug),
     retry: false,

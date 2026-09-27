@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
 import { PlugBluetoothAddPage } from './PlugBluetoothAddPage.js';
 
@@ -20,7 +20,7 @@ const hoisted = vi.hoisted(() => {
       verifyCandidate: vi.fn()
     },
     savedState: {
-      plugs: [] as SavedBlePlug[],
+      plugs: [] as SavedPlugWithBleLocator[],
       saveCandidate: vi.fn()
     }
   };
@@ -39,7 +39,7 @@ const verified: VerifiedPlugBleCandidate = {
   matterEnabled: false,
   preview: null
 };
-const savedPlug: SavedBlePlug = {
+const savedPlug: SavedPlugWithBleLocator = {
   physicalId: verified.physicalId,
   name: 'Kitchen',
   bleDeviceId: verified.bleDeviceId,
@@ -54,8 +54,8 @@ vi.mock('../flows/usePlugBleAddFlow.js', () => ({
   usePlugBleAddFlow: () => flowState
 }));
 
-vi.mock('../state/savedBlePlugStore.js', () => ({
-  useSavedBlePlugStore: (selector: (state: typeof savedState) => unknown) =>
+vi.mock('../state/savedPlugStore.js', () => ({
+  useSavedPlugStore: (selector: (state: typeof savedState) => unknown) =>
     selector(savedState)
 }));
 

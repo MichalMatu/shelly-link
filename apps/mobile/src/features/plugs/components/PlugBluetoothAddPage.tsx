@@ -1,11 +1,11 @@
 import { usePlugBleAddFlow } from '../flows/usePlugBleAddFlow.js';
-import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
+import { useSavedPlugStore } from '../state/savedPlugStore.js';
 import { PlugBluetoothAddPanel } from './PlugBluetoothAddPanel.js';
 
 export const PlugBluetoothAddPage = () => {
   const bluetooth = usePlugBleAddFlow();
-  const savedPlugs = useSavedBlePlugStore((state) => state.plugs);
-  const saveCandidate = useSavedBlePlugStore((state) => state.saveCandidate);
+  const savedPlugs = useSavedPlugStore((state) => state.plugs);
+  const saveCandidate = useSavedPlugStore((state) => state.saveBleCandidate);
 
   return (
     <main className="demo-shell hardware-shell">

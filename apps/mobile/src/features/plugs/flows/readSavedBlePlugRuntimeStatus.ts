@@ -3,7 +3,7 @@ import {
   readBlePlugRuntimeStatus,
   type BlePlugRuntimeStatus
 } from '../data/blePlugRuntime.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import {
   recoverSavedBlePlugLocator,
   type SavedBlePlugLocatorRecoveryDependencies,
@@ -16,11 +16,11 @@ export type SavedBlePlugRuntimeRecoveryOptions = SavedBlePlugLocatorRecoveryOpti
 
 export type SavedBlePlugRuntimeRecoveryDependencies =
   SavedBlePlugLocatorRecoveryDependencies & {
-    readStatus?(plug: Pick<SavedBlePlug, 'bleDeviceId'>): Promise<BlePlugRuntimeStatus>;
+    readStatus?(plug: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>): Promise<BlePlugRuntimeStatus>;
   };
 
 export const readSavedBlePlugRuntimeStatus = async (
-  plug: SavedBlePlug,
+  plug: SavedPlugWithBleLocator,
   options: SavedBlePlugRuntimeRecoveryOptions,
   dependencies: SavedBlePlugRuntimeRecoveryDependencies = {}
 ): Promise<BlePlugRuntimeStatus> => {

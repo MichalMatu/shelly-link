@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { syncSavedPlugTime } from '../data/savedPlugTimeSync.js';
 import { blePlugReadOnlyDetailQueryKey } from './useBlePlugReadOnlyDetailFlow.js';
 
-export const useBlePlugTimeSyncFlow = (plug: SavedBlePlug) => {
+export const useBlePlugTimeSyncFlow = (plug: SavedPlugWithBleLocator) => {
   const queryClient = useQueryClient();
 
   return useMutation({

@@ -7,13 +7,13 @@ import type {
   PlugBleAdvertisement,
   VerifiedPlugBleCandidate
 } from '../data/plugBleOnboarding.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import {
   PLUG_BLE_LOCATOR_RECOVERY_MAX_CANDIDATES,
   readSavedBlePlugRuntimeStatus
 } from './readSavedBlePlugRuntimeStatus.js';
 
-const plug: SavedBlePlug = {
+const plug: SavedPlugWithBleLocator = {
   physicalId: 'shellyplugsg3-aabbccddeeff',
   name: 'Growbox fan',
   bleDeviceId: 'stale-locator',
@@ -86,7 +86,7 @@ describe('readSavedBlePlugRuntimeStatus', () => {
     const events: string[] = [];
     const misleading = advertisement('wrong-locator', plug.advertisementName, -30);
     const matching = advertisement('fresh-locator', 'ShellyPlugSG3-FRESH', -60);
-    const readStatus = vi.fn(async (target: Pick<SavedBlePlug, 'bleDeviceId'>) => {
+    const readStatus = vi.fn(async (target: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>) => {
       events.push(`read:${target.bleDeviceId}`);
       if (target.bleDeviceId === plug.bleDeviceId) throw readError();
       return status;
@@ -169,7 +169,7 @@ describe('readSavedBlePlugRuntimeStatus', () => {
   it('continues conservatively after one candidate identity inspection fails', async () => {
     const broken = advertisement('broken', plug.advertisementName);
     const matching = advertisement('fresh-locator', 'ShellyPlugSG3-FRESH');
-    const readStatus = vi.fn(async (target: Pick<SavedBlePlug, 'bleDeviceId'>) => {
+    const readStatus = vi.fn(async (target: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>) => {
       if (target.bleDeviceId === plug.bleDeviceId) throw readError();
       return status;
     });
@@ -246,7 +246,7 @@ describe('readSavedBlePlugRuntimeStatus', () => {
   });
 
   it('single-flights concurrent rediscovery for the same physical Plug', async () => {
-    const readStatus = vi.fn(async (target: Pick<SavedBlePlug, 'bleDeviceId'>) => {
+    const readStatus = vi.fn(async (target: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>) => {
       if (target.bleDeviceId === plug.bleDeviceId) throw readError();
       return status;
     });

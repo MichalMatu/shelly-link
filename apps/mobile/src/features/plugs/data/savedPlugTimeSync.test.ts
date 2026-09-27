@@ -1,7 +1,7 @@
 import type { Result, ShellyRpcTransport } from '@lcl/shelly-client';
 import { describe, expect, it, vi } from 'vitest';
 import { BlePlugTimeSyncUnsupportedError } from './blePlugTimeSync.js';
-import type { SavedBlePlug } from './savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from './savedPlug.js';
 import {
   syncSavedPlugTime,
   type SavedPlugTimeSyncDependencies
@@ -9,7 +9,7 @@ import {
 
 const success = <T>(value: T): Result<T> => ({ ok: true, value });
 
-const plug: SavedBlePlug = {
+const plug: SavedPlugWithBleLocator = {
   physicalId: 'shellyplugsg3-demo',
   name: 'Grow Plug',
   bleDeviceId: 'BLE-LOCATOR',

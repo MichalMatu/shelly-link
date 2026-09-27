@@ -6,12 +6,12 @@ import {
   BlePlugWifiProvisioningUnsupportedError,
   type BlePlugWifiNetwork
 } from '../data/blePlugWifiProvisioning.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { useBlePlugWifiProvisioningFlow } from '../flows/useBlePlugWifiProvisioningFlow.js';
 import './PlugSettingsSurface.css';
 
 export type BlePlugWifiProvisioningCardProps = {
-  plug: SavedBlePlug;
+  plug: SavedPlugWithBleLocator;
 };
 
 const errorMessage = (error: unknown, fallback: string, unsupported: string): string => {

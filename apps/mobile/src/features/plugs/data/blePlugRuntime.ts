@@ -11,7 +11,7 @@ import {
   shellyResultErrorMessage,
   unwrapShellyResult
 } from '../../../platform/shellyResult.js';
-import type { SavedBlePlug } from './savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from './savedPlug.js';
 
 export type BlePlugRuntimeStatus = Pick<ShellyStatus, 'relayOn' | 'telemetry' | 'clock'>;
 
@@ -78,7 +78,7 @@ const serializeBlePlugOperation = async <T>(
 };
 
 const withBlePlugClient = async <T>(
-  plug: Pick<SavedBlePlug, 'bleDeviceId'>,
+  plug: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>,
   work: (client: BlePlugRuntimeClient) => Promise<T>,
   dependencies: BlePlugRuntimeDependencies
 ): Promise<T> =>
@@ -92,7 +92,7 @@ const withBlePlugClient = async <T>(
   });
 
 export const readBlePlugRuntimeStatus = async (
-  plug: Pick<SavedBlePlug, 'bleDeviceId'>,
+  plug: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>,
   dependencies: BlePlugRuntimeDependencies = defaultDependencies
 ): Promise<BlePlugRuntimeStatus> =>
   withBlePlugClient(
@@ -112,7 +112,7 @@ export const readBlePlugRuntimeStatus = async (
   );
 
 export const setBlePlugRelay = async (
-  plug: Pick<SavedBlePlug, 'bleDeviceId'>,
+  plug: Pick<SavedPlugWithBleLocator, 'bleDeviceId'>,
   relayOn: boolean,
   dependencies: BlePlugRuntimeDependencies = defaultDependencies
 ): Promise<void> => {

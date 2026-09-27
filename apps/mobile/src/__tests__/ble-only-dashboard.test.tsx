@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
-import { resetSavedBlePlugStore, useSavedBlePlugStore } from '../features/plugs/index.js';
+import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 import {
   resetHardwareSetupDraftStore,
   useHardwareSetupDraftStore
@@ -38,7 +38,7 @@ vi.mock('../flows/hardware-setup/useHardwareSetupFlow.js', () => ({
 }));
 
 const saveBlePlug = (physicalId: string, name: string) => {
-  useSavedBlePlugStore.getState().saveCandidate({
+  useSavedPlugStore.getState().saveBleCandidate({
     bleDeviceId: `BLE:${physicalId}`,
     advertisementName: 'ShellyPlugSG3-BLE',
     rssi: -42,
@@ -48,7 +48,7 @@ const saveBlePlug = (physicalId: string, name: string) => {
     firmwareId: '1.7.5',
     matterEnabled: false
   });
-  useSavedBlePlugStore.getState().renamePlug(physicalId, name);
+  useSavedPlugStore.getState().renamePlug(physicalId, name);
 };
 
 const renderDashboard = () => {
@@ -75,14 +75,14 @@ const renderDashboard = () => {
 describe('BLE-only dashboard integration', () => {
   beforeEach(() => {
     setLocalePreference('en');
-    resetSavedBlePlugStore();
+    resetSavedPlugStore();
     resetHardwareSetupDraftStore();
     resetInstalledAutomationStore();
   });
 
   afterEach(() => {
     cleanup();
-    resetSavedBlePlugStore();
+    resetSavedPlugStore();
     resetHardwareSetupDraftStore();
     resetInstalledAutomationStore();
     setLocalePreference('system');

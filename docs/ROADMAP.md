@@ -8,19 +8,15 @@ Device-management work is not a goal by itself. Prioritize it when it enables a 
 
 The product should remain local-first: the phone configures, manages and diagnoses; the Shelly Plug executes automation locally after installation.
 
-## Now — structural cleanup before the next feature wave
+## Completed structural foundation
 
 ### Unified physical Plug registry
 
-Create one canonical durable record per normalized `Shelly.GetDeviceInfo.id` with independent transport metadata such as BLE locator and verified Wi-Fi/HTTP locator.
+One canonical durable Plug record is keyed by normalized `Shelly.GetDeviceInfo.id`. BLE and verified Wi-Fi/HTTP addresses are independent transport locators on that record, and transport discovery enriches the record instead of creating another saved device.
 
-The current Wi-Fi and BLE registries can represent the same physical Plug twice. Dashboard-level dedupe is not a sufficient long-term model. Do not solve this with more cross-registry guards; converge ownership around one physical-device record.
+## Now — feature-complete v1 track
 
-This is a bounded architecture cleanup, not a UX redesign.
-
-## Next — feature-complete v1 track
-
-After the unified Plug registry, develop the following slices in sequence rather than in parallel.
+Develop the following slices in sequence rather than in parallel.
 
 ### 1. Runtime control/state arbitration
 

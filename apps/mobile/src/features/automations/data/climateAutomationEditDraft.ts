@@ -1,14 +1,6 @@
 import type { ClimateInstalledAutomation } from './installedAutomation.js';
 
 type ClimateAutomationEditDraftState = {
-  shellyDevices: readonly {
-    id: string;
-    name: string;
-    baseUrl: string;
-    scriptIdInput: string;
-    model?: string | undefined;
-    gen?: number | undefined;
-  }[];
   sensorDevices: readonly {
     id: string;
     name: string;
@@ -32,14 +24,6 @@ export const createClimateAutomationEditDraftPatch = (
   installation: ClimateInstalledAutomation
 ) => {
   const { config } = installation;
-  const shellyDevice = {
-    id: installation.shelly.deviceId,
-    name: installation.shelly.name,
-    baseUrl: installation.shelly.baseUrl,
-    scriptIdInput: String(installation.script.id),
-    model: installation.shelly.model,
-    gen: installation.shelly.gen
-  };
   const configuredSensors = [
     config.sensor,
     ...(config.sensorSet?.additionalSensors ?? [])
@@ -86,12 +70,8 @@ export const createClimateAutomationEditDraftPatch = (
     .map((sensor) => sensor.runtimeAddress);
 
   return {
-    shellyDevices: [
-      shellyDevice,
-      ...state.shellyDevices.filter((item) => item.id !== shellyDevice.id)
-    ],
     sensorDevices,
-    selectedShellyId: shellyDevice.id,
+    selectedShellyId: installation.shelly.deviceId,
     selectedSensorId: configuredSensorDevices[0]!.id,
     additionalSensorIds: configuredSensorDevices.slice(1).map((sensor) => sensor.id),
     inheritedSensorIds,

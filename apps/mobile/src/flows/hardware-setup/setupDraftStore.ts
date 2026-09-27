@@ -19,15 +19,17 @@ import {
   readStoredHardwareSetupDraft,
   type HardwareSetupDraft,
   type SensorDraftDevice,
-  type ShellyDraftDevice
 } from '../../features/hardware-setup/index.js';
+import { useSavedPlugStore } from '../../features/plugs/index.js';
 
 export { HARDWARE_SETUP_DRAFT_STORAGE_KEY } from '../../features/hardware-setup/index.js';
+import { useSavedPlugStore } from '../../features/plugs/index.js';
 export type {
   HardwareSetupDraft,
   SensorDraftDevice,
   ShellyDraftDevice
 } from '../../features/hardware-setup/index.js';
+import { useSavedPlugStore } from '../../features/plugs/index.js';
 
 export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   shellyNameInput: 'Shelly Plug S Gen3',
@@ -64,12 +66,7 @@ type HardwareSetupDraftState = HardwareSetupDraft &
     sensorMembershipEditStarted: boolean;
     setShellyNameInput(value: string): void;
     setShellyUrlInput(value: string): void;
-    upsertShellyDevice(device: ShellyDraftDevice): void;
-    selectShellyDevice(id: string): void;
-    setShellyDeviceName(id: string, name: string): void;
-    setShellyDeviceMetadata(id: string, metadata: { model: string; gen: number }): void;
-    setShellyScriptId(id: string, scriptIdInput: string): void;
-    removeShellyDevice(id: string): void;
+    selectShellyDevice(id: string | null): void;
     setSensorProfileInput(value: SensorProfileId): void;
     setSensorMacInput(value: string): void;
     setSensorNameInput(value: string): void;
@@ -120,17 +117,6 @@ const updateListItem = <TItem extends { id: string }>(
   patch: Partial<TItem>
 ): TItem[] => items.map((item) => (item.id === id ? { ...item, ...patch } : item));
 
-const normalizeSavedShellyEndpoint = (baseUrl: string): string =>
-  baseUrl.trim().replace(/\/+$/, '').toLowerCase();
-
-const isReplacedShellyDevice = (
-  current: ShellyDraftDevice,
-  verified: ShellyDraftDevice
-): boolean =>
-  current.id.trim().toLowerCase() === verified.id.trim().toLowerCase() ||
-  normalizeSavedShellyEndpoint(current.baseUrl) ===
-    normalizeSavedShellyEndpoint(verified.baseUrl);
-
 export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) => {
   const storedDraft = readStoredHardwareSetupDraft(DEFAULT_HARDWARE_SETUP_DRAFT);
   const initialDraft = {
@@ -150,64 +136,8 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
     sensorMembershipEditStarted: false,
     setShellyNameInput: (shellyNameInput) => set({ shellyNameInput }),
     setShellyUrlInput: (shellyUrlInput) => set({ shellyUrlInput }),
-    upsertShellyDevice: (device) =>
-      set((state) => {
-        const patch = {
-          shellyNameInput: DEFAULT_HARDWARE_SETUP_DRAFT.shellyNameInput,
-          shellyUrlInput: DEFAULT_HARDWARE_SETUP_DRAFT.shellyUrlInput,
-          shellyDevices: [
-            device,
-            ...state.shellyDevices.filter((item) => !isReplacedShellyDevice(item, device))
-          ],
-          selectedShellyId: device.id
-        };
-        return persistPatch(state, patch);
-      }),
     selectShellyDevice: (id) =>
-      set((state) => {
-        const device = state.shellyDevices.find((item) => item.id === id);
-        if (!device) {
-          return state;
-        }
-        const patch = {
-          selectedShellyId: id
-        };
-        return persistPatch(state, patch);
-      }),
-    setShellyDeviceName: (id, name) =>
-      set((state) => {
-        const shellyDevices = updateListItem(state.shellyDevices, id, { name });
-        return persistPatch(state, { shellyDevices });
-      }),
-    setShellyDeviceMetadata: (id, metadata) =>
-      set((state) => {
-        const shellyDevices = updateListItem(state.shellyDevices, id, metadata);
-        return persistPatch(state, { shellyDevices });
-      }),
-    setShellyScriptId: (id, scriptIdInput) =>
-      set((state) => {
-        const shellyDevices = updateListItem(state.shellyDevices, id, {
-          scriptIdInput
-        });
-        return persistPatch(state, { shellyDevices });
-      }),
-    removeShellyDevice: (id) =>
-      set((state) => {
-        const shellyDevices = state.shellyDevices.filter((item) => item.id !== id);
-        if (shellyDevices.length === state.shellyDevices.length) {
-          return state;
-        }
-
-        const nextSelectedShellyId =
-          state.selectedShellyId === id
-            ? (shellyDevices[0]?.id ?? null)
-            : state.selectedShellyId;
-
-        return persistPatch(state, {
-          shellyDevices,
-          selectedShellyId: nextSelectedShellyId
-        });
-      }),
+      set((state) => persistPatch(state, { selectedShellyId: id })),
     setSensorProfileInput: (sensorProfileInput) => set({ sensorProfileInput }),
     setSensorMacInput: (sensorMacInput) => set({ sensorMacInput }),
     setSensorNameInput: (sensorNameInput) => set({ sensorNameInput }),
@@ -277,14 +207,20 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
       updateDraft({ staleTimeoutMinInput }),
     setMinChangeMinInput: (minChangeMinInput) => updateDraft({ minChangeMinInput }),
     setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput }),
-    loadClimateAutomationDraft: (installation) =>
+    loadClimateAutomationDraft: (installation) => {
+      useSavedPlugStore.getState().saveWifiDevice({
+        physicalId: installation.shelly.deviceId,
+        name: installation.shelly.name,
+        wifiBaseUrl: installation.shelly.baseUrl,
+        scriptIdInput: String(installation.script.id),
+        model: installation.shelly.model,
+        generation: installation.shelly.gen
+      });
       set((state) => ({
-        ...persistPatch(
-          state,
-          createClimateAutomationEditDraftPatch(state, installation)
-        ),
+        ...persistPatch(state, createClimateAutomationEditDraftPatch(state, installation)),
         sensorMembershipEditStarted: false
-      })),
+      }));
+    },
     commitClimateAutomationDraft: (installationId) =>
       set((state) => ({
         ...(state.inheritedSensorSourceId === installationId

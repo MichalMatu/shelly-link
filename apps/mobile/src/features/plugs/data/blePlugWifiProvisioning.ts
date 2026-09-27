@@ -10,7 +10,7 @@ import {
 } from '@lcl/shelly-client';
 import { createShellyBleTransport } from '../../../platform/shellyBleTransport.js';
 import { unwrapShellyResult } from '../../../platform/shellyResult.js';
-import type { SavedBlePlug } from './savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from './savedPlug.js';
 
 type BlePlugWifiClient = Pick<ShellyClient, 'getDeviceInfo'>;
 type DisposableShellyRpcTransport = ShellyRpcTransport & { disconnect(): Promise<void> };
@@ -80,7 +80,7 @@ const assertMethods = (methods: readonly string[], required: readonly string[]):
 };
 
 const assertMatchingPhysicalIdentity = async (
-  plug: Pick<SavedBlePlug, 'physicalId'>,
+  plug: Pick<SavedPlugWithBleLocator, 'physicalId'>,
   client: BlePlugWifiClient
 ): Promise<void> => {
   const info = unwrapShellyResult(await client.getDeviceInfo());
@@ -118,7 +118,7 @@ const normalizeNetworks = (
 };
 
 export const scanBlePlugWifiNetworks = async (
-  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>,
+  plug: Pick<SavedPlugWithBleLocator, 'physicalId' | 'bleDeviceId'>,
   dependencies: BlePlugWifiProvisioningDependencies = defaultDependencies
 ): Promise<BlePlugWifiNetwork[]> => {
   const transport = dependencies.createTransport(plug.bleDeviceId);
@@ -143,7 +143,7 @@ export type ProvisionBlePlugWifiOptions = {
 };
 
 export const provisionBlePlugWifi = async (
-  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>,
+  plug: Pick<SavedPlugWithBleLocator, 'physicalId' | 'bleDeviceId'>,
   input: { ssid: string; password: string },
   options: ProvisionBlePlugWifiOptions = {},
   dependencies: BlePlugWifiProvisioningDependencies = defaultDependencies

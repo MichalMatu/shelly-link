@@ -11,7 +11,7 @@ import {
   type BlePlugTimeSyncResult
 } from './blePlugTimeSync.js';
 import { createVerifiedPlugSettingsTransport } from './plugSettingsTarget.js';
-import type { SavedBlePlug } from './savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from './savedPlug.js';
 
 export type SavedPlugTimeSyncDependencies = {
   createWifiTransport(target: {
@@ -21,7 +21,7 @@ export type SavedPlugTimeSyncDependencies = {
   supportsSetTime(transport: ShellyRpcTransport): Promise<boolean>;
   setTime(transport: ShellyRpcTransport, unixTimeSec: number): Promise<Result<null>>;
   syncBle(
-    plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>
+    plug: Pick<SavedPlugWithBleLocator, 'physicalId' | 'bleDeviceId'>
   ): Promise<BlePlugTimeSyncResult>;
   nowMs(): number;
 };
@@ -44,7 +44,7 @@ const defaultDependencies: SavedPlugTimeSyncDependencies = {
 };
 
 export const syncSavedPlugTime = async (
-  plug: SavedBlePlug,
+  plug: SavedPlugWithBleLocator,
   dependencies: SavedPlugTimeSyncDependencies = defaultDependencies
 ): Promise<BlePlugTimeSyncResult> => {
   if (!plug.wifiBaseUrl) {

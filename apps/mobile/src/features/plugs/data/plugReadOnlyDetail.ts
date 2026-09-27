@@ -13,7 +13,7 @@ import {
   type PlugReadOnlyManagementDependencies,
   type PlugReadOnlyManagementTarget
 } from './plugReadOnlyManagementTarget.js';
-import type { SavedBlePlug } from './savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from './savedPlug.js';
 
 export type PlugReadOnlyDetail = {
   information: PlugInformation;
@@ -51,7 +51,7 @@ export const readPlugReadOnlyDetailFromTarget = async (
   );
 
 export const readBlePlugReadOnlyDetail = async (
-  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>
+  plug: Pick<SavedPlugWithBleLocator, 'physicalId' | 'bleDeviceId'>
 ): Promise<PlugReadOnlyDetail> =>
   readPlugReadOnlyDetailFromTarget({
     transport: 'bluetooth',

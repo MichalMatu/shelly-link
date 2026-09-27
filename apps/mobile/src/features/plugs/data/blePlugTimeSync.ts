@@ -9,7 +9,7 @@ import {
 } from '@lcl/shelly-client';
 import { createShellyBleTransport } from '../../../platform/shellyBleTransport.js';
 import { unwrapShellyResult } from '../../../platform/shellyResult.js';
-import type { SavedBlePlug } from './savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from './savedPlug.js';
 
 type BlePlugTimeSyncClient = Pick<ShellyClient, 'getDeviceInfo'>;
 
@@ -54,7 +54,7 @@ const defaultDependencies: BlePlugTimeSyncDependencies = {
 };
 
 const assertMatchingPhysicalIdentity = async (
-  plug: Pick<SavedBlePlug, 'physicalId'>,
+  plug: Pick<SavedPlugWithBleLocator, 'physicalId'>,
   client: BlePlugTimeSyncClient
 ): Promise<void> => {
   const info = unwrapShellyResult(await client.getDeviceInfo());
@@ -70,7 +70,7 @@ const assertMatchingPhysicalIdentity = async (
 };
 
 export const syncBlePlugTime = async (
-  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>,
+  plug: Pick<SavedPlugWithBleLocator, 'physicalId' | 'bleDeviceId'>,
   dependencies: BlePlugTimeSyncDependencies = defaultDependencies
 ): Promise<BlePlugTimeSyncResult> => {
   const transport = dependencies.createTransport(plug.bleDeviceId);

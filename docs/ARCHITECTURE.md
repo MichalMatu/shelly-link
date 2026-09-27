@@ -30,16 +30,13 @@ Before destructive operations, runtime replacement or device mutations, the app 
 
 A physical Plug may have more than one verified locator. Provisioning and transport promotion enrich transport metadata; they do not create a new physical identity.
 
-### Known registry debt
+### Canonical physical Plug registry
 
-Two durable saved-Plug registries still exist from different historical flows:
+Saved Plugs have one durable record keyed by normalized canonical identity. The `plugs` feature owns that record and stores BLE and verified Wi-Fi/HTTP locators as independent optional transport metadata.
 
-- Wi-Fi-origin `ShellyDraftDevice` state;
-- BLE-origin `SavedBlePlug` state, which may later gain `wifiBaseUrl`.
+Wi-Fi setup and BLE discovery both enrich the same record. Hardware-setup state keeps only workflow/configuration draft state and a selected physical Plug id; it is not a second device registry. Presentation consumes the canonical registry directly rather than deduplicating transport-specific saved-device lists.
 
-Presentation currently deduplicates the same physical Plug by canonical identity, but duplicate durable records can still exist when the same device is added independently through both entry paths.
-
-Do not add more registry-specific behavior around this split. The next structural cleanup should converge these paths on one canonical physical Plug registry while keeping transport locators independent from identity and automation ownership.
+Development-state migration merges the former Wi-Fi and BLE records by canonical identity and rejects endpoint-shaped legacy ids as physical identity.
 
 ## Runtime ownership and safety
 

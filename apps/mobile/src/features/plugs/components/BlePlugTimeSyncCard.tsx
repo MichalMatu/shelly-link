@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceTimeCopy } from '../../../app/locales/deviceTime.js';
 import { BlePlugTimeSyncUnsupportedError } from '../data/blePlugTimeSync.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { useBlePlugTimeSyncFlow } from '../flows/useBlePlugTimeSyncFlow.js';
 import './PlugSettingsSurface.css';
 
 export type BlePlugTimeSyncCardProps = {
-  plug: SavedBlePlug;
+  plug: SavedPlugWithBleLocator;
   clock: ShellyClockStatus;
 };
 

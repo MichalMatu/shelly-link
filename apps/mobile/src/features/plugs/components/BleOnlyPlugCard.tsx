@@ -1,16 +1,16 @@
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { useSavedBlePlugRuntime } from '../flows/useSavedBlePlugRuntime.js';
 import { PlugDashboardCardShell } from './PlugDashboardCardShell.js';
 
 export type BleOnlyPlugCardProps = {
-  plug: SavedBlePlug;
+  plug: SavedPlugWithBleLocator;
   onNameChange(value: string): void;
   onOpen(): void;
 };
 
-const dashboardName = (plug: SavedBlePlug): string => {
+const dashboardName = (plug: SavedPlugWithBleLocator): string => {
   const savedName = plug.name.trim();
   const advertisementName = plug.advertisementName.trim();
   const model = plug.model.trim();

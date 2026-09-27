@@ -28,22 +28,30 @@ export {
   type VerifiedPlugBleCandidate
 } from './data/plugBleOnboarding.js';
 export {
-  SAVED_BLE_PLUG_VERSION,
-  savedBlePlugFromCandidate,
-  savedBlePlugSchema,
-  type SavedBlePlug
-} from './data/savedBlePlug.js';
+  SAVED_PLUG_VERSION,
+  hasBleLocator,
+  hasWifiLocator,
+  savedPlugFromBleCandidate,
+  savedPlugFromWifiDevice,
+  savedPlugSchema,
+  savedPlugToWifiDevice,
+  type SavedPlug,
+  type SavedPlugWithBleLocator,
+  type SavedPlugWithWifiLocator,
+  type VerifiedWifiPlug,
+  type WifiPlugDevice
+} from './data/savedPlug.js';
 export {
-  createSavedBlePlugRepository,
-  SAVED_BLE_PLUGS_STORAGE_KEY,
-  type SavedBlePlugRepository,
-  type SavedBlePlugStorageAdapter
-} from './data/savedBlePlugRepository.js';
+  createSavedPlugRepository,
+  SAVED_PLUGS_STORAGE_KEY,
+  type SavedPlugRepository,
+  type SavedPlugStorageAdapter
+} from './data/savedPlugRepository.js';
 export {
-  resetSavedBlePlugStore,
-  useSavedBlePlugStore,
-  type SavedBlePlugState
-} from './state/savedBlePlugStore.js';
+  resetSavedPlugStore,
+  useSavedPlugStore,
+  type SavedPlugState
+} from './state/savedPlugStore.js';
 export {
   inspectPlugBleCandidate,
   PLUG_BLE_GATT_RADIO_SETTLE_MS,

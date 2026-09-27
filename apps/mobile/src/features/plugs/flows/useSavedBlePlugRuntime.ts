@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { setBlePlugRelay, type BlePlugRuntimeStatus } from '../data/blePlugRuntime.js';
 import { readWifiPlugRuntimeStatus, setWifiPlugRelay } from '../data/wifiPlugRuntime.js';
-import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
+import { useSavedPlugStore } from '../state/savedPlugStore.js';
 import { readSavedBlePlugRuntimeStatus } from './readSavedBlePlugRuntimeStatus.js';
 
 export const SAVED_BLE_PLUG_RUNTIME_REFRESH_MS = 5_000;
 
 export const savedBlePlugRuntimeQueryKey = (
-  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId' | 'wifiBaseUrl'>
+  plug: Pick<SavedPlugWithBleLocator, 'physicalId' | 'bleDeviceId' | 'wifiBaseUrl'>
 ) =>
   [
     'saved-ble-plug-runtime',
@@ -23,11 +23,11 @@ type SavedBlePlugRuntimeOptions = {
 };
 
 export const useSavedBlePlugRuntime = (
-  plug: SavedBlePlug,
+  plug: SavedPlugWithBleLocator,
   options: SavedBlePlugRuntimeOptions = {}
 ) => {
   const queryClient = useQueryClient();
-  const replaceLocator = useSavedBlePlugStore((state) => state.replaceLocator);
+  const replaceBleLocator = useSavedPlugStore((state) => state.replaceBleLocator);
   const queryKey = savedBlePlugRuntimeQueryKey(plug);
   const wifiTarget = plug.wifiBaseUrl
     ? { physicalId: plug.physicalId, baseUrl: plug.wifiBaseUrl }
@@ -39,7 +39,7 @@ export const useSavedBlePlugRuntime = (
       wifiTarget
         ? readWifiPlugRuntimeStatus(wifiTarget)
         : readSavedBlePlugRuntimeStatus(plug, {
-            persistLocator: replaceLocator
+            persistLocator: replaceBleLocator
           }),
     enabled: options.enabled ?? true,
     retry: false,

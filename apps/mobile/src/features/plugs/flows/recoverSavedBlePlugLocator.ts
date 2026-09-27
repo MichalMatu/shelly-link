@@ -5,7 +5,7 @@ import type {
   PlugBleAdvertisement,
   VerifiedPlugBleCandidate
 } from '../data/plugBleOnboarding.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { inspectPlugBleCandidate } from './inspectPlugBleCandidate.js';
 import {
   DEFAULT_PLUG_BLE_SCAN_TIMEOUT_MS,
@@ -42,7 +42,7 @@ const defaultInspectCandidate: RecoveryInspectCandidate = (candidate) =>
   inspectPlugBleCandidate(candidate, { includePreview: false });
 
 const prioritizeCandidates = (
-  plug: SavedBlePlug,
+  plug: SavedPlugWithBleLocator,
   candidates: readonly PlugBleAdvertisement[]
 ): PlugBleAdvertisement[] => {
   const savedAdvertisementName = plug.advertisementName.trim().toLowerCase();
@@ -66,7 +66,7 @@ const prioritizeCandidates = (
 };
 
 const recoverLocator = async (
-  plug: SavedBlePlug,
+  plug: SavedPlugWithBleLocator,
   options: SavedBlePlugLocatorRecoveryOptions,
   scanCandidates: RecoveryScanCandidates,
   inspectCandidate: RecoveryInspectCandidate
@@ -94,7 +94,7 @@ const recoverLocator = async (
 };
 
 export const recoverSavedBlePlugLocator = (
-  plug: SavedBlePlug,
+  plug: SavedPlugWithBleLocator,
   options: SavedBlePlugLocatorRecoveryOptions,
   dependencies: SavedBlePlugLocatorRecoveryDependencies = {}
 ): Promise<string> => {
