@@ -54,6 +54,28 @@ const staleReadError = () =>
   });
 
 describe('readSavedBlePlugReadOnlyDetail', () => {
+  it('prefers the saved Wi-Fi locator and does not touch BLE recovery', async () => {
+    const provisioned = { ...plug, wifiBaseUrl: 'http://192.168.0.17' };
+    const readDetail = vi.fn(async () => {
+      throw new Error('BLE should not be used');
+    });
+    const readWifiDetail = vi.fn(async () => detail);
+    const scanCandidates = vi.fn(async () => [] as PlugBleAdvertisement[]);
+
+    await expect(
+      readSavedBlePlugReadOnlyDetail(
+        provisioned,
+        { persistLocator: vi.fn() },
+        { readDetail, readWifiDetail, scanCandidates, inspectCandidate: vi.fn() }
+      )
+    ).resolves.toBe(detail);
+
+    expect(readWifiDetail).toHaveBeenCalledOnce();
+    expect(readWifiDetail).toHaveBeenCalledWith(provisioned);
+    expect(readDetail).not.toHaveBeenCalled();
+    expect(scanCandidates).not.toHaveBeenCalled();
+  });
+
   it('uses a healthy saved locator without scanning', async () => {
     const readDetail = vi.fn(async () => detail);
     const scanCandidates = vi.fn(async () => [] as PlugBleAdvertisement[]);
