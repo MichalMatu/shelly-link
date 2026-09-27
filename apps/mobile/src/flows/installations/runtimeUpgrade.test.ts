@@ -41,6 +41,7 @@ vi.mock('./runtimeStatus.js', async (importOriginal) => {
 });
 
 import {
+  convergeManagedButtonMode,
   ensureInstalledAutomationRuntimeCurrent,
   recoverInstalledAutomationRuntime
 } from './runtimeUpgrade.js';
@@ -139,6 +140,20 @@ describe('installed automation runtime replacement', () => {
       baseUrl: 'http://192.168.0.20/'
     });
     expect(mocks.installScript).not.toHaveBeenCalled();
+  });
+
+  it('converges a legacy edit through the selected verified locator and captures the baseline', async () => {
+    const result = await convergeManagedButtonMode(legacyInstallation, {
+      deviceId: 'shelly-a',
+      baseUrl: 'http://192.168.0.99/'
+    });
+
+    expect(mocks.detachButton).toHaveBeenCalledWith({
+      deviceId: 'shelly-a',
+      baseUrl: 'http://192.168.0.99/'
+    });
+    expect(result.buttonInputModeBeforeInstall).toBe('momentary');
+    expect(result.updatedAtMs).toBeGreaterThan(legacyInstallation.updatedAtMs);
   });
 
   it('captures the pre-install button mode for a legacy managed runtime', async () => {

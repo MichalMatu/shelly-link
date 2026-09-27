@@ -35,13 +35,14 @@ const assertStoredDeviceIdentity = async (
   }
 };
 
-const convergeManagedButtonMode = async (
-  installation: ClimateInstalledAutomation
-): Promise<ClimateInstalledAutomation> => {
-  const previousMode = await detachPlugButtonForManagedAutomation({
+export const convergeManagedButtonMode = async (
+  installation: ClimateInstalledAutomation,
+  target: { deviceId: string; baseUrl: string } = {
     deviceId: installation.shelly.deviceId,
     baseUrl: installation.shelly.baseUrl
-  });
+  }
+): Promise<ClimateInstalledAutomation> => {
+  const previousMode = await detachPlugButtonForManagedAutomation(target);
   if (installation.buttonInputModeBeforeInstall !== undefined) return installation;
   return {
     ...installation,

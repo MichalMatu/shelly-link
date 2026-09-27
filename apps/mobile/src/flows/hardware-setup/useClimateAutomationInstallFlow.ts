@@ -26,6 +26,7 @@ import {
   useSavedPlugStore
 } from '../../features/plugs/index.js';
 import { forceRelayOffAndConfirm } from '../installations/relaySafety.js';
+import { convergeManagedButtonMode } from '../installations/runtimeUpgrade.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
 import { cleanupStaleShellyBleDiscoveryScripts } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
@@ -144,11 +145,21 @@ export const useClimateAutomationInstallFlow = ({
         if (!editingInstallation) {
           throw new Error('Installed climate automation was not found.');
         }
+        const preparedInstallation = await convergeManagedButtonMode(
+          editingInstallation,
+          {
+            deviceId: editingInstallation.shelly.deviceId,
+            baseUrl: shelly.baseUrl
+          }
+        );
+        if (preparedInstallation !== editingInstallation) {
+          upsertInstalledAutomation(preparedInstallation);
+        }
         const edited = await updateClimateInstalledAutomation({
           installation: {
-            ...editingInstallation,
+            ...preparedInstallation,
             shelly: {
-              ...editingInstallation.shelly,
+              ...preparedInstallation.shelly,
               name: shelly.name,
               baseUrl: shelly.baseUrl
             }

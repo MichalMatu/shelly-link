@@ -77,6 +77,7 @@ const mockShellyRpc = async (page: Page) => {
   let scriptRunning = true;
   let relayOn = true;
   let runtimeMode = 0;
+  let buttonMode: 'momentary' | 'detached' = 'momentary';
 
   const handleRpc = async (route: Route) => {
     const requestUrl = new URL(route.request().url());
@@ -190,9 +191,24 @@ const mockShellyRpc = async (page: Page) => {
               active_between: ['22:00', '06:00']
             }
           },
-          controls: { 'switch:0': { in_mode: 'momentary' } }
+          controls: { 'switch:0': { in_mode: buttonMode } }
         };
         break;
+      case 'PLUGS_UI.SetConfig': {
+        const params = requestBody.params as
+          | {
+              config?: {
+                controls?: {
+                  'switch:0'?: { in_mode?: 'momentary' | 'detached' };
+                };
+              };
+            }
+          | undefined;
+        const nextMode = params?.config?.controls?.['switch:0']?.in_mode;
+        if (nextMode) buttonMode = nextMode;
+        result = { restart_required: false };
+        break;
+      }
       case 'Cloud.GetConfig':
         result = { enable: false, server: 'shelly-195-eu.shelly.cloud:6022/jrpc' };
         break;
@@ -231,6 +247,13 @@ const mockShellyRpc = async (page: Page) => {
         const code = requestBody.params?.code ?? '';
         if (code.includes('R.m=1')) {
           runtimeMode = 1;
+          relayOn = false;
+        } else if (code.includes('R.m=2')) {
+          runtimeMode = 2;
+          relayOn = true;
+        } else if (code.includes('R.m=3')) {
+          runtimeMode = 3;
+          relayOn = false;
         } else if (code.includes('R.m=0')) {
           runtimeMode = 0;
         }
