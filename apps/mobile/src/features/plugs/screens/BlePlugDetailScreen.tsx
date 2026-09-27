@@ -74,7 +74,7 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
                   settings={detailQuery.data.deviceSettings}
                   cloud={detailQuery.data.cloud}
                 />
-                <BlePlugWifiProvisioningCard plug={plug} />
+                {!plug.wifiBaseUrl && <BlePlugWifiProvisioningCard plug={plug} />}
                 <BlePlugTimeSyncCard
                   plug={plug}
                   clock={detailQuery.data.information.status.clock}
