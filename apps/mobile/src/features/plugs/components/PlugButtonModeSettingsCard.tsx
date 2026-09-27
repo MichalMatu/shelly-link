@@ -9,10 +9,12 @@ import { usePlugButtonModeSettingsFlow } from '../flows/usePlugButtonModeSetting
 
 export type PlugButtonModeSettingsCardProps = {
   target: PlugButtonModeSettingsTarget;
+  locked?: boolean;
 };
 
 export const PlugButtonModeSettingsCard = ({
-  target
+  target,
+  locked = false
 }: PlugButtonModeSettingsCardProps) => {
   const { locale } = useTranslation();
   const copy = deviceButtonModeCopy[locale];
@@ -31,7 +33,7 @@ export const PlugButtonModeSettingsCard = ({
   }, [hasChanges, mode]);
 
   const save = () => {
-    if (!draft || draft === baseline) {
+    if (locked || !draft || draft === baseline) {
       setFeedback(copy.noChanges);
       return;
     }
@@ -87,6 +89,7 @@ export const PlugButtonModeSettingsCard = ({
         <SelectField<ShellyPlugsUiButtonInputMode>
           ariaLabel={copy.currentMode}
           value={draft}
+          disabled={locked}
           options={[
             { value: 'momentary', label: copy.momentary },
             { value: 'detached', label: copy.detached }
@@ -106,7 +109,7 @@ export const PlugButtonModeSettingsCard = ({
         <button
           className="primary-action"
           type="button"
-          disabled={!hasChanges || updateMutation.isPending}
+          disabled={locked || !hasChanges || updateMutation.isPending}
           onClick={save}
         >
           {updateMutation.isPending ? copy.saving : copy.save}
