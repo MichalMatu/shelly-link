@@ -1,10 +1,14 @@
 # Handoff — clean product checkpoint
 
-Status: **2026-09-27 — current BLE/Plug-management iteration accepted; closeout/merge in progress**
+Status: **2026-09-27 — BLE/Plug-management iteration merged and verified on `main`**
 
 Repository: `MichalMatu/shelly-link`
 
-Closeout branch: `work/shelly-ble-transport`
+Current base: `main`
+
+Validated product merge: `39fa377a216bbae836569662a53e9e8dcf17aa37`
+
+The merge tree is identical to the fully gated work-branch source `7e971171c7d16a0dfaf0cff2e8837f28c088ea5d`. `pnpm check:full` passed both before merge and again on the merge commit. The merge-commit gate included mobile 84/84 test files with 382/382 tests, automation-core 86/86 tests, script-generator coverage 138/138 tests and responsive E2E 36/36. Existing React `act(...)` and Node localStorage warnings are non-failing.
 
 ## Product direction
 
@@ -12,11 +16,11 @@ Shelly Link is **climate/grow-first with a reusable local Shelly management plat
 
 Do not expand device management merely because an RPC exists. Prioritize platform work when it enables a concrete climate/grow use case, improves safety/reliability, reduces setup friction or provides useful operational diagnostics.
 
-The previously proposed zero-friction onboarding orchestrator is **deferred**, not the next automatic task.
+The previously proposed zero-friction onboarding orchestrator is **deferred** and is not the next automatic task.
 
 ## Accepted foundation
 
-The current product baseline includes:
+The current baseline includes:
 
 - local `climate-engine-v1` automation with safe-OFF behavior;
 - 1–4 supported BLE thermometers with aggregation and per-sensor diagnostics;
@@ -69,28 +73,37 @@ The factory Plug moved from firmware `1.2.3` to `2.0.1`; `Sys.SetTime` was absen
 - The phone configures/manages/diagnoses; Shelly executes installed automation locally.
 - Page-level duplicate Back navigation remains absent from Plug Detail; the five tabs are first content.
 
-## Known architecture debt — next bounded cleanup
+## Next bounded architecture slice
 
-Two durable Plug registries remain from historical Wi-Fi and BLE flows. The dashboard prevents a duplicate visual card for the same physical identity, but duplicate durable records may still exist if the same Plug is independently added through both paths.
+Two durable Plug registries remain from historical Wi-Fi and BLE flows. Presentation deduplicates the same physical identity, but duplicate durable records may still exist if one Plug is independently added through both entry paths.
 
-The next structural slice should create **one canonical physical Plug registry** with independent Wi-Fi/BLE locator metadata. Do not solve this with more cross-registry guards or transport-specific identity rules.
+The next structural task should create **one canonical physical Plug registry** with independent Wi-Fi/BLE locator metadata.
 
-## Next product decision
+Acceptance:
 
-After the physical Plug registry cleanup, choose one main product milestone rather than developing both in parallel:
+- the same normalized `Shelly.GetDeviceInfo.id` maps to one durable physical Plug;
+- adding another verified transport enriches the existing record instead of creating a second logical device;
+- user name and automation ownership survive convergence/migration;
+- transport locators remain replaceable metadata rather than identity;
+- focused migration/deduplication regressions exist before retiring the old split.
 
-1. **History / Datalogger** — operational history of climate/VPD/relay behavior, using `work/kvs-datalogger` only as parked source material and redesigning lifecycle ownership first.
+Do not solve this with additional cross-registry UI guards.
+
+## Next product decision after registry cleanup
+
+Choose one main product milestone rather than developing both in parallel:
+
+1. **History / Datalogger** — operational history of climate/VPD/relay behavior. `work/kvs-datalogger` is parked source material only; redesign lifecycle ownership before reusing its pieces.
 2. **Richer climate rules** — minimum ON/OFF, cooldown/debounce, time windows and reusable condition operators with explicit safety precedence.
 
 Broad general-purpose Shelly management, persistent BLE pairing and offline OTA remain later/explicitly approved work.
 
-## Closeout rule
+## Branch state
 
-Before retiring `work/shelly-ble-transport`:
+`work/shelly-ble-transport` is completed and may be deleted after this docs-only checkpoint is verified.
 
-- run the final full repository gate on the exact source candidate;
-- merge to `main` only after it passes;
-- verify merged `main`;
-- update this handoff to the final `main` SHA/checkpoint;
-- delete the completed work branch;
-- preserve `work/kvs-datalogger` as an intentionally parked research branch.
+Preserve:
+
+- `main` — clean base for the next task;
+- `agent-control` — Local Agent control branch;
+- `work/kvs-datalogger` — intentionally parked research/source-material branch.
