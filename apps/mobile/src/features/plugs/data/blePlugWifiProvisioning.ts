@@ -3,9 +3,7 @@ import {
   RPC_METHODS,
   RpcShellyClient,
   RpcShellyWifiClient,
-  type Result,
   type ShellyClient,
-  type ShellyClientError,
   type ShellyRpcTransport,
   type ShellyWifiScanEntry,
   type ShellyWifiStatus
@@ -115,11 +113,6 @@ const normalizeNetworks = (entries: readonly ShellyWifiScanEntry[]): BlePlugWifi
   );
 };
 
-const throwResultError = (result: Result<unknown, ShellyClientError>): never => {
-  if (result.ok) throw new Error('Expected failed Shelly result.');
-  throw new Error(result.error.technicalMessage ?? `Shelly RPC: ${result.error.kind}`);
-};
-
 export const scanBlePlugWifiNetworks = async (
   plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>,
   dependencies: BlePlugWifiProvisioningDependencies = defaultDependencies
@@ -129,7 +122,11 @@ export const scanBlePlugWifiNetworks = async (
     await assertMatchingPhysicalIdentity(plug, dependencies.createClient(transport));
     assertMethods(await dependencies.listMethods(transport), [RPC_METHODS.WifiScan]);
     const result = await dependencies.createWifiClient(transport).scan();
-    if (!result.ok) throwResultError(result);
+    if (!result.ok) {
+      throw new Error(
+        result.error.technicalMessage ?? `Shelly RPC: ${result.error.kind}`
+      );
+    }
     return normalizeNetworks(result.value);
   } finally {
     await transport.disconnect().catch(() => undefined);
@@ -159,7 +156,11 @@ export const provisionBlePlugWifi = async (
 
     const wifi = dependencies.createWifiClient(transport);
     const mutation = await wifi.setStation(input);
-    if (!mutation.ok) throwResultError(mutation);
+    if (!mutation.ok) {
+      throw new Error(
+        mutation.error.technicalMessage ?? `Shelly RPC: ${mutation.error.kind}`
+      );
+    }
 
     const deadline = dependencies.nowMs() + timeoutMs;
     while (dependencies.nowMs() <= deadline) {
@@ -170,7 +171,9 @@ export const provisionBlePlugWifi = async (
           return { status };
         }
       } else if (!statusResult.error.retryable) {
-        throwResultError(statusResult);
+        throw new Error(
+          statusResult.error.technicalMessage ?? `Shelly RPC: ${statusResult.error.kind}`
+        );
       }
 
       if (dependencies.nowMs() >= deadline) break;
