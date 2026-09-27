@@ -125,12 +125,16 @@ const ClimateAutomationCard = ({
     ? installedAutomationScriptMatch(installation, controlStatus)
     : null;
   const controlsVerified = controlMatch === 'matched';
+  const runtimeMode = controlStatus?.automationMode;
   const runtimeControllable =
     controlsVerified &&
-    (controlStatus?.automationMode === 'auto' ||
-      controlStatus?.automationMode === 'manual');
-  const automationRunning = controlsVerified && controlStatus?.automationMode === 'auto';
-  const manualControl = controlsVerified && controlStatus?.automationMode === 'manual';
+    runtimeMode !== 'fault' &&
+    runtimeMode !== 'stopped' &&
+    runtimeMode !== 'missing';
+  const automationRunning = controlsVerified && runtimeMode === 'auto';
+  const manualControl =
+    controlsVerified && (runtimeMode === 'manual-off' || runtimeMode === 'manual-on');
+  const automationPaused = controlsVerified && runtimeMode === 'paused';
   const relayState =
     snapshot?.plug?.relayState ??
     controlStatus?.relayOn ??
@@ -262,10 +266,21 @@ const ClimateAutomationCard = ({
             aria-pressed={manualControl}
             disabled={action.isPending || !runtimeControllable}
             onClick={() => {
-              if (controlStatus?.automationMode !== 'manual') action.mutate('manual');
+              if (!manualControl) action.mutate('manual');
             }}
           >
             MANUAL
+          </button>
+          <button
+            className="automation-control-button"
+            type="button"
+            aria-pressed={automationPaused}
+            disabled={action.isPending || !runtimeControllable}
+            onClick={() => {
+              if (!automationPaused) action.mutate('pause');
+            }}
+          >
+            PAUSED
           </button>
         </div>
       </div>
@@ -291,7 +306,7 @@ const ClimateAutomationCard = ({
           aria-pressed={relayState === true}
           disabled={action.isPending || !manualControl}
           onClick={() => {
-            if (!controlStatus?.relayOn) action.mutate('on');
+            if (runtimeMode !== 'manual-on') action.mutate('on');
           }}
         >
           ON
@@ -302,7 +317,7 @@ const ClimateAutomationCard = ({
           aria-pressed={relayState === false}
           disabled={action.isPending || !manualControl}
           onClick={() => {
-            if (controlStatus?.relayOn) action.mutate('off');
+            if (runtimeMode !== 'manual-off') action.mutate('off');
           }}
         >
           OFF

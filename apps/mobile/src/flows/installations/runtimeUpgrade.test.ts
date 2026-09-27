@@ -45,14 +45,17 @@ const installation = createInstalledAutomation({
   nowMs: 1000
 });
 
-const runtimeStatus = (scriptId: number | null, mode: 'auto' | 'manual' | 'missing') => ({
+const runtimeStatus = (
+  scriptId: number | null,
+  mode: 'auto' | 'manual-off' | 'manual-on' | 'paused' | 'fault' | 'missing'
+) => ({
   relayOn: false,
   automationMode: mode,
   automationScriptId: scriptId,
   firmwareId: '1.0.0',
   telemetry: {},
   clock: { timeSynced: false },
-  runtimeModeSupported: mode === 'auto' || mode === 'manual'
+  runtimeModeSupported: mode !== 'missing'
 });
 
 describe('installed automation runtime replacement', () => {

@@ -28,10 +28,10 @@ const installation = createInstalledAutomation({
 describe('runtime mode Script.Eval transport', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('sets MANUAL inside the running script and verifies the eval result', async () => {
+  it('sets MANUAL_OFF inside the running script and verifies the eval result', async () => {
     mocks.call.mockResolvedValue({ ok: true, value: { result: '1' } });
 
-    await setInstalledAutomationRuntimeMode(installation, 'manual');
+    await setInstalledAutomationRuntimeMode(installation, 'manual-off');
 
     expect(mocks.call).toHaveBeenCalledWith({
       method: 'Script.Eval',
@@ -42,10 +42,10 @@ describe('runtime mode Script.Eval transport', () => {
     });
   });
 
-  it('reads live MANUAL/AUTO state without using Script.Stop', async () => {
+  it('reads live MANUAL_OFF/AUTO state without using Script.Stop', async () => {
     mocks.call.mockResolvedValueOnce({ ok: true, value: { result: '1' } });
     await expect(readInstalledAutomationRuntimeMode(installation)).resolves.toEqual({
-      mode: 'manual',
+      mode: 'manual-off',
       supported: true
     });
 

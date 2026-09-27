@@ -26,7 +26,7 @@ vi.mock('../flows/installations/useInstalledAutomationRuntime.js', () => ({
   useInstalledAutomationControl: () => ({
     data: {
       relayOn: false,
-      automationMode: 'manual',
+      automationMode: 'manual-off',
       runtimeModeSupported: true,
       automationScriptId: 7,
       firmwareId: '1.0.0',
@@ -92,11 +92,13 @@ describe('AutomationDashboardScreen controls', () => {
     expect(screen.queryByRole('switch')).toBeNull();
     expect(screen.queryByText('Wymaga uwagi')).toBeNull();
     const manual = screen.getByRole('button', { name: 'MANUAL' });
+    const paused = screen.getByRole('button', { name: 'PAUSED' });
     const auto = screen.getByRole('button', { name: 'AUTO' });
     const on = screen.getByRole('button', { name: 'ON' });
     const off = screen.getByRole('button', { name: 'OFF' });
 
     expect(manual).toHaveAttribute('aria-pressed', 'true');
+    expect(paused).toHaveAttribute('aria-pressed', 'false');
     expect(off).toHaveAttribute('aria-pressed', 'true');
     expect(on).toBeEnabled();
 
