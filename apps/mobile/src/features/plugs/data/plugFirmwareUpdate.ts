@@ -108,9 +108,7 @@ export const classifyPlugFirmwareUpdateStart = (
   if (result.error.kind === 'timeout' || result.error.kind === 'shelly-offline') {
     return { acknowledged: false };
   }
-  throw new Error(
-    result.error.technicalMessage ?? `Shelly RPC: ${result.error.kind}`
-  );
+  throw new Error(result.error.technicalMessage ?? `Shelly RPC: ${result.error.kind}`);
 };
 
 export const readPlugFirmwareUpdate = async (
