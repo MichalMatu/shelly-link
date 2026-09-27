@@ -1,5 +1,7 @@
+import type { Result } from '@lcl/shelly-client';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  classifyPlugFirmwareUpdateStart,
   waitForPlugFirmwareUpdate,
   type PlugFirmwareVerificationDependencies
 } from './plugFirmwareUpdate.js';
@@ -47,7 +49,34 @@ const createDependencies = () => {
   return { dependencies, readSnapshot, sleep };
 };
 
-describe('waitForPlugFirmwareUpdate', () => {
+const failed = (
+  kind: 'timeout' | 'shelly-offline' | 'validation-failed'
+): Result<null> => ({
+  ok: false,
+  error: {
+    kind,
+    userMessageKey: 'errors.test',
+    technicalMessage: `test ${kind}`,
+    retryable: kind !== 'validation-failed'
+  }
+});
+
+describe('firmware update safety', () => {
+  it('treats timeout/offline around Shelly.Update as ambiguous without requesting replay', () => {
+    expect(classifyPlugFirmwareUpdateStart(failed('timeout'))).toEqual({
+      acknowledged: false
+    });
+    expect(classifyPlugFirmwareUpdateStart(failed('shelly-offline'))).toEqual({
+      acknowledged: false
+    });
+  });
+
+  it('does not hide a definite non-retryable update failure', () => {
+    expect(() => classifyPlugFirmwareUpdateStart(failed('validation-failed'))).toThrow(
+      'test validation-failed'
+    );
+  });
+
   it('uses read-only polling until the same Plug returns with the expected firmware', async () => {
     const { dependencies, readSnapshot, sleep } = createDependencies();
 
