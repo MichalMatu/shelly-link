@@ -2,128 +2,170 @@
 
 ## Product direction
 
-Shelly Link is **climate/grow-first with a reusable local Shelly platform underneath it**.
+Shelly Link is **climate/grow-first with a reusable local Shelly management platform underneath it**.
 
-The product is not trying to become a general-purpose replacement for every Shelly management surface. Platform work earns priority when it enables a real climate/grow use case, improves safety/reliability, reduces setup friction or provides diagnostics needed to operate the local automation confidently.
+Device-management work is not a goal by itself. Prioritize it when it enables a concrete climate/grow use case, improves safety/reliability, reduces setup friction or provides useful operational diagnostics.
 
-The phone configures, manages and diagnoses. Shelly executes installed automation locally.
+The product should remain local-first: the phone configures, manages and diagnoses; the Shelly Plug executes automation locally after installation.
 
-## Now — close the current foundation cleanly
+## Now — structural cleanup before the next feature wave
 
-The long BLE/Plug-management iteration is feature-complete enough to checkpoint. Before starting another user-facing feature, keep the baseline clean:
+### Unified physical Plug registry
 
-- merge the accepted BLE management/provisioning/OTA/time-sync work to `main` after the final repository gate;
-- keep one active product branch at a time;
-- preserve dated hardware evidence separately from architecture/product docs;
-- remove completed implementation plans from the active documentation set;
-- do not add a new zero-friction onboarding abstraction just because the primitives now exist.
+Create one canonical durable record per normalized `Shelly.GetDeviceInfo.id` with independent transport metadata such as BLE locator and verified Wi-Fi/HTTP locator.
 
-### Next architecture cleanup: one physical Plug registry
+The current Wi-Fi and BLE registries can represent the same physical Plug twice. Dashboard-level dedupe is not a sufficient long-term model. Do not solve this with more cross-registry guards; converge ownership around one physical-device record.
 
-Canonical physical identity is already normalized `Shelly.GetDeviceInfo.id`, but two durable Plug registries still exist from the historical Wi-Fi and BLE flows.
+This is a bounded architecture cleanup, not a UX redesign.
 
-Next structural cleanup should converge Wi-Fi-origin and BLE-origin saved Plug state around one physical Plug record with independent transport locators.
+## Next — feature-complete v1 track
 
-Acceptance for that cleanup:
+After the unified Plug registry, develop the following slices in sequence rather than in parallel.
 
-- adding the same physical Plug through another transport enriches/reuses the existing record instead of creating another durable device;
-- Wi-Fi and BLE locators remain replaceable metadata, never identity;
-- existing saved names and automation ownership survive migration/convergence;
-- no transport-specific fallback is hidden inside identity semantics;
-- focused migration/deduplication regressions exist before removing the old split.
+### 1. History / Datalogger
 
-Do this as a bounded architecture slice, not mixed into a new product feature.
+Resume from `work/kvs-datalogger`, but treat that branch as parked source material rather than something to merge mechanically. Reconcile it with the current exclusive Shelly Scripts ownership/lifecycle first.
 
-## Next product milestone — explicit decision gate
+The logger should record useful operational history, not only raw measurements. At minimum consider:
 
-After the physical Plug registry is clean, choose **one** of these as the next main product milestone. Do not develop both in parallel.
+- timestamp;
+- temperature;
+- humidity;
+- VPD;
+- relay state;
+- power/current where available;
+- automation mode;
+- trigger/reason code;
+- safety/fault state;
+- relevant threshold or rule context.
 
-### Candidate A — History / Datalogger
+The goal is that history can explain **why** the relay changed state, not merely that it changed.
 
-User value:
+Climate safety must remain independent of History failure.
 
-- understand temperature/humidity/VPD and relay behavior over time;
-- diagnose why automation acted;
-- validate grow/climate conditions without a separate server.
+### 2. Rule/action model expansion
 
-The parked `work/kvs-datalogger` branch is research/source material only. Do not merge it mechanically: it predates the current exclusive Shelly Scripts ownership model.
+Extend the stable runtime toward a small reusable **rule + action engine**, rather than adding more feature-specific automation types.
 
-Before implementation choose a lifecycle compatible with current ownership, then reuse only still-valid KVS/codec/client/generator pieces. History failure must never compromise Climate safety.
+Priority capabilities:
 
-### Candidate B — richer climate rules
+- Pulse ON for a configured duration;
+- Pulse OFF for a configured duration;
+- Pulse actions restore the state implied by the automation after the pulse rather than blindly toggling;
+- minimum ON duration;
+- minimum OFF duration;
+- cooldown;
+- debounce / condition-must-remain-true delay;
+- time windows combined with sensor rules;
+- scheduled triggers combined with conditions;
+- simple reusable `AND` / `OR` composition where the safety model stays explicit.
 
-User value:
+Model pulse as an **action**, not as a special standalone rule. Example actions may include `Set ON`, `Set OFF`, `Pulse ON`, `Pulse OFF`.
 
-- minimum ON/OFF times;
-- cooldown/debounce behavior;
-- clock/time windows;
-- reusable condition composition;
-- safer control of real equipment with fewer external tools.
+### 3. Runtime safety supervisor
 
-Implement reusable typed operators rather than feature-specific runtime forks. Safety precedence and safe-OFF behavior remain explicit.
+Safety is a separate layer above normal automation and manual behavior, not an ordinary user rule.
 
-## Later — product-supporting expansion
+Target protections:
 
-These are valid directions only when tied to a concrete product use case:
+- maximum power;
+- maximum current;
+- maximum Plug/device temperature;
+- maximum continuous ON duration;
+- startup delay after reboot when appropriate;
+- latched safety fault/lockout;
+- explicit fault/reason code;
+- deliberate acknowledge/reset path before automation may resume after a latched fault.
 
-- curated Shelly Script Library with typed/simple configurators;
-- additional climate/grow sensors through the existing typed sensor model;
-- additional automation templates built from shared operators;
-- stronger diagnostics/recovery where field evidence shows a real need;
-- persistent BLE pairing/bonding when a supported workflow truly needs BLE after provisioning;
-- offline firmware servicing only after a safe hardware-proven approach exists.
+Safety must win over all normal automation decisions. A rule that still evaluates true must not immediately re-enable a relay that safety has shut down.
 
-Do not prioritize a capability merely because Shelly exposes an RPC for it.
+### 4. Dashboard master control
 
-## Parked / research
+Add a clear product-level automation master state, preferably modeled as **RUNNING / PAUSED** rather than ambiguous relay ON/OFF.
 
-### KVS datalogger
+Expected semantics:
 
-`work/kvs-datalogger` stays preserved as source material until History becomes the selected product milestone.
+- `PAUSED` stops normal automation and leaves the relay in a safe OFF state;
+- datalogging and diagnostics continue;
+- safety supervision remains active;
+- `RUNNING` resumes evaluation while respecting minimum-OFF/cooldown constraints;
+- manual relay control, if exposed, remains visibly distinct from the automation master state.
 
-### Offline OTA
+### 5. UX redesign round 2
 
-A local cached-firmware path may be researched later. Raw undocumented `OTA.*` methods are not a product API.
+Run the next major UX pass only after the datalogger, rule/action model and safety semantics are stable.
 
-### BLE soil moisture
+Primary goal: make the app more status-first and easier to understand rather than exposing implementation details by default.
 
-Deferred until there is a clear product need. If resumed, start with identity/readings/diagnostics and integrate through the existing sensor/config model before adding automation behavior.
+The main dashboard should emphasize:
 
-### Broad general-purpose Shelly management
+- whether automation is RUNNING or PAUSED;
+- current climate values;
+- current relay/output state and power;
+- concise rule reason / why the output is ON or OFF;
+- safety summary;
+- clear entry to History.
 
-Not an active goal. Shelly Link may gain reusable management capabilities, but only in support of the climate/grow product or a later explicitly approved expansion of product scope.
+Keep BLE, firmware, raw script/runtime details and transport diagnostics available, but deeper under Device / Info / Advanced rather than competing with the main product status.
 
-## Stable baseline already accepted
+## Runtime/script development opportunities
 
-The following are foundation, not active roadmap items:
+Use remaining Shelly runtime headroom for capabilities that materially improve reliability or explainability before adding broad new product surface.
 
-- local `climate-engine-v1` automation with safe-OFF behavior;
-- persistent automation ownership/recovery semantics;
-- 1–4 mixed supported BLE thermometers with per-sensor freshness/diagnostics;
-- Climate temperature/humidity/VPD setup;
-- Time automation using native Shelly schedules;
-- Plug lifecycle and conservative recovery;
-- shared five-section Plug Detail UX;
-- Shelly HTTP management;
-- Shelly BLE RPC transport and BLE-only Plug management;
-- bounded stale BLE-locator recovery for reads;
-- capability-aware device settings/read models;
-- BLE Wi-Fi provisioning and verified HTTP transport promotion;
-- explicit firmware check/update with read-only post-reboot verification;
-- capability-aware device-time synchronization;
-- real Samsung S22+ / Shelly Plug S Gen3 hardware evidence for the accepted paths.
+High-value candidates:
 
-Detailed dated evidence belongs in `docs/testing/hardware-matrix.md`, not here.
+- reason code for every output transition;
+- last-transition timestamp;
+- max continuous ON supervision;
+- minimum ON/OFF timing;
+- cooldown and debounce state;
+- startup/restart guard;
+- latched safety faults;
+- per-sensor disagreement diagnostics;
+- optional outlier detection/rejection for multi-sensor Climate;
+- clear distinction between sensor fault, rule decision, manual state and safety override.
+
+For multiple thermometers, diagnostics may flag an outlier relative to the sensor set before any future automatic rejection policy is enabled. Do not silently discard a sensor without an explicit and tested policy.
+
+## v1 completion target
+
+Treat the product as broadly **feature-complete v1** once the following are stable and hardware-accepted:
+
+- Climate temperature / humidity / VPD automation;
+- 1–4 BLE thermometers with aggregation and diagnostics;
+- Time windows / schedules combined with rules where appropriate;
+- Pulse ON/OFF actions;
+- minimum ON/OFF and cooldown/debounce behavior;
+- History / Datalogger with reasons and fault context;
+- power/current/device-temperature/max-runtime safety supervision;
+- RUNNING / PAUSED master control;
+- local Wi-Fi/BLE provisioning and firmware maintenance;
+- final UX simplification/redesign pass.
+
+After this point, new features should clear a higher bar: they should materially improve climate/grow use cases rather than merely increase application breadth.
+
+## Later — explicit product bets, not automatic next work
+
+Potential later extensions:
+
+- alarm/notification delivery for meaningful fault and safety events;
+- richer sensor-failure / outlier handling;
+- broader condition composition beyond the initial simple `AND` / `OR` model;
+- persistent BLE pairing/bonding on firmware 2.x when a real product use case requires it;
+- offline firmware update only through a documented/safe path with real-hardware proof;
+- curated script library only if it fits the climate/grow product direction and current script-ownership model;
+- broader Shelly device support only when tied to a concrete climate/grow scenario.
+
+The deferred zero-friction onboarding orchestrator is not an automatic next task. Reconsider it later only if real setup friction justifies another user-facing flow.
+
+## Parked
+
+`work/kvs-datalogger` remains intentional source material until the History slice begins. Do not mechanically rebase/merge it.
+
+BLE soil-moisture and broad general-purpose Shelly management remain deferred until the core climate/grow v1 path is complete.
 
 ## Working rule
 
-Prefer one small vertical slice, focused regressions during iteration and one broad repository gate at the acceptance boundary.
+Prefer small vertical slices, focused regressions and one final full repository gate. Use `pnpm check:full` whenever responsive E2E is part of the acceptance surface. Hardware-facing behavior requires real-device acceptance and an explicit final relay state when a relay mutation is exercised.
 
-For hardware-facing work:
-
-- verify canonical physical identity before mutation;
-- never automatically replay an ambiguous mutation;
-- require real-device evidence before claiming hardware support;
-- record a known final relay state when relay behavior is exercised.
-
-Merge completed slices promptly, delete retired work branches after merged `main` is verified, and preserve explicitly parked research branches rather than treating them as cleanup noise.
+Keep active work on one clearly named branch, merge completed slices promptly, and delete retired work branches after the merged `main` is re-verified. Preserve intentionally parked branches from separate tracks instead of deleting them as incidental cleanup.
