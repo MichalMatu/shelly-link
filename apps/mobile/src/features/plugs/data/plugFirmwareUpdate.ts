@@ -93,13 +93,8 @@ const versionPattern = (version: string): RegExp => {
 
 const firmwareMatches = (
   firmwareId: string | undefined,
-  expectedVersion: string,
-  previousFirmware: string | undefined
-): boolean => {
-  if (!firmwareId) return false;
-  if (versionPattern(expectedVersion).test(firmwareId)) return true;
-  return Boolean(previousFirmware && firmwareId !== previousFirmware);
-};
+  expectedVersion: string
+): boolean => Boolean(firmwareId && versionPattern(expectedVersion).test(firmwareId));
 
 export const readPlugFirmwareUpdate = async (
   target: PlugFirmwareUpdateTarget
@@ -126,13 +121,7 @@ export const waitForPlugFirmwareUpdate = async (
     try {
       const snapshot = await dependencies.readSnapshot(target);
       lastFirmware = snapshot.deviceInfo.firmwareId;
-      if (
-        firmwareMatches(
-          snapshot.deviceInfo.firmwareId,
-          options.expectedVersion,
-          options.previousFirmware
-        )
-      ) {
+      if (firmwareMatches(snapshot.deviceInfo.firmwareId, options.expectedVersion)) {
         return snapshot;
       }
       lastError = undefined;
