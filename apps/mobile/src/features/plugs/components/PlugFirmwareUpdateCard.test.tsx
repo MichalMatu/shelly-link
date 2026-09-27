@@ -31,7 +31,7 @@ describe('PlugFirmwareUpdateCard', () => {
         data: undefined
       },
       updatePhase: 'idle'
-    } as ReturnType<typeof usePlugFirmwareUpdateFlow>);
+    } as unknown as ReturnType<typeof usePlugFirmwareUpdateFlow>);
 
     render(
       <I18nProvider>
@@ -64,7 +64,7 @@ describe('PlugFirmwareUpdateCard', () => {
         data: undefined
       },
       updatePhase: 'idle'
-    } as ReturnType<typeof usePlugFirmwareUpdateFlow>);
+    } as unknown as ReturnType<typeof usePlugFirmwareUpdateFlow>);
 
     render(
       <I18nProvider>
@@ -103,7 +103,7 @@ describe('PlugFirmwareUpdateCard', () => {
         }
       },
       updatePhase: 'complete'
-    } as ReturnType<typeof usePlugFirmwareUpdateFlow>);
+    } as unknown as ReturnType<typeof usePlugFirmwareUpdateFlow>);
 
     render(
       <I18nProvider>

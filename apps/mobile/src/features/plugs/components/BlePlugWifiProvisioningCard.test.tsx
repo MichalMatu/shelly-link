@@ -46,7 +46,7 @@ describe('BlePlugWifiProvisioningCard', () => {
         isPending: false,
         isError: false
       }
-    } as ReturnType<typeof useBlePlugWifiProvisioningFlow>);
+    } as unknown as ReturnType<typeof useBlePlugWifiProvisioningFlow>);
   });
 
   afterEach(() => {
