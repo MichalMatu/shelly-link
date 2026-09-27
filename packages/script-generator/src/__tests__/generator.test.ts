@@ -15,6 +15,7 @@ const readGeneratedDiagnostics = (script: string): unknown => {
       _params: unknown,
       callback?: (_result: unknown, code: number) => void
     ) => callback?.({}, 0),
+    addEventHandler: () => 1,
     getComponentStatus: (component: string) =>
       component === 'sys'
         ? { time: '09:31', unixtime: 1782667904, uptime: 12345 }
@@ -78,6 +79,7 @@ const createExecutableRuntime = (
       }
       callback?.({}, 0);
     },
+    addEventHandler: () => 1,
     getComponentStatus: (component: string) =>
       component === 'switch:0' ? { output: physicalRelayOn } : null,
     getUptimeMs: () => Date.now()
@@ -240,7 +242,9 @@ describe('generateShellyThermostatScript', () => {
         null,
         null,
         0,
-        'boot'
+        'boot',
+        0,
+        false
       ],
       d: [['A4C1384F24CD', null, null, null, null, null, 0]]
     });

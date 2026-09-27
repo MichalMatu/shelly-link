@@ -4,6 +4,8 @@ import {
 } from '../index.js';
 import { describe, expect, it, vi } from 'vitest';
 
+type RuntimeEvent = { component: string; info?: { event?: string } };
+
 const advertisement = (temperatureC: number, humidityPct: number): number[] => {
   const temp = Math.round(temperatureC * 100);
   const humidity = Math.round(humidityPct * 100);
@@ -27,18 +29,24 @@ const createRuntime = (script: string) => {
   let scanner:
     | ((event: string, packet: { addr: string; advData: number[]; rssi: number }) => void)
     | undefined;
+  let eventHandler: ((event: RuntimeEvent) => void) | undefined;
   const switchCalls: boolean[] = [];
   const shelly = {
     call: (
       method: string,
-      params: { on: boolean },
+      params: unknown,
       callback?: (_r: unknown, e: number) => void
     ) => {
       if (method === 'Switch.Set') {
-        physicalRelayOn = params.on;
-        switchCalls.push(params.on);
+        const on = (params as { on?: boolean }).on === true;
+        physicalRelayOn = on;
+        switchCalls.push(on);
       }
       callback?.({}, 0);
+    },
+    addEventHandler: (callback: (event: RuntimeEvent) => void) => {
+      eventHandler = callback;
+      return 1;
     },
     getComponentStatus: (component: string) =>
       component === 'switch:0'
@@ -65,13 +73,26 @@ const createRuntime = (script: string) => {
     'BLE',
     'Timer',
     `${script}
-return {diag:function(){return JSON.parse(diag());},setMode:function(m){R.nh=0;R.fh=0;if(m){R.m=1;R.rs="mn";}else{R.on=false;R.os=null;R.rs="ar";R.m=0;}}};`
+return {
+  diag:function(){return JSON.parse(diag());},
+  mode:function(){return R.m;},
+  setMode:function(m){
+    R.m=m;
+    if(m===1||m===3||m===4){if(R.on)sw(false,"ts",true);}
+    else if(m===2){if(!R.on)sw(true,"ts",true);}
+  },
+  stale:stale
+};`
   )(shelly, ble, timer) as {
-    diag: () => { md: number; g: unknown[] };
+    diag: () => { g: unknown[] };
+    mode: () => number;
     setMode: (mode: number) => void;
+    stale: () => void;
   };
 
   if (!scanner) throw new Error('Generated runtime did not subscribe to BLE.');
+  if (!eventHandler)
+    throw new Error('Generated runtime did not subscribe to input events.');
 
   return {
     runtime,
@@ -82,60 +103,115 @@ return {diag:function(){return JSON.parse(diag());},setMode:function(m){R.nh=0;R
         advData: advertisement(temperatureC, humidityPct),
         rssi: -35
       }),
-    setPhysicalRelayOn: (on: boolean) => {
-      physicalRelayOn = on;
-    },
+    pressButton: () =>
+      eventHandler?.({ component: 'input:0', info: { event: 'single_push' } }),
     physicalRelayOn: () => physicalRelayOn
   };
 };
 
-describe('generated MANUAL runtime mode', () => {
-  it('keeps BLE telemetry alive without automatic relay decisions', () => {
+const createHeatingRuntime = () => {
+  const base = createDefaultShellyThermostatConfig(
+    'xiaomi_lywsd03mmc_bthome_v2',
+    'heating'
+  );
+  return createRuntime(
+    generateShellyThermostatScript({
+      ...base,
+      sensor: { ...base.sensor, runtimeAddress: 'AA:BB:CC:DD:EE:FF' },
+      rule: { ...base.rule, consecutiveHits: 1, minChangeMs: 1 }
+    })
+  );
+};
+
+describe('generated runtime control arbitration', () => {
+  it('first physical press from AUTO+ON enters MANUAL_OFF and blocks automation', () => {
     let nowMs = 1_000_000;
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
     try {
-      const base = createDefaultShellyThermostatConfig(
-        'xiaomi_lywsd03mmc_bthome_v2',
-        'heating'
-      );
-      const script = generateShellyThermostatScript({
-        ...base,
-        sensor: { ...base.sensor, runtimeAddress: 'AA:BB:CC:DD:EE:FF' },
-        rule: { ...base.rule, consecutiveHits: 1, minChangeMs: 1 }
-      });
-      const runtime = createRuntime(script);
-
+      const runtime = createHeatingRuntime();
       runtime.scan(18, 50);
       expect(runtime.physicalRelayOn()).toBe(true);
-      expect(runtime.runtime.diag().g[1]).toBe(18);
 
-      runtime.runtime.setMode(1);
-      runtime.setPhysicalRelayOn(false);
+      runtime.pressButton();
+      expect(runtime.runtime.mode()).toBe(1);
+      expect(runtime.physicalRelayOn()).toBe(false);
 
-      const callsAfterManual = runtime.switchCalls.length;
-      runtime.setPhysicalRelayOn(true);
-      nowMs += 1_000;
-      runtime.scan(23.5, 61);
-      expect(runtime.runtime.diag().g[1]).toBe(23.5);
-      expect(runtime.runtime.diag().g[2]).toBe(61);
-      expect(runtime.physicalRelayOn()).toBe(true);
-      expect(runtime.switchCalls).toHaveLength(callsAfterManual);
-
-      runtime.runtime.setMode(0);
-      runtime.setPhysicalRelayOn(false);
+      const calls = runtime.switchCalls.length;
       nowMs += 1_000;
       runtime.scan(18, 50);
+      expect(runtime.switchCalls).toHaveLength(calls);
+      expect(runtime.physicalRelayOn()).toBe(false);
+
+      runtime.pressButton();
+      expect(runtime.runtime.mode()).toBe(2);
       expect(runtime.physicalRelayOn()).toBe(true);
+      runtime.pressButton();
+      expect(runtime.runtime.mode()).toBe(1);
+      expect(runtime.physicalRelayOn()).toBe(false);
     } finally {
       nowSpy.mockRestore();
     }
   });
 
-  it('keeps runtime control compact and exposes mode through runtime state', () => {
-    const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
-    expect(script).toContain('m:0');
-    expect(script).not.toContain('md:');
-    expect(script).not.toContain('registerEndpoint("manual"');
-    expect(script).not.toContain('registerEndpoint("auto"');
+  it('first physical press from AUTO+OFF changes mode without an extra relay write', () => {
+    const nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const runtime = createHeatingRuntime();
+      runtime.scan(23.5, 50);
+      expect(runtime.physicalRelayOn()).toBe(false);
+      const calls = runtime.switchCalls.length;
+
+      runtime.pressButton();
+      expect(runtime.runtime.mode()).toBe(1);
+      expect(runtime.physicalRelayOn()).toBe(false);
+      expect(runtime.switchCalls).toHaveLength(calls);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('PAUSED and FAULT remain OFF and ignore physical toggles', () => {
+    const runtime = createHeatingRuntime();
+
+    runtime.runtime.setMode(3);
+    expect(runtime.runtime.mode()).toBe(3);
+    expect(runtime.physicalRelayOn()).toBe(false);
+    runtime.pressButton();
+    expect(runtime.runtime.mode()).toBe(3);
+
+    runtime.runtime.setMode(4);
+    runtime.pressButton();
+    expect(runtime.runtime.mode()).toBe(4);
+    expect(runtime.physicalRelayOn()).toBe(false);
+  });
+
+  it('stale safety overrides MANUAL_ON and latches FAULT', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const runtime = createHeatingRuntime();
+      runtime.scan(23.5, 50);
+      runtime.pressButton();
+      runtime.pressButton();
+      expect(runtime.runtime.mode()).toBe(2);
+      expect(runtime.physicalRelayOn()).toBe(true);
+
+      nowMs += 700_000;
+      runtime.runtime.stale();
+      expect(runtime.runtime.mode()).toBe(4);
+      expect(runtime.physicalRelayOn()).toBe(false);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('exposes mode and automation-requested output in diagnostics', () => {
+    const runtime = createRuntime(
+      generateShellyThermostatScript(createDefaultShellyThermostatConfig())
+    );
+    const g = runtime.runtime.diag().g;
+    expect(g[17]).toBe(0);
+    expect(g[18]).toBe(false);
   });
 });

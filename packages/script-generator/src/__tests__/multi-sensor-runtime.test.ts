@@ -36,6 +36,7 @@ const createExecutableRuntime = (script: string) => {
       if (method === 'Switch.Set') switchCalls.push(params);
       callback?.({}, 0);
     },
+    addEventHandler: () => 1,
     getComponentStatus: () => ({ output: false }),
     getUptimeMs: () => Date.now()
   };

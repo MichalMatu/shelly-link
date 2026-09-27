@@ -157,7 +157,7 @@ describe('Shelly runtime generation matrix', () => {
       expect(script).toContain('function ad(d)');
       expect(script).toContain('function r2(d,o,s)');
       expect(script).toContain('function mf(d)');
-      expect(script).toContain('function parse(x,p,j){return p===1?pt(x,j):pb(x,j);}');
+      expect(script).toContain('function parse(x,p,j){return p==1?pt(x,j):pb(x,j)}');
       expect(script).not.toContain('BTHome.parseData');
       expect(script).not.toContain('parseBthomeV2Payload');
     }

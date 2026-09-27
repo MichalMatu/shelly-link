@@ -104,7 +104,7 @@ describe('persistent Shelly runtime config', () => {
     expect(decodeShellyThermostatScript(script, '{bad')).toBeNull();
   });
 
-  it('generates an in-place config update that persists the same compact config and resets runtime state', () => {
+  it('generates an in-place config update that preserves runtime control mode and output', () => {
     const config = createDefaultShellyThermostatConfig(
       'tp357_custom_v1',
       'dehumidifying'
@@ -132,6 +132,7 @@ describe('persistent Shelly runtime config', () => {
       eo: 11,
       ef: 12,
       m: 1,
+      a: true,
       sa: 13,
       u: [[21.5, 55, 1000, 1000, 88, -60, 'A4C1384F24CD']],
       fc: 1
@@ -165,18 +166,19 @@ describe('persistent Shelly runtime config', () => {
       ht: null,
       b: null,
       r: null,
-      on: false,
+      on: true,
       rs: 'cu',
       ds: 'boot',
       lc: 1234,
-      os: null,
+      os: 1234,
       nh: 0,
       fh: 0,
       cv: null,
       vp: null,
       eo: null,
       ef: null,
-      m: 0,
+      m: 1,
+      a: false,
       sa: 0,
       u: [],
       fc: 0
