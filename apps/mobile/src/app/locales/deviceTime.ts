@@ -8,6 +8,7 @@ type DeviceTimeCopy = {
   syncing: string;
   synced: string;
   unavailable: string;
+  unsupported: string;
   actionFailed: string;
 };
 
@@ -19,7 +20,9 @@ const en: DeviceTimeCopy = {
   sync: 'Sync with phone',
   syncing: 'Syncing…',
   synced: 'Device time synchronized with this phone.',
-  unavailable: 'Device time is not available yet.',
+  unavailable: 'Not set',
+  unsupported:
+    'This Shelly firmware does not support manual device-time synchronization. Connect the device to a network for NTP time sync or update its firmware.',
   actionFailed: 'Could not synchronize device time.'
 };
 
@@ -34,7 +37,9 @@ export const deviceTimeCopy: Record<Locale, DeviceTimeCopy> = {
     sync: 'Synchronizuj z telefonem',
     syncing: 'Synchronizuję…',
     synced: 'Czas urządzenia zsynchronizowany z tym telefonem.',
-    unavailable: 'Czas urządzenia nie jest jeszcze dostępny.',
+    unavailable: 'Nie ustawiono',
+    unsupported:
+      'Ten firmware Shelly nie obsługuje ręcznej synchronizacji czasu urządzenia. Podłącz urządzenie do sieci, aby zsynchronizowało czas przez NTP, albo zaktualizuj firmware.',
     actionFailed: 'Nie udało się zsynchronizować czasu urządzenia.'
   },
   de: { ...en, title: 'Gerätezeit', sync: 'Mit Telefon synchronisieren' },
