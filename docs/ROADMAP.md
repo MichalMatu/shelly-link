@@ -62,7 +62,42 @@ Priority capabilities:
 
 Model pulse as an **action**, not as a special standalone rule. Example actions may include `Set ON`, `Set OFF`, `Pulse ON`, `Pulse OFF`.
 
-### 3. Runtime safety supervisor
+### 3. Physical-button manual takeover
+
+The physical Plug button is a deliberate human override and must have deterministic, safe semantics.
+
+Target behavior:
+
+- when automation is in `AUTO`, the **first physical button press always switches to manual mode and forces relay OFF**, regardless of whether automation was currently ON or OFF;
+- if automation was already OFF, that first press may leave the relay electrically unchanged while still changing mode from `AUTO` to `MANUAL_OFF`;
+- once in manual mode, subsequent physical button presses toggle `MANUAL_OFF <-> MANUAL_ON` normally;
+- physical-button takeover never silently returns to `AUTO`; returning to automation requires an explicit action from the app;
+- normal automation must stop driving the relay immediately after takeover;
+- datalogging/diagnostics continue and should record a reason such as `physical_button_takeover` plus the resulting manual state;
+- the future safety supervisor remains higher priority than manual mode and may still force OFF or latch a fault.
+
+Preferred state model:
+
+```text
+AUTO_RUNNING / AUTO_IDLE
+        |
+        | first physical button press
+        v
+MANUAL_OFF <-> MANUAL_ON
+
+FAULT_OFF / safety override > MANUAL > AUTO
+```
+
+Minimum regression coverage before hardware acceptance:
+
+- `AUTO + relay ON -> physical button -> MANUAL_OFF`;
+- `AUTO + relay OFF -> physical button -> MANUAL_OFF`;
+- subsequent `MANUAL_OFF -> MANUAL_ON -> MANUAL_OFF` button toggles;
+- automation cannot reassert relay state while manual takeover is active;
+- safety/fault OFF overrides `MANUAL_ON`;
+- datalogger/history records the takeover reason and mode transition when History is enabled.
+
+### 4. Runtime safety supervisor
 
 Safety is a separate layer above normal automation and manual behavior, not an ordinary user rule.
 
@@ -77,9 +112,9 @@ Target protections:
 - explicit fault/reason code;
 - deliberate acknowledge/reset path before automation may resume after a latched fault.
 
-Safety must win over all normal automation decisions. A rule that still evaluates true must not immediately re-enable a relay that safety has shut down.
+Safety must win over all normal automation and manual decisions. A rule that still evaluates true, or a manual `ON`, must not immediately re-enable a relay that safety has shut down.
 
-### 4. Dashboard master control
+### 5. Dashboard master control
 
 Add a clear product-level automation master state, preferably modeled as **RUNNING / PAUSED** rather than ambiguous relay ON/OFF.
 
@@ -89,20 +124,21 @@ Expected semantics:
 - datalogging and diagnostics continue;
 - safety supervision remains active;
 - `RUNNING` resumes evaluation while respecting minimum-OFF/cooldown constraints;
-- manual relay control, if exposed, remains visibly distinct from the automation master state.
+- manual relay control, including physical-button takeover, remains visibly distinct from the automation master state.
 
-### 5. UX redesign round 2
+### 6. UX redesign round 2
 
-Run the next major UX pass only after the datalogger, rule/action model and safety semantics are stable.
+Run the next major UX pass only after the datalogger, rule/action model, physical-button takeover and safety semantics are stable.
 
 Primary goal: make the app more status-first and easier to understand rather than exposing implementation details by default.
 
 The main dashboard should emphasize:
 
-- whether automation is RUNNING or PAUSED;
+- whether automation is RUNNING, PAUSED or under MANUAL override;
 - current climate values;
 - current relay/output state and power;
 - concise rule reason / why the output is ON or OFF;
+- whether control came from automation, physical/manual takeover or safety;
 - safety summary;
 - clear entry to History.
 
@@ -116,6 +152,7 @@ High-value candidates:
 
 - reason code for every output transition;
 - last-transition timestamp;
+- explicit control-source state: automation / manual physical-button takeover / safety override;
 - max continuous ON supervision;
 - minimum ON/OFF timing;
 - cooldown and debounce state;
@@ -136,6 +173,7 @@ Treat the product as broadly **feature-complete v1** once the following are stab
 - Time windows / schedules combined with rules where appropriate;
 - Pulse ON/OFF actions;
 - minimum ON/OFF and cooldown/debounce behavior;
+- deterministic physical-button takeover into safe `MANUAL_OFF` plus manual toggling afterward;
 - History / Datalogger with reasons and fault context;
 - power/current/device-temperature/max-runtime safety supervision;
 - RUNNING / PAUSED master control;
