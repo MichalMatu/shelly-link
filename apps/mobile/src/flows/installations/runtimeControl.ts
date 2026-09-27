@@ -157,7 +157,10 @@ export const setInstalledAutomationRelayState = async (
 ): Promise<InstalledAutomationActionResult> => {
   const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
   const nextInstallation = prepared.installation;
-  if (!isManualMode(prepared.status.automationMode) || !prepared.status.runtimeModeSupported) {
+  if (
+    !isManualMode(prepared.status.automationMode) ||
+    !prepared.status.runtimeModeSupported
+  ) {
     throw new Error('Manual relay control requires a live MANUAL automation runtime.');
   }
 

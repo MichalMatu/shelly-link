@@ -147,7 +147,9 @@ describe('installed automation runtime replacement', () => {
     const result = await ensureInstalledAutomationRuntimeCurrent(legacyInstallation);
 
     expect(result.installation.buttonInputModeBeforeInstall).toBe('momentary');
-    expect(result.installation.updatedAtMs).toBeGreaterThan(legacyInstallation.updatedAtMs);
+    expect(result.installation.updatedAtMs).toBeGreaterThan(
+      legacyInstallation.updatedAtMs
+    );
     expect(result.upgraded).toBe(true);
     expect(mocks.installScript).not.toHaveBeenCalled();
   });

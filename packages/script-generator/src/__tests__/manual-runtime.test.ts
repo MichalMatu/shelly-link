@@ -41,7 +41,6 @@ const createRuntime = (script: string) => {
       }
       callback?.({}, 0);
     },
-    addEventHandler: () => 1,
     getComponentStatus: (component: string) =>
       component === 'switch:0'
         ? { output: physicalRelayOn }
@@ -114,6 +113,12 @@ const createHeatingRuntime = () => {
 };
 
 describe('generated runtime control arbitration', () => {
+  it('does not claim unsupported Plug S Gen3 input events', () => {
+    const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
+    expect(script).not.toContain('input:0');
+    expect(script).not.toContain('Shelly.addEventHandler');
+  });
+
   it('MANUAL_OFF blocks automation and explicit MANUAL_ON controls the relay', () => {
     let nowMs = 1_000_000;
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);

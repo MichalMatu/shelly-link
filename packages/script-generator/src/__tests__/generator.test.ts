@@ -348,7 +348,7 @@ describe('generateShellyThermostatScript', () => {
       ...baseConfig.sensor,
       sensorId: `sensor-${index}`,
       runtimeAddress: `02:00:00:00:00:0${index}`,
-      displayName: `Sensor ${index} `.padEnd(32, 'X')
+      displayName: `Sensor ${index} `.padEnd(96, 'X')
     });
 
     expect(() =>

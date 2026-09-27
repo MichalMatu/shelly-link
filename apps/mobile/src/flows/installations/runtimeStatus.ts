@@ -6,13 +6,7 @@ import type { ClimateInstalledAutomation } from './model.js';
 import { readInstalledAutomationRuntimeMode } from './runtimeModeTransport.js';
 
 export type InstalledAutomationControlMode =
-  | 'auto'
-  | 'manual-off'
-  | 'manual-on'
-  | 'paused'
-  | 'fault'
-  | 'stopped'
-  | 'missing';
+  'auto' | 'manual-off' | 'manual-on' | 'paused' | 'fault' | 'stopped' | 'missing';
 
 export type InstalledAutomationControlStatus = Omit<
   ShellyControlStatus,

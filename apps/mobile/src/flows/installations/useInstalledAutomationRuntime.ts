@@ -99,12 +99,7 @@ export const useInstalledAutomationControl = (
   });
 
 export type InstalledAutomationControlAction =
-  | 'auto'
-  | 'manual'
-  | 'pause'
-  | 'on'
-  | 'off'
-  | 'recover';
+  'auto' | 'manual' | 'pause' | 'on' | 'off' | 'recover';
 
 export const useInstalledAutomationActions = (
   installation: ClimateInstalledAutomation

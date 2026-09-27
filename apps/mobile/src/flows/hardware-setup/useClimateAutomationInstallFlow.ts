@@ -190,9 +190,8 @@ export const useClimateAutomationInstallFlow = ({
 
       const buttonTarget = { deviceId, baseUrl: shelly.baseUrl };
       await forceRelayOffAndConfirm(client, config.output.relayId);
-      const buttonInputModeBeforeInstall = await detachPlugButtonForManagedAutomation(
-        buttonTarget
-      );
+      const buttonInputModeBeforeInstall =
+        await detachPlugButtonForManagedAutomation(buttonTarget);
 
       try {
         await forceRelayOffAndConfirm(client, config.output.relayId);
@@ -217,7 +216,9 @@ export const useClimateAutomationInstallFlow = ({
           requiresSafeRelayTest: true
         };
       } catch (error) {
-        await forceRelayOffAndConfirm(client, config.output.relayId).catch(() => undefined);
+        await forceRelayOffAndConfirm(client, config.output.relayId).catch(
+          () => undefined
+        );
         await restorePlugButtonAfterManagedAutomation(
           buttonTarget,
           buttonInputModeBeforeInstall

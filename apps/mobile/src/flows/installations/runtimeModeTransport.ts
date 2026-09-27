@@ -6,11 +6,7 @@ import { z } from 'zod';
 import type { ClimateInstalledAutomation } from './model.js';
 
 export type InstalledAutomationRuntimeMode =
-  | 'auto'
-  | 'manual-off'
-  | 'manual-on'
-  | 'paused'
-  | 'fault';
+  'auto' | 'manual-off' | 'manual-on' | 'paused' | 'fault';
 
 export type SettableInstalledAutomationRuntimeMode = Exclude<
   InstalledAutomationRuntimeMode,
@@ -59,7 +55,9 @@ const evaluateRuntime = async (
 };
 
 const runtimeModeFromResult = (result: string): InstalledAutomationRuntimeMode | null => {
-  const entry = Object.entries(runtimeModeCode).find(([, value]) => String(value) === result);
+  const entry = Object.entries(runtimeModeCode).find(
+    ([, value]) => String(value) === result
+  );
   return (entry?.[0] as InstalledAutomationRuntimeMode | undefined) ?? null;
 };
 

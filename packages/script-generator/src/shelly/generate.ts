@@ -65,7 +65,6 @@ function fv(o,k){return o&&o[k]!=null?o[k]:null;}
 function s(o,c){Shelly.call("Switch.Set",{id:C.i,on:o},c)}
 function ft(q){R.m=4;R.rs=q;R.lc=nw();R.on=false;R.os=null;s(false)}
 function sw(o,q,f){if(!f){R.a=o;if(R.m)return}var n=nw(),c=R.on!=o,m=R.m;if(o&&!f&&c&&n-R.lc<C.c)return R.rs="mc";s(o,function(r,e){if(R.m!=m)return s(R.m==2);if(e)return ft("se");R.on=o;R.rs=q;if(c)R.lc=n;R.os=o?n:null})}
-function pe(e){if(e.component!="input:0"||e.info.event!="single_push"||R.m>2)return;var n=nw(),m=R.m==1?2:1,o=m==2;if(o&&(!R.ls||n-R.ls>C.s))return ft("st");R.m=m;R.rs="pb";R.lc=n;if(R.on!=o)sw(o,"pb",1)}
 function stale(){var n=nw();if(!R.ls||n-R.ls>C.s){R.ds="st";R.nh=R.fh=0;ft("st");return}if(R.on&&R.os&&n-R.os>=C.x){R.nh=R.fh=0;ft("mx")}}
 ${renderThresholdHelper()}
 ${renderMeasurementHelper()}
@@ -78,7 +77,7 @@ function ev(e,x){if(e!=BLE.Scanner.SCAN_RESULT||!x)return;var j=ix(x.addr);if(j<
 var bt=BLE.Scanner.stop||BLE.Scanner.Stop;
 function bs(){if(bt)bt.call(BLE.Scanner);R.sa=nw();var f=BLE.Scanner.start||BLE.Scanner.Start;if(!f||f.call(BLE.Scanner,{duration_ms:-1,active:false,interval_ms:241,window_ms:61,rssi_thr:0})==null)sw(false,"bf",true);}
 function bw(){if(R.sa&&nw()-(R.l||R.sa)>9e4)bs();}
-Shelly.addEventHandler(pe);if(E){R.ds="cf";ft("cf")}else{sw(false,"b",true);BLE.Scanner.subscribe(function(e,x){ev(e,x)});Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();bw()})}`;
+if(E){R.ds="cf";ft("cf")}else{sw(false,"b",true);BLE.Scanner.subscribe(function(e,x){ev(e,x)});Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();bw()})}`;
   const compactBody = compactGeneratedShellyScript(body);
 
   const script = `// LCL
