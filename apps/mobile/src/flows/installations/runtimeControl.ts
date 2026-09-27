@@ -1,5 +1,6 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
+import { restorePlugButtonAfterManagedAutomation } from '../../features/plugs/data/plugButtonModeSettings.js';
 import { normalizeShellyDeviceId, RpcShellyClient } from '@lcl/shelly-client';
 import { readShellySetupStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
@@ -192,4 +193,13 @@ export const deleteInstalledAutomation = async (
   if (verified.status.relayOn || verified.scripts.length !== 0) {
     throw new Error('Shelly did not confirm a safely deleted automation.');
   }
+
+  await restorePlugButtonAfterManagedAutomation(
+    {
+      deviceId: installation.shelly.deviceId,
+      baseUrl: installation.shelly.baseUrl
+    },
+    installation.buttonInputModeBeforeInstall
+  );
+  await forceRelayOffAndConfirm(client, relayId);
 };
