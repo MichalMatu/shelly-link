@@ -95,7 +95,11 @@ export {
   PlugButtonModeSettingsCard,
   type PlugButtonModeSettingsCardProps
 } from './components/PlugButtonModeSettingsCard.js';
-export type { PlugButtonModeSettingsTarget } from './data/plugButtonModeSettings.js';
+export {
+  detachPlugButtonForManagedAutomation,
+  restorePlugButtonAfterManagedAutomation,
+  type PlugButtonModeSettingsTarget
+} from './data/plugButtonModeSettings.js';
 export {
   PlugCloudSettingsCard,
   type PlugCloudSettingsCardProps
