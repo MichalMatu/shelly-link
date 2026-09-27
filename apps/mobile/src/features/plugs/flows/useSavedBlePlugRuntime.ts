@@ -1,14 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
 import { setBlePlugRelay, type BlePlugRuntimeStatus } from '../data/blePlugRuntime.js';
+import { readWifiPlugRuntimeStatus, setWifiPlugRelay } from '../data/wifiPlugRuntime.js';
 import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
 import { readSavedBlePlugRuntimeStatus } from './readSavedBlePlugRuntimeStatus.js';
 
 export const SAVED_BLE_PLUG_RUNTIME_REFRESH_MS = 5_000;
 
 export const savedBlePlugRuntimeQueryKey = (
-  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>
-) => ['saved-ble-plug-runtime', plug.physicalId, plug.bleDeviceId] as const;
+  plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId' | 'wifiBaseUrl'>
+) =>
+  [
+    'saved-ble-plug-runtime',
+    plug.physicalId,
+    plug.bleDeviceId,
+    plug.wifiBaseUrl ?? 'no-wifi'
+  ] as const;
 
 type SavedBlePlugRuntimeOptions = {
   enabled?: boolean;
@@ -22,12 +29,18 @@ export const useSavedBlePlugRuntime = (
   const queryClient = useQueryClient();
   const replaceLocator = useSavedBlePlugStore((state) => state.replaceLocator);
   const queryKey = savedBlePlugRuntimeQueryKey(plug);
+  const wifiTarget = plug.wifiBaseUrl
+    ? { physicalId: plug.physicalId, baseUrl: plug.wifiBaseUrl }
+    : null;
+
   const query = useQuery({
     queryKey,
     queryFn: () =>
-      readSavedBlePlugRuntimeStatus(plug, {
-        persistLocator: replaceLocator
-      }),
+      wifiTarget
+        ? readWifiPlugRuntimeStatus(wifiTarget)
+        : readSavedBlePlugRuntimeStatus(plug, {
+            persistLocator: replaceLocator
+          }),
     enabled: options.enabled ?? true,
     retry: false,
     refetchInterval: options.refetchIntervalMs ?? SAVED_BLE_PLUG_RUNTIME_REFRESH_MS,
@@ -39,7 +52,11 @@ export const useSavedBlePlugRuntime = (
 
   const relayMutation = useMutation({
     mutationFn: async (relayOn: boolean) => {
-      await setBlePlugRelay(plug, relayOn);
+      if (wifiTarget) {
+        await setWifiPlugRelay(wifiTarget, relayOn);
+      } else {
+        await setBlePlugRelay(plug, relayOn);
+      }
       return relayOn;
     },
     retry: false,
