@@ -11,7 +11,7 @@ const draft = {
   sensorNameInput: '',
   shellyDevices: [
     {
-      id: 'http://192.168.0.20/',
+      id: 'shellyplugsg3-e2e',
       name: 'Shelly Plug S Gen3',
       baseUrl: 'http://192.168.0.20/',
       scriptIdInput: '1'
@@ -25,11 +25,11 @@ const draft = {
       profileId: 'xiaomi_lywsd03mmc_bthome_v2'
     }
   ],
-  selectedShellyId: 'http://192.168.0.20/',
+  selectedShellyId: 'shellyplugsg3-e2e',
   selectedSensorId: 'A4:C1:38:4F:24:CD',
   additionalSensorIds: [],
   sensorAggregation: 'avg',
-  diagnosticShellyId: 'http://192.168.0.20/',
+  diagnosticShellyId: 'shellyplugsg3-e2e',
   rulePreset: 'heating',
   onThresholdInput: '19',
   offThresholdInput: '20',
