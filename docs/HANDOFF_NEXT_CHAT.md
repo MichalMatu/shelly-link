@@ -1,10 +1,10 @@
 # Handoff — clean product checkpoint
 
-Status: **2026-09-27 — BLE/Plug-management iteration merged; v1 sequence and post-freeze Gen4 boundary agreed**
+Status: **2026-09-27 — Unified physical Plug registry completed; runtime control/state arbitration is next**
 
 Repository: `MichalMatu/shelly-link`
 
-Current branch: `main`
+Current branch after slice merge: `main`
 
 ## Product direction
 
@@ -37,6 +37,10 @@ Detailed dated hardware evidence belongs in `docs/testing/hardware-matrix.md`.
 
 - Canonical Plug identity is normalized `Shelly.GetDeviceInfo.id`.
 - Wi-Fi and BLE addresses are replaceable transport locators, never identity.
+- `features/plugs` is the single durable owner of saved physical Plugs through `lcl.savedPlugs.v1`.
+- Hardware setup owns only setup selection/configuration state; its v10 draft does not persist a second Plug registry.
+- Legacy Wi-Fi state from `lcl.hardwareSetupDraft.v9` and legacy BLE state from `lcl.savedBlePlugs.v1` migrate into the unified registry by canonical physical identity.
+- Endpoint-shaped historical IDs are not accepted as physical identity; HTTP URLs remain locators only.
 - Identity is verified before destructive/device mutations.
 - Optional behavior is capability-driven via `Shelly.ListMethods`.
 - Ambiguous mutations are never automatically replayed after timeout/disconnect.
@@ -46,7 +50,11 @@ Detailed dated hardware evidence belongs in `docs/testing/hardware-matrix.md`.
 
 ## Current structural foundation
 
-The saved Plug registry is canonical by normalized physical identity. BLE and verified Wi-Fi/HTTP locators enrich the same durable record; hardware-setup keeps workflow draft state rather than a second Plug registry.
+The Unified Physical Plug Registry slice is complete. BLE and verified Wi-Fi/HTTP locators enrich the same canonical physical record; hardware-setup consumes that registry through composition adapters and does not own a competing durable device list.
+
+Final architecture checks for the slice found no endpoint-shaped `physicalId` seeds, no `shellyDevices` durable setup field and no private cross-feature imports of the Plug store. The legacy BLE storage key remains only in migration code and migration tests.
+
+No new real-device acceptance was claimed by this slice; hardware evidence remains whatever is already recorded in `docs/testing/hardware-matrix.md`.
 
 ## Agreed v1 implementation sequence
 
@@ -112,6 +120,8 @@ Gen4 should prove that the platform can add a second physical Plug type by suppl
 
 ## Current checkpoint
 
-The long BLE/Plug-management work branch was merged and deleted. `work/kvs-datalogger` remains parked intentionally.
+The Unified Physical Plug Registry slice is ready to merge after its final full repository gate. After merge, delete only its implementation/staging branches and preserve `work/kvs-datalogger`.
 
-The roadmap/handoff changes after the merge are docs-only descendants on `main`. Before starting implementation in a new chat, read this file, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, the relevant `AGENTS.md` files, and verify the current `main` SHA.
+The immediate next slice is **Runtime control/state arbitration**. Begin with an audit of existing relay decision paths and physical-button handling before changing behavior. The target is one explicit arbiter for `AUTO`, `MANUAL`, `PAUSED` and `FAULT`, including the exact safe `MANUAL_OFF` takeover semantics above.
+
+Before starting implementation in a new chat, read this file, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, the relevant `AGENTS.md` files, and verify the current `main` SHA.
