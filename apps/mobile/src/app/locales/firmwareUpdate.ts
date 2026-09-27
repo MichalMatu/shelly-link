@@ -18,7 +18,8 @@ type FirmwareUpdateCopy = {
 
 const en: FirmwareUpdateCopy = {
   title: 'Firmware update',
-  description: 'Check and install the stable Shelly firmware using the Plug’s Wi-Fi connection.',
+  description:
+    'Check and install the stable Shelly firmware using the Plug’s Wi-Fi connection.',
   current: 'Current firmware',
   checking: 'Checking for updates…',
   upToDate: 'Up to date',
@@ -37,15 +38,18 @@ export const firmwareUpdateCopy: Record<Locale, FirmwareUpdateCopy> = {
   pl: {
     ...en,
     title: 'Aktualizacja firmware',
-    description: 'Sprawdź i zainstaluj stabilny firmware Shelly przez połączenie Wi-Fi gniazdka.',
+    description:
+      'Sprawdź i zainstaluj stabilny firmware Shelly przez połączenie Wi-Fi gniazdka.',
     current: 'Aktualny firmware',
     checking: 'Sprawdzam aktualizacje…',
     upToDate: 'Aktualny',
     available: 'Dostępna stabilna aktualizacja',
     update: 'Aktualizuj',
     updating: 'Uruchamiam aktualizację…',
-    started: 'Aktualizacja uruchomiona. Gniazdko zrestartuje się; połącz się ponownie, aby zweryfikować nowy firmware.',
-    needsWifi: 'Najpierw połącz to gniazdko z Wi-Fi, aby sprawdzić aktualizacje firmware.',
+    started:
+      'Aktualizacja uruchomiona. Gniazdko zrestartuje się; połącz się ponownie, aby zweryfikować nowy firmware.',
+    needsWifi:
+      'Najpierw połącz to gniazdko z Wi-Fi, aby sprawdzić aktualizacje firmware.',
     unsupported: 'Ten firmware Shelly nie udostępnia sprawdzania aktualizacji.',
     checkFailed: 'Nie udało się sprawdzić aktualizacji firmware.',
     updateFailed: 'Nie udało się uruchomić aktualizacji firmware.'

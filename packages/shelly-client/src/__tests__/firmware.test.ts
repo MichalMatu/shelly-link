@@ -63,10 +63,7 @@ describe('RpcShellyFirmwareClient', () => {
   });
 
   it('sends one explicit stable update mutation after capability verification', async () => {
-    const transport = new QueueTransport([
-      ok({ methods: ['Shelly.Update'] }),
-      ok(null)
-    ]);
+    const transport = new QueueTransport([ok({ methods: ['Shelly.Update'] }), ok(null)]);
 
     await expect(new RpcShellyFirmwareClient(transport).updateStable()).resolves.toEqual({
       ok: true,
@@ -79,9 +76,7 @@ describe('RpcShellyFirmwareClient', () => {
   });
 
   it('does not send an update mutation when Shelly.Update is unavailable', async () => {
-    const transport = new QueueTransport([
-      ok({ methods: ['Shelly.CheckForUpdate'] })
-    ]);
+    const transport = new QueueTransport([ok({ methods: ['Shelly.CheckForUpdate'] })]);
 
     const result = await new RpcShellyFirmwareClient(transport).updateStable();
     expect(result).toMatchObject({

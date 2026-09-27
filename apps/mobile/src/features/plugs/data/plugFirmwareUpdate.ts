@@ -17,7 +17,11 @@ const createClient = async (target: PlugFirmwareUpdateTarget) =>
     })
   );
 
-const unwrap = <T>(result: { ok: true; value: T } | { ok: false; error: { technicalMessage?: string; kind: string } }): T => {
+const unwrap = <T>(
+  result:
+    | { ok: true; value: T }
+    | { ok: false; error: { technicalMessage?: string; kind: string } }
+): T => {
   if (result.ok) return result.value;
   throw new Error(result.error.technicalMessage ?? `Shelly RPC: ${result.error.kind}`);
 };

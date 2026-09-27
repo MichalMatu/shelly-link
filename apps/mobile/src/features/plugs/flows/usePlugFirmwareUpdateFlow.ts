@@ -7,11 +7,12 @@ import {
 
 export const plugFirmwareUpdateQueryKey = (
   target: PlugFirmwareUpdateTarget | undefined
-) => [
-  'plug-firmware-update',
-  target?.physicalId ?? 'missing',
-  target?.baseUrl ?? 'missing'
-] as const;
+) =>
+  [
+    'plug-firmware-update',
+    target?.physicalId ?? 'missing',
+    target?.baseUrl ?? 'missing'
+  ] as const;
 
 export const usePlugFirmwareUpdateFlow = (
   target: PlugFirmwareUpdateTarget | undefined
