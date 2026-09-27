@@ -22,9 +22,9 @@ import {
 } from '../../features/automations/index.js';
 import {
   detachPlugButtonForManagedAutomation,
-  restorePlugButtonAfterManagedAutomation
-} from '../../features/plugs/data/plugButtonModeSettings.js';
-import { useSavedPlugStore } from '../../features/plugs/index.js';
+  restorePlugButtonAfterManagedAutomation,
+  useSavedPlugStore
+} from '../../features/plugs/index.js';
 import { forceRelayOffAndConfirm } from '../installations/relaySafety.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
 import { cleanupStaleShellyBleDiscoveryScripts } from './shellyRequests.js';
