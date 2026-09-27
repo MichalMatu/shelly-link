@@ -1,5 +1,4 @@
 import { DiagnosticRow } from '@lcl/ui';
-import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { firmwareUpdateCopy } from '../../../app/locales/firmwareUpdate.js';
 import type { PlugFirmwareUpdateTarget } from '../data/plugFirmwareUpdate.js';
@@ -22,19 +21,21 @@ export const PlugFirmwareUpdateCard = ({
 }: PlugFirmwareUpdateCardProps) => {
   const { locale, t } = useTranslation();
   const copy = firmwareUpdateCopy[locale];
-  const { query, updateMutation } = usePlugFirmwareUpdateFlow(target);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const { query, updateMutation, updatePhase } = usePlugFirmwareUpdateFlow(
+    target,
+    currentFirmware
+  );
   const result = query.data;
   const stable = result?.supported ? result.updates.stable : undefined;
   const canUpdate = Boolean(result?.supported && result.canUpdate && stable);
+  const verifiedFirmware = updateMutation.data?.deviceInfo.firmwareId;
 
-  const startUpdate = () => {
-    setFeedback(null);
-    updateMutation.mutate(undefined, {
-      onSuccess: () => setFeedback(copy.started),
-      onError: (error) => setFeedback(detailError(copy.updateFailed, error))
-    });
-  };
+  const pendingCopy =
+    updatePhase === 'reconnecting'
+      ? copy.reconnecting
+      : updatePhase === 'verifying'
+        ? copy.verifying
+        : copy.updating;
 
   return (
     <section className="plug-settings-section installation-detail-firmware-update">
@@ -46,7 +47,7 @@ export const PlugFirmwareUpdateCard = ({
       <div className="plug-info-grid">
         <DiagnosticRow
           label={copy.current}
-          value={currentFirmware ?? t('common.missing')}
+          value={verifiedFirmware ?? currentFirmware ?? t('common.missing')}
         />
         {target && query.isPending && (
           <DiagnosticRow label={copy.title} value={copy.checking} />
@@ -71,28 +72,33 @@ export const PlugFirmwareUpdateCard = ({
         </p>
       )}
 
-      {canUpdate && (
+      {canUpdate && updatePhase !== 'complete' && (
         <div className="plug-settings-actions">
           <button
             className="primary-action"
             type="button"
             disabled={updateMutation.isPending}
             aria-busy={updateMutation.isPending || undefined}
-            onClick={startUpdate}
+            onClick={() => updateMutation.mutate()}
           >
-            {updateMutation.isPending ? copy.updating : copy.update}
+            {updateMutation.isPending ? pendingCopy : copy.update}
           </button>
         </div>
       )}
 
-      {feedback && (
-        <p
-          role="status"
-          className={`plug-settings-feedback${
-            updateMutation.isError ? ' plug-settings-feedback--warning' : ''
-          }`}
-        >
-          {feedback}
+      {updateMutation.isPending && updatePhase !== 'starting' && (
+        <p role="status" className="plug-settings-feedback">
+          {pendingCopy}
+        </p>
+      )}
+      {updatePhase === 'complete' && (
+        <p role="status" className="plug-settings-feedback">
+          {copy.complete}
+        </p>
+      )}
+      {updateMutation.isError && (
+        <p role="status" className="plug-settings-feedback plug-settings-feedback--warning">
+          {detailError(copy.updateFailed, updateMutation.error)}
         </p>
       )}
     </section>
