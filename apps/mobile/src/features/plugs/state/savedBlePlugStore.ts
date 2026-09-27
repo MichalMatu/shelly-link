@@ -4,7 +4,11 @@ import {
   createSavedBlePlugRepository,
   type SavedBlePlugRepository
 } from '../data/savedBlePlugRepository.js';
-import { savedBlePlugFromCandidate, type SavedBlePlug } from '../data/savedBlePlug.js';
+import {
+  savedBlePlugFromCandidate,
+  savedBlePlugSchema,
+  type SavedBlePlug
+} from '../data/savedBlePlug.js';
 
 export type SavedBlePlugState = {
   plugs: SavedBlePlug[];
@@ -70,21 +74,8 @@ export const useSavedBlePlugStore = create<SavedBlePlugState>((set) => ({
         ) {
           return plug;
         }
-        const parsed = savedBlePlugFromCandidate(
-          {
-            bleDeviceId: plug.bleDeviceId,
-            advertisementName: plug.advertisementName,
-            rssi: 0,
-            physicalId: plug.physicalId,
-            model: plug.model,
-            generation: plug.generation,
-            firmwareId: plug.firmwareId,
-            matterEnabled: plug.matterEnabled
-          },
-          { ...plug, wifiBaseUrl: normalizedBaseUrl }
-        );
         changed = true;
-        return parsed;
+        return savedBlePlugSchema.parse({ ...plug, wifiBaseUrl: normalizedBaseUrl });
       });
       if (!changed) return state;
       repository.save(plugs);
