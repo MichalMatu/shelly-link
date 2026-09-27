@@ -33,12 +33,13 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
   const firmwareTarget = plug.wifiBaseUrl
     ? { physicalId: plug.physicalId, baseUrl: plug.wifiBaseUrl }
     : undefined;
+  const preferredTransport = plug.wifiBaseUrl ? 'wifi' : 'bluetooth';
 
   return (
     <main className="demo-shell installation-detail-shell">
       <PlugDetailTop
         plug={plug}
-        transport="bluetooth"
+        transport={preferredTransport}
         tabs={[activeTab, setActiveTab]}
         disabledTabs={disabledBleDetailTabs}
       />
@@ -86,11 +87,15 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
         {activeTab === 'info' && (
           <>
             <PlugInfoPanel
-              connection={{
-                transport: 'bluetooth',
-                bleDeviceId: plug.bleDeviceId,
-                advertisementName: plug.advertisementName
-              }}
+              connection={
+                plug.wifiBaseUrl
+                  ? { transport: 'wifi', baseUrl: plug.wifiBaseUrl }
+                  : {
+                      transport: 'bluetooth',
+                      bleDeviceId: plug.bleDeviceId,
+                      advertisementName: plug.advertisementName
+                    }
+              }
               information={detailQuery.data?.information}
               loading={detailQuery.isPending}
               error={detailQuery.isError}
