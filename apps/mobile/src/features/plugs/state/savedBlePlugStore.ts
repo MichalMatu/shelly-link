@@ -15,6 +15,7 @@ export type SavedBlePlugState = {
   saveCandidate(candidate: VerifiedPlugBleCandidate): void;
   replaceLocator(physicalId: string, bleDeviceId: string): void;
   setWifiLocator(physicalId: string, wifiBaseUrl: string): void;
+  updateFirmware(physicalId: string, firmwareId: string): void;
   renamePlug(physicalId: string, name: string): void;
   removePlug(physicalId: string): void;
 };
@@ -76,6 +77,27 @@ export const useSavedBlePlugStore = create<SavedBlePlugState>((set) => ({
         }
         changed = true;
         return savedBlePlugSchema.parse({ ...plug, wifiBaseUrl: normalizedBaseUrl });
+      });
+      if (!changed) return state;
+      repository.save(plugs);
+      return { plugs };
+    }),
+  updateFirmware: (physicalId, firmwareId) =>
+    set((state) => {
+      const normalizedId = normalizeId(physicalId);
+      const normalizedFirmwareId = firmwareId.trim();
+      if (!normalizedFirmwareId) return state;
+
+      let changed = false;
+      const plugs = state.plugs.map((plug) => {
+        if (
+          normalizeId(plug.physicalId) !== normalizedId ||
+          plug.firmwareId === normalizedFirmwareId
+        ) {
+          return plug;
+        }
+        changed = true;
+        return savedBlePlugSchema.parse({ ...plug, firmwareId: normalizedFirmwareId });
       });
       if (!changed) return state;
       repository.save(plugs);
