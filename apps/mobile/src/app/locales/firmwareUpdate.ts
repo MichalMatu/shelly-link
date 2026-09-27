@@ -9,7 +9,9 @@ type FirmwareUpdateCopy = {
   available: string;
   update: string;
   updating: string;
-  started: string;
+  reconnecting: string;
+  verifying: string;
+  complete: string;
   needsWifi: string;
   unsupported: string;
   checkFailed: string;
@@ -26,11 +28,13 @@ const en: FirmwareUpdateCopy = {
   available: 'Stable update available',
   update: 'Update',
   updating: 'Starting update…',
-  started: 'Update started. The Plug will restart; reconnect to verify the new firmware.',
+  reconnecting: 'Updating firmware and waiting for the Plug to restart…',
+  verifying: 'Plug reconnected. Verifying firmware and capabilities…',
+  complete: 'Firmware update verified.',
   needsWifi: 'Connect this Plug to Wi-Fi first to check for firmware updates.',
   unsupported: 'This Shelly firmware does not expose firmware update checks.',
   checkFailed: 'Could not check for firmware updates.',
-  updateFailed: 'Could not start the firmware update.'
+  updateFailed: 'Firmware update could not be verified.'
 };
 
 export const firmwareUpdateCopy: Record<Locale, FirmwareUpdateCopy> = {
@@ -46,13 +50,14 @@ export const firmwareUpdateCopy: Record<Locale, FirmwareUpdateCopy> = {
     available: 'Dostępna stabilna aktualizacja',
     update: 'Aktualizuj',
     updating: 'Uruchamiam aktualizację…',
-    started:
-      'Aktualizacja uruchomiona. Gniazdko zrestartuje się; połącz się ponownie, aby zweryfikować nowy firmware.',
+    reconnecting: 'Aktualizuję firmware i czekam na restart gniazdka…',
+    verifying: 'Gniazdko wróciło. Weryfikuję firmware i dostępne funkcje…',
+    complete: 'Aktualizacja firmware zweryfikowana.',
     needsWifi:
       'Najpierw połącz to gniazdko z Wi-Fi, aby sprawdzić aktualizacje firmware.',
     unsupported: 'Ten firmware Shelly nie udostępnia sprawdzania aktualizacji.',
     checkFailed: 'Nie udało się sprawdzić aktualizacji firmware.',
-    updateFailed: 'Nie udało się uruchomić aktualizacji firmware.'
+    updateFailed: 'Nie udało się zweryfikować aktualizacji firmware.'
   },
   de: { ...en, title: 'Firmware-Update', update: 'Aktualisieren' },
   es: { ...en, title: 'Actualización de firmware', update: 'Actualizar' },
