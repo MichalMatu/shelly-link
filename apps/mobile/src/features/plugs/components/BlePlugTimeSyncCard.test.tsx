@@ -3,13 +3,17 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { deviceTimeCopy } from '../../../app/locales/deviceTime.js';
-import { syncBlePlugTime } from '../data/blePlugTimeSync.js';
+import {
+  BlePlugTimeSyncUnsupportedError,
+  syncBlePlugTime
+} from '../data/blePlugTimeSync.js';
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
 import { BlePlugTimeSyncCard } from './BlePlugTimeSyncCard.js';
 
-vi.mock('../data/blePlugTimeSync.js', () => ({
-  syncBlePlugTime: vi.fn()
-}));
+vi.mock('../data/blePlugTimeSync.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../data/blePlugTimeSync.js')>();
+  return { ...actual, syncBlePlugTime: vi.fn() };
+});
 
 const copy = deviceTimeCopy.pl;
 const plug: SavedBlePlug = {
@@ -23,7 +27,7 @@ const plug: SavedBlePlug = {
   matterEnabled: false
 };
 
-const renderCard = () => {
+const renderCard = (localTime: string | undefined = '18:42') => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   });
@@ -32,7 +36,7 @@ const renderCard = () => {
       <QueryClientProvider client={queryClient}>
         <BlePlugTimeSyncCard
           plug={plug}
-          clock={{ localTime: '18:42', unixTimeSec: 1_800_000_000, timeSynced: false }}
+          clock={{ ...(localTime ? { localTime } : {}), timeSynced: false }}
         />
       </QueryClientProvider>
     </I18nProvider>
@@ -61,5 +65,16 @@ describe('BlePlugTimeSyncCard', () => {
     expect(await screen.findByText(copy.synced)).toBeVisible();
     expect(syncBlePlugTime).toHaveBeenCalledOnce();
     expect(syncBlePlugTime).toHaveBeenCalledWith(plug);
+  });
+
+  it('shows an unset clock and firmware-specific unsupported feedback', async () => {
+    vi.mocked(syncBlePlugTime).mockRejectedValue(new BlePlugTimeSyncUnsupportedError());
+    renderCard(undefined);
+
+    expect(screen.getByText(copy.unavailable)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: copy.sync }));
+
+    expect(await screen.findByText(copy.unsupported)).toBeVisible();
+    expect(syncBlePlugTime).toHaveBeenCalledOnce();
   });
 });
