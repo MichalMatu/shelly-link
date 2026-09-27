@@ -205,6 +205,7 @@ export const AppRoutes = () => {
       <BlePlugDetailScreen
         physicalId={route.physicalId}
         onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
+        onRemove={removeShellyDevice}
       />
     );
   } else if (route.type === 'plug-settings') {
