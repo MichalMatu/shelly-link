@@ -1,6 +1,7 @@
 import { isRecoverableBlePlugReadOnlyError } from '../data/blePlugReadOnlyError.js';
 import {
   readBlePlugReadOnlyDetail,
+  readPlugReadOnlyDetailFromTarget,
   type PlugReadOnlyDetail
 } from '../data/plugReadOnlyDetail.js';
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
@@ -15,6 +16,9 @@ export type SavedBlePlugReadOnlyDetailRecoveryDependencies =
     readDetail?(
       plug: Pick<SavedBlePlug, 'physicalId' | 'bleDeviceId'>
     ): Promise<PlugReadOnlyDetail>;
+    readWifiDetail?(
+      plug: Pick<SavedBlePlug, 'physicalId' | 'wifiBaseUrl'>
+    ): Promise<PlugReadOnlyDetail>;
   };
 
 export const readSavedBlePlugReadOnlyDetail = async (
@@ -22,6 +26,18 @@ export const readSavedBlePlugReadOnlyDetail = async (
   options: SavedBlePlugLocatorRecoveryOptions,
   dependencies: SavedBlePlugReadOnlyDetailRecoveryDependencies = {}
 ): Promise<PlugReadOnlyDetail> => {
+  if (plug.wifiBaseUrl) {
+    const readWifiDetail =
+      dependencies.readWifiDetail ??
+      ((target: Pick<SavedBlePlug, 'physicalId' | 'wifiBaseUrl'>) =>
+        readPlugReadOnlyDetailFromTarget({
+          transport: 'wifi',
+          physicalId: target.physicalId,
+          baseUrl: target.wifiBaseUrl as string
+        }));
+    return readWifiDetail(plug);
+  }
+
   const readDetail = dependencies.readDetail ?? readBlePlugReadOnlyDetail;
 
   try {
