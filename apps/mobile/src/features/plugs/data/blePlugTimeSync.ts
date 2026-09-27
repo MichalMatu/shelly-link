@@ -41,7 +41,9 @@ const defaultDependencies: BlePlugTimeSyncDependencies = {
   createClient: (transport) => new RpcShellyClient(transport),
   supportsSetTime: async (transport) => {
     const response = unwrapShellyResult(
-      await transport.call<{ methods?: unknown }>({ method: RPC_METHODS.ShellyListMethods })
+      await transport.call<{ methods?: unknown }>({
+        method: RPC_METHODS.ShellyListMethods
+      })
     );
     return (
       Array.isArray(response.methods) && response.methods.includes(RPC_METHODS.SysSetTime)

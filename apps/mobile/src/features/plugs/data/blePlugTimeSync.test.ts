@@ -36,8 +36,14 @@ const plug = {
 
 describe('syncBlePlugTime', () => {
   it('verifies physical identity and capability before sending phone time over the same BLE session', async () => {
-    const { dependencies, disconnect, getDeviceInfo, setTime, supportsSetTime, transport } =
-      createDependencies();
+    const {
+      dependencies,
+      disconnect,
+      getDeviceInfo,
+      setTime,
+      supportsSetTime,
+      transport
+    } = createDependencies();
 
     await expect(syncBlePlugTime(plug, dependencies)).resolves.toEqual({
       unixTimeSec: 1_800_000_000.987
