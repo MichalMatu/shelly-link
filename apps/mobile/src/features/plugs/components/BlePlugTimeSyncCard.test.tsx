@@ -72,6 +72,18 @@ describe('BlePlugTimeSyncCard', () => {
     expect(syncBlePlugTime).toHaveBeenCalledWith(plug);
   });
 
+  it('keeps unexpected technical failures out of user-facing feedback', async () => {
+    const technicalMessage = 'RPC -32601: No handler for Sys.SetTime';
+    vi.mocked(syncBlePlugTime).mockRejectedValue(new Error(technicalMessage));
+    renderCard();
+
+    fireEvent.click(screen.getByRole('button', { name: copy.sync }));
+
+    expect(await screen.findByText(copy.actionFailed)).toBeVisible();
+    expect(screen.queryByText(technicalMessage)).toBeNull();
+    expect(syncBlePlugTime).toHaveBeenCalledOnce();
+  });
+
   it('shows an unset clock and firmware-specific unsupported feedback', async () => {
     vi.mocked(syncBlePlugTime).mockRejectedValue(new BlePlugTimeSyncUnsupportedError());
     renderCard(null);
