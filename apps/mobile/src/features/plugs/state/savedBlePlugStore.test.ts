@@ -83,6 +83,31 @@ describe('saved BLE plug store', () => {
     });
   });
 
+  it('persists verified firmware metadata without changing locators or the custom name', () => {
+    useSavedBlePlugStore.getState().saveCandidate(candidate());
+    useSavedBlePlugStore.getState().renamePlug('shellyplugsg3-aabb', 'Growbox fan');
+    useSavedBlePlugStore
+      .getState()
+      .setWifiLocator('shellyplugsg3-aabb', 'http://192.168.0.17');
+
+    useSavedBlePlugStore
+      .getState()
+      .updateFirmware(
+        'SHELLYPLUGSG3-AABB',
+        '20260923-075613/2.0.1-ge1a198b'
+      );
+
+    expect(useSavedBlePlugStore.getState().plugs).toEqual([
+      expect.objectContaining({
+        physicalId: 'shellyplugsg3-aabb',
+        name: 'Growbox fan',
+        bleDeviceId: 'temporary-handle-a',
+        wifiBaseUrl: 'http://192.168.0.17',
+        firmwareId: '20260923-075613/2.0.1-ge1a198b'
+      })
+    ]);
+  });
+
   it('removes a BLE-only plug by physical identity', () => {
     useSavedBlePlugStore.getState().saveCandidate(candidate());
 
