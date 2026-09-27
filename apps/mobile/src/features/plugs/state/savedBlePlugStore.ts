@@ -10,6 +10,7 @@ export type SavedBlePlugState = {
   plugs: SavedBlePlug[];
   saveCandidate(candidate: VerifiedPlugBleCandidate): void;
   replaceLocator(physicalId: string, bleDeviceId: string): void;
+  setWifiLocator(physicalId: string, wifiBaseUrl: string): void;
   renamePlug(physicalId: string, name: string): void;
   removePlug(physicalId: string): void;
 };
@@ -50,6 +51,40 @@ export const useSavedBlePlugStore = create<SavedBlePlugState>((set) => ({
         }
         changed = true;
         return { ...plug, bleDeviceId: normalizedLocator };
+      });
+      if (!changed) return state;
+      repository.save(plugs);
+      return { plugs };
+    }),
+  setWifiLocator: (physicalId, wifiBaseUrl) =>
+    set((state) => {
+      const normalizedId = normalizeId(physicalId);
+      const normalizedBaseUrl = wifiBaseUrl.trim().replace(/\/$/, '');
+      if (!normalizedBaseUrl) return state;
+
+      let changed = false;
+      const plugs = state.plugs.map((plug) => {
+        if (
+          normalizeId(plug.physicalId) !== normalizedId ||
+          plug.wifiBaseUrl === normalizedBaseUrl
+        ) {
+          return plug;
+        }
+        const parsed = savedBlePlugFromCandidate(
+          {
+            bleDeviceId: plug.bleDeviceId,
+            advertisementName: plug.advertisementName,
+            rssi: 0,
+            physicalId: plug.physicalId,
+            model: plug.model,
+            generation: plug.generation,
+            firmwareId: plug.firmwareId,
+            matterEnabled: plug.matterEnabled
+          },
+          { ...plug, wifiBaseUrl: normalizedBaseUrl }
+        );
+        changed = true;
+        return parsed;
       });
       if (!changed) return state;
       repository.save(plugs);
