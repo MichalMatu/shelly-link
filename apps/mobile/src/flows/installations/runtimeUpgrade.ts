@@ -1,5 +1,6 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
+import { detachPlugButtonForManagedAutomation } from '../../features/plugs/data/plugButtonModeSettings.js';
 import { generateShellyThermostatScript } from '@lcl/script-generator';
 import {
   createInstallPlan,
@@ -34,24 +35,42 @@ const assertStoredDeviceIdentity = async (
   }
 };
 
+const convergeManagedButtonMode = async (
+  installation: ClimateInstalledAutomation
+): Promise<ClimateInstalledAutomation> => {
+  const previousMode = await detachPlugButtonForManagedAutomation({
+    deviceId: installation.shelly.deviceId,
+    baseUrl: installation.shelly.baseUrl
+  });
+  if (installation.buttonInputModeBeforeInstall !== undefined) return installation;
+  return {
+    ...installation,
+    buttonInputModeBeforeInstall: previousMode,
+    updatedAtMs: Math.max(Date.now(), installation.updatedAtMs + 1)
+  };
+};
+
 const reinstallCurrentRuntime = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationRuntimePreparation> => {
   await assertStoredDeviceIdentity(installation);
-  const relayId = installation.config.output.relayId;
-  const client = new RpcShellyClient(createShellyTransport(installation.shelly.baseUrl));
+  const preparedInstallation = await convergeManagedButtonMode(installation);
+  const relayId = preparedInstallation.config.output.relayId;
+  const client = new RpcShellyClient(
+    createShellyTransport(preparedInstallation.shelly.baseUrl)
+  );
 
   await forceRelayOffAndConfirm(client, relayId);
-  const code = generateShellyThermostatScript(installation.config);
+  const code = generateShellyThermostatScript(preparedInstallation.config);
   const installed = unwrapShellyResult(
     await client.installScript(createInstallPlan(code, relayId))
   );
   await forceRelayOffAndConfirm(client, relayId);
 
   const upgradedInstallation: ClimateInstalledAutomation = {
-    ...installation,
+    ...preparedInstallation,
     script: { id: installed.scriptId, hash: installed.scriptHash },
-    updatedAtMs: Math.max(Date.now(), installation.updatedAtMs + 1)
+    updatedAtMs: Math.max(Date.now(), preparedInstallation.updatedAtMs + 1)
   };
   const status = await readInstalledAutomationControlStatus(upgradedInstallation);
   if (
@@ -70,17 +89,22 @@ export const ensureInstalledAutomationRuntimeCurrent = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationRuntimePreparation> => {
   await assertStoredDeviceIdentity(installation);
-  const status = await readInstalledAutomationControlStatus(installation);
+  const preparedInstallation = await convergeManagedButtonMode(installation);
+  const status = await readInstalledAutomationControlStatus(preparedInstallation);
   if (
-    status.automationScriptId === installation.script.id &&
+    status.automationScriptId === preparedInstallation.script.id &&
     status.automationMode !== 'missing' &&
     status.automationMode !== 'stopped' &&
     status.runtimeModeSupported
   ) {
-    return { installation, status, upgraded: false };
+    return {
+      installation: preparedInstallation,
+      status,
+      upgraded: preparedInstallation !== installation
+    };
   }
 
-  return reinstallCurrentRuntime(installation);
+  return reinstallCurrentRuntime(preparedInstallation);
 };
 
 export const recoverInstalledAutomationRuntime = (
