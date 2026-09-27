@@ -7,7 +7,8 @@ export const blePlugReadOnlyDetailQueryKey = (plug: SavedBlePlug | undefined) =>
   [
     'ble-plug-read-only-detail',
     plug?.physicalId ?? 'missing',
-    plug?.bleDeviceId ?? 'missing'
+    plug?.bleDeviceId ?? 'missing',
+    plug?.wifiBaseUrl ?? 'no-wifi'
   ] as const;
 
 export const useBlePlugReadOnlyDetailFlow = (plug: SavedBlePlug | undefined) => {
