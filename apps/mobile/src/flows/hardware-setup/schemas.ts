@@ -92,6 +92,25 @@ const perSensorDiagnosticSchema = z
     fresh: diagnostic[6] === 1
   }));
 
+const runtimeControlModeCodeSchema = z.union([
+  z.literal(0),
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+  z.literal(4)
+]);
+
+const runtimeControlModeFromCode = (
+  code: z.infer<typeof runtimeControlModeCodeSchema> | undefined
+): 'auto' | 'manual-off' | 'manual-on' | 'paused' | 'fault' | null => {
+  if (code === 0) return 'auto';
+  if (code === 1) return 'manual-off';
+  if (code === 2) return 'manual-on';
+  if (code === 3) return 'paused';
+  if (code === 4) return 'fault';
+  return null;
+};
+
 export const diagnosticSnapshotSchema = z
   .object({
     v: z.number(),
@@ -136,7 +155,9 @@ export const diagnosticSnapshotSchema = z
       z.number().nullable(),
       z.number().nullable(),
       z.number().nullable(),
-      z.string()
+      z.string(),
+      runtimeControlModeCodeSchema.optional(),
+      z.boolean().optional()
     ])
   })
   .transform((snapshot) => ({
@@ -194,7 +215,9 @@ export const diagnosticSnapshotSchema = z
       lastEffectiveOnThreshold: snapshot.g[13],
       lastEffectiveOffThreshold: snapshot.g[14],
       lastPacketSeenUptimeMs: snapshot.g[15],
-      dataState: snapshot.g[16]
+      dataState: snapshot.g[16],
+      controlMode: runtimeControlModeFromCode(snapshot.g[17]),
+      automationRequestedRelayState: snapshot.g[18] ?? null
     }
   }));
 
