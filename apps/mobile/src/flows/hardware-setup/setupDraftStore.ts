@@ -18,18 +18,16 @@ import {
   persistHardwareSetupDraftPatch,
   readStoredHardwareSetupDraft,
   type HardwareSetupDraft,
-  type SensorDraftDevice,
+  type SensorDraftDevice
 } from '../../features/hardware-setup/index.js';
 import { useSavedPlugStore } from '../../features/plugs/index.js';
 
 export { HARDWARE_SETUP_DRAFT_STORAGE_KEY } from '../../features/hardware-setup/index.js';
-import { useSavedPlugStore } from '../../features/plugs/index.js';
 export type {
   HardwareSetupDraft,
   SensorDraftDevice,
   ShellyDraftDevice
 } from '../../features/hardware-setup/index.js';
-import { useSavedPlugStore } from '../../features/plugs/index.js';
 
 export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   shellyNameInput: 'Shelly Plug S Gen3',
@@ -37,7 +35,6 @@ export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   sensorProfileInput: 'xiaomi_lywsd03mmc_bthome_v2',
   sensorMacInput: '',
   sensorNameInput: '',
-  shellyDevices: [],
   sensorDevices: [],
   selectedShellyId: null,
   selectedSensorId: null,
