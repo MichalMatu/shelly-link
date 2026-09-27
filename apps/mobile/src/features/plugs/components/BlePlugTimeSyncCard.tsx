@@ -23,7 +23,10 @@ export const BlePlugTimeSyncCard = ({ plug, clock }: BlePlugTimeSyncCardProps) =
     setFeedback(null);
     syncMutation.mutate(undefined, {
       onSuccess: () => setFeedback(copy.synced),
-      onError: () => setFeedback(copy.actionFailed)
+      onError: (error) => {
+        const detail = error instanceof Error ? error.message.trim() : '';
+        setFeedback(detail ? `${copy.actionFailed} ${detail}` : copy.actionFailed);
+      }
     });
   };
 
