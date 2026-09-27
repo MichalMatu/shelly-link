@@ -178,6 +178,28 @@ export const diagnosticSnapshotSchema = z
         z.string(),
         runtimeControlModeCodeSchema,
         z.boolean()
+      ]),
+      z.tuple([
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.boolean(),
+        z.string(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number(),
+        z.number(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+        z.string(),
+        runtimeControlModeCodeSchema,
+        z.boolean(),
+        z.number().nullable()
       ])
     ])
   })
@@ -238,7 +260,8 @@ export const diagnosticSnapshotSchema = z
       lastPacketSeenUptimeMs: snapshot.g[15],
       dataState: snapshot.g[16],
       controlMode: runtimeControlModeFromCode(snapshot.g[17]),
-      automationRequestedRelayState: snapshot.g[18] ?? null
+      automationRequestedRelayState: snapshot.g[18] ?? null,
+      lastControlTransitionUptimeMs: snapshot.g[19] ?? null
     }
   }));
 

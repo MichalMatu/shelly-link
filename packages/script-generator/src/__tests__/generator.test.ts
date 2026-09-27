@@ -244,7 +244,8 @@ describe('generateShellyThermostatScript', () => {
         0,
         'boot',
         0,
-        false
+        false,
+        null
       ],
       d: [['A4C1384F24CD', null, null, null, null, null, 0]]
     });

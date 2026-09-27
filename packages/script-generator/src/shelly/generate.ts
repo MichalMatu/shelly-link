@@ -40,7 +40,7 @@ function pt(x,j){var d=x.advData;if(!d){R.ds="ta";return;}var p=mf(d);if(p===nul
 function parse(x,p,j){return p==1?pt(x,j):pb(x,j)}`;
 
 const renderRuntimeState = (): string =>
-  'var R={ls:null,l:0,t:null,h:null,tt:null,ht:null,b:null,r:null,on:false,rs:"boot",ds:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,m:0,a:false,sa:0,u:[],fc:0};';
+  'var R={ls:null,l:0,t:null,h:null,tt:null,ht:null,b:null,r:null,on:false,rs:"boot",ds:"boot",lc:0,os:null,nh:0,fh:0,cv:null,vp:null,eo:null,ef:null,m:0,a:false,mt:null,sa:0,u:[],fc:0};';
 
 const renderMeasurementHelper = (): string => {
   const commonDecision =
@@ -63,14 +63,14 @@ function nw(){return Shelly.getUptimeMs();}
 function na(a){var s=a==null?"":String(a).toUpperCase(),o="",i,c;for(i=0;i<s.length;i++)if((c=s[i])!=":"&&c!="-")o+=c;return o}
 function fv(o,k){return o&&o[k]!=null?o[k]:null;}
 function s(o,c){Shelly.call("Switch.Set",{id:C.i,on:o},c)}
-function ft(q){R.m=4;R.rs=q;R.lc=nw();R.on=false;R.os=null;s(false)}
+function ft(q){var n=nw();if(R.m!=4)R.mt=n;R.m=4;R.rs=q;R.lc=n;R.on=false;R.os=null;s(false)}
 function sw(o,q,f){if(!f){R.a=o;if(R.m)return}var n=nw(),c=R.on!=o,m=R.m;if(o&&!f&&c&&n-R.lc<C.c)return R.rs="mc";s(o,function(r,e){if(R.m!=m)return s(R.m==2);if(e)return ft("se");R.on=o;R.rs=q;if(c)R.lc=n;R.os=o?n:null})}
 function stale(){var n=nw();if(!R.ls||n-R.ls>C.s){R.ds="st";R.nh=R.fh=0;ft("st");return}if(R.on&&R.os&&n-R.os>=C.x){R.nh=R.fh=0;ft("mx")}}
 ${renderThresholdHelper()}
 ${renderMeasurementHelper()}
 ${renderRuntimeParser()}
 function pd(){var n=nw(),s=C.ss,a=[],i,u,x,l,f;for(i=0;i<(s?s.length:1);i++){x=s?s[i][0]:C.a;u=R.u[i];if(!u||u[6]!=x){a.push([x,null,null,null,null,null,0]);continue;}l=u[2];if(u[3]!=null&&(l==null||u[3]>l))l=u[3];f=C.vp?fr(u[2],n)&&fr(u[3],n):fr(C.m?u[3]:u[2],n);a.push([x,u[0],u[1],u[4],u[5],l,f?1:0]);}return a;}
-function diag(){var y=Shelly.getComponentStatus("sys"),w=Shelly.getComponentStatus("switch:0");return JSON.stringify({v:C.v,z:C.k,s:[C.fa,C.n],q:[C.m,C.d,C.on,C.off,C.s/1000,C.r],y:y?[y.time||null,y.unixtime||null,y.uptime||null]:null,p:w?[!!w.output,fv(w,"apower"),fv(w,"voltage"),fv(w,"current"),w.aenergy?fv(w.aenergy,"total"):null,w.temperature?fv(w.temperature,"tC"):null]:null,g:[R.ls,R.t,R.h,R.b,R.r,R.on,R.rs,R.lc,R.os,R.nh,R.fh,R.cv,R.vp,R.eo,R.ef,R.l,R.ds,R.m,R.a],d:pd(),u:[R.fc,C.ss?C.ss.length:1,C.ag==null?3:C.ag]});}
+function diag(){var y=Shelly.getComponentStatus("sys"),w=Shelly.getComponentStatus("switch:0");return JSON.stringify({v:C.v,z:C.k,s:[C.fa,C.n],q:[C.m,C.d,C.on,C.off,C.s/1000,C.r],y:y?[y.time||null,y.unixtime||null,y.uptime||null]:null,p:w?[!!w.output,fv(w,"apower"),fv(w,"voltage"),fv(w,"current"),w.aenergy?fv(w.aenergy,"total"):null,w.temperature?fv(w.temperature,"tC"):null]:null,g:[R.ls,R.t,R.h,R.b,R.r,R.on,R.rs,R.lc,R.os,R.nh,R.fh,R.cv,R.vp,R.eo,R.ef,R.l,R.ds,R.m,R.a,R.mt],d:pd(),u:[R.fc,C.ss?C.ss.length:1,C.ag==null?3:C.ag]});}
 if(typeof HTTPServer!=="undefined"&&HTTPServer.registerEndpoint){HTTPServer.registerEndpoint("diag",function(q,p){p.code=200;p.headers=[["Content-Type","application/json"]];p.body=diag();p.send();});}
 function ix(a){var z=na(a),s=C.ss;if(!s)return z==C.a?0:-1;for(var i=0;i<s.length;i++)if(z==s[i][0])return i;return-1;}
 function ev(e,x){if(e!=BLE.Scanner.SCAN_RESULT||!x)return;var j=ix(x.addr);if(j<0)return;R.l=nw();if(x.rssi!=null&&x.rssi<C.r){R.r=x.rssi;R.ds="rl";return;}var p=C.ss?C.ss[j][2]:C.p;parse(x,p,j);}

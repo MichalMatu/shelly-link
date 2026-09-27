@@ -28,6 +28,18 @@ const installation = createInstalledAutomation({
 describe('runtime mode Script.Eval transport', () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it('tracks control-mode transition uptime without reusing relay-change timing', async () => {
+    mocks.call.mockResolvedValue({ ok: true, value: { result: '1' } });
+
+    await setInstalledAutomationRuntimeMode(installation, 'manual-off');
+
+    const request = mocks.call.mock.calls.at(-1)?.[0] as
+      { params?: { code?: string } } | undefined;
+    const code = request?.params?.code ?? '';
+    expect(code).toContain('R.mt');
+    expect(code).not.toContain('R.lc=nw()');
+  });
+
   it('sets MANUAL_OFF inside the running script and verifies the eval result', async () => {
     mocks.call.mockResolvedValue({ ok: true, value: { result: '1' } });
 

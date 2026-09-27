@@ -23,7 +23,7 @@ FAULT / safety
             > AUTO
 ```
 
-The runtime owns the final relay decision. It tracks automation-requested state separately from final relay state and exposes control mode, reason and last relay-change uptime in diagnostics. Manual mode starts safe OFF, manual ON/OFF is explicit, PAUSED is safe OFF, FAULT cannot silently resume, and return to AUTO is explicit. Runtime upgrades preserve the automation-requested state.
+The runtime owns the final relay decision. It tracks automation-requested state separately from final relay state and exposes control mode, reason, last relay-change uptime and last control-mode transition uptime in diagnostics. Manual mode starts safe OFF, manual ON/OFF is explicit, PAUSED is safe OFF, FAULT cannot silently resume, and return to AUTO is explicit. Runtime upgrades preserve the automation-requested state.
 
 For Plug S Gen3, managed Climate ownership keeps the physical button `detached` and restores the prior mode on uninstall. Firmware 1.7.5 exposes no usable local Input/Button event for the built-in button while detached, so **physical takeover is not a Plug S Gen3 capability**. Manual takeover is app-driven. Future hardware may support physical takeover only through an explicitly verified input/button capability.
 

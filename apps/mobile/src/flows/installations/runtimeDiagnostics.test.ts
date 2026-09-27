@@ -44,7 +44,7 @@ const snapshot = (
       20,
       960_000,
       overrides.dataState ?? 'ok',
-      ...(overrides.includeArbitrationDiagnostics === false ? [] : [2, true])
+      ...(overrides.includeArbitrationDiagnostics === false ? [] : [2, true, 925_000])
     ]
   });
 
@@ -73,7 +73,8 @@ describe('installedAutomationHealth', () => {
         controlMode: 'manual-on',
         automationRequestedRelayState: true,
         lastReason: 'ok',
-        lastChangeUptimeMs: 900_000
+        lastChangeUptimeMs: 900_000,
+        lastControlTransitionUptimeMs: 925_000
       })
     );
   });
@@ -82,7 +83,8 @@ describe('installedAutomationHealth', () => {
     expect(snapshot({ includeArbitrationDiagnostics: false }).diagnostics).toEqual(
       expect.objectContaining({
         controlMode: null,
-        automationRequestedRelayState: null
+        automationRequestedRelayState: null,
+        lastControlTransitionUptimeMs: null
       })
     );
   });

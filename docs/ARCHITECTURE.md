@@ -70,7 +70,7 @@ FAULT / safety
             > AUTO
 ```
 
-`AUTO` records the automation-requested relay state and may drive the relay. `MANUAL_OFF`, `MANUAL_ON` and `PAUSED` block normal automation output; `FAULT` remains the highest-priority safe-OFF state. Returning to `AUTO` is explicit. The mobile app changes managed runtime modes through `Script.Eval`; it does not bypass the runtime with raw `Switch.Set`. Diagnostics expose the current control mode, automation-requested relay state, final relay state, reason code and last relay-change uptime.
+`AUTO` records the automation-requested relay state and may drive the relay. `MANUAL_OFF`, `MANUAL_ON` and `PAUSED` block normal automation output; `FAULT` remains the highest-priority safe-OFF state. Returning to `AUTO` is explicit. The mobile app changes managed runtime modes through `Script.Eval`; it does not bypass the runtime with raw `Switch.Set`. Diagnostics expose the current control mode, automation-requested relay state, final relay state, reason code, last relay-change uptime and last control-mode transition uptime.
 
 While a Climate automation owns a Plug S Gen3, the app converges `PLUGS_UI.controls.switch:0.in_mode` to `detached` and restores the previous mode on uninstall. Real-device acceptance on Plug S Gen3 firmware 1.7.5 confirmed that this model exposes no physical `Input`/`Button` component for its built-in button while detached. Therefore physical-button takeover is not part of the Plug S Gen3 runtime contract; manual takeover is app-driven. Future device profiles may enable physical takeover only when a real local input/button event capability is verified.
 

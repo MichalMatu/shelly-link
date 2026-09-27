@@ -13,7 +13,7 @@ Current accepted foundation:
 - one canonical physical Plug registry keyed by normalized `Shelly.GetDeviceInfo.id`; BLE and HTTP addresses are locators, not identity;
 - local `climate-engine-v1` with safe boot OFF, stale-data OFF and 1–4 BLE thermometers;
 - Climate runtime arbitration with priority `FAULT > PAUSED > MANUAL > AUTO`;
-- diagnostics expose control mode, automation-requested relay state, final relay state, reason and last relay-change uptime;
+- diagnostics expose control mode, automation-requested relay state, final relay state, reason, last relay-change uptime and last control-mode transition uptime;
 - managed manual control is `MANUAL_OFF` / `MANUAL_ON`; entering manual is safe OFF, relay ON/OFF is allowed only while manual, and return to AUTO is explicit;
 - PAUSED is safe OFF; FAULT cannot silently resume; safety/fault can override manual ON;
 - managed Climate control changes mode through `Script.Eval`, not raw relay RPC from presentation;

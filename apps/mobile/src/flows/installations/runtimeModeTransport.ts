@@ -30,12 +30,12 @@ const runtimeModeCode: Record<InstalledAutomationRuntimeMode, number> = {
 
 const runtimeModeEvalCode: Record<SettableInstalledAutomationRuntimeMode, string> = {
   'manual-off':
-    '(function(){if(R.m===4)return R.m;R.m=1;R.nh=R.fh=0;R.rs="mn";if(R.on)sw(false,"mn",1);return R.m})()',
+    '(function(){if(R.m===4)return R.m;if(R.m!==1)R.mt=nw();R.m=1;R.nh=R.fh=0;R.rs="mn";if(R.on)sw(false,"mn",1);return R.m})()',
   'manual-on':
-    '(function(){if(R.m===4)return R.m;var n=nw();if(!R.ls||n-R.ls>C.s){ft("st");return R.m}R.m=2;R.nh=R.fh=0;R.rs="mn";if(!R.on)sw(true,"mn",1);return R.m})()',
+    '(function(){if(R.m===4)return R.m;var n=nw();if(!R.ls||n-R.ls>C.s){ft("st");return R.m}if(R.m!==2)R.mt=n;R.m=2;R.nh=R.fh=0;R.rs="mn";if(!R.on)sw(true,"mn",1);return R.m})()',
   paused:
-    '(function(){if(R.m===4)return R.m;R.m=3;R.nh=R.fh=0;R.rs="pa";if(R.on)sw(false,"pa",1);return R.m})()',
-  auto: '(function(){if(R.m===4)return R.m;R.m=0;R.nh=R.fh=0;R.rs="ar";return R.m})()'
+    '(function(){if(R.m===4)return R.m;if(R.m!==3)R.mt=nw();R.m=3;R.nh=R.fh=0;R.rs="pa";if(R.on)sw(false,"pa",1);return R.m})()',
+  auto: '(function(){if(R.m===4)return R.m;if(R.m!==0)R.mt=nw();R.m=0;R.nh=R.fh=0;R.rs="ar";return R.m})()'
 };
 
 const readModeEvalCode = 'typeof R==="object"&&typeof R.m==="number"?R.m:-1';
