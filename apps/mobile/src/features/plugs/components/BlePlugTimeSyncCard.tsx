@@ -29,8 +29,7 @@ export const BlePlugTimeSyncCard = ({ plug, clock }: BlePlugTimeSyncCardProps) =
           setFeedback(copy.unsupported);
           return;
         }
-        const detail = error instanceof Error ? error.message.trim() : '';
-        setFeedback(detail ? `${copy.actionFailed} ${detail}` : copy.actionFailed);
+        setFeedback(copy.actionFailed);
       }
     });
   };
