@@ -3,6 +3,7 @@ import {
   RPC_METHODS,
   RpcShellyClient,
   RpcShellyFirmwareClient,
+  type Result,
   type ShellyDeviceInfo,
   type ShellyFirmwareReadResult,
   type ShellyRpcTransport
@@ -19,6 +20,10 @@ export type PlugFirmwareUpdateTarget = {
 export type PlugFirmwareVerificationSnapshot = {
   deviceInfo: ShellyDeviceInfo;
   methods: string[];
+};
+
+export type PlugFirmwareUpdateStartResult = {
+  acknowledged: boolean;
 };
 
 export type WaitForPlugFirmwareOptions = {
@@ -96,15 +101,26 @@ const firmwareMatches = (
   expectedVersion: string
 ): boolean => Boolean(firmwareId && versionPattern(expectedVersion).test(firmwareId));
 
+export const classifyPlugFirmwareUpdateStart = (
+  result: Result<null>
+): PlugFirmwareUpdateStartResult => {
+  if (result.ok) return { acknowledged: true };
+  if (result.error.kind === 'timeout' || result.error.kind === 'shelly-offline') {
+    return { acknowledged: false };
+  }
+  throw new Error(
+    result.error.technicalMessage ?? `Shelly RPC: ${result.error.kind}`
+  );
+};
+
 export const readPlugFirmwareUpdate = async (
   target: PlugFirmwareUpdateTarget
 ): Promise<ShellyFirmwareReadResult> => unwrap(await (await createClient(target)).read());
 
 export const startPlugStableFirmwareUpdate = async (
   target: PlugFirmwareUpdateTarget
-): Promise<void> => {
-  unwrap(await (await createClient(target)).updateStable());
-};
+): Promise<PlugFirmwareUpdateStartResult> =>
+  classifyPlugFirmwareUpdateStart(await (await createClient(target)).updateStable());
 
 export const waitForPlugFirmwareUpdate = async (
   target: PlugFirmwareUpdateTarget,
