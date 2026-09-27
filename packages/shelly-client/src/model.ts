@@ -150,7 +150,8 @@ export const RPC_METHODS = {
   CloudGetStatus: 'Cloud.GetStatus',
   WifiGetConfig: 'WiFi.GetConfig',
   WifiSetConfig: 'WiFi.SetConfig',
-  WifiGetStatus: 'WiFi.GetStatus'
+  WifiGetStatus: 'WiFi.GetStatus',
+  WifiScan: 'WiFi.Scan'
 } as const;
 
 export type ShellyRpcMethod = (typeof RPC_METHODS)[keyof typeof RPC_METHODS];
