@@ -70,7 +70,6 @@ describe('useClimateAutomationScriptLoadDraftFlow', () => {
     if (!decoded) return;
 
     const draftActions = {
-      setShellyScriptId: vi.fn(),
       selectSensorDevice: vi.fn(),
       setAdditionalSensorIds: vi.fn(),
       setSensorAggregation: vi.fn(),
@@ -84,10 +83,12 @@ describe('useClimateAutomationScriptLoadDraftFlow', () => {
       setMinChangeMinInput: vi.fn(),
       setMaxOnHoursInput: vi.fn()
     };
+    const setShellyScriptId = vi.fn();
     const upsertSensorDevice = vi.fn();
 
     useClimateAutomationScriptLoadDraftFlow({
       getDraftActions: () => draftActions,
+      setShellyScriptId,
       upsertSensorDevice,
       resetInstallState: vi.fn(),
       applyControlStatus: vi.fn(),
@@ -108,7 +109,7 @@ describe('useClimateAutomationScriptLoadDraftFlow', () => {
 
     callbacks?.onSuccess?.(result);
 
-    expect(draftActions.setShellyScriptId).toHaveBeenCalledWith('shelly-abc', '7');
+    expect(setShellyScriptId).toHaveBeenCalledWith('shelly-abc', '7');
     expect(
       upsertSensorDevice.mock.calls.map(([device]) => device.runtimeAddress)
     ).toEqual(addresses);
