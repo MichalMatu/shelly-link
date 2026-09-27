@@ -1,6 +1,6 @@
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
-import { detachPlugButtonForManagedAutomation } from '../../features/plugs/data/plugButtonModeSettings.js';
+import { detachPlugButtonForManagedAutomation } from '../../features/plugs/index.js';
 import { generateShellyThermostatScript } from '@lcl/script-generator';
 import {
   createInstallPlan,
