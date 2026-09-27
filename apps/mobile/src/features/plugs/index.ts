@@ -1,17 +1,6 @@
-export {
-  readPlugInformation,
-  readPlugInformationFromTarget,
-  type PlugInformation
-} from './data/plugInformation.js';
-export {
-  withVerifiedPlugReadOnlyClient,
-  type PlugReadOnlyManagementDependencies,
-  type PlugReadOnlyManagementTarget
-} from './data/plugReadOnlyManagementTarget.js';
-export {
-  usePlugInformationFlow,
-  plugInformationQueryKey
-} from './flows/usePlugInformationFlow.js';
+export { readPlugInformation, type PlugInformation } from './data/plugInformation.js';
+export { withVerifiedPlugReadOnlyClient } from './data/plugReadOnlyManagementTarget.js';
+export { usePlugInformationFlow } from './flows/usePlugInformationFlow.js';
 export { PlugInfoPanel } from './components/PlugInfoPanel.js';
 export { PlugDetailNotFound } from './components/PlugDetailNotFound.js';
 export { PlugDetailTop } from './components/PlugDetailTop.js';
@@ -35,6 +24,7 @@ export {
   savedPlugFromWifiDevice,
   savedPlugSchema,
   savedPlugToWifiDevice,
+  savedPlugsToWifiDevices,
   type SavedPlug,
   type SavedPlugWithBleLocator,
   type SavedPlugWithWifiLocator,

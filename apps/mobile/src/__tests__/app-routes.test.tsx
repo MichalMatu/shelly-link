@@ -110,10 +110,7 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
 }));
 
 import { AppRoutes } from '../routes/AppRoutes.js';
-import {
-  resetSavedPlugStore,
-  useSavedPlugStore
-} from '../features/plugs/state/savedPlugStore.js';
+import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 
 const renderRoutes = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

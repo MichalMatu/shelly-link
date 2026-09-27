@@ -16,10 +16,7 @@ import {
 } from '../flows/installations/store.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
-import {
-  resetSavedPlugStore,
-  useSavedPlugStore
-} from '../features/plugs/state/savedPlugStore.js';
+import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 
 const jsonResponse = (payload: unknown, status = 200) =>
   new Response(JSON.stringify(payload), {

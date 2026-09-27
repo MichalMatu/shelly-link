@@ -168,10 +168,7 @@ import {
 import { formatSensorId } from '../flows/hardware-setup/validation.js';
 import { HardwareSetupScreen } from '../screens/hardware-setup/HardwareSetupScreen.js';
 import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
-import {
-  resetSavedPlugStore,
-  useSavedPlugStore
-} from '../features/plugs/state/savedPlugStore.js';
+import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 
 const renderHardwareSetup = (props: Parameters<typeof HardwareSetupScreen>[0] = {}) => {
   const queryClient = new QueryClient({

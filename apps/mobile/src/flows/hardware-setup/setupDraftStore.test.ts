@@ -10,10 +10,7 @@ import {
   resetHardwareSetupDraftStore,
   useHardwareSetupDraftStore
 } from './setupDraftStore.js';
-import {
-  resetSavedPlugStore,
-  useSavedPlugStore
-} from '../../features/plugs/state/savedPlugStore.js';
+import { resetSavedPlugStore, useSavedPlugStore } from '../../features/plugs/index.js';
 
 describe('hardware setup Plug identity', () => {
   beforeEach(() => {

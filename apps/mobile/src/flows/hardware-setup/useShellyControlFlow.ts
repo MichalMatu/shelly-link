@@ -286,18 +286,6 @@ export const useShellyControlFlow = () => {
     onError: (error, device) => applyControlError(device, error)
   });
 
-  const refreshShellyControl = (device: ShellyControlTarget) => {
-    refreshShellyControlMutation.mutate(device);
-  };
-
-  const turnRelayOn = (device: ShellyControlTarget) => {
-    turnRelayOnMutation.mutate(device);
-  };
-
-  const turnRelayOff = (device: ShellyControlTarget) => {
-    turnRelayOffMutation.mutate(device);
-  };
-
   const acknowledgeShellyControlFeedback = useCallback(
     (deviceId: string, updatedAtMs: number, message: string) => {
       setShellyControlStates((current) => {
@@ -339,9 +327,9 @@ export const useShellyControlFlow = () => {
     refreshShellyControlMutation,
     turnRelayOnMutation,
     turnRelayOffMutation,
-    refreshShellyControl,
-    turnRelayOn,
-    turnRelayOff,
+    refreshShellyControl: refreshShellyControlMutation.mutate,
+    turnRelayOn: turnRelayOnMutation.mutate,
+    turnRelayOff: turnRelayOffMutation.mutate,
     acknowledgeShellyControlFeedback,
     applyControlStatus,
     applyControlError,

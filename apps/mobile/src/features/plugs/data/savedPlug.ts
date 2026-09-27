@@ -106,3 +106,9 @@ export const savedPlugToWifiDevice = (plug: SavedPlug): WifiPlugDevice | null =>
     ...(plug.generation > 0 ? { gen: plug.generation } : {})
   };
 };
+
+export const savedPlugsToWifiDevices = (plugs: SavedPlug[]): WifiPlugDevice[] =>
+  plugs.flatMap((plug) => {
+    const device = savedPlugToWifiDevice(plug);
+    return device ? [device] : [];
+  });

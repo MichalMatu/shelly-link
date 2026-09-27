@@ -22,10 +22,7 @@ import {
 } from '../flows/installations/store.js';
 import { resetHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
-import {
-  resetSavedPlugStore,
-  useSavedPlugStore
-} from '../features/plugs/state/savedPlugStore.js';
+import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 
 vi.mock('../flows/hardware-setup/useHardwareSetupFlow.js', () => ({
   useHardwareSetupFlow: () => {
