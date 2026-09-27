@@ -1,14 +1,10 @@
 # Handoff — clean product checkpoint
 
-Status: **2026-09-27 — BLE/Plug-management iteration merged and verified on `main`**
+Status: **2026-09-27 — current BLE/Plug-management iteration merged to `main`; next v1 product track agreed**
 
 Repository: `MichalMatu/shelly-link`
 
-Current base: `main`
-
-Validated product merge: `39fa377a216bbae836569662a53e9e8dcf17aa37`
-
-The merge tree is identical to the fully gated work-branch source `7e971171c7d16a0dfaf0cff2e8837f28c088ea5d`. `pnpm check:full` passed both before merge and again on the merge commit. The merge-commit gate included mobile 84/84 test files with 382/382 tests, automation-core 86/86 tests, script-generator coverage 138/138 tests and responsive E2E 36/36. Existing React `act(...)` and Node localStorage warnings are non-failing.
+Current branch: `main`
 
 ## Product direction
 
@@ -16,11 +12,11 @@ Shelly Link is **climate/grow-first with a reusable local Shelly management plat
 
 Do not expand device management merely because an RPC exists. Prioritize platform work when it enables a concrete climate/grow use case, improves safety/reliability, reduces setup friction or provides useful operational diagnostics.
 
-The previously proposed zero-friction onboarding orchestrator is **deferred** and is not the next automatic task.
+The previously proposed zero-friction onboarding orchestrator remains **deferred**, not the next automatic task.
 
 ## Accepted foundation
 
-The current baseline includes:
+The current product baseline includes:
 
 - local `climate-engine-v1` automation with safe-OFF behavior;
 - 1–4 supported BLE thermometers with aggregation and per-sensor diagnostics;
@@ -73,37 +69,38 @@ The factory Plug moved from firmware `1.2.3` to `2.0.1`; `Sys.SetTime` was absen
 - The phone configures/manages/diagnoses; Shelly executes installed automation locally.
 - Page-level duplicate Back navigation remains absent from Plug Detail; the five tabs are first content.
 
-## Next bounded architecture slice
+## Next bounded structural cleanup
 
-Two durable Plug registries remain from historical Wi-Fi and BLE flows. Presentation deduplicates the same physical identity, but duplicate durable records may still exist if one Plug is independently added through both entry paths.
+Two durable Plug registries remain from historical Wi-Fi and BLE flows. The dashboard prevents a duplicate visual card for the same physical identity, but duplicate durable records may still exist if the same Plug is independently added through both paths.
 
-The next structural task should create **one canonical physical Plug registry** with independent Wi-Fi/BLE locator metadata.
+The next structural slice should create **one canonical physical Plug registry** with independent Wi-Fi/BLE locator metadata. Do not solve this with more cross-registry guards or transport-specific identity rules.
 
-Acceptance:
+## Agreed v1 product sequence
 
-- the same normalized `Shelly.GetDeviceInfo.id` maps to one durable physical Plug;
-- adding another verified transport enriches the existing record instead of creating a second logical device;
-- user name and automation ownership survive convergence/migration;
-- transport locators remain replaceable metadata rather than identity;
-- focused migration/deduplication regressions exist before retiring the old split.
+After the unified Plug registry, the next product slices should be developed in this order rather than in parallel:
 
-Do not solve this with additional cross-registry UI guards.
+1. **History / Datalogger** — resume from `work/kvs-datalogger` as source material, redesigning it around the current exclusive script/runtime lifecycle; log measurements plus relay state, reason/trigger, fault/safety context and relevant rule state.
+2. **Rule/action expansion** — Pulse ON, Pulse OFF, minimum ON/OFF, cooldown, debounce, time windows combined with sensor rules, simple reusable `AND` / `OR` composition. Model pulse as an action and restore the state implied by the automation after a pulse.
+3. **Runtime safety supervisor** — maximum power, current, Plug temperature and maximum continuous ON time; safety is a layer above ordinary automation, can force OFF and may latch a fault until acknowledged.
+4. **Dashboard master control** — clear `RUNNING / PAUSED` automation state; PAUSED means safe OFF while datalogging/diagnostics/safety continue.
+5. **UX redesign round 2** — status-first dashboard after the above semantics are stable. Emphasize current climate, output, reason, safety and History; push BLE/firmware/script/transport detail deeper under Device/Info/Advanced.
 
-## Next product decision after registry cleanup
+High-value script/runtime improvements include transition reason codes, last-transition time, startup guard, min ON/OFF, cooldown/debounce state, latched safety faults and multi-sensor disagreement/outlier diagnostics.
 
-Choose one main product milestone rather than developing both in parallel:
+The working v1-complete target is: Climate + multi-sensor + time-aware rules + pulse actions + timing guards + History + safety supervisor + master RUN/PAUSE + existing local provisioning/OTA + final UX simplification.
 
-1. **History / Datalogger** — operational history of climate/VPD/relay behavior. `work/kvs-datalogger` is parked source material only; redesign lifecycle ownership before reusing its pieces.
-2. **Richer climate rules** — minimum ON/OFF, cooldown/debounce, time windows and reusable condition operators with explicit safety precedence.
+After that point, new capabilities should clear a higher product-value bar rather than simply increasing Shelly management breadth.
 
-Broad general-purpose Shelly management, persistent BLE pairing and offline OTA remain later/explicitly approved work.
+## Parked / later
 
-## Branch state
+- `work/kvs-datalogger` remains preserved until the History slice starts; do not mechanically rebase/merge it.
+- Persistent BLE pairing/bonding, offline OTA, broad general-purpose Shelly management and BLE soil-moisture remain later/explicitly approved work.
+- Alarm/notification delivery and richer automatic outlier handling are useful later additions once the v1 core above is stable.
 
-`work/shelly-ble-transport` is completed and may be deleted after this docs-only checkpoint is verified.
+## Current checkpoint
 
-Preserve:
+The long BLE/Plug-management iteration was merged to `main`, its work branch was deleted, and `work/kvs-datalogger` was intentionally preserved.
 
-- `main` — clean base for the next task;
-- `agent-control` — Local Agent control branch;
-- `work/kvs-datalogger` — intentionally parked research/source-material branch.
+Final clean checkpoint before this roadmap update: `0f61e0eaaae38c9e6d98c27f8857dbe0f43a0bad`.
+
+The roadmap update that records the agreed v1 sequence is a docs-only descendant on `main`; verify the current `main` SHA before starting implementation in the next chat.
