@@ -1,8 +1,10 @@
+import { IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { BlePlugDeviceReadOnlyPanel } from '../components/BlePlugDeviceReadOnlyPanel.js';
 import { BlePlugTimeSyncCard } from '../components/BlePlugTimeSyncCard.js';
 import { BlePlugWifiProvisioningCard } from '../components/BlePlugWifiProvisioningCard.js';
+import { PlugDeleteConfirmModal } from '../components/PlugDeleteConfirmModal.js';
 import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
 import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
@@ -15,13 +17,19 @@ import { useSavedPlugStore } from '../state/savedPlugStore.js';
 export type BlePlugDetailScreenProps = {
   physicalId: string;
   onBack(): void;
+  onRemove(physicalId: string): void;
 };
 
 const disabledBleDetailTabs: readonly PlugDetailTab[] = ['automation', 'ble', 'script'];
 
-export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenProps) => {
+export const BlePlugDetailScreen = ({
+  physicalId,
+  onBack,
+  onRemove
+}: BlePlugDetailScreenProps) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('info');
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const plug = useSavedPlugStore((state) =>
     state.plugs
       .filter(hasBleLocator)
@@ -108,9 +116,30 @@ export const BlePlugDetailScreen = ({ physicalId, onBack }: BlePlugDetailScreenP
               currentFirmware={currentFirmware}
               target={firmwareTarget}
             />
+            <div className="plug-settings-actions">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                title={t('hardware.shelly.deleteTitle')}
+                onClick={() => setDeleteOpen(true)}
+              >
+                <IconTrash className="icon-action__svg" aria-hidden="true" />
+                <span>{t('hardware.shelly.deleteTitle')}</span>
+              </button>
+            </div>
           </>
         )}
       </section>
+
+      <PlugDeleteConfirmModal
+        deviceName={deleteOpen ? plug.name : null}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={() => {
+          onRemove(plug.physicalId);
+          setDeleteOpen(false);
+          onBack();
+        }}
+      />
     </main>
   );
 };
