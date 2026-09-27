@@ -110,6 +110,10 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
 }));
 
 import { AppRoutes } from '../routes/AppRoutes.js';
+import {
+  resetSavedPlugStore,
+  useSavedPlugStore
+} from '../features/plugs/state/savedPlugStore.js';
 
 const renderRoutes = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -151,10 +155,10 @@ const addTimeInstallation = (suffix = 'time-route') => {
     nowMs: 1000
   });
   useInstalledAutomationStore.getState().upsertInstallation(installation);
-  useHardwareSetupDraftStore.getState().upsertShellyDevice({
-    id: installation.shelly.deviceId,
+  useSavedPlugStore.getState().saveWifiDevice({
+    physicalId: installation.shelly.deviceId,
     name: installation.shelly.name,
-    baseUrl: installation.shelly.baseUrl,
+    wifiBaseUrl: installation.shelly.baseUrl,
     scriptIdInput: '1'
   });
   return installation;
@@ -165,6 +169,7 @@ describe('AppRoutes navigation shell', () => {
     setLocalePreference('pl');
     resetInstalledAutomationStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     nativeAppMocks.resetListener();
     nativeAppMocks.getPlatform.mockReturnValue('web');
     nativeAppMocks.addListener.mockClear();
@@ -228,10 +233,10 @@ describe('AppRoutes navigation shell', () => {
   });
 
   it('starts climate setup from a saved plug with fixed Shelly context', async () => {
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.30/',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'http://192.168.0.30/',
       name: 'Nawilżacz',
-      baseUrl: 'http://192.168.0.30/',
+      wifiBaseUrl: 'http://192.168.0.30/',
       scriptIdInput: '1'
     });
     renderRoutes();
@@ -246,10 +251,10 @@ describe('AppRoutes navigation shell', () => {
   });
 
   it('starts time setup from a saved plug and keeps that Shelly context', async () => {
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.33/',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'http://192.168.0.33/',
       name: 'Lampa',
-      baseUrl: 'http://192.168.0.33/',
+      wifiBaseUrl: 'http://192.168.0.33/',
       scriptIdInput: '1'
     });
     renderRoutes();
@@ -267,10 +272,10 @@ describe('AppRoutes navigation shell', () => {
   });
 
   it('keeps Settings available from per-plug Add automation intent', () => {
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.31/',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'http://192.168.0.31/',
       name: 'Wentylator',
-      baseUrl: 'http://192.168.0.31/',
+      wifiBaseUrl: 'http://192.168.0.31/',
       scriptIdInput: '1'
     });
     renderRoutes();
@@ -288,10 +293,10 @@ describe('AppRoutes navigation shell', () => {
 
   it('returns from Android setup through intent and dashboard before exiting', async () => {
     nativeAppMocks.getPlatform.mockReturnValue('android');
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.32/',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'http://192.168.0.32/',
       name: 'Grzejnik',
-      baseUrl: 'http://192.168.0.32/',
+      wifiBaseUrl: 'http://192.168.0.32/',
       scriptIdInput: '1'
     });
     const view = renderRoutes();
@@ -391,10 +396,10 @@ describe('AppRoutes navigation shell', () => {
   });
 
   it('completes per-plug Time setup back to the Plugs dashboard', async () => {
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.34/',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'http://192.168.0.34/',
       name: 'Pompa',
-      baseUrl: 'http://192.168.0.34/',
+      wifiBaseUrl: 'http://192.168.0.34/',
       scriptIdInput: '1'
     });
     renderRoutes();

@@ -10,78 +10,63 @@ import {
   resetHardwareSetupDraftStore,
   useHardwareSetupDraftStore
 } from './setupDraftStore.js';
+import {
+  resetSavedPlugStore,
+  useSavedPlugStore
+} from '../../features/plugs/state/savedPlugStore.js';
 
 describe('hardware setup Plug identity', () => {
-  beforeEach(() => resetHardwareSetupDraftStore());
+  beforeEach(() => {
+    resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
+  });
 
-  it('replaces a legacy endpoint-shaped Plug id with the verified physical device id', () => {
-    useHardwareSetupDraftStore.setState({
-      ...DEFAULT_HARDWARE_SETUP_DRAFT,
-      shellyDevices: [
-        {
-          id: 'http://192.168.0.20/',
-          name: 'Legacy Plug',
-          baseUrl: 'http://192.168.0.20/',
-          scriptIdInput: '1'
-        }
-      ],
-      selectedShellyId: 'http://192.168.0.20/'
-    });
-
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'shellyplugsg3-test',
-      name: 'Salon',
+  it('loads the installed physical Plug into the unified registry', () => {
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Salon',
       baseUrl: 'http://192.168.0.20/',
-      scriptIdInput: '1',
-      model: 'S3PL-00112EU',
-      gen: 3
+      scriptId: 1,
+      scriptHash: 'registry-test',
+      config: createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating'),
+      nowMs: 1000
     });
 
-    expect(useHardwareSetupDraftStore.getState().shellyDevices).toEqual([
-      {
-        id: 'shellyplugsg3-test',
+    useHardwareSetupDraftStore.getState().loadClimateAutomationDraft(installation);
+
+    expect(useSavedPlugStore.getState().plugs).toEqual([
+      expect.objectContaining({
+        physicalId: 'shellyplugsg3-test',
         name: 'Salon',
-        baseUrl: 'http://192.168.0.20/',
+        wifiBaseUrl: 'http://192.168.0.20',
         scriptIdInput: '1',
         model: 'S3PL-00112EU',
-        gen: 3
-      }
+        generation: 3
+      })
     ]);
     expect(useHardwareSetupDraftStore.getState().selectedShellyId).toBe(
       'shellyplugsg3-test'
     );
   });
 
-  it('replaces a stale saved Plug that still owns the verified endpoint', () => {
-    useHardwareSetupDraftStore.setState({
-      ...DEFAULT_HARDWARE_SETUP_DRAFT,
-      shellyDevices: [
-        {
-          id: 'shellyplugsg3-old',
-          name: 'Old Plug',
-          baseUrl: 'http://192.168.0.20',
-          scriptIdInput: '1'
-        },
-        {
-          id: 'shellyplugsg3-other',
-          name: 'Other Plug',
-          baseUrl: 'http://192.168.0.21/',
-          scriptIdInput: '1'
-        }
-      ],
-      selectedShellyId: 'shellyplugsg3-old'
-    });
-
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'SHELLYPLUGSG3-TEST',
-      name: 'Salon',
+  it('persists only the selected Plug identity in the hardware draft', () => {
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Salon',
       baseUrl: 'http://192.168.0.20/',
-      scriptIdInput: '1'
+      scriptId: 1,
+      scriptHash: 'registry-test',
+      config: createDefaultShellyThermostatConfig('tp357_custom_v1', 'heating'),
+      nowMs: 1000
     });
 
-    expect(
-      useHardwareSetupDraftStore.getState().shellyDevices.map((item) => item.id)
-    ).toEqual(['SHELLYPLUGSG3-TEST', 'shellyplugsg3-other']);
+    useHardwareSetupDraftStore.getState().loadClimateAutomationDraft(installation);
+
+    const stored = JSON.parse(
+      String(window.localStorage.getItem(HARDWARE_SETUP_DRAFT_STORAGE_KEY))
+    ) as Record<string, unknown>;
+    expect(stored.selectedShellyId).toBe('shellyplugsg3-test');
+    expect(stored).not.toHaveProperty('shellyDevices');
   });
 
   it('persists additional sensors and aggregation in the v9 hardware draft', () => {

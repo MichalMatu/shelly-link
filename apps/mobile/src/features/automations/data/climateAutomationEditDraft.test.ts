@@ -52,7 +52,7 @@ describe('createClimateAutomationEditDraftPatch', () => {
     });
 
     const patch = createClimateAutomationEditDraftPatch(
-      { shellyDevices: [], sensorDevices: [] },
+      { sensorDevices: [] },
       installation
     );
 
@@ -107,7 +107,6 @@ describe('createClimateAutomationEditDraftPatch', () => {
 
     const patch = createClimateAutomationEditDraftPatch(
       {
-        shellyDevices: [],
         sensorDevices: addresses.slice(0, 3).map((runtimeAddress, index) => ({
           id: runtimeAddress,
           name: `Saved TP357 ${index + 1}`,
@@ -151,7 +150,6 @@ describe('createClimateAutomationEditDraftPatch', () => {
 
     const patch = createClimateAutomationEditDraftPatch(
       {
-        shellyDevices: [],
         sensorDevices: [
           {
             id: 'saved-local-id',
@@ -206,7 +204,6 @@ describe('createClimateAutomationEditDraftPatch', () => {
 
     const patch = createClimateAutomationEditDraftPatch(
       {
-        shellyDevices: [],
         sensorDevices: [
           {
             id: primaryAddress,
@@ -254,7 +251,6 @@ describe('createClimateAutomationEditDraftPatch', () => {
 
     const patch = createClimateAutomationEditDraftPatch(
       {
-        shellyDevices: [],
         sensorDevices: [
           {
             id: runtimeAddress,

@@ -24,6 +24,7 @@ import {
   PlugLedSettingsCard,
   isSameShellyDevice,
   usePlugInformationFlow,
+  useSavedPlugStore,
   type PlugDetailTab
 } from '../features/plugs/index.js';
 import { installationRecoveryState } from '../flows/installations/healthRecovery.js';
@@ -155,15 +156,13 @@ const ClimateInstallationDetail = ({
     (state) => state.removeInstallation
   );
   const automationEditFlow = useHardwareSetupFlow(installation.id);
-  const shellyDevices = useHardwareSetupDraftStore((state) => state.shellyDevices);
+  const savedPlugs = useSavedPlugStore((state) => state.plugs);
   const loadClimateAutomationDraft = useHardwareSetupDraftStore(
     (state) => state.loadClimateAutomationDraft
   );
-  const removeShellyDevice = useHardwareSetupDraftStore(
-    (state) => state.removeShellyDevice
-  );
-  const savedDevice = shellyDevices.find((device) =>
-    isSameShellyDevice(device.id, installation.shelly.deviceId)
+  const removePlug = useSavedPlugStore((state) => state.removePlug);
+  const savedDevice = savedPlugs.find((device) =>
+    isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
 
   const deleteCopy = installationDeleteCopy[locale];
@@ -429,7 +428,7 @@ const ClimateInstallationDetail = ({
         onClose={() => setForgetOpen(false)}
         onConfirm={() => {
           if (!savedDevice) return;
-          removeShellyDevice(savedDevice.id);
+          removePlug(savedDevice.physicalId);
           setForgetOpen(false);
           pushToast('ok', t('hardware.shelly.removed'));
         }}

@@ -9,16 +9,17 @@ import {
   createTimeInstalledAutomation
 } from '../flows/installations/model.js';
 import { dailyScheduleTimespec } from '../flows/time-automation/config.js';
-import {
-  resetHardwareSetupDraftStore,
-  useHardwareSetupDraftStore
-} from '../flows/hardware-setup/setupDraftStore.js';
+import { resetHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
+import {
+  resetSavedPlugStore,
+  useSavedPlugStore
+} from '../features/plugs/state/savedPlugStore.js';
 
 const jsonResponse = (payload: unknown, status = 200) =>
   new Response(JSON.stringify(payload), {
@@ -369,6 +370,7 @@ describe('InstallationDetailScreen', () => {
     setLocalePreference('pl');
     resetInstalledAutomationStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     vi.restoreAllMocks();
   });
 
@@ -376,6 +378,7 @@ describe('InstallationDetailScreen', () => {
     cleanup();
     resetInstalledAutomationStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     vi.unstubAllGlobals();
   });
 
@@ -441,10 +444,10 @@ describe('InstallationDetailScreen', () => {
 
   it('shows shared Plug identity without duplicating rename or climate-purpose controls', async () => {
     const saved = installation();
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: saved.shelly.deviceId,
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: saved.shelly.deviceId,
       name: 'Salon',
-      baseUrl: 'http://192.168.0.20/',
+      wifiBaseUrl: 'http://192.168.0.20/',
       scriptIdInput: '1'
     });
     useInstalledAutomationStore.getState().upsertInstallation(saved);

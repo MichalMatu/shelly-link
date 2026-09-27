@@ -21,7 +21,7 @@ const hoisted = vi.hoisted(() => {
     },
     savedState: {
       plugs: [] as SavedPlugWithBleLocator[],
-      saveCandidate: vi.fn()
+      saveBleCandidate: vi.fn()
     }
   };
 });
@@ -72,7 +72,7 @@ describe('PlugBluetoothAddPage', () => {
     flowState.verifiedCandidates = [];
     flowState.verifyCandidate.mockReset();
     savedState.plugs = [];
-    savedState.saveCandidate.mockReset();
+    savedState.saveBleCandidate.mockReset();
   });
 
   afterEach(() => setLocalePreference('system'));
@@ -86,7 +86,7 @@ describe('PlugBluetoothAddPage', () => {
     await waitFor(() =>
       expect(flowState.verifyCandidate).toHaveBeenCalledWith(candidate)
     );
-    expect(savedState.saveCandidate).not.toHaveBeenCalled();
+    expect(savedState.saveBleCandidate).not.toHaveBeenCalled();
   });
 
   it('persists only the verified candidate returned by canonical inspection', async () => {
@@ -95,7 +95,9 @@ describe('PlugBluetoothAddPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: `Add: ${candidate.name}` }));
 
-    await waitFor(() => expect(savedState.saveCandidate).toHaveBeenCalledWith(verified));
+    await waitFor(() =>
+      expect(savedState.saveBleCandidate).toHaveBeenCalledWith(verified)
+    );
   });
 
   it('renders Added disabled for an already saved verified physical device', () => {

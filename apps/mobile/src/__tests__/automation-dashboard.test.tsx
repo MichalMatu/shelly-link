@@ -20,11 +20,12 @@ import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
-import {
-  resetHardwareSetupDraftStore,
-  useHardwareSetupDraftStore
-} from '../flows/hardware-setup/setupDraftStore.js';
+import { resetHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
+import {
+  resetSavedPlugStore,
+  useSavedPlugStore
+} from '../features/plugs/state/savedPlugStore.js';
 
 vi.mock('../flows/hardware-setup/useHardwareSetupFlow.js', () => ({
   useHardwareSetupFlow: () => {
@@ -248,6 +249,7 @@ describe('AutomationDashboardScreen', () => {
     setLocalePreference('pl');
     resetInstalledAutomationStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     vi.restoreAllMocks();
   });
 
@@ -255,6 +257,7 @@ describe('AutomationDashboardScreen', () => {
     cleanup();
     resetInstalledAutomationStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     vi.unstubAllGlobals();
   });
 
@@ -280,10 +283,10 @@ describe('AutomationDashboardScreen', () => {
   it('associates a saved Plug with its automation by stable device id, not endpoint', () => {
     const saved = installedAutomation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: saved.shelly.deviceId,
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: saved.shelly.deviceId,
       name: saved.shelly.name,
-      baseUrl: 'http://192.168.0.99/',
+      wifiBaseUrl: 'http://192.168.0.99/',
       scriptIdInput: '1'
     });
     vi.stubGlobal(
@@ -359,10 +362,10 @@ describe('AutomationDashboardScreen', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.30/',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'http://192.168.0.30/',
       name: 'Nawilżacz',
-      baseUrl: 'http://192.168.0.30/',
+      wifiBaseUrl: 'http://192.168.0.30/',
       scriptIdInput: '1'
     });
     const { onOpenPlugSettings } = renderDashboard(onAddAutomation);
@@ -376,9 +379,7 @@ describe('AutomationDashboardScreen', () => {
     fireEvent.change(nameInput, { target: { value: 'Nawilżacz salon' } });
     fireEvent.blur(nameInput);
     expect(within(plugCard).getByText('Nawilżacz salon')).toBeVisible();
-    expect(useHardwareSetupDraftStore.getState().shellyDevices[0]?.name).toBe(
-      'Nawilżacz salon'
-    );
+    expect(useSavedPlugStore.getState().plugs[0]?.name).toBe('Nawilżacz salon');
     expect(await within(plugCard).findByText('0.0 W')).toBeVisible();
     expect(within(plugCard).getByText('243 V')).toBeVisible();
     expect(within(plugCard).getByText('25.16 kWh')).toBeVisible();
@@ -453,10 +454,10 @@ describe('AutomationDashboardScreen', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.31/',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'http://192.168.0.31/',
       name: 'Lampa testowa',
-      baseUrl: 'http://192.168.0.31/',
+      wifiBaseUrl: 'http://192.168.0.31/',
       scriptIdInput: '1'
     });
     renderDashboard();
@@ -478,10 +479,10 @@ describe('AutomationDashboardScreen', () => {
 
   it('renames a configured Plug inline and keeps draft and installed names synchronized', async () => {
     const saved = installedAutomation();
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: saved.shelly.deviceId,
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: saved.shelly.deviceId,
       name: 'Salon',
-      baseUrl: 'http://192.168.0.20/',
+      wifiBaseUrl: 'http://192.168.0.20/',
       scriptIdInput: '1'
     });
     useInstalledAutomationStore.getState().upsertInstallation(saved);
@@ -499,9 +500,7 @@ describe('AutomationDashboardScreen', () => {
     fireEvent.blur(input);
 
     expect(within(card).getByText('Nawilżacz growbox')).toBeVisible();
-    expect(useHardwareSetupDraftStore.getState().shellyDevices[0]?.name).toBe(
-      'Nawilżacz growbox'
-    );
+    expect(useSavedPlugStore.getState().plugs[0]?.name).toBe('Nawilżacz growbox');
     expect(useInstalledAutomationStore.getState().installations[0]?.shelly.name).toBe(
       'Nawilżacz growbox'
     );

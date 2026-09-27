@@ -3,10 +3,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
 import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
-import {
-  resetHardwareSetupDraftStore,
-  useHardwareSetupDraftStore
-} from '../flows/hardware-setup/setupDraftStore.js';
+import { resetHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { resetInstalledAutomationStore } from '../flows/installations/store.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 
@@ -77,6 +74,7 @@ describe('BLE-only dashboard integration', () => {
     setLocalePreference('en');
     resetSavedPlugStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     resetInstalledAutomationStore();
   });
 
@@ -84,6 +82,7 @@ describe('BLE-only dashboard integration', () => {
     cleanup();
     resetSavedPlugStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     resetInstalledAutomationStore();
     setLocalePreference('system');
   });
@@ -103,16 +102,16 @@ describe('BLE-only dashboard integration', () => {
   it('does not duplicate a physical Plug already represented by Wi-Fi', () => {
     const physicalId = 'shellyplugsg3-shared-1';
     saveBlePlug(physicalId, 'BLE shadow');
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: physicalId,
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: physicalId,
       name: 'Wi-Fi Plug',
-      baseUrl: 'http://192.168.0.44/',
+      wifiBaseUrl: 'http://192.168.0.44/',
       scriptIdInput: '1'
     });
 
     renderDashboard();
 
-    expect(screen.getByText('Wi-Fi Plug')).toBeVisible();
-    expect(screen.queryByText('BLE shadow')).toBeNull();
+    expect(screen.getByText('BLE shadow')).toBeVisible();
+    expect(screen.queryByText('Wi-Fi Plug')).toBeNull();
   });
 });

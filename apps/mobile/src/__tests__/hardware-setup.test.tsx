@@ -168,6 +168,10 @@ import {
 import { formatSensorId } from '../flows/hardware-setup/validation.js';
 import { HardwareSetupScreen } from '../screens/hardware-setup/HardwareSetupScreen.js';
 import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
+import {
+  resetSavedPlugStore,
+  useSavedPlugStore
+} from '../features/plugs/state/savedPlugStore.js';
 
 const renderHardwareSetup = (props: Parameters<typeof HardwareSetupScreen>[0] = {}) => {
   const queryClient = new QueryClient({
@@ -407,6 +411,7 @@ const getSavedSensorCard = (name: string) => {
 describe('HardwareSetupScreen', () => {
   beforeEach(() => {
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     resetHardwareSetupReadingsStore();
     resetInstalledAutomationStore();
     phoneBleScannerMock.failureMessage = null;
@@ -772,10 +777,10 @@ describe('HardwareSetupScreen', () => {
 
   it('opens fixed climate setup directly on the rule editor', () => {
     const shellyId = 'http://192.168.0.30/';
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: shellyId,
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: shellyId,
       name: 'Grzejnik',
-      baseUrl: shellyId,
+      wifiBaseUrl: shellyId,
       scriptIdInput: '1'
     });
 
@@ -804,10 +809,10 @@ describe('HardwareSetupScreen', () => {
   });
 
   it('opens saved Shelly settings and BLE discovery as nested child pages', async () => {
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'http://192.168.0.20/',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'http://192.168.0.20/',
       name: 'Salon',
-      baseUrl: 'http://192.168.0.20/',
+      wifiBaseUrl: 'http://192.168.0.20',
       scriptIdInput: '1'
     });
     renderHardwareSetup({ setupIntent: 'temperature', onBackToIntent: vi.fn() });
@@ -1013,9 +1018,9 @@ describe('HardwareSetupScreen', () => {
     const infoDialog = await findShellySettingsPage('Salon testowy');
     expect(within(infoDialog).getByText('Adres IP')).toBeInTheDocument();
     const shellyPanelLink = within(infoDialog).getByRole('link', {
-      name: 'Otwórz panel Shelly: http://192.168.0.20/'
+      name: 'Otwórz panel Shelly: http://192.168.0.20'
     });
-    expect(shellyPanelLink).toHaveAttribute('href', 'http://192.168.0.20/');
+    expect(shellyPanelLink).toHaveAttribute('href', 'http://192.168.0.20');
     expect(shellyPanelLink).toHaveAttribute('target', '_blank');
     expect(shellyPanelLink).toHaveAttribute('rel', 'noreferrer noopener');
     expect(
@@ -1084,7 +1089,7 @@ describe('HardwareSetupScreen', () => {
       shelly: {
         deviceId: 'shellyplugsg3-test',
         name: 'Salon',
-        baseUrl: 'http://192.168.0.20/'
+        baseUrl: 'http://192.168.0.20'
       },
       config: {
         sensor: {
@@ -1228,7 +1233,7 @@ describe('HardwareSetupScreen', () => {
     expect(within(infoDialog).getByText('Adres IP')).toBeInTheDocument();
     expect(
       within(infoDialog).getByRole('link', {
-        name: 'Otwórz panel Shelly: http://192.168.0.20/'
+        name: 'Otwórz panel Shelly: http://192.168.0.20'
       })
     ).toBeInTheDocument();
     expect(within(infoDialog).getByText('Firmware')).toBeInTheDocument();
@@ -1281,18 +1286,13 @@ describe('HardwareSetupScreen', () => {
   });
 
   it('renders a saved Shelly plug in final setup shape and refreshes status', async () => {
-    useHardwareSetupDraftStore.setState({
-      ...DEFAULT_HARDWARE_SETUP_DRAFT,
-      shellyDevices: [
-        {
-          id: 'http://192.168.0.20/',
-          name: 'Shelly Plug S Gen3',
-          baseUrl: 'http://192.168.0.20/',
-          scriptIdInput: '1'
-        }
-      ],
-      selectedShellyId: 'http://192.168.0.20/'
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'shellyplugsg3-test',
+      name: 'Shelly Plug S Gen3',
+      wifiBaseUrl: 'http://192.168.0.20',
+      scriptIdInput: '1'
     });
+    useHardwareSetupDraftStore.getState().selectShellyDevice('shellyplugsg3-test');
 
     renderHardwareSetup();
 
@@ -1376,11 +1376,11 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
     await addShellyThroughUi('Salon');
 
-    expect(useHardwareSetupDraftStore.getState().shellyDevices).toContainEqual(
+    expect(useSavedPlugStore.getState().plugs).toContainEqual(
       expect.objectContaining({
-        id: 'shellyplugsg3-test',
+        physicalId: 'shellyplugsg3-test',
         name: 'Salon',
-        baseUrl: 'http://192.168.0.20/'
+        wifiBaseUrl: 'http://192.168.0.20'
       })
     );
     const reconciled = useInstalledAutomationStore.getState().installations[0];
@@ -3293,10 +3293,10 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
     const addDialog = await openShellyAddDialog();
-    expect(within(addDialog).getByLabelText('Nazwa gniazdka')).toHaveValue(
-      'Shelly Plug S Gen3'
+    expect(within(addDialog).getByLabelText('Nazwa gniazdka')).toHaveValue('Salon');
+    expect(within(addDialog).getByLabelText('Adres IP Shelly')).toHaveValue(
+      '192.168.0.20'
     );
-    expect(within(addDialog).getByLabelText('Adres IP Shelly')).toHaveValue('');
     closeCurrentAddPage();
     expect(screen.getByText('Salon')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));

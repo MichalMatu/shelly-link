@@ -9,10 +9,11 @@ import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
+import { resetHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import {
-  resetHardwareSetupDraftStore,
-  useHardwareSetupDraftStore
-} from '../flows/hardware-setup/setupDraftStore.js';
+  resetSavedPlugStore,
+  useSavedPlugStore
+} from '../features/plugs/state/savedPlugStore.js';
 
 vi.mock('../screens/AutomationDashboardScreen.js', () => ({
   AutomationDashboardScreen: ({
@@ -39,6 +40,7 @@ describe('navigation and settings regression coverage', () => {
     window.localStorage.clear();
     resetInstalledAutomationStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     setLocalePreference('pl');
     setThemeMode('system');
   });
@@ -47,6 +49,7 @@ describe('navigation and settings regression coverage', () => {
     cleanup();
     resetInstalledAutomationStore();
     resetHardwareSetupDraftStore();
+    resetSavedPlugStore();
     vi.unstubAllGlobals();
     setLocalePreference('system');
     setThemeMode('system');
@@ -110,13 +113,13 @@ describe('navigation and settings regression coverage', () => {
   });
 
   it('opens a saved Plug in the shared five-tab detail shell', async () => {
-    useHardwareSetupDraftStore.getState().upsertShellyDevice({
-      id: 'plug-settings-test',
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'plug-settings-test',
       name: 'Nawilżacz',
-      baseUrl: 'http://192.168.0.30/',
+      wifiBaseUrl: 'http://192.168.0.30/',
       scriptIdInput: '1',
       model: 'S3PL-00112EU',
-      gen: 3
+      generation: 3
     });
     vi.stubGlobal(
       'fetch',
