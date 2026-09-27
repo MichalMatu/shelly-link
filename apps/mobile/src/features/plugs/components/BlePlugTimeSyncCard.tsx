@@ -3,27 +3,35 @@ import { DiagnosticRow } from '@lcl/ui';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceTimeCopy } from '../../../app/locales/deviceTime.js';
-import type { SavedBlePlug } from '../data/savedBlePlug.js';
+import {
+  BlePlugTimeSyncUnsupportedError,
+  type SavedBlePlug
+} from '../data/blePlugTimeSync.js';
+import type { SavedBlePlug as SavedBlePlugModel } from '../data/savedBlePlug.js';
 import { useBlePlugTimeSyncFlow } from '../flows/useBlePlugTimeSyncFlow.js';
 import './PlugSettingsSurface.css';
 
 export type BlePlugTimeSyncCardProps = {
-  plug: SavedBlePlug;
+  plug: SavedBlePlugModel;
   clock: ShellyClockStatus;
 };
 
 export const BlePlugTimeSyncCard = ({ plug, clock }: BlePlugTimeSyncCardProps) => {
-  const { locale, t } = useTranslation();
+  const { locale } = useTranslation();
   const copy = deviceTimeCopy[locale];
   const syncMutation = useBlePlugTimeSyncFlow(plug);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const currentTime = clock.localTime ?? t('common.missing');
+  const currentTime = clock.localTime ?? copy.unavailable;
 
   const sync = () => {
     setFeedback(null);
     syncMutation.mutate(undefined, {
       onSuccess: () => setFeedback(copy.synced),
       onError: (error) => {
+        if (error instanceof BlePlugTimeSyncUnsupportedError) {
+          setFeedback(copy.unsupported);
+          return;
+        }
         const detail = error instanceof Error ? error.message.trim() : '';
         setFeedback(detail ? `${copy.actionFailed} ${detail}` : copy.actionFailed);
       }
