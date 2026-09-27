@@ -20,6 +20,10 @@ import {
   useInstalledAutomationStore,
   type ClimateInstalledAutomation
 } from '../../features/automations/index.js';
+import {
+  detachPlugButtonForManagedAutomation,
+  restorePlugButtonAfterManagedAutomation
+} from '../../features/plugs/data/plugButtonModeSettings.js';
 import { useSavedPlugStore } from '../../features/plugs/index.js';
 import { forceRelayOffAndConfirm } from '../installations/relaySafety.js';
 import type { ClimateConfigState } from './ruleConfigDerivation.js';
@@ -184,26 +188,42 @@ export const useClimateAutomationInstallFlow = ({
         throw new Error(t('hardware.flow.relayOwnedByNativeSchedule'));
       }
 
+      const buttonTarget = { deviceId, baseUrl: shelly.baseUrl };
       await forceRelayOffAndConfirm(client, config.output.relayId);
-      await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
-      const install = unwrapShellyResult(
-        await client.installScript(
-          createInstallPlan(configState.script, config.output.relayId)
-        )
+      const buttonInputModeBeforeInstall = await detachPlugButtonForManagedAutomation(
+        buttonTarget
       );
-      return {
-        install,
-        installation: createInstalledAutomation({
-          shelly: deviceInfo,
-          shellyName: shelly.name,
-          baseUrl: shelly.baseUrl,
-          scriptId: install.scriptId,
-          scriptHash: install.scriptHash,
-          config
-        }),
-        shellyDraftId: shelly.id,
-        requiresSafeRelayTest: true
-      };
+
+      try {
+        await forceRelayOffAndConfirm(client, config.output.relayId);
+        await cleanupStaleShellyBleDiscoveryScripts(shelly.baseUrl);
+        const install = unwrapShellyResult(
+          await client.installScript(
+            createInstallPlan(configState.script, config.output.relayId)
+          )
+        );
+        return {
+          install,
+          installation: createInstalledAutomation({
+            shelly: deviceInfo,
+            shellyName: shelly.name,
+            baseUrl: shelly.baseUrl,
+            scriptId: install.scriptId,
+            scriptHash: install.scriptHash,
+            config,
+            buttonInputModeBeforeInstall
+          }),
+          shellyDraftId: shelly.id,
+          requiresSafeRelayTest: true
+        };
+      } catch (error) {
+        await forceRelayOffAndConfirm(client, config.output.relayId).catch(() => undefined);
+        await restorePlugButtonAfterManagedAutomation(
+          buttonTarget,
+          buttonInputModeBeforeInstall
+        );
+        throw error;
+      }
     },
     onSuccess: ({ install, installation, shellyDraftId, requiresSafeRelayTest }) => {
       setShellyScriptId(shellyDraftId, String(install.scriptId));
