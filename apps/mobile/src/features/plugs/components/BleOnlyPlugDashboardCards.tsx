@@ -1,8 +1,8 @@
-import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
+import { hasBleLocator, type SavedPlug } from '../data/savedPlug.js';
 import { BleOnlyPlugCard } from './BleOnlyPlugCard.js';
 
 export type BleOnlyPlugDashboardCardsProps = {
-  plugs: readonly SavedPlugWithBleLocator[];
+  plugs: readonly SavedPlug[];
   onNameChange(physicalId: string, value: string): void;
   onOpen(physicalId: string): void;
 };
@@ -12,7 +12,7 @@ export const BleOnlyPlugDashboardCards = ({
   onNameChange,
   onOpen
 }: BleOnlyPlugDashboardCardsProps) =>
-  plugs.map((plug) => (
+  plugs.filter(hasBleLocator).map((plug) => (
     <BleOnlyPlugCard
       key={`ble-plug:${plug.physicalId}`}
       plug={plug}
