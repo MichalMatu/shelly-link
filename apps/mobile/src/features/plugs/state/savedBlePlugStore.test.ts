@@ -60,6 +60,29 @@ describe('saved BLE plug store', () => {
     ]);
   });
 
+  it('stores a Wi-Fi locator on the same physical Plug and preserves it across BLE rediscovery', () => {
+    useSavedBlePlugStore.getState().saveCandidate(candidate());
+    useSavedBlePlugStore
+      .getState()
+      .setWifiLocator('SHELLYPLUGSG3-AABB', 'http://192.168.1.44/');
+
+    expect(useSavedBlePlugStore.getState().plugs[0]).toMatchObject({
+      physicalId: 'shellyplugsg3-aabb',
+      bleDeviceId: 'temporary-handle-a',
+      wifiBaseUrl: 'http://192.168.1.44'
+    });
+
+    useSavedBlePlugStore
+      .getState()
+      .saveCandidate(candidate({ bleDeviceId: 'temporary-handle-new' }));
+
+    expect(useSavedBlePlugStore.getState().plugs[0]).toMatchObject({
+      physicalId: 'shellyplugsg3-aabb',
+      bleDeviceId: 'temporary-handle-new',
+      wifiBaseUrl: 'http://192.168.1.44'
+    });
+  });
+
   it('removes a BLE-only plug by physical identity', () => {
     useSavedBlePlugStore.getState().saveCandidate(candidate());
 
