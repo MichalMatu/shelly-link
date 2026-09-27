@@ -10,7 +10,7 @@ export const savedPlugSchema = z
     name: z.string().min(1),
     bleDeviceId: z.string().min(1).optional(),
     wifiBaseUrl: z.string().url().optional(),
-    scriptIdInput: z.string().min(1).default('1'),
+    scriptIdInput: z.string().min(1).optional(),
     advertisementName: z.string().default(''),
     model: z.string().default(''),
     generation: z.number().int().nonnegative().default(0),
@@ -66,7 +66,7 @@ export const savedPlugFromBleCandidate = (
     physicalId,
     name: existing?.name.trim() || defaultSavedPlugName(candidate),
     bleDeviceId: candidate.bleDeviceId.trim(),
-    scriptIdInput: existing?.scriptIdInput ?? '1',
+    ...(existing?.scriptIdInput ? { scriptIdInput: existing.scriptIdInput } : {}),
     advertisementName: candidate.advertisementName,
     model: candidate.model,
     generation: candidate.generation,
@@ -101,7 +101,7 @@ export const savedPlugToWifiDevice = (plug: SavedPlug): WifiPlugDevice | null =>
     id: plug.physicalId,
     name: plug.name,
     baseUrl: plug.wifiBaseUrl,
-    scriptIdInput: plug.scriptIdInput,
+    scriptIdInput: plug.scriptIdInput ?? '1',
     ...(plug.model ? { model: plug.model } : {}),
     ...(plug.generation > 0 ? { gen: plug.generation } : {})
   };
