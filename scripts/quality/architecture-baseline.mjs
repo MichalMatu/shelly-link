@@ -30,7 +30,6 @@ export const legacyProductionPaths = Object.freeze({
     'AutomationDashboardScreen.tsx',
     'InstallationDetailScreen.tsx',
     'PlugBleDiscoveryScreen.tsx',
-    'PlugSettingsScreen.tsx',
     'SetupIntentScreen.tsx',
     'ShellyLedSettingsCard.tsx',
     'TimeAutomationCard.tsx',

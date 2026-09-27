@@ -8,14 +8,16 @@ export const shellyDeviceInfoSchema = z
     firmwareId: z.string().optional(),
     fw_id: z.string().optional(),
     ver: z.string().optional(),
-    matter: z.boolean().optional()
+    matter: z.boolean().optional(),
+    provision: z.enum(['pending', 'confirmed', 'complete', 'locked']).optional()
   })
   .transform((deviceInfo) => ({
     id: deviceInfo.id,
     model: deviceInfo.model,
     gen: deviceInfo.gen,
     firmwareId: deviceInfo.firmwareId ?? deviceInfo.fw_id ?? deviceInfo.ver,
-    matterEnabled: deviceInfo.matter
+    matterEnabled: deviceInfo.matter,
+    provision: deviceInfo.provision
   }));
 
 export const scriptCreateResponseSchema = z.object({

@@ -192,6 +192,7 @@ describe('AppRoutes navigation shell', () => {
   it('opens standalone Add Plug without page-local back and keeps bottom navigation available', async () => {
     renderRoutes();
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wi-Fi' }));
     expect(await screen.findByText('mock-setup-none')).toBeVisible();
     expect(screen.getByText('mock-plug-add-yes')).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Co chcesz zrobić?' })).toBeNull();
@@ -212,6 +213,7 @@ describe('AppRoutes navigation shell', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Wi-Fi' }));
     expect(await screen.findByText('mock-plug-add-yes')).toBeVisible();
     act(() => nativeAppMocks.fireBack());
     expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -321,7 +323,7 @@ describe('AppRoutes navigation shell', () => {
   it('opens an installed system by stable id and returns to its dashboard', () => {
     const installation = addClimateInstallation('detail');
     renderRoutes();
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-dashboard-back' }));
     expect(screen.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -335,7 +337,7 @@ describe('AppRoutes navigation shell', () => {
     const installation = addClimateInstallation('edit');
     renderRoutes();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
 

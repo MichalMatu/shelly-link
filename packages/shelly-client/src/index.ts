@@ -1,8 +1,12 @@
 export * from './model.js';
 export * from './deviceIdentity.js';
+export * from './systemTime.js';
+export * from './firmware.js';
 export * from './rpc/timeout.js';
 export * from './rpc/validators.js';
 export * from './rpc/fetch.js';
+export * from './rpc/bleProtocol.js';
+export * from './rpc/ble.js';
 export * from './scripts/hash.js';
 export * from './scripts/install.js';
 export * from './scripts/read.js';
@@ -10,3 +14,4 @@ export * from './scripts/fake.js';
 export * from './schedules.js';
 export * from './plugsUi.js';
 export * from './cloud.js';
+export * from './wifi.js';

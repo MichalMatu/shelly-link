@@ -6,7 +6,6 @@ import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
-import { AppPageBack } from '../components/AppPageBack.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   ClimateAutomationDetailSection,
@@ -19,7 +18,8 @@ import {
   PlugButtonModeSettingsCard,
   PlugCloudSettingsCard,
   PlugDeleteConfirmModal,
-  PlugDetailTabs,
+  PlugDetailNotFound,
+  PlugDetailTop,
   PlugInfoPanel,
   PlugLedSettingsCard,
   isSameShellyDevice,
@@ -73,7 +73,6 @@ export const InstallationDetailScreen = ({
   onOpenBleDiscovery,
   onEdit
 }: InstallationDetailScreenProps) => {
-  const { t } = useTranslation();
   const installation = useInstalledAutomationStore((state) =>
     state.installations.find((candidate) => candidate.id === installationId)
   );
@@ -92,17 +91,7 @@ export const InstallationDetailScreen = ({
     ]);
   }, []);
 
-  if (!installation) {
-    return (
-      <main className="demo-shell installation-detail-shell">
-        <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
-        <section className="automation-card installation-detail-identity">
-          <h1>{t('detail.notFoundTitle')}</h1>
-          <p className="installation-detail-note">{t('detail.notFoundDescription')}</p>
-        </section>
-      </main>
-    );
-  }
+  if (!installation) return <PlugDetailNotFound onBack={onBack} />;
 
   if (installation.kind === 'time') {
     return (
@@ -264,7 +253,7 @@ const ClimateInstallationDetail = ({
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <PlugDetailTabs activeTab={activeTab} onChange={setActiveTab} />
+      <PlugDetailTop plug={installation.shelly} tabs={[activeTab, setActiveTab]} />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
         {activeTab === 'automation' && (
@@ -382,7 +371,10 @@ const ClimateInstallationDetail = ({
         {activeTab === 'info' && (
           <section>
             <PlugInfoPanel
-              target={installation.shelly}
+              connection={{
+                transport: 'wifi',
+                baseUrl: installation.shelly.baseUrl
+              }}
               information={informationQuery.data}
               loading={informationQuery.isPending}
               error={informationQuery.isError}

@@ -108,12 +108,15 @@ describe('navigation and settings regression coverage', () => {
     fireEvent.click(back!);
     expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
   });
-  it('opens saved Plug settings as a child page instead of a modal', async () => {
+
+  it('opens a saved Plug in the shared five-tab detail shell', async () => {
     useHardwareSetupDraftStore.getState().upsertShellyDevice({
       id: 'plug-settings-test',
       name: 'Nawilżacz',
       baseUrl: 'http://192.168.0.30/',
-      scriptIdInput: '1'
+      scriptIdInput: '1',
+      model: 'S3PL-00112EU',
+      gen: 3
     });
     vi.stubGlobal(
       'fetch',
@@ -124,7 +127,7 @@ describe('navigation and settings regression coverage', () => {
         };
         let result: unknown = {};
         if (body.method === 'Shelly.GetDeviceInfo') {
-          result = { id: 'shellyplugsg3-settings', model: 'S3PL-00112EU', gen: 3 };
+          result = { id: 'plug-settings-test', model: 'S3PL-00112EU', gen: 3 };
         } else if (body.method === 'Shelly.GetStatus') {
           result = {
             matter: { enabled: false },
@@ -134,6 +137,8 @@ describe('navigation and settings regression coverage', () => {
             wifi: { rssi: -55 },
             sys: { time: '12:00', unixtime: 1_800_000_000, uptime: 3600 }
           };
+        } else if (body.method === 'Shelly.ListMethods') {
+          result = { methods: [] };
         } else if (body.method === 'Script.List') {
           result = { scripts: [] };
         }
@@ -149,18 +154,31 @@ describe('navigation and settings regression coverage', () => {
 
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(await screen.findByRole('heading', { name: 'Nawilżacz' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Wstecz: Gniazdka' })).toBeVisible();
-    const scanBle = screen.getByRole('button', {
-      name: 'Skanuj termometry BLE przez to gniazdko'
-    });
-    expect(scanBle).toBeVisible();
-    expect(
-      screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
-    ).toBeVisible();
+    expect(screen.getByText('Wi-Fi · S3PL-00112EU')).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Wstecz: Gniazdka' })).toBeNull();
+    const detailShell = document.querySelector('.installation-detail-shell');
+    const detailTabs = detailShell?.querySelector('.plug-detail-tabs');
+    const detailIdentity = detailShell?.querySelector('.installation-detail-identity');
+    expect(detailShell?.firstElementChild).toBe(detailTabs);
+    expect(detailTabs?.nextElementSibling).toBe(detailIdentity);
+    expect(screen.getByRole('button', { name: 'Automatyka' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Skrypt' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+    expect(screen.getByRole('button', { name: 'Bluetooth' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Informacje' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Bluetooth' }));
+    const scanBle = screen.getByRole('button', {
+      name: 'Skanuj termometry BLE przez to gniazdko'
+    });
+    expect(scanBle).toBeVisible();
 
     fireEvent.click(scanBle);
     expect(screen.queryByRole('dialog')).toBeNull();
@@ -175,9 +193,14 @@ describe('navigation and settings regression coverage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Nawilżacz' }));
     expect(await screen.findByRole('heading', { name: 'Nawilżacz' })).toBeVisible();
-    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Gniazdka' }));
-    expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Informacje' }));
+    expect(
+      screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
+    ).toBeVisible();
   });
 });

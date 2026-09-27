@@ -224,6 +224,7 @@ const renderDashboard = (
           onAddThermometer={onAddThermometer}
           onAddAutomation={onAddAutomation}
           onOpenInstallation={onOpenInstallation}
+          onOpenBlePlug={vi.fn()}
           onOpenPlugSettings={onOpenPlugSettings}
         />
       </QueryClientProvider>
@@ -268,7 +269,11 @@ describe('AutomationDashboardScreen', () => {
     expect(within(plugEmptyState).getByText('Brak dodanych gniazdek.')).toBeVisible();
     expect(screen.queryByText('Brak automatyzacji')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Dodaj gniazdko' }));
-    expect(onAddPlug).toHaveBeenCalledTimes(1);
+    expect(onAddPlug).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Wi-Fi' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Bluetooth' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Bluetooth' }));
+    expect(onAddPlug).toHaveBeenCalledWith('bluetooth');
     expect(onAddAutomation).not.toHaveBeenCalled();
   });
 
@@ -365,7 +370,7 @@ describe('AutomationDashboardScreen', () => {
     const card = screen.getByText('Nawilżacz').closest('article');
     expect(card).not.toBeNull();
     const plugCard = card as HTMLElement;
-    expect(within(plugCard).getByText('Brak automatyzacji')).toBeVisible();
+    expect(within(plugCard).queryByText('Brak automatyzacji')).toBeNull();
     fireEvent.click(within(plugCard).getByRole('button', { name: 'Nazwa gniazdka' }));
     const nameInput = within(plugCard).getByRole('textbox', { name: 'Nazwa gniazdka' });
     fireEvent.change(nameInput, { target: { value: 'Nawilżacz salon' } });
@@ -381,7 +386,7 @@ describe('AutomationDashboardScreen', () => {
 
     fireEvent.click(
       within(plugCard).getByRole('button', {
-        name: 'Ustawienia gniazdka: Nawilżacz salon'
+        name: 'Szczegóły: Nawilżacz salon · Wi-Fi'
       })
     );
     expect(onOpenPlugSettings).toHaveBeenCalledWith('http://192.168.0.30/');
@@ -543,7 +548,9 @@ describe('AutomationDashboardScreen', () => {
       screen.getByRole('button', { name: 'Skanuj termometry BLE telefonem' })
     ).toBeVisible();
     rerenderKind('climate');
-    expect(screen.getByRole('button', { name: 'Szczegóły: Salon' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' })
+    ).toBeVisible();
     expect(
       document.querySelector('.automation-card__menu svg.tabler-icon')
     ).not.toBeNull();

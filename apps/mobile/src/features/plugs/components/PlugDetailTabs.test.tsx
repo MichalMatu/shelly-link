@@ -1,0 +1,38 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import { PlugDetailTabs } from './PlugDetailTabs.js';
+
+const renderTabs = (onChange = vi.fn()) =>
+  render(
+    <I18nProvider>
+      <PlugDetailTabs
+        activeTab="info"
+        disabledTabs={['automation', 'ble', 'script']}
+        onChange={onChange}
+      />
+    </I18nProvider>
+  );
+
+describe('PlugDetailTabs', () => {
+  beforeEach(() => setLocalePreference('en'));
+  afterEach(() => setLocalePreference('system'));
+
+  it('keeps unavailable transport features in the shared tab skeleton', () => {
+    const onChange = vi.fn();
+    renderTabs(onChange);
+
+    expect(screen.getByRole('button', { name: 'Automation' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Bluetooth' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Script' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Plug settings' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Info' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Info' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Plug settings' }));
+    expect(onChange).toHaveBeenCalledWith('device');
+  });
+});

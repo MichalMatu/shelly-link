@@ -1,35 +1,47 @@
 # Shelly Link
 
-**Thermostat without a hub.**
+**Local-first climate and grow automation without a hub.**
 
-Shelly Link is a local-first mobile app for configuring and managing Shelly Plug climate automation:
+Shelly Link is a mobile configurator and management app built around a simple product model:
 
 ```text
-BLE thermometer -> Shelly Plug S Gen3 -> local relay ON/OFF
+BLE thermometer -> Shelly Plug -> local automation -> relay
 ```
 
-The phone configures and diagnoses. The Shelly executes the installed automation locally, so the app does not need to remain open and the default product path does not require cloud services, Home Assistant, MQTT or a 24/7 server.
+The phone discovers, configures and diagnoses. The Shelly executes installed automation locally, so the normal runtime does not require the app to stay open and does not depend on cloud services, Home Assistant, MQTT or a 24/7 server.
 
-## What the app does
+## Product direction
 
-- discovers and manages Shelly Plug S Gen3 devices;
+Shelly Link is **climate/grow-first**. The reusable Shelly management layer underneath it is intentionally broader than one automation, but that platform is not the product goal by itself.
+
+New device-management capabilities should earn priority by doing at least one of these things:
+
+- enabling a concrete climate/grow use case;
+- improving reliability or safety;
+- reducing setup/maintenance friction for supported hardware;
+- providing diagnostics needed to operate the local automation confidently.
+
+This keeps the architecture reusable without turning the app into a general-purpose clone of the vendor UI.
+
+## What the app does today
+
+- discovers and manages Shelly Plug S Gen3 over Wi-Fi and BLE;
+- uses normalized `Shelly.GetDeviceInfo.id` as physical identity and treats network/BLE addresses as replaceable locators;
 - supports Xiaomi LYWSD03MMC / PVVX BTHome v2 and TP357 BLE thermometers;
-- supports up to 4 thermometers in one Climate automation with `avg`, `min`, `max` or `firstValid` aggregation;
+- supports 1–4 thermometers in one Climate automation with `avg`, `min`, `max` or `firstValid` aggregation;
 - configures temperature, humidity and VPD rules;
-- generates and manages a local Shelly Script runtime;
-- exposes Plug, BLE, script and automation diagnostics without duplicating ownership;
-- keeps device settings such as LED, physical button mode and Shelly Cloud separate from automation logic.
+- installs and manages a local Shelly Script runtime;
+- exposes Plug, BLE, automation, script and device diagnostics without moving runtime ownership to the phone;
+- supports BLE bootstrap provisioning to Wi-Fi, verified transport promotion to HTTP, firmware status/update and capability-aware device-time synchronization;
+- keeps user-triggered device mutations identity-verified and avoids automatic replay after ambiguous transport failures.
 
-## Current product status
+## Current status
 
-The project is in MVP/beta with a stable architecture, an accepted UX baseline and a verified real-hardware path on Samsung S22+ + Shelly Plug S Gen3.
+The project is pre-release/beta. Core local automation, multi-sensor Climate, Plug lifecycle/recovery, BLE management, BLE-to-Wi-Fi provisioning and the verified OTA/time-sync path have real-device evidence on Samsung S22+ / Android 16 and Shelly Plug S Gen3.
 
-The UX stabilization pass is complete. The next planned product expansions are:
+The current closeout intentionally stops before adding another onboarding abstraction. The next architecture cleanup is to converge the remaining separate Wi-Fi-origin and BLE-origin saved-Plug registries around one canonical physical Plug model. After that, the next user-facing milestone should be chosen explicitly between richer climate rules and History/Datalogger rather than developing both in parallel.
 
-1. BLE soil-moisture input through the existing typed sensor/config model;
-2. a real-hardware feasibility spike for managing Shelly over BLE, reusing the same ownership and RPC transport boundaries.
-
-See [Roadmap](docs/ROADMAP.md) and [Current handoff](docs/HANDOFF_NEXT_CHAT.md) for the exact next-session contract.
+See [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), [Current handoff](docs/HANDOFF_NEXT_CHAT.md) and the [Hardware test matrix](docs/testing/hardware-matrix.md).
 
 ## Downloads
 
@@ -53,6 +65,8 @@ The active documentation set is intentionally small:
 - [Roadmap](docs/ROADMAP.md)
 - [Current handoff](docs/HANDOFF_NEXT_CHAT.md)
 - [Hardware test matrix](docs/testing/hardware-matrix.md)
+- [UX visual contract](docs/UX_VISUAL_CONTRACT.md)
+- [UX visual gallery](docs/UX_VISUAL_GALLERY.md)
 
 Repository operating rules live in [AGENTS.md](AGENTS.md) and the nearest directory-level `AGENTS.md` files.
 

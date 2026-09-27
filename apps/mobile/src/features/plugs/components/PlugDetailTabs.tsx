@@ -12,6 +12,7 @@ export type PlugDetailTab = 'automation' | 'ble' | 'device' | 'script' | 'info';
 type PlugDetailTabsProps = {
   activeTab: PlugDetailTab;
   onChange(tab: PlugDetailTab): void;
+  disabledTabs?: readonly PlugDetailTab[];
 };
 
 const tabs: readonly {
@@ -31,7 +32,11 @@ const tabs: readonly {
   { id: 'info', labelKey: 'common.info', icon: null }
 ];
 
-export const PlugDetailTabs = ({ activeTab, onChange }: PlugDetailTabsProps) => {
+export const PlugDetailTabs = ({
+  activeTab,
+  onChange,
+  disabledTabs = []
+}: PlugDetailTabsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -42,12 +47,14 @@ export const PlugDetailTabs = ({ activeTab, onChange }: PlugDetailTabsProps) => 
       {tabs.map((tab) => {
         const label = t(tab.labelKey);
         const Icon = tab.icon;
+        const disabled = disabledTabs.includes(tab.id);
         return (
           <button
             key={tab.id}
             aria-current={activeTab === tab.id ? 'page' : undefined}
             aria-label={label}
             className="plug-detail-tabs__item lcl-segmented-control__item"
+            disabled={disabled}
             title={label}
             type="button"
             onClick={() => onChange(tab.id)}

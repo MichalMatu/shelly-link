@@ -1,18 +1,25 @@
 import { App as CapacitorApp } from '@capacitor/app';
-import { calculateVpdKpa } from '@lcl/automation-core';
-import { isSameShellyDevice } from '../features/plugs/index.js';
 import { Capacitor } from '@capacitor/core';
-import {
-  IconAlertTriangle,
-  IconDotsVertical,
-  IconPlug,
-  IconPlus
-} from '@tabler/icons-react';
+import { calculateVpdKpa } from '@lcl/automation-core';
+import { IconAlertTriangle, IconDotsVertical, IconPlug } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { EditablePlugName } from '../components/EditablePlugName.js';
+import {
+  BleOnlyPlugDashboardCards,
+  isSameShellyDevice,
+  PlugAddSpeedDial,
+  PlugDashboardCardShell,
+  useSavedBlePlugStore,
+  type PlugAddTransport
+} from '../features/plugs/index.js';
+import { isDashboardRuntimeQuery } from '../features/dashboard/index.js';
+import {
+  useHardwareSetupDraftStore,
+  type ShellyDraftDevice
+} from '../flows/hardware-setup/setupDraftStore.js';
 import type {
   ClimateInstalledAutomation,
   InstalledAutomation
@@ -27,10 +34,6 @@ import { installedAutomationHealth } from '../flows/installations/runtimeDiagnos
 import { installedAutomationScriptMatch } from '../flows/installations/runtimeControl.js';
 import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import {
-  useHardwareSetupDraftStore,
-  type ShellyDraftDevice
-} from '../flows/hardware-setup/setupDraftStore.js';
-import {
   useInstalledAutomationActions,
   useInstalledAutomationControl,
   useInstalledAutomationDiagnostics
@@ -40,16 +43,6 @@ import { useSensorSetupFlow } from '../flows/hardware-setup/usePhoneSensorFlow.j
 import { TimeAutomationCard } from './TimeAutomationCard.js';
 import { SensorSetupPage } from './hardware-setup/pages/SensorSetupPage.js';
 import './AutomationDashboardScreen.css';
-
-const isDashboardRuntimeQuery = (query: { queryKey: readonly unknown[] }) => {
-  const root = query.queryKey[0];
-  return (
-    root === 'installed-automation-diagnostics' ||
-    root === 'installed-automation-control' ||
-    root === 'time-automation-runtime' ||
-    root === 'plain-shelly-runtime'
-  );
-};
 
 type AutomationCardProps = {
   installation: InstalledAutomation;
@@ -215,7 +208,7 @@ const ClimateAutomationCard = ({
           <button
             className="automation-card__menu"
             type="button"
-            aria-label={`${t('dashboard.openSystem')}: ${installation.shelly.name}`}
+            aria-label={`${t('dashboard.openSystem')}: ${installation.shelly.name} · Wi-Fi`}
             title={t('dashboard.openSystem')}
             onClick={() => onOpen(installation.id)}
           >
@@ -373,94 +366,37 @@ const PlainPlugCard = ({
   onOpenSettings(): void;
   onNameChange(value: string): void;
 }) => {
-  const { t } = useTranslation();
   const { status, isRelayPending, turnRelayOn, turnRelayOff } =
     usePlainShellyRuntime(device);
-  const relayState = status?.relayOn;
-  const isBusy = isRelayPending;
 
   return (
-    <article className="automation-card plug-card plug-card--unconfigured">
-      <header className="automation-card__header">
-        <span
-          className={`automation-card__leading-icon${
-            relayState === true ? ' automation-card__leading-icon--active' : ''
-          }`}
-          aria-hidden="true"
-        >
-          <IconPlug className="automation-card__icon" />
-        </span>
-        <div className="automation-card__identity">
-          <EditablePlugName name={device.name} variant="card" onCommit={onNameChange} />
-          <p>{t('dashboard.emptyCategory')}</p>
-        </div>
-        <button
-          className="automation-card__menu"
-          type="button"
-          aria-label={`${t('hardware.shelly.settings')}: ${device.name}`}
-          title={t('hardware.shelly.settings')}
-          onClick={onOpenSettings}
-        >
-          <IconDotsVertical aria-hidden="true" />
-        </button>
-      </header>
-
-      <div
-        className="automation-card__plug-runtime"
-        aria-label={t('hardware.shelly.statusMetricsLabel')}
-      >
-        <span>{formatInstallationMetric(status?.telemetry.powerW, ' W', 1)}</span>
-        <span>{formatInstallationMetric(status?.telemetry.voltageV, ' V', 0)}</span>
-        <span>{formatPlugEnergy(status?.telemetry.energyWh)}</span>
-        <span>{status?.clock.localTime ?? '—'}</span>
-      </div>
-
-      <div
-        className="automation-relay-actions automation-card__relay-actions"
-        role="group"
-        aria-label={t('dashboard.output')}
-      >
-        <button
-          className="automation-relay-button"
-          type="button"
-          aria-pressed={relayState === true}
-          disabled={isBusy}
-          onClick={() => {
-            if (relayState !== true) turnRelayOn();
-          }}
-        >
-          ON
-        </button>
-        <button
-          className="automation-relay-button"
-          type="button"
-          aria-pressed={relayState === false}
-          disabled={isBusy}
-          onClick={() => {
-            if (relayState !== false) turnRelayOff();
-          }}
-        >
-          OFF
-        </button>
-      </div>
-
-      <button
-        className="primary-action plug-card__automation-action"
-        type="button"
-        onClick={onAddAutomation}
-      >
-        {t('dashboard.addAutomation')}
-      </button>
-    </article>
+    <PlugDashboardCardShell
+      name={device.name}
+      relayState={status?.relayOn}
+      busy={isRelayPending}
+      telemetry={{
+        powerW: status?.telemetry.powerW,
+        voltageV: status?.telemetry.voltageV,
+        energyWh: status?.telemetry.energyWh,
+        localTime: status?.clock.localTime
+      }}
+      automationAction={{ disabled: false, onClick: onAddAutomation }}
+      detailContext="Wi-Fi"
+      onNameChange={onNameChange}
+      onOpenDetails={onOpenSettings}
+      onTurnRelayOn={turnRelayOn}
+      onTurnRelayOff={turnRelayOff}
+    />
   );
 };
 
 type AutomationDashboardScreenProps = {
   initialKind?: AppNavigationKind;
-  onAddPlug(): void;
+  onAddPlug(transport: PlugAddTransport): void;
   onAddThermometer(): void;
   onAddAutomation(kind: AppNavigationKind, shellyId?: string): void;
   onOpenInstallation(installationId: string): void;
+  onOpenBlePlug(physicalId: string): void;
   onOpenPlugSettings(deviceId: string): void;
 };
 
@@ -470,6 +406,7 @@ export const AutomationDashboardScreen = ({
   onAddThermometer,
   onAddAutomation,
   onOpenInstallation,
+  onOpenBlePlug,
   onOpenPlugSettings
 }: AutomationDashboardScreenProps) => {
   const { t } = useTranslation();
@@ -481,6 +418,8 @@ export const AutomationDashboardScreen = ({
   const setShellyDeviceName = useHardwareSetupDraftStore(
     (state) => state.setShellyDeviceName
   );
+  const savedBlePlugs = useSavedBlePlugStore((state) => state.plugs);
+  const renameSavedBlePlug = useSavedBlePlugStore((state) => state.renamePlug);
   const queryClient = useQueryClient();
   const activeKind = initialKind ?? 'climate';
   useEffect(() => {
@@ -527,8 +466,10 @@ export const AutomationDashboardScreen = ({
   const unmatchedInstallations = installations.filter(
     (installation) => !matchedInstallationIds.has(installation.id)
   );
-  const hasPlugEntries = plugEntries.length > 0 || unmatchedInstallations.length > 0;
-  const fabLabel = t('hardware.shelly.add');
+  const hasPlugEntries =
+    plugEntries.length > 0 ||
+    unmatchedInstallations.length > 0 ||
+    savedBlePlugs.length > 0;
 
   return (
     <main
@@ -568,6 +509,15 @@ export const AutomationDashboardScreen = ({
                 onNameChange={renameInstalledPlug}
               />
             ))}
+            <BleOnlyPlugDashboardCards
+              plugs={savedBlePlugs}
+              representedPhysicalIds={[
+                ...shellyDevices.map((device) => device.id),
+                ...installations.map((installation) => installation.shelly.deviceId)
+              ]}
+              onNameChange={renameSavedBlePlug}
+              onOpen={onOpenBlePlug}
+            />
           </>
         ) : (
           <div className="dashboard-kind-empty" role="status">
@@ -577,17 +527,7 @@ export const AutomationDashboardScreen = ({
         )}
       </section>
 
-      {activeKind === 'climate' && (
-        <button
-          className="dashboard-fab"
-          type="button"
-          aria-label={fabLabel}
-          title={fabLabel}
-          onClick={onAddPlug}
-        >
-          <IconPlus className="dashboard-fab__icon" aria-hidden="true" />
-        </button>
-      )}
+      {activeKind === 'climate' && <PlugAddSpeedDial onSelect={onAddPlug} />}
     </main>
   );
 };

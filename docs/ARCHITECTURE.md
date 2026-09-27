@@ -1,6 +1,8 @@
 # Architecture
 
-Shelly Link is a local configurator and management app. The phone discovers, configures and diagnoses devices; a Shelly Plug executes installed automation locally without requiring the phone, cloud, Home Assistant, MQTT or a 24/7 server.
+Shelly Link is a local-first climate/grow configurator and management app. The phone discovers, configures and diagnoses devices; Shelly executes installed automation locally after setup.
+
+The architecture is intentionally reusable beyond one automation, but the product remains climate/grow-first. Device-management work is prioritized when it enables that product, improves safety/reliability, reduces setup friction or provides useful operational diagnostics.
 
 ## Product model
 
@@ -8,23 +10,36 @@ Shelly Link is a local configurator and management app. The phone discovers, con
 physical Plug -> optional installed automation
 ```
 
-A saved Plug is useful without automation. Automation setup starts from a concrete Plug. One Plug relay has at most one Shelly Link managed automation owner at a time. Time automation is a Plug automation type, not a separate global device model.
+A saved Plug is useful without automation. Automation setup starts from a concrete physical Plug. One Plug relay has at most one Shelly Link managed automation owner at a time.
 
-`InstalledAutomation` is the durable record of installed automation ownership. Forgetting a Plug removes only the saved physical-device entry from the app; it does not uninstall the automation or mutate Shelly. Uninstalling an automation is a separate destructive operation.
+`InstalledAutomation` is the durable automation ownership record. Forgetting a Plug removes the saved device from the app but does not mutate Shelly. Uninstalling an automation is a separate destructive operation.
 
-The project is pre-release. Development-only persisted state, script names and internal APIs do not receive backward-compatibility adapters. A rename or model change is applied cohesively to current code/tests/docs; obsolete compatibility paths are deleted.
+The project is pre-release. Internal model/API renames are applied cohesively to current code/tests/docs instead of carrying compatibility layers for never-released development states.
 
-## Identity and recovery
+## Physical identity and transport locators
 
-Shelly physical identity is `Shelly.GetDeviceInfo.id`, normalized consistently. URL/IP is transport location, not durable identity.
+Canonical Shelly identity is normalized `Shelly.GetDeviceInfo.id`.
 
-Before relay mutations, runtime replacement or destructive operations, the app verifies that the endpoint still belongs to the stored Shelly device. A mismatch stops before mutation.
+Transport-specific addresses are locators, not identity:
 
-On a Shelly Link-managed Plug, the application owns the full Shelly Scripts namespace. Script name, old script hash and previously stored script id are not authorization evidence and do not block install/edit/recover/delete. Explicit automation mutation first confirms physical device identity and safe OFF, then converges the device to the current application state.
+- HTTP `baseUrl` / IP is a Wi-Fi locator;
+- Android BLE address / CoreBluetooth UUID / `bleDeviceId` is a BLE locator;
+- advertisement name and RSSI are discovery metadata only.
 
-Remote-to-local recovery may reconstruct a missing Climate installation when the single enabled runtime can be decoded as the current generated Climate runtime and its metadata/config is valid. Script display name is not ownership evidence. Passive reconciliation may report changed/unavailable state but does not rewrite the device; explicit recover/edit is the convergence boundary.
+Before destructive operations, runtime replacement or device mutations, the app verifies that the endpoint still belongs to the expected canonical physical device.
 
-When Climate recovery succeeds, the configured sensor identities are passively merged into the saved Thermometers registry by physical BLE `runtimeAddress`. Existing entries and user names win, duplicate MACs are not created, current rule membership is not changed, and recovery never synthesizes live readings.
+A physical Plug may have more than one verified locator. Provisioning and transport promotion enrich transport metadata; they do not create a new physical identity.
+
+### Known registry debt
+
+Two durable saved-Plug registries still exist from different historical flows:
+
+- Wi-Fi-origin `ShellyDraftDevice` state;
+- BLE-origin `SavedBlePlug` state, which may later gain `wifiBaseUrl`.
+
+Presentation currently deduplicates the same physical Plug by canonical identity, but duplicate durable records can still exist when the same device is added independently through both entry paths.
+
+Do not add more registry-specific behavior around this split. The next structural cleanup should converge these paths on one canonical physical Plug registry while keeping transport locators independent from identity and automation ownership.
 
 ## Runtime ownership and safety
 
@@ -33,98 +48,143 @@ The phone owns configuration, persistence, presentation and diagnostics. Shelly 
 Climate runtime invariants:
 
 - boot starts safe OFF;
-- stale/unusable sensor data fails OFF;
-- destructive/runtime mutation paths verify physical device identity first;
-- install/edit/recover force the relay OFF, stop/delete every existing Shelly script, install exactly one current Climate runtime, verify it, then persist its new script id/hash;
-- uninstall forces the relay OFF, stops/deletes every Shelly script and confirms an empty script list before removing the local automation record;
-- script hashes describe generated code only; display-name changes must not change runtime identity;
-- hardware tests finish with an explicit known relay state.
+- stale or unusable sensor data fails OFF;
+- identity is verified before destructive/runtime mutation;
+- install/edit/recover forces relay OFF before replacing managed runtime state;
+- current Climate install owns the full Shelly Scripts namespace and converges it to exactly one managed runtime;
+- uninstall forces relay OFF, removes managed script state and verifies the resulting device state before deleting local ownership;
+- script hashes describe generated code only; display names, old script IDs and old hashes are not authorization evidence;
+- hardware tests that exercise relay mutation finish with an explicitly known relay state.
 
-Temporary BLE discovery is the one non-exclusive script flow. It is short-lived, uses run-on-boot disabled, pauses the enabled automation while scanning, deletes its discovery script when finished and restores the automation when requested. It must not redefine the automation lifecycle ownership model.
+Passive recovery may recognize and reconstruct valid Shelly Link-managed state, but passive reconciliation does not silently rewrite a valid runtime. Explicit install/edit/recover is the convergence boundary.
 
-The current Climate runtime is `climate-engine-v1` with managed metadata, config hash and diagnostics. Native Time automation uses Shelly schedules rather than the Climate script.
+Temporary BLE discovery is the exception to exclusive long-lived script ownership. It is short-lived, disabled for run-on-boot, pauses the managed automation when needed, cleans itself up and restores the automation path without redefining ownership.
 
-Shelly script status is intentionally read from script-specific RPCs. `Shelly.GetStatus` exposes created script slots under dynamic keys such as `script:1`; it is not a global Scripts capability flag and must not be interpreted through a synthetic `status.script` field. Use successful `Script.List` to establish script-management availability/listing and `Script.GetStatus` for the state of a concrete runtime.
+Native Time automation uses Shelly schedules rather than the Climate script runtime.
 
-## Dependency direction
+## Climate engine and persistent config
 
-```text
-screens / routes
-  -> mobile feature flows and state
-    -> package APIs
-      -> domain logic and adapters
-
-shared UI -> design tokens
-```
-
-Screens do not own raw HTTP, Shelly RPC, BLE, persistence or runtime lifecycle. Side effects stay in clients/adapters/feature flows. `packages/*` never import from `apps/*`, and domain packages do not depend on React or Ionic. Repository and feature-boundary gates enforce these constraints.
-
-Refactor only when it removes a concrete blocker, restores one clear owner or enables an agreed feature. File size is an alarm, not a reason for mechanical splitting.
-
-## Engine and persistent config
-
-The architecture separates stable engine code from automation-specific data:
+The stable direction is:
 
 ```text
-mobile automation configuration
-  -> typed domain model
+mobile configuration
+  -> typed automation model
     -> Shelly RPC transport
-      -> stable Climate engine
-        -> persistent runtime config/data
+      -> stable Climate runtime
+        -> compact persistent config/diagnostics
           -> sensors + clock
             -> rules/operators
               -> relay
 ```
 
-The generator emits one `climate-engine-v1` body across supported Xiaomi/PVVX BTHome and TP357 profiles and VPD on/off. Sensor profiles, thresholds and automation-specific values live in typed compact config.
+The current Climate runtime is `climate-engine-v1`. Supported thermometer profiles share one generated runtime body; automation-specific values live in typed compact config.
 
-`Script.storage` remains a runtime persistence mechanism where firmware supports it, but the mobile edit lifecycle intentionally does not preserve development-era engine instances through config-only mutation. During pre-release development every explicit Climate edit replaces the script runtime using the current generator and stores the returned script id plus a code-only hash. This keeps device state deterministic and prevents stale script identity/name/history from becoming a compatibility surface.
+Explicit Climate edits currently replace the managed runtime using the current generator instead of preserving development-era script instances. Recovery may read persisted config while retaining the current generated-runtime decoding fallback.
 
-Recovery reads persisted config when present while retaining embedded config as the generator/runtime decoding fallback for the current development build. No compatibility promise is made to never-released historical script formats.
+If future history/config data requires larger storage, Shelly KVS may be evaluated as a namespaced/versioned persistence mechanism. It must not create a second automation ownership model.
 
-## Multiple-thermometer Climate input
+## Climate sensors
 
-A Climate automation supports **1 to 4 thermometers**. The compact runtime config keeps the ordered sensor set in `ss` and aggregation in `ag` (`avg`, `min`, `max`, `firstValid`). Xiaomi/PVVX BTHome and TP357 sensors may coexist in one set.
+A Climate automation supports 1–4 thermometers with `avg`, `min`, `max` or `firstValid` aggregation. Xiaomi/PVVX BTHome and TP357 devices may be mixed.
 
-Freshness is evaluated independently for every member. Stale or unusable members do not contribute to the aggregate; if no configured member remains usable, safe OFF wins. Incomplete advertisements such as battery-only updates must not make old temperature data fresh.
+Normalized physical BLE `runtimeAddress` is the logical thermometer identity at the mobile/runtime boundary. Phone discovery, Plug discovery, installed config and recovery converge on that identity.
 
-Normalized physical BLE `runtimeAddress` is the canonical logical thermometer identity at the mobile draft/edit boundary. Phone discovery, Plug discovery, installed config and Load from Shelly converge on that identity. Recovery preserves the complete sensor set and aggregation.
+Freshness is evaluated independently per sensor. Stale/unusable members do not contribute; if no configured member remains usable, safe OFF wins. Incomplete advertisements must not make old temperature/humidity values fresh.
 
-The runtime exposes a compact diagnostic record per configured thermometer. Phone BLE and Plug BLE are live-reading sources; recovered/runtime identity provenance is tracked separately. Old aggregate-only diagnostics remain parseable.
+Runtime diagnostics expose one compact record per configured thermometer. Phone BLE and Plug BLE are live-reading sources; recovered identity provenance is tracked separately from live readings.
 
-Real S22+ + Shelly Plug S Gen3 firmware 1.7.5 acceptance passed with 3 TP357 + 1 Xiaomi/PVVX sensor. Exact dated evidence is kept in `docs/testing/hardware-matrix.md`.
+## Shelly RPC transport
 
-## Plug detail UX ownership
+The transport boundary is shared:
 
-The Plug detail screen is one product surface with five local sections:
+```text
+feature flow
+  -> RpcShellyClient / ShellyRpcTransport
+      -> HTTP adapter
+      -> BLE adapter
+```
+
+HTTP remains the preferred stable management channel once a verified Wi-Fi locator exists. BLE is also a real Shelly RPC management channel and is especially useful for bootstrap/discovery.
+
+Transport rules:
+
+- BLE RPC handles framing, chunking, request IDs, timeouts, serialization and connection invalidation below the feature layer;
+- read-only BLE recovery may perform one bounded rediscovery after a retryable stale-locator failure and accepts only a canonical-id match;
+- locator recovery updates only the locator and never changes canonical identity;
+- optional capabilities are discovered with `Shelly.ListMethods`; model, generation and firmware strings do not substitute for advertised methods;
+- mutating RPC is never automatically replayed after an ambiguous timeout/disconnect;
+- UI/components do not own raw HTTP, GATT or Shelly RPC calls.
+
+### Provisioning and transport promotion
+
+The accepted bootstrap flow is:
+
+```text
+BLE identity/capabilities
+-> Wifi.Scan
+-> one Wifi.SetConfig
+-> read-only Wifi.GetStatus
+-> persist verified HTTP locator on the same physical Plug
+-> verify canonical identity over HTTP
+-> prefer HTTP for normal management
+```
+
+This is deterministic transport promotion, not blind BLE/Wi-Fi fallback.
+
+Firmware maintenance uses capability-aware `Shelly.CheckForUpdate` / explicit `Shelly.Update`. Update-start ambiguity is resolved with read-only reconnect, canonical-id verification and expected-firmware verification rather than replaying the update mutation.
+
+`Sys.SetTime` is exposed only when advertised. Undocumented raw `OTA.*` RPCs are not a product contract.
+
+Persistent BLE pairing/bonding and offline OTA remain separate research/feature decisions; they are not prerequisites for the normal climate/grow path.
+
+## Plug detail ownership
+
+Plug Detail is one product surface with five local sections:
 
 ```text
 Automation | BLE | Device | Script | Info
 ```
 
-They are presentation/navigation boundaries, not new ownership models:
+They are presentation boundaries, not new domain owners:
 
-- **Automation** presents live rule/relay state and owns inline Climate configuration editing plus automation deletion;
-- **BLE** presents BLE state, devices/readings/diagnostics and is the reserved surface for future BLE capabilities;
-- **Device** groups Shelly-owned settings such as LED, physical button mode and Shelly Cloud;
-- **Script** presents the managed runtime source/preview and code-loading feedback only;
-- **Info** presents device identity, firmware/network/health information, script/runtime resource diagnostics and destructive device-removal entry points.
+- **Automation** — installed automation state/configuration and deletion;
+- **BLE** — BLE state, configured sensors, readings and diagnostics;
+- **Device** — Shelly-owned settings such as LED, button mode and Cloud plus explicit management actions approved for that transport/state;
+- **Script** — managed runtime source/preview;
+- **Info** — identity, firmware/network/health and runtime resource diagnostics.
 
-Device-setting forms keep a local draft. Background refetches may refresh the server/device baseline, but must not overwrite a dirty user draft. A successful save establishes the newly confirmed device state as the next baseline.
+The five tabs remain the first Plug Detail content; page-level duplicate Back navigation is not reintroduced.
 
-Legacy nested Settings, Diagnostics and Script detail pages were removed after their data was moved to the correct surface. Do not reintroduce parallel nested pages for the same data.
+Device-setting forms keep local drafts. Background refresh may update the device baseline but must not overwrite a dirty user draft.
 
-Shared controls should use `packages/ui` + design tokens when the behavior is genuinely reusable. Product-specific layout remains in the owning mobile feature. Avoid one-off global CSS injections.
+Legacy nested Settings/Diagnostics/Script pages remain retired after their data moved to the owning surface.
 
-Plug detail visual hierarchy is intentional: the tab surface is flat by default; a thin framed group with an inline title is used only for a closed data/control group; `Disclosure` is reserved for optional expandable content; destructive/action separators are explicit. Styling must not infer visual separators from semantic nesting such as `section > section`, because component markup must not accidentally change page hierarchy.
+## Dependency direction
 
-## Transport direction
+```text
+screens / routes
+  -> feature flows + state
+    -> package APIs
+      -> domain logic + adapters
 
-Current production management uses local HTTP RPC.
+shared UI -> design tokens
+```
 
-Two future BLE directions remain intentionally separate:
+Rules:
 
-1. **BLE sensors** — additional sensor types such as soil moisture should reuse the existing typed sensor/config/diagnostic model.
-2. **Shelly management over BLE** — must start with a real-hardware feasibility spike. If sufficient RPC lifecycle support exists, implement a shared `ShellyRpcTransport` with HTTP and BLE adapters rather than duplicating product logic.
+- screens compose and present; they do not own raw transport, storage or runtime lifecycle;
+- flows own orchestration and side-effect lifecycles;
+- durable state is accessed through repository/store boundaries;
+- reusable Shelly protocol/domain behavior belongs in packages rather than mobile presentation;
+- `packages/*` never depend on `apps/*`;
+- feature public APIs and repository gates enforce dependency boundaries.
 
-BLE transport must not fork automation ownership, persistence, safety or business logic.
+Refactor only to fix ownership, remove a concrete blocker or enable an agreed feature. File length alone is not a reason for mechanical splitting.
+
+## Evidence and acceptance
+
+Architecture documents contain durable contracts, not chronological test history.
+
+Real-device claims belong in `docs/testing/hardware-matrix.md`. UI geometry belongs in the UX contract/gallery. Session-specific implementation state belongs in `docs/HANDOFF_NEXT_CHAT.md`.
+
+Hardware-facing behavior requires real-device acceptance. Mutating tests must record the final relay/device state when that state matters for safety.

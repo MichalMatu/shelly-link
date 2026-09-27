@@ -1,0 +1,145 @@
+import { z } from 'zod';
+import { RPC_METHODS, type Result, type ShellyRpcTransport } from './model.js';
+import { validationError } from './rpc/errors.js';
+
+const wifiStationConfigSchema = z
+  .object({
+    ssid: z.string().nullable(),
+    enable: z.boolean(),
+    is_open: z.boolean().optional(),
+    ipv4mode: z.string().optional(),
+    ip: z.string().nullable().optional()
+  })
+  .passthrough();
+
+const wifiConfigSchema = z
+  .object({
+    sta: wifiStationConfigSchema,
+    sta1: wifiStationConfigSchema.optional()
+  })
+  .passthrough();
+
+const wifiStatusSchema = z
+  .object({
+    sta_ip: z.string().nullable().optional(),
+    status: z.enum(['disconnected', 'connecting', 'connected', 'got ip']),
+    ssid: z.string().nullable().optional(),
+    rssi: z.number().optional()
+  })
+  .passthrough();
+
+const wifiScanEntrySchema = z
+  .object({
+    ssid: z.string().nullable(),
+    bssid: z.string(),
+    auth: z.number().int().nonnegative(),
+    channel: z.number().int().optional(),
+    rssi: z.number().optional()
+  })
+  .passthrough();
+
+const wifiScanResponseSchema = z.object({
+  results: z.array(wifiScanEntrySchema)
+});
+
+const wifiStationProvisioningSchema = z.object({
+  ssid: z.string().refine((value) => value.trim().length > 0, {
+    message: 'SSID must not be blank.'
+  }),
+  password: z.string(),
+  enable: z.boolean().default(true)
+});
+
+const setConfigResponseSchema = z.object({
+  restart_required: z.boolean()
+});
+
+export type ShellyWifiStationConfig = z.infer<typeof wifiStationConfigSchema>;
+export type ShellyWifiConfig = z.infer<typeof wifiConfigSchema>;
+export type ShellyWifiStatus = z.infer<typeof wifiStatusSchema>;
+export type ShellyWifiScanEntry = z.infer<typeof wifiScanEntrySchema>;
+export type ShellyWifiStationProvisioning = z.input<typeof wifiStationProvisioningSchema>;
+export type ShellyWifiSetResult = z.infer<typeof setConfigResponseSchema>;
+
+export type ShellyWifiReadResult = {
+  config: ShellyWifiConfig;
+  status: ShellyWifiStatus;
+};
+
+const parseResponse = <T>(response: Result<unknown>, schema: z.ZodType<T>): Result<T> => {
+  if (!response.ok) {
+    return response;
+  }
+
+  const parsed = schema.safeParse(response.value);
+  return parsed.success
+    ? { ok: true, value: parsed.data }
+    : { ok: false, error: validationError(parsed.error.message) };
+};
+
+export class RpcShellyWifiClient {
+  constructor(private readonly transport: ShellyRpcTransport) {}
+
+  async scan(): Promise<Result<ShellyWifiScanEntry[]>> {
+    const response = parseResponse(
+      await this.transport.call<unknown>({ method: RPC_METHODS.WifiScan }),
+      wifiScanResponseSchema
+    );
+    return response.ok ? { ok: true, value: response.value.results } : response;
+  }
+
+  async getStatus(): Promise<Result<ShellyWifiStatus>> {
+    return parseResponse(
+      await this.transport.call<unknown>({ method: RPC_METHODS.WifiGetStatus }),
+      wifiStatusSchema
+    );
+  }
+
+  async read(): Promise<Result<ShellyWifiReadResult>> {
+    const config = parseResponse(
+      await this.transport.call<unknown>({ method: RPC_METHODS.WifiGetConfig }),
+      wifiConfigSchema
+    );
+    if (!config.ok) {
+      return config;
+    }
+
+    const status = await this.getStatus();
+    if (!status.ok) {
+      return status;
+    }
+
+    return {
+      ok: true,
+      value: {
+        config: config.value,
+        status: status.value
+      }
+    };
+  }
+
+  async setStation(
+    input: ShellyWifiStationProvisioning
+  ): Promise<Result<ShellyWifiSetResult>> {
+    const parsedInput = wifiStationProvisioningSchema.safeParse(input);
+    if (!parsedInput.success) {
+      return { ok: false, error: validationError(parsedInput.error.message) };
+    }
+
+    return parseResponse(
+      await this.transport.call<unknown>({
+        method: RPC_METHODS.WifiSetConfig,
+        params: {
+          config: {
+            sta: {
+              ssid: parsedInput.data.ssid,
+              pass: parsedInput.data.password,
+              enable: parsedInput.data.enable
+            }
+          }
+        }
+      }),
+      setConfigResponseSchema
+    );
+  }
+}

@@ -1,16 +1,94 @@
-export { readPlugInformation, type PlugInformation } from './data/plugInformation.js';
+export {
+  readPlugInformation,
+  readPlugInformationFromTarget,
+  type PlugInformation
+} from './data/plugInformation.js';
+export {
+  withVerifiedPlugReadOnlyClient,
+  type PlugReadOnlyManagementDependencies,
+  type PlugReadOnlyManagementTarget
+} from './data/plugReadOnlyManagementTarget.js';
 export {
   usePlugInformationFlow,
   plugInformationQueryKey
 } from './flows/usePlugInformationFlow.js';
-export { PlugInfoPanel, type PlugInfoPanelProps } from './components/PlugInfoPanel.js';
+export { PlugInfoPanel } from './components/PlugInfoPanel.js';
+export { PlugDetailNotFound } from './components/PlugDetailNotFound.js';
+export { PlugDetailTop } from './components/PlugDetailTop.js';
 export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.js';
+export {
+  BlePlugDetailScreen,
+  type BlePlugDetailScreenProps
+} from './screens/BlePlugDetailScreen.js';
+export { WifiPlugDetailScreen } from './screens/WifiPlugDetailScreen.js';
 export { isSameShellyDevice } from './data/shellyDeviceIdentity.js';
 export {
-  PlugAddPage,
-  type PlugAddPageProps,
-  type PlugScanResultView
-} from './components/PlugAddPage.js';
+  buildVerifiedPlugBleCandidate,
+  type PlugBleAdvertisement,
+  type VerifiedPlugBleCandidate
+} from './data/plugBleOnboarding.js';
+export {
+  SAVED_BLE_PLUG_VERSION,
+  savedBlePlugFromCandidate,
+  savedBlePlugSchema,
+  type SavedBlePlug
+} from './data/savedBlePlug.js';
+export {
+  createSavedBlePlugRepository,
+  SAVED_BLE_PLUGS_STORAGE_KEY,
+  type SavedBlePlugRepository,
+  type SavedBlePlugStorageAdapter
+} from './data/savedBlePlugRepository.js';
+export {
+  resetSavedBlePlugStore,
+  useSavedBlePlugStore,
+  type SavedBlePlugState
+} from './state/savedBlePlugStore.js';
+export {
+  inspectPlugBleCandidate,
+  PLUG_BLE_GATT_RADIO_SETTLE_MS,
+  type InspectPlugBleCandidateOptions,
+  type InspectPlugBleCandidateDependencies
+} from './flows/inspectPlugBleCandidate.js';
+export {
+  scanPlugBleCandidates,
+  DEFAULT_PLUG_BLE_SCAN_TIMEOUT_MS,
+  type ScanPlugBleCandidatesOptions
+} from './flows/scanPlugBleCandidates.js';
+export {
+  usePlugBleAddFlow,
+  type UsePlugBleAddFlowDependencies,
+  type UsePlugBleAddFlowResult
+} from './flows/usePlugBleAddFlow.js';
+export {
+  PlugAddPageContainer as PlugAddPage,
+  type PlugAddPageContainerProps as PlugAddPageProps
+} from './components/PlugAddPageContainer.js';
+export type { PlugScanResultView } from './components/PlugAddPage.js';
+export { PlugBluetoothAddPage } from './components/PlugBluetoothAddPage.js';
+export {
+  PlugBluetoothAddPanel,
+  type PlugBluetoothAddPanelProps
+} from './components/PlugBluetoothAddPanel.js';
+export {
+  BleOnlyPlugCard,
+  type BleOnlyPlugCardProps
+} from './components/BleOnlyPlugCard.js';
+export {
+  BleOnlyPlugDashboardCards,
+  type BleOnlyPlugDashboardCardsProps
+} from './components/BleOnlyPlugDashboardCards.js';
+export {
+  PlugDashboardCardShell,
+  type PlugDashboardAutomationAction,
+  type PlugDashboardCardShellProps,
+  type PlugDashboardTelemetry
+} from './components/PlugDashboardCardShell.js';
+export {
+  PlugAddSpeedDial,
+  type PlugAddSpeedDialProps,
+  type PlugAddTransport
+} from './components/PlugAddSpeedDial.js';
 export {
   PlugDeleteConfirmModal,
   type PlugDeleteConfirmModalProps

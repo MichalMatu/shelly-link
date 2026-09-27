@@ -1,0 +1,128 @@
+import {
+  RpcShellyClient,
+  type ShellyClient,
+  type ShellyClientError,
+  type ShellyErrorKind,
+  type ShellyRpcTransport,
+  type ShellyStatus
+} from '@lcl/shelly-client';
+import { createShellyBleTransport } from '../../../platform/shellyBleTransport.js';
+import {
+  shellyResultErrorMessage,
+  unwrapShellyResult
+} from '../../../platform/shellyResult.js';
+import type { SavedBlePlug } from './savedBlePlug.js';
+
+export type BlePlugRuntimeStatus = Pick<ShellyStatus, 'relayOn' | 'telemetry' | 'clock'>;
+
+type BlePlugRuntimeClient = Pick<
+  ShellyClient,
+  'getStatus' | 'setRelayOn' | 'setRelayOff'
+>;
+
+type DisposableShellyRpcTransport = ShellyRpcTransport & {
+  disconnect(): Promise<void>;
+};
+
+export type BlePlugRuntimeDependencies = {
+  createTransport(deviceId: string): DisposableShellyRpcTransport;
+  createClient(transport: ShellyRpcTransport): BlePlugRuntimeClient;
+};
+
+export class BlePlugRuntimeReadError extends Error {
+  readonly kind: ShellyErrorKind;
+  readonly retryable: boolean;
+
+  constructor(error: ShellyClientError) {
+    super(shellyResultErrorMessage({ ok: false, error }));
+    this.name = 'BlePlugRuntimeReadError';
+    this.kind = error.kind;
+    this.retryable = error.retryable;
+  }
+}
+
+export const isRecoverableBlePlugRuntimeReadError = (
+  error: unknown
+): error is BlePlugRuntimeReadError =>
+  error instanceof BlePlugRuntimeReadError &&
+  error.retryable &&
+  (error.kind === 'shelly-offline' || error.kind === 'timeout');
+
+const defaultDependencies: BlePlugRuntimeDependencies = {
+  createTransport: (deviceId) => createShellyBleTransport(deviceId),
+  createClient: (transport) => new RpcShellyClient(transport)
+};
+
+const operationCompletionByDeviceId = new Map<string, Promise<void>>();
+
+const serializeBlePlugOperation = async <T>(
+  deviceId: string,
+  work: () => Promise<T>
+): Promise<T> => {
+  const previous = operationCompletionByDeviceId.get(deviceId) ?? Promise.resolve();
+  let release!: () => void;
+  const completion = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  operationCompletionByDeviceId.set(deviceId, completion);
+
+  await previous;
+  try {
+    return await work();
+  } finally {
+    release();
+    if (operationCompletionByDeviceId.get(deviceId) === completion) {
+      operationCompletionByDeviceId.delete(deviceId);
+    }
+  }
+};
+
+const withBlePlugClient = async <T>(
+  plug: Pick<SavedBlePlug, 'bleDeviceId'>,
+  work: (client: BlePlugRuntimeClient) => Promise<T>,
+  dependencies: BlePlugRuntimeDependencies
+): Promise<T> =>
+  serializeBlePlugOperation(plug.bleDeviceId, async () => {
+    const transport = dependencies.createTransport(plug.bleDeviceId);
+    try {
+      return await work(dependencies.createClient(transport));
+    } finally {
+      await transport.disconnect().catch(() => undefined);
+    }
+  });
+
+export const readBlePlugRuntimeStatus = async (
+  plug: Pick<SavedBlePlug, 'bleDeviceId'>,
+  dependencies: BlePlugRuntimeDependencies = defaultDependencies
+): Promise<BlePlugRuntimeStatus> =>
+  withBlePlugClient(
+    plug,
+    async (client) => {
+      const result = await client.getStatus();
+      if (!result.ok) {
+        throw new BlePlugRuntimeReadError(result.error);
+      }
+      return {
+        relayOn: result.value.relayOn,
+        telemetry: result.value.telemetry,
+        clock: result.value.clock
+      };
+    },
+    dependencies
+  );
+
+export const setBlePlugRelay = async (
+  plug: Pick<SavedBlePlug, 'bleDeviceId'>,
+  relayOn: boolean,
+  dependencies: BlePlugRuntimeDependencies = defaultDependencies
+): Promise<void> => {
+  await withBlePlugClient(
+    plug,
+    async (client) => {
+      unwrapShellyResult(
+        relayOn ? await client.setRelayOn() : await client.setRelayOff()
+      );
+    },
+    dependencies
+  );
+};
