@@ -3,16 +3,13 @@ import { DiagnosticRow } from '@lcl/ui';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceTimeCopy } from '../../../app/locales/deviceTime.js';
-import {
-  BlePlugTimeSyncUnsupportedError,
-  type SavedBlePlug
-} from '../data/blePlugTimeSync.js';
-import type { SavedBlePlug as SavedBlePlugModel } from '../data/savedBlePlug.js';
+import { BlePlugTimeSyncUnsupportedError } from '../data/blePlugTimeSync.js';
+import type { SavedBlePlug } from '../data/savedBlePlug.js';
 import { useBlePlugTimeSyncFlow } from '../flows/useBlePlugTimeSyncFlow.js';
 import './PlugSettingsSurface.css';
 
 export type BlePlugTimeSyncCardProps = {
-  plug: SavedBlePlugModel;
+  plug: SavedBlePlug;
   clock: ShellyClockStatus;
 };
 
