@@ -12,7 +12,13 @@ The product should remain local-first: the phone configures, manages and diagnos
 
 ### Unified physical Plug registry
 
+Completed on 2026-09-27.
+
 One canonical durable Plug record is keyed by normalized `Shelly.GetDeviceInfo.id`. BLE and verified Wi-Fi/HTTP addresses are independent transport locators on that record, and transport discovery enriches the record instead of creating another saved device.
+
+Durable ownership now belongs only to `features/plugs` via `lcl.savedPlugs.v1`. Hardware setup owns selection/configuration workflow state only; its v10 draft no longer persists a second `shellyDevices` registry.
+
+Migration imports legacy Wi-Fi devices from `lcl.hardwareSetupDraft.v9` and legacy BLE devices from `lcl.savedBlePlugs.v1`, merges them by canonical physical identity, and rejects endpoint-shaped historical IDs as physical identity. Verified HTTP remains the normal management transport when present, while BLE remains an onboarding/fallback locator rather than a second device identity.
 
 ## Now — feature-complete v1 track
 
