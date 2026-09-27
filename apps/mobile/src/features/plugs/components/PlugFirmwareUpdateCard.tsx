@@ -97,7 +97,10 @@ export const PlugFirmwareUpdateCard = ({
         </p>
       )}
       {updateMutation.isError && (
-        <p role="status" className="plug-settings-feedback plug-settings-feedback--warning">
+        <p
+          role="status"
+          className="plug-settings-feedback plug-settings-feedback--warning"
+        >
           {detailError(copy.updateFailed, updateMutation.error)}
         </p>
       )}

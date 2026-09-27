@@ -29,7 +29,9 @@ export type WaitForPlugFirmwareOptions = {
 };
 
 export type PlugFirmwareVerificationDependencies = {
-  readSnapshot(target: PlugFirmwareUpdateTarget): Promise<PlugFirmwareVerificationSnapshot>;
+  readSnapshot(
+    target: PlugFirmwareUpdateTarget
+  ): Promise<PlugFirmwareVerificationSnapshot>;
   sleep(ms: number): Promise<void>;
   nowMs(): number;
 };
