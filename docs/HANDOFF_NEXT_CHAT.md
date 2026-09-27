@@ -81,15 +81,35 @@ After the unified Plug registry, the next product slices should be developed in 
 
 1. **History / Datalogger** — resume from `work/kvs-datalogger` as source material, redesigning it around the current exclusive script/runtime lifecycle; log measurements plus relay state, reason/trigger, fault/safety context and relevant rule state.
 2. **Rule/action expansion** — Pulse ON, Pulse OFF, minimum ON/OFF, cooldown, debounce, time windows combined with sensor rules, simple reusable `AND` / `OR` composition. Model pulse as an action and restore the state implied by the automation after a pulse.
-3. **Runtime safety supervisor** — maximum power, current, Plug temperature and maximum continuous ON time; safety is a layer above ordinary automation, can force OFF and may latch a fault until acknowledged.
-4. **Dashboard master control** — clear `RUNNING / PAUSED` automation state; PAUSED means safe OFF while datalogging/diagnostics/safety continue.
-5. **UX redesign round 2** — status-first dashboard after the above semantics are stable. Emphasize current climate, output, reason, safety and History; push BLE/firmware/script/transport detail deeper under Device/Info/Advanced.
+3. **Physical-button manual takeover** — first physical button press while automation is in `AUTO` always changes mode to safe `MANUAL_OFF`; if relay was ON it is forced OFF, if already OFF only the mode changes. Subsequent physical presses toggle `MANUAL_OFF <-> MANUAL_ON`. Manual takeover never silently returns to `AUTO`; the app must explicitly resume automation. Normal automation must stop driving the relay immediately after takeover. History should log a `physical_button_takeover`-style reason. Future safety/fault logic remains higher priority than manual mode and may force OFF.
+4. **Runtime safety supervisor** — maximum power, current, Plug temperature and maximum continuous ON time; safety is a layer above ordinary automation and manual mode, can force OFF and may latch a fault until acknowledged.
+5. **Dashboard master control** — clear `RUNNING / PAUSED` automation state; PAUSED means safe OFF while datalogging/diagnostics/safety continue. Manual physical-button takeover is a separate visible state, not the same thing as PAUSED.
+6. **UX redesign round 2** — status-first dashboard after the above semantics are stable. Emphasize current climate, output, control source/reason, safety and History; push BLE/firmware/script/transport detail deeper under Device/Info/Advanced.
 
-High-value script/runtime improvements include transition reason codes, last-transition time, startup guard, min ON/OFF, cooldown/debounce state, latched safety faults and multi-sensor disagreement/outlier diagnostics.
+High-value script/runtime improvements include transition reason codes, last-transition time, explicit control-source state (`automation` / `manual` / `safety`), startup guard, min ON/OFF, cooldown/debounce state, latched safety faults and multi-sensor disagreement/outlier diagnostics.
 
-The working v1-complete target is: Climate + multi-sensor + time-aware rules + pulse actions + timing guards + History + safety supervisor + master RUN/PAUSE + existing local provisioning/OTA + final UX simplification.
+The working v1-complete target is: Climate + multi-sensor + time-aware rules + pulse actions + timing guards + deterministic physical-button takeover + History + safety supervisor + master RUN/PAUSE + existing local provisioning/OTA + final UX simplification.
 
 After that point, new capabilities should clear a higher product-value bar rather than simply increasing Shelly management breadth.
+
+## Physical-button takeover acceptance contract
+
+Before marking the takeover slice complete, cover at least:
+
+- `AUTO + relay ON -> physical button -> MANUAL_OFF`;
+- `AUTO + relay OFF -> physical button -> MANUAL_OFF`;
+- `MANUAL_OFF -> MANUAL_ON -> MANUAL_OFF` on subsequent button presses;
+- automation cannot immediately reassert relay state while manual takeover is active;
+- safety/fault OFF overrides manual ON;
+- the control-source/reason is visible to diagnostics/history.
+
+The intended priority model is:
+
+```text
+SAFETY / FAULT
+    > MANUAL physical-button override
+        > AUTO automation
+```
 
 ## Parked / later
 
@@ -101,6 +121,6 @@ After that point, new capabilities should clear a higher product-value bar rathe
 
 The long BLE/Plug-management iteration was merged to `main`, its work branch was deleted, and `work/kvs-datalogger` was intentionally preserved.
 
-Final clean checkpoint before this roadmap update: `0f61e0eaaae38c9e6d98c27f8857dbe0f43a0bad`.
+Clean checkpoint before the subsequent docs-only roadmap updates: `0f61e0eaaae38c9e6d98c27f8857dbe0f43a0bad`.
 
-The roadmap update that records the agreed v1 sequence is a docs-only descendant on `main`; verify the current `main` SHA before starting implementation in the next chat.
+The v1 roadmap and physical-button takeover updates are docs-only descendants on `main`; verify the current `main` SHA before starting implementation in the next chat.
