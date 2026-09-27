@@ -10,8 +10,13 @@ import {
 import type { SavedBlePlug } from '../data/savedBlePlug.js';
 import { BlePlugTimeSyncCard } from './BlePlugTimeSyncCard.js';
 
+type BlePlugTimeSyncModule = {
+  BlePlugTimeSyncUnsupportedError: typeof BlePlugTimeSyncUnsupportedError;
+  syncBlePlugTime: typeof syncBlePlugTime;
+};
+
 vi.mock('../data/blePlugTimeSync.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../data/blePlugTimeSync.js')>();
+  const actual = await importOriginal<BlePlugTimeSyncModule>();
   return { ...actual, syncBlePlugTime: vi.fn() };
 });
 
