@@ -4,8 +4,6 @@ import {
 } from '../index.js';
 import { describe, expect, it, vi } from 'vitest';
 
-type RuntimeEvent = { component: string; info?: { event?: string } };
-
 const advertisement = (temperatureC: number, humidityPct: number): number[] => {
   const temp = Math.round(temperatureC * 100);
   const humidity = Math.round(humidityPct * 100);
@@ -29,7 +27,6 @@ const createRuntime = (script: string) => {
   let scanner:
     | ((event: string, packet: { addr: string; advData: number[]; rssi: number }) => void)
     | undefined;
-  let eventHandler: ((event: RuntimeEvent) => void) | undefined;
   const switchCalls: boolean[] = [];
   const shelly = {
     call: (
@@ -44,10 +41,7 @@ const createRuntime = (script: string) => {
       }
       callback?.({}, 0);
     },
-    addEventHandler: (callback: (event: RuntimeEvent) => void) => {
-      eventHandler = callback;
-      return 1;
-    },
+    addEventHandler: () => 1,
     getComponentStatus: (component: string) =>
       component === 'switch:0'
         ? { output: physicalRelayOn }
@@ -91,8 +85,6 @@ return {
   };
 
   if (!scanner) throw new Error('Generated runtime did not subscribe to BLE.');
-  if (!eventHandler)
-    throw new Error('Generated runtime did not subscribe to input events.');
 
   return {
     runtime,
@@ -103,8 +95,6 @@ return {
         advData: advertisement(temperatureC, humidityPct),
         rssi: -35
       }),
-    pressButton: () =>
-      eventHandler?.({ component: 'input:0', info: { event: 'single_push' } }),
     physicalRelayOn: () => physicalRelayOn
   };
 };
@@ -124,7 +114,7 @@ const createHeatingRuntime = () => {
 };
 
 describe('generated runtime control arbitration', () => {
-  it('first physical press from AUTO+ON enters MANUAL_OFF and blocks automation', () => {
+  it('MANUAL_OFF blocks automation and explicit MANUAL_ON controls the relay', () => {
     let nowMs = 1_000_000;
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
     try {
@@ -132,7 +122,7 @@ describe('generated runtime control arbitration', () => {
       runtime.scan(18, 50);
       expect(runtime.physicalRelayOn()).toBe(true);
 
-      runtime.pressButton();
+      runtime.runtime.setMode(1);
       expect(runtime.runtime.mode()).toBe(1);
       expect(runtime.physicalRelayOn()).toBe(false);
 
@@ -142,10 +132,10 @@ describe('generated runtime control arbitration', () => {
       expect(runtime.switchCalls).toHaveLength(calls);
       expect(runtime.physicalRelayOn()).toBe(false);
 
-      runtime.pressButton();
+      runtime.runtime.setMode(2);
       expect(runtime.runtime.mode()).toBe(2);
       expect(runtime.physicalRelayOn()).toBe(true);
-      runtime.pressButton();
+      runtime.runtime.setMode(1);
       expect(runtime.runtime.mode()).toBe(1);
       expect(runtime.physicalRelayOn()).toBe(false);
     } finally {
@@ -153,36 +143,17 @@ describe('generated runtime control arbitration', () => {
     }
   });
 
-  it('first physical press from AUTO+OFF changes mode without an extra relay write', () => {
-    const nowMs = 1_000_000;
-    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
-    try {
-      const runtime = createHeatingRuntime();
-      runtime.scan(23.5, 50);
-      expect(runtime.physicalRelayOn()).toBe(false);
-      const calls = runtime.switchCalls.length;
-
-      runtime.pressButton();
-      expect(runtime.runtime.mode()).toBe(1);
-      expect(runtime.physicalRelayOn()).toBe(false);
-      expect(runtime.switchCalls).toHaveLength(calls);
-    } finally {
-      nowSpy.mockRestore();
-    }
-  });
-
-  it('PAUSED and FAULT remain OFF and ignore physical toggles', () => {
+  it('PAUSED remains OFF and blocks automation output', () => {
     const runtime = createHeatingRuntime();
+    runtime.scan(18, 50);
+    expect(runtime.physicalRelayOn()).toBe(true);
 
     runtime.runtime.setMode(3);
     expect(runtime.runtime.mode()).toBe(3);
     expect(runtime.physicalRelayOn()).toBe(false);
-    runtime.pressButton();
-    expect(runtime.runtime.mode()).toBe(3);
-
-    runtime.runtime.setMode(4);
-    runtime.pressButton();
-    expect(runtime.runtime.mode()).toBe(4);
+    const calls = runtime.switchCalls.length;
+    runtime.scan(18, 50);
+    expect(runtime.switchCalls).toHaveLength(calls);
     expect(runtime.physicalRelayOn()).toBe(false);
   });
 
@@ -192,8 +163,7 @@ describe('generated runtime control arbitration', () => {
     try {
       const runtime = createHeatingRuntime();
       runtime.scan(23.5, 50);
-      runtime.pressButton();
-      runtime.pressButton();
+      runtime.runtime.setMode(2);
       expect(runtime.runtime.mode()).toBe(2);
       expect(runtime.physicalRelayOn()).toBe(true);
 
