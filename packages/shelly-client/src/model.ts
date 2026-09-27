@@ -29,12 +29,15 @@ export interface ShellyRpcTransport {
   ): Promise<Result<TResponse>>;
 }
 
+export type ShellyProvisioningState = 'pending' | 'confirmed' | 'complete' | 'locked';
+
 export interface ShellyDeviceInfo {
   id?: string | undefined;
   model: string;
   gen: number;
   firmwareId?: string | undefined;
   matterEnabled?: boolean | undefined;
+  provision?: ShellyProvisioningState | undefined;
 }
 
 export interface ShellyPlugTelemetry {
@@ -127,6 +130,8 @@ export const RPC_METHODS = {
   SysGetStatus: 'Sys.GetStatus',
   SysSetTime: 'Sys.SetTime',
   ShellyListMethods: 'Shelly.ListMethods',
+  ShellyCheckForUpdate: 'Shelly.CheckForUpdate',
+  ShellyUpdate: 'Shelly.Update',
   ScriptList: 'Script.List',
   ScriptCreate: 'Script.Create',
   ScriptGetCode: 'Script.GetCode',
