@@ -6,9 +6,15 @@ import {
   waitForPlugFirmwareUpdate,
   type PlugFirmwareUpdateTarget
 } from '../data/plugFirmwareUpdate.js';
+import { useSavedBlePlugStore } from '../state/savedBlePlugStore.js';
 
 export type PlugFirmwareUpdatePhase =
-  'idle' | 'starting' | 'reconnecting' | 'verifying' | 'complete' | 'failed';
+  | 'idle'
+  | 'starting'
+  | 'reconnecting'
+  | 'verifying'
+  | 'complete'
+  | 'failed';
 
 export const plugFirmwareUpdateQueryKey = (
   target: PlugFirmwareUpdateTarget | undefined
@@ -24,6 +30,7 @@ export const usePlugFirmwareUpdateFlow = (
   currentFirmware: string | undefined
 ) => {
   const queryClient = useQueryClient();
+  const updateFirmware = useSavedBlePlugStore((state) => state.updateFirmware);
   const [updatePhase, setUpdatePhase] = useState<PlugFirmwareUpdatePhase>('idle');
   const queryKey = plugFirmwareUpdateQueryKey(target);
   const query = useQuery({
@@ -54,8 +61,11 @@ export const usePlugFirmwareUpdateFlow = (
       return snapshot;
     },
     retry: false,
-    onSuccess: async () => {
+    onSuccess: async (snapshot) => {
       if (!target) return;
+      if (snapshot.deviceInfo.firmwareId) {
+        updateFirmware(target.physicalId, snapshot.deviceInfo.firmwareId);
+      }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey, exact: true }),
         queryClient.invalidateQueries({
