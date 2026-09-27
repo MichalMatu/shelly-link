@@ -1,6 +1,6 @@
 # Plug provisioning plan
 
-Status: active implementation plan for `work/shelly-ble-transport`.
+Status: **Slices A-C implemented and hardware-accepted on 2026-09-27; Slice D is next.**
 
 ## Goal
 
@@ -114,7 +114,7 @@ Use the documented Shelly RPC firmware flow:
 
 ### Offline update research path
 
-Do not implement an undocumented raw BLE DFU protocol as the product path.
+Do not implement an undocumented raw BLE DFU protocol as the product path. The tested Plug advertises raw `OTA.*` RPCs, but they are undocumented and deliberately remain unsupported.
 
 A later PoC may support a fully offline service mode by caching an official firmware image in Shelly Link and making it available to the Plug through a local URL accepted by `Shelly.Update({ url })`. This must be proven on hardware before product integration and must preserve firmware authenticity/integrity checks. Until that PoC is accepted, offline setup may proceed without firmware update when the existing capabilities are sufficient.
 
@@ -126,7 +126,7 @@ A later PoC may support a fully offline service mode by caching an official firm
 - unsupported firmware gets a clear message and no mutation;
 - no automatic retry.
 
-Status: implemented. Real Plug S Gen3 firmware `1.2.3` exposed the missing-handler case and drove the capability-first contract.
+Status: **hardware accepted.** Firmware `1.2.3` exposed the missing-handler case; after accepted OTA to `2.0.1`, `Sys.SetTime` appeared in `Shelly.ListMethods` and the user confirmed synchronization works.
 
 ### Slice B - BLE Wi-Fi provisioning
 
@@ -140,7 +140,7 @@ Status: implemented. Real Plug S Gen3 firmware `1.2.3` exposed the missing-handl
 - first expose on BLE Plug Device for hardware acceptance;
 - then reuse the same service from initial onboarding.
 
-Status: software slice implemented; focused tests/build pass and Android development APK installed. Real scan/connect acceptance is next.
+Status: **hardware accepted.** Real BLE scan returned SSIDs; one `Wifi.SetConfig` connected successfully; `Wifi.GetStatus` returned `192.168.0.17`; the verified HTTP locator was persisted on the same Plug.
 
 ### Slice C - firmware status and update in Info
 
@@ -151,9 +151,9 @@ Status: software slice implemented; focused tests/build pass and Android develop
 - reboot/reconnect/reverify flow;
 - capability refresh after update.
 
-Status: package client foundation in progress.
+Status: **hardware accepted.** The real Plug reported stable `2.0.1`; one explicit update upgraded `1.2.3 -> 2.0.1`; read-only reconnect verified the same id and expected firmware, refreshed methods and reported no remaining stable update.
 
-### Slice D - zero-friction onboarding orchestration
+### Slice D - zero-friction onboarding orchestration — NEXT
 
 Compose the accepted primitives into one state machine:
 

@@ -105,38 +105,13 @@ Focused recovery validation passed 4 Vitest files / 23 tests, mobile typecheck, 
 
 Real Samsung S22+ stale-locator acceptance passed on 2026-09-26 using factory-fresh Plug `shellyplugsg3-e4b063e3e298`. The saved locator was deliberately changed from `E4:B0:63:E3:E2:9A` to stale `02:00:00:00:00:01`; the read-only runtime path recovered through BLE scanning/canonical identity verification, persisted `E4:B0:63:E3:E2:9A` again, preserved `physicalId` and saved metadata, and settled to a successful `0.0 W / 245 V / 0 Wh` read with relay OFF, controls enabled and no alerts. No relay toggle or settings mutation was performed. Android Bluetooth logs showed the recovery scan followed by successful GATT reconnects to the target address suffix `E2:9A`.
 
-### Read-only BLE Plug Detail / Device / Info — SOFTWARE DONE, HARDWARE ACCEPTANCE PENDING
+### BLE Plug Detail + provisioning + OTA — HARDWARE ACCEPTED
 
-The verified read-only management boundary supports Wi-Fi and BLE without changing the existing Wi-Fi-shaped mutation target or introducing a fake HTTP target. BLE reads verify normalized `Shelly.GetDeviceInfo.id` against the saved canonical `physicalId`, reuse one verified BLE transport for the Detail read model, disconnect in `finally`, and retain the existing 30-second refresh cadence.
+Samsung SM-S906B / Android 16 hardware acceptance passed against factory Plug `shellyplugsg3-e4b063e3e298` (`S3PL-00112EU`). BLE Device/Info keeps LED/button/Cloud read-only, while capability-aware time sync, Wi-Fi provisioning and HTTP firmware maintenance are accepted. Real `Wifi.Scan` -> one `Wifi.SetConfig` produced verified HTTP locator `192.168.0.17` on the same canonical Plug. One explicit `Shelly.Update` upgraded `1.2.3 -> 2.0.1`; read-only reconnect verified the same id and expected firmware without replaying the update; `Sys.SetTime` became advertised and the user confirmed time sync works.
 
-The BLE-only Detail now reads and presents a deliberately small Device subset:
+Hardware-tested source is `21d8675470a3d6425b0733cc708bdff55cb0d2cd`, APK SHA-256 `59c0bcbdc4122c565df43f3918437410ccca27a079acb790e634e7803dbd2c35`. Final software-gated descendant `5059feaaa654a2522f65b57bd0918652ac9a46ca` passes the full repository gate.
 
-- `PLUGS_UI.GetConfig`: LED mode, power-mode brightness when available, night-mode state/window/brightness and physical-button input mode;
-- `Cloud.GetConfig` + `Cloud.GetStatus`: Shelly Cloud enabled state and connection state;
-- existing Info identity/firmware/health rows through the same verified Detail session.
-
-The read-only getters do not require the corresponding setter to exist. PLUGS_UI and Cloud capability presentation is independent, so a firmware exposing one does not hide the other. Unsupported surfaces degrade without creating mutation controls. Wi-Fi Device mutation flows remain unchanged and are not forced through the new BLE read model merely for reuse.
-
-Architecture/ownership rules for this slice:
-
-- `features/plugs` owns the read model, bounded locator recovery and presentation;
-- package clients own RPC schemas/capability detection;
-- the screen does not call raw BLE/RPC;
-- one combined BLE Detail query replaces the older parallel Info-only query/recovery pipeline;
-- a recoverable read failure triggers at most one bounded locator recovery and one retry of the combined read;
-- no LED/button/Cloud mutation, script/config mutation, automatic mutation replay or BLE↔Wi-Fi fallback was added.
-
-Software validation is green, including shelly-client tests, the full mobile Vitest suite, typechecks, repository/feature gates and formatting. The earlier Detail/Info hardware evidence still applies to the transport/recovery foundation, but the expanded LED/button/Cloud Device presentation has not yet been accepted on the S22+ and must not be marked hardware-complete until that real-device check is recorded.
-
-Safe next work:
-
-1. install the current branch on the Samsung S22+ and accept the expanded BLE-only Device/Info presentation against the factory-fresh Plug, read-only only;
-2. record the dated hardware evidence in `docs/testing/hardware-matrix.md` after the real-phone check;
-3. implement BLE settings mutations only when explicitly approved, preserving canonical identity verification and the no-ambiguous-retry rule;
-4. pairing/bonding policy for firmware that requires it;
-5. optional dual-transport representation and only then an explicit transport selection/fallback policy.
-
-The existing Wi-Fi/HTTP path remains stable and must not be refactored merely to make BLE reuse easier.
+Next active work is the zero-friction onboarding state machine: discovery -> identity/capabilities -> Wi-Fi when needed -> HTTP handoff -> firmware check/update -> reconnect/verify -> final configuration -> Ready. Pairing/bonding for persistent BLE on firmware 2.x and offline OTA remain separate later slices.
 
 ## 6. Shelly Script Library + simple configurators — LATER
 

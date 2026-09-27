@@ -116,7 +116,7 @@ They are presentation/navigation boundaries, not new ownership models:
 - **Script** presents the managed runtime source/preview and code-loading feedback only;
 - **Info** presents device identity, firmware/network/health information, script/runtime resource diagnostics and destructive device-removal entry points.
 
-The Wi-Fi Plug Detail keeps editable Device cards. A BLE-only Plug uses the same product taxonomy but currently exposes Device as a compact read-only summary: LED mode plus supported brightness/night-mode state, physical-button mode and Shelly Cloud enabled/connection state. That BLE surface must not grow mutation controls until a mutation-specific product and transport contract is explicitly approved.
+The Wi-Fi Plug Detail keeps editable Device cards. A BLE-origin Plug keeps LED/brightness/night-mode, physical-button mode and Shelly Cloud as a compact read-only summary. Capability-aware Wi-Fi provisioning and device-time synchronization are explicitly approved outside those read-only cards. Firmware maintenance is exposed after a verified Wi-Fi locator exists. Optional mutations are capability-checked and identity-verified before use.
 
 Device-setting forms keep a local draft. Background refetches may refresh the server/device baseline, but must not overwrite a dirty user draft. A successful save establishes the newly confirmed device state as the next baseline.
 
@@ -150,9 +150,14 @@ Current state:
 - package-level read clients may expose getter-only capability detection independently from setter availability; this is used for read-only `PLUGS_UI.GetConfig` and `Cloud.GetConfig`/`Cloud.GetStatus` without changing existing Wi-Fi mutation flows;
 - the BLE Device read model intentionally includes only user-meaningful Shelly-owned state: LED, physical-button mode and Shelly Cloud; low-value Wi-Fi/system/server diagnostics stay out of that Device summary;
 - mutating BLE RPC stays outside locator recovery and is never automatically replayed after an ambiguous failure;
-- no automatic BLE↔Wi-Fi fallback or transport merging is implemented yet.
+- capability discovery uses `Shelly.ListMethods`; model/generation/version strings do not substitute for an advertised method;
+- BLE provisioning may add a verified `wifiBaseUrl` to the same physical Plug through `Wifi.Scan` -> one `Wifi.SetConfig` -> read-only `Wifi.GetStatus`;
+- after a verified Wi-Fi locator exists, normal Detail/runtime/relay/firmware/time management is explicitly promoted to HTTP; this is deterministic transport promotion, not blind fallback;
+- firmware update sends one `Shelly.Update({ stage: 'stable' })`; reboot ambiguity is resolved by read-only reconnect, canonical-id verification, expected-firmware verification and capability refresh;
+- `Sys.SetTime` is shown only when advertised; hardware proved 1.2.3 lacks it and 2.0.1 advertises it;
+- raw `OTA.*` methods observed on hardware are not part of the product contract because they are undocumented.
 
-`SavedBlePlug` must not be forced into HTTP `ShellyDraftDevice` with a fake `baseUrl`. A future dual-transport record may represent both locators for one physical Plug, but canonical identity remains normalized `Shelly.GetDeviceInfo.id` and transport selection must stay separate from business logic.
+`SavedBlePlug` is not forced into HTTP `ShellyDraftDevice` with a fake `baseUrl`. It may carry both replaceable `bleDeviceId` and optional verified `wifiBaseUrl` transport metadata on the same canonical physical record; normalized `Shelly.GetDeviceInfo.id` remains identity and transport selection stays separate from automation ownership.
 
 Mutating BLE RPC is never blindly retried after timeout/disconnect because the remote mutation result may be ambiguous.
 
