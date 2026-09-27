@@ -22,11 +22,52 @@ This is a bounded architecture cleanup, not a UX redesign.
 
 After the unified Plug registry, develop the following slices in sequence rather than in parallel.
 
-### 1. History / Datalogger
+### 1. Runtime control/state arbitration
+
+Freeze the control semantics before expanding History or rules so every later feature records and respects the same states.
+
+Target model:
+
+```text
+SAFETY / FAULT
+    > PAUSED
+        > MANUAL
+            > AUTO
+```
+
+Define one owner for the final relay decision and stable state/reason codes. At minimum cover:
+
+- automation-requested state versus final relay state;
+- explicit `AUTO`, `MANUAL`, `PAUSED` and `FAULT` control sources;
+- reason code for every output transition;
+- last-transition timestamp;
+- explicit return-to-AUTO semantics;
+- physical-button manual takeover.
+
+Physical-button takeover contract:
+
+- while in `AUTO`, the first physical button press always enters safe `MANUAL_OFF`;
+- if relay was ON it is forced OFF; if already OFF only the mode changes;
+- subsequent physical presses toggle `MANUAL_OFF <-> MANUAL_ON`;
+- manual takeover never silently returns to AUTO;
+- normal automation stops driving the relay immediately after takeover;
+- future safety/fault logic remains higher priority than manual mode.
+
+Minimum regression coverage:
+
+- `AUTO + relay ON -> physical button -> MANUAL_OFF`;
+- `AUTO + relay OFF -> physical button -> MANUAL_OFF`;
+- subsequent `MANUAL_OFF -> MANUAL_ON -> MANUAL_OFF` toggles;
+- automation cannot reassert relay state while manual takeover is active;
+- safety/fault OFF overrides manual ON.
+
+### 2. History / Datalogger
 
 Resume from `work/kvs-datalogger`, but treat that branch as parked source material rather than something to merge mechanically. Reconcile it with the current exclusive Shelly Scripts ownership/lifecycle first.
 
-The logger should record useful operational history, not only raw measurements. At minimum consider:
+Because the control model is frozen first, History should use the stable state/reason vocabulary from day one.
+
+Record useful operational history, not only raw measurements. At minimum consider:
 
 - timestamp;
 - temperature;
@@ -34,16 +75,32 @@ The logger should record useful operational history, not only raw measurements. 
 - VPD;
 - relay state;
 - power/current where available;
-- automation mode;
+- control/automation mode;
 - trigger/reason code;
+- physical-button takeover;
 - safety/fault state;
 - relevant threshold or rule context.
 
-The goal is that history can explain **why** the relay changed state, not merely that it changed.
+The goal is that History can explain **why** the relay changed state, not merely that it changed. Climate safety must remain independent of History failure.
 
-Climate safety must remain independent of History failure.
+### 3. Runtime safety supervisor
 
-### 2. Rule/action model expansion
+Safety is a separate layer above normal automation and manual behavior, not an ordinary user rule.
+
+Target protections:
+
+- maximum power;
+- maximum current;
+- maximum Plug/device temperature;
+- maximum continuous ON duration;
+- startup delay after reboot when appropriate;
+- latched safety fault/lockout;
+- explicit fault/reason code;
+- deliberate acknowledge/reset path before automation may resume after a latched fault.
+
+Safety must win over all normal automation and manual decisions. A rule that still evaluates true, or a manual `ON`, must not immediately re-enable a relay that safety has shut down.
+
+### 4. Rule/action model expansion
 
 Extend the stable runtime toward a small reusable **rule + action engine**, rather than adding more feature-specific automation types.
 
@@ -62,57 +119,7 @@ Priority capabilities:
 
 Model pulse as an **action**, not as a special standalone rule. Example actions may include `Set ON`, `Set OFF`, `Pulse ON`, `Pulse OFF`.
 
-### 3. Physical-button manual takeover
-
-The physical Plug button is a deliberate human override and must have deterministic, safe semantics.
-
-Target behavior:
-
-- when automation is in `AUTO`, the **first physical button press always switches to manual mode and forces relay OFF**, regardless of whether automation was currently ON or OFF;
-- if automation was already OFF, that first press may leave the relay electrically unchanged while still changing mode from `AUTO` to `MANUAL_OFF`;
-- once in manual mode, subsequent physical button presses toggle `MANUAL_OFF <-> MANUAL_ON` normally;
-- physical-button takeover never silently returns to `AUTO`; returning to automation requires an explicit action from the app;
-- normal automation must stop driving the relay immediately after takeover;
-- datalogging/diagnostics continue and should record a reason such as `physical_button_takeover` plus the resulting manual state;
-- the future safety supervisor remains higher priority than manual mode and may still force OFF or latch a fault.
-
-Preferred state model:
-
-```text
-AUTO_RUNNING / AUTO_IDLE
-        |
-        | first physical button press
-        v
-MANUAL_OFF <-> MANUAL_ON
-
-FAULT_OFF / safety override > MANUAL > AUTO
-```
-
-Minimum regression coverage before hardware acceptance:
-
-- `AUTO + relay ON -> physical button -> MANUAL_OFF`;
-- `AUTO + relay OFF -> physical button -> MANUAL_OFF`;
-- subsequent `MANUAL_OFF -> MANUAL_ON -> MANUAL_OFF` button toggles;
-- automation cannot reassert relay state while manual takeover is active;
-- safety/fault OFF overrides `MANUAL_ON`;
-- datalogger/history records the takeover reason and mode transition when History is enabled.
-
-### 4. Runtime safety supervisor
-
-Safety is a separate layer above normal automation and manual behavior, not an ordinary user rule.
-
-Target protections:
-
-- maximum power;
-- maximum current;
-- maximum Plug/device temperature;
-- maximum continuous ON duration;
-- startup delay after reboot when appropriate;
-- latched safety fault/lockout;
-- explicit fault/reason code;
-- deliberate acknowledge/reset path before automation may resume after a latched fault.
-
-Safety must win over all normal automation and manual decisions. A rule that still evaluates true, or a manual `ON`, must not immediately re-enable a relay that safety has shut down.
+All requested actions pass through the already-defined control/safety arbiter before reaching the relay.
 
 ### 5. Dashboard master control
 
@@ -124,17 +131,17 @@ Expected semantics:
 - datalogging and diagnostics continue;
 - safety supervision remains active;
 - `RUNNING` resumes evaluation while respecting minimum-OFF/cooldown constraints;
-- manual relay control, including physical-button takeover, remains visibly distinct from the automation master state.
+- manual relay control and physical-button takeover remain visibly distinct from the automation master state.
 
 ### 6. UX redesign round 2
 
-Run the next major UX pass only after the datalogger, rule/action model, physical-button takeover and safety semantics are stable.
+Run the next major UX pass only after History, safety, rule/action and control semantics are stable.
 
-Primary goal: make the app more status-first and easier to understand rather than exposing implementation details by default.
+Primary goal: make the app status-first and easier to understand rather than exposing implementation details by default.
 
 The main dashboard should emphasize:
 
-- whether automation is RUNNING, PAUSED or under MANUAL override;
+- whether automation is RUNNING, PAUSED, MANUAL or faulted;
 - current climate values;
 - current relay/output state and power;
 - concise rule reason / why the output is ON or OFF;
@@ -144,23 +151,44 @@ The main dashboard should emphasize:
 
 Keep BLE, firmware, raw script/runtime details and transport diagnostics available, but deeper under Device / Info / Advanced rather than competing with the main product status.
 
+### 7. Runtime watchdog, stabilization and feature freeze
+
+Before declaring v1 feature-complete, harden the finished runtime rather than adding another feature wave.
+
+Add or verify:
+
+- runtime/engine health watchdog with safe-OFF failure behavior;
+- last successful rule evaluation / sensor-processing heartbeat where practical;
+- relay state consistency with the arbiter's requested state;
+- boot/restart reason and restart counter in diagnostics/history where available;
+- recovery after reboot/power cycle;
+- Wi-Fi/BLE loss and reconnection behavior;
+- automation/manual/pause/safety interaction matrix;
+- long soak tests;
+- script/runtime memory headroom;
+- final hardware matrix and known final relay state;
+- final UX acceptance.
+
+After this stabilization round, declare a **v1 feature freeze**. New capabilities then require an explicit post-v1 decision rather than silently expanding the runtime.
+
 ## Runtime/script development opportunities
 
 Use remaining Shelly runtime headroom for capabilities that materially improve reliability or explainability before adding broad new product surface.
 
-High-value candidates:
+High-value items already incorporated into the v1 track include:
 
 - reason code for every output transition;
 - last-transition timestamp;
-- explicit control-source state: automation / manual physical-button takeover / safety override;
+- explicit control-source state: automation / paused / manual / safety;
 - max continuous ON supervision;
 - minimum ON/OFF timing;
 - cooldown and debounce state;
 - startup/restart guard;
 - latched safety faults;
+- runtime watchdog/heartbeat;
+- boot/restart diagnostics;
 - per-sensor disagreement diagnostics;
-- optional outlier detection/rejection for multi-sensor Climate;
-- clear distinction between sensor fault, rule decision, manual state and safety override.
+- optional outlier detection/rejection for multi-sensor Climate.
 
 For multiple thermometers, diagnostics may flag an outlier relative to the sensor set before any future automatic rejection policy is enabled. Do not silently discard a sensor without an explicit and tested policy.
 
@@ -170,17 +198,40 @@ Treat the product as broadly **feature-complete v1** once the following are stab
 
 - Climate temperature / humidity / VPD automation;
 - 1–4 BLE thermometers with aggregation and diagnostics;
+- unified physical Plug identity/transport persistence;
+- frozen AUTO/MANUAL/PAUSED/FAULT control semantics;
+- deterministic physical-button takeover into safe `MANUAL_OFF`;
+- History / Datalogger with reasons and fault context;
+- power/current/device-temperature/max-runtime safety supervision;
 - Time windows / schedules combined with rules where appropriate;
 - Pulse ON/OFF actions;
 - minimum ON/OFF and cooldown/debounce behavior;
-- deterministic physical-button takeover into safe `MANUAL_OFF` plus manual toggling afterward;
-- History / Datalogger with reasons and fault context;
-- power/current/device-temperature/max-runtime safety supervision;
 - RUNNING / PAUSED master control;
 - local Wi-Fi/BLE provisioning and firmware maintenance;
-- final UX simplification/redesign pass.
+- final UX simplification/redesign pass;
+- watchdog/reboot/recovery/soak stabilization.
 
 After this point, new features should clear a higher bar: they should materially improve climate/grow use cases rather than merely increase application breadth.
+
+## Post-freeze — second device type
+
+### Shelly Plug Gen4 compatibility port
+
+Add the Shelly Plug Gen4 only **after v1 feature freeze**, using the frozen product/runtime contract as the compatibility target.
+
+Do not fork the application into Gen3/Gen4-specific product flows. Prefer capability/profile-driven support:
+
+```text
+physical Plug
+  -> canonical identity
+  -> capability profile
+  -> available transport(s)
+  -> frozen Shelly Link runtime/product contract
+```
+
+The Gen4 compatibility profile should describe support for capabilities such as relay, power/current measurement, device temperature, Scripts, KVS, schedules, BLE, Wi-Fi provisioning and firmware maintenance. Unsupported capabilities remain explicit rather than creating scattered `if gen === 4` behavior.
+
+Use the same contract/regression suite wherever behavior is shared. Treat Gen4 as an architectural proof that the reusable Shelly platform can support a second physical device without duplicating product logic.
 
 ## Later — explicit product bets, not automatic next work
 
