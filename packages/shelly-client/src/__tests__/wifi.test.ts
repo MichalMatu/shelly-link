@@ -108,7 +108,10 @@ describe('RpcShellyWifiClient', () => {
   it('rejects malformed Wi-Fi config', async () => {
     const transport = new QueueTransport([ok({ sta: { enable: true } })]);
     const result = await new RpcShellyWifiClient(transport).read();
-    expect(result).toMatchObject({ ok: false, error: { kind: 'validation-failed', retryable: false } });
+    expect(result).toMatchObject({
+      ok: false,
+      error: { kind: 'validation-failed', retryable: false }
+    });
     expect(transport.requests).toHaveLength(1);
   });
 
@@ -118,7 +121,10 @@ describe('RpcShellyWifiClient', () => {
       ok({ status: 'mystery' })
     ]);
     const result = await new RpcShellyWifiClient(transport).read();
-    expect(result).toMatchObject({ ok: false, error: { kind: 'validation-failed', retryable: false } });
+    expect(result).toMatchObject({
+      ok: false,
+      error: { kind: 'validation-failed', retryable: false }
+    });
   });
 
   it('returns a transport failure without issuing the status RPC', async () => {
@@ -156,7 +162,10 @@ describe('RpcShellyWifiClient', () => {
       ssid: '   ',
       password: 'test-password'
     });
-    expect(result).toMatchObject({ ok: false, error: { kind: 'validation-failed', retryable: false } });
+    expect(result).toMatchObject({
+      ok: false,
+      error: { kind: 'validation-failed', retryable: false }
+    });
     expect(transport.requests).toHaveLength(0);
   });
 

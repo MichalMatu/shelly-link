@@ -58,7 +58,9 @@ const defaultDependencies: BlePlugWifiProvisioningDependencies = {
   createWifiClient: (transport) => new RpcShellyWifiClient(transport),
   listMethods: async (transport) => {
     const response = unwrapShellyResult(
-      await transport.call<{ methods?: unknown }>({ method: RPC_METHODS.ShellyListMethods })
+      await transport.call<{ methods?: unknown }>({
+        method: RPC_METHODS.ShellyListMethods
+      })
     );
     return Array.isArray(response.methods)
       ? response.methods.filter((method): method is string => typeof method === 'string')
@@ -91,7 +93,9 @@ const assertMatchingPhysicalIdentity = async (
   }
 };
 
-const normalizeNetworks = (entries: readonly ShellyWifiScanEntry[]): BlePlugWifiNetwork[] => {
+const normalizeNetworks = (
+  entries: readonly ShellyWifiScanEntry[]
+): BlePlugWifiNetwork[] => {
   const strongestBySsid = new Map<string, BlePlugWifiNetwork>();
   for (const entry of entries) {
     const ssid = entry.ssid?.trim();

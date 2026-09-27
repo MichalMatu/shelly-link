@@ -13,17 +13,15 @@ export type BlePlugWifiProvisioningCardProps = {
   plug: SavedBlePlug;
 };
 
-const errorMessage = (
-  error: unknown,
-  fallback: string,
-  unsupported: string
-): string => {
+const errorMessage = (error: unknown, fallback: string, unsupported: string): string => {
   if (error instanceof BlePlugWifiProvisioningUnsupportedError) return unsupported;
   const detail = error instanceof Error ? error.message.trim() : '';
   return detail ? `${fallback} ${detail}` : fallback;
 };
 
-export const BlePlugWifiProvisioningCard = ({ plug }: BlePlugWifiProvisioningCardProps) => {
+export const BlePlugWifiProvisioningCard = ({
+  plug
+}: BlePlugWifiProvisioningCardProps) => {
   const { locale } = useTranslation();
   const copy = deviceWifiCopy[locale];
   const { scanMutation, connectMutation } = useBlePlugWifiProvisioningFlow(plug);
@@ -44,11 +42,14 @@ export const BlePlugWifiProvisioningCard = ({ plug }: BlePlugWifiProvisioningCar
       onSuccess: (result) => {
         setNetworks(result);
         setSelectedSsid((current) =>
-          result.some((network) => network.ssid === current) ? current : (result[0]?.ssid ?? '')
+          result.some((network) => network.ssid === current)
+            ? current
+            : (result[0]?.ssid ?? '')
         );
         if (result.length === 0) setFeedback(copy.noNetworks);
       },
-      onError: (error) => setFeedback(errorMessage(error, copy.scanFailed, copy.unsupported))
+      onError: (error) =>
+        setFeedback(errorMessage(error, copy.scanFailed, copy.unsupported))
     });
   };
 

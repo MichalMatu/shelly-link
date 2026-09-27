@@ -35,7 +35,9 @@ const createHarness = () => {
   const getDeviceInfo = vi.fn(async () =>
     success({ id: plug.physicalId, model: 'S3PL-00112EU', gen: 3 })
   );
-  const scan = vi.fn<() => Promise<Result<ShellyWifiScanEntry[]>>>(async () => success([]));
+  const scan = vi.fn<() => Promise<Result<ShellyWifiScanEntry[]>>>(async () =>
+    success([])
+  );
   const setStation = vi.fn(async () => success({ restart_required: false }));
   const getStatus = vi.fn<() => Promise<Result<ShellyWifiStatus>>>(async () =>
     success({ status: 'got ip', ssid: 'Home', sta_ip: '192.168.1.44' })
@@ -84,7 +86,9 @@ describe('BLE Plug Wi-Fi provisioning', () => {
   it('sends credentials once and uses read-only polling until the Plug gets an IP', async () => {
     const { dependencies, disconnect, getStatus, setStation } = createHarness();
     getStatus
-      .mockResolvedValueOnce(success({ status: 'connecting', ssid: 'Home', sta_ip: null }))
+      .mockResolvedValueOnce(
+        success({ status: 'connecting', ssid: 'Home', sta_ip: null })
+      )
       .mockResolvedValueOnce(success({ status: 'connected', ssid: 'Home', sta_ip: null }))
       .mockResolvedValueOnce(
         success({ status: 'got ip', ssid: 'Home', sta_ip: '192.168.1.44', rssi: -51 })

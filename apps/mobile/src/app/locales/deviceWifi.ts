@@ -61,9 +61,24 @@ export const deviceWifiCopy: Record<Locale, DeviceWifiCopy> = {
     open: 'Otwarta',
     secured: 'Zabezpieczona'
   },
-  de: { ...en, title: 'WLAN-Einrichtung', scan: 'Netzwerke suchen', connect: 'Verbinden' },
+  de: {
+    ...en,
+    title: 'WLAN-Einrichtung',
+    scan: 'Netzwerke suchen',
+    connect: 'Verbinden'
+  },
   es: { ...en, title: 'Configuración Wi-Fi', scan: 'Buscar redes', connect: 'Conectar' },
-  fr: { ...en, title: 'Configuration Wi-Fi', scan: 'Rechercher les réseaux', connect: 'Connecter' },
+  fr: {
+    ...en,
+    title: 'Configuration Wi-Fi',
+    scan: 'Rechercher les réseaux',
+    connect: 'Connecter'
+  },
   it: { ...en, title: 'Configurazione Wi-Fi', scan: 'Cerca reti', connect: 'Connetti' },
-  'pt-BR': { ...en, title: 'Configuração de Wi-Fi', scan: 'Buscar redes', connect: 'Conectar' }
+  'pt-BR': {
+    ...en,
+    title: 'Configuração de Wi-Fi',
+    scan: 'Buscar redes',
+    connect: 'Conectar'
+  }
 };
