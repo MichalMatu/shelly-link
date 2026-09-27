@@ -9,6 +9,7 @@ const snapshot = (
     staleTimeoutSec?: number;
     dataState?: string;
     includeSensorDiagnostics?: boolean;
+    includeArbitrationDiagnostics?: boolean;
   } = {}
 ) =>
   diagnosticSnapshotSchema.parse({
@@ -42,7 +43,8 @@ const snapshot = (
       19,
       20,
       960_000,
-      overrides.dataState ?? 'ok'
+      overrides.dataState ?? 'ok',
+      ...(overrides.includeArbitrationDiagnostics === false ? [] : [2, true])
     ]
   });
 
@@ -63,6 +65,26 @@ describe('installedAutomationHealth', () => {
 
   it('keeps aggregate-only legacy diagnostics backward compatible', () => {
     expect(snapshot({ includeSensorDiagnostics: false }).sensorDiagnostics).toEqual([]);
+  });
+
+  it('parses runtime control mode and automation-requested output', () => {
+    expect(snapshot().diagnostics).toEqual(
+      expect.objectContaining({
+        controlMode: 'manual-on',
+        automationRequestedRelayState: true,
+        lastReason: 'ok',
+        lastChangeUptimeMs: 900_000
+      })
+    );
+  });
+
+  it('keeps arbitration diagnostics nullable for older installed runtimes', () => {
+    expect(snapshot({ includeArbitrationDiagnostics: false }).diagnostics).toEqual(
+      expect.objectContaining({
+        controlMode: null,
+        automationRequestedRelayState: null
+      })
+    );
   });
 
   it('marks a fresh runtime snapshot as healthy', () => {
