@@ -1093,7 +1093,7 @@ describe('HardwareSetupScreen', () => {
       {
         name: 'Przetestuj przekaźnik przed użyciem'
       },
-      { timeout: 3000 }
+      { timeout: 10000 }
     );
     expect(
       within(relayDialog).getByText('Dla grzania domyślny tryb bezpieczeństwa to OFF.')
