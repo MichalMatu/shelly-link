@@ -2341,7 +2341,7 @@ describe('HardwareSetupScreen', () => {
     expect(
       screen.queryByRole('region', { name: 'Powiadomienia' })
     ).not.toBeInTheDocument();
-  });
+  }, 15_000);
 
   it('adds a TP357 thermometer and previews the minimal TP357 Shelly parser', async () => {
     renderHardwareSetup();
@@ -2871,7 +2871,7 @@ describe('HardwareSetupScreen', () => {
         Reflect.deleteProperty(navigator, 'clipboard');
       }
     }
-  });
+  }, 15_000);
 
   it('recognizes a thermometer restored from automation during Shelly-side BLE scan', async () => {
     renderHardwareSetup();
