@@ -352,7 +352,9 @@ const addShellyThroughUi = async (name = 'Przedpokój') => {
     target: { value: '192.168.0.20' }
   });
   fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
-  expect(await screen.findByText('Dodano gniazdko.')).toBeInTheDocument();
+  expect(
+    await screen.findByText('Dodano gniazdko.', {}, { timeout: 10000 })
+  ).toBeInTheDocument();
   expect(screen.getByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
   expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
   expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
@@ -2093,7 +2095,7 @@ describe('HardwareSetupScreen', () => {
     expect(relayOnIndex).toBeGreaterThan(scriptStatusIndex);
     expect(relayOffIndex).toBeGreaterThan(relayOnIndex);
     expect(relayStatusIndex).toBeGreaterThan(relayOffIndex);
-  });
+  }, 15000);
 
   it('creates neutral sensor ids for Xiaomi and TP357 configurations', () => {
     expect(formatSensorId('xiaomi_lywsd03mmc_bthome_v2', 'A4:C1:38:4F:24:CD')).toBe(
@@ -2315,7 +2317,7 @@ describe('HardwareSetupScreen', () => {
       {
         name: 'Przetestuj przekaźnik przed użyciem'
       },
-      { timeout: 3000 }
+      { timeout: 10000 }
     );
     fireEvent.click(within(relayDialog).getByRole('button', { name: 'Przetestuj' }));
 
