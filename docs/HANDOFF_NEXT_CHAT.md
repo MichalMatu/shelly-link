@@ -1,6 +1,6 @@
-# Handoff — Plug UI unification and UX audit
+# Handoff — clean main after UX unification
 
-Status: **2026-09-28 — UX unification branch is stable; Local Agent idle; continue from verified repo state**
+Status: **2026-09-28 — Plug/Time/Thermometer UX unification is merged and closed; start new work from `main`.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -8,97 +8,76 @@ Repository: `MichalMatu/shelly-link`
 
 Do not assume state from this document alone. At the start of a new chat:
 
-1. verify remote `main` and `refactor/plug-ui-unification`;
-2. verify Local Agent daemon/binding and any active task;
-3. read root/relevant `AGENTS.md`;
-4. read this file, `docs/UX_VISUAL_CONTRACT.md`, `docs/ARCHITECTURE.md` and `docs/ROADMAP.md`;
-5. only then choose the next implementation slice.
+1. verify remote `main`;
+2. verify the Local Agent daemon, fresh conversation binding and any active task;
+3. inspect remote branches before creating or deleting anything;
+4. read root/relevant `AGENTS.md`;
+5. read this file, `docs/UX_VISUAL_CONTRACT.md`, `docs/ARCHITECTURE.md` and `docs/ROADMAP.md`;
+6. only then create a fresh work branch for the next slice.
 
 Local Agent bindings are conversation-scoped runtime state and must never be copied from this handoff.
 
-## Repository state at handoff
+## Repository state at closeout
 
-- `main`: `823b51ef0d58ff731d8d25df8d54db968d97cea5` — golden Plug navigation checkpoint.
-- UX work branch: `refactor/plug-ui-unification`.
-- Product implementation commit before the docs-only handoff commits: `93d36b54983dd2ab7e825b213ee0124ff4aee512` — `Add Thermometer detail settings`.
-- Frozen Climate recovery branch: `golden/climate-ui-20260928` at `823b51ef0d58ff731d8d25df8d54db968d97cea5`.
-- Local Agent was idle after the completed Thermometer slice.
+- UX PR: **#38 — Unify Plug, Time, and Thermometer UX**.
+- Product merge commit on `main`: `9196cac9d32ac3ade694f31c04ebfe1d2d424fb9`.
+- Final pre-merge UX branch head: `7220c8f2f8116d84d4a8796eca033464a05ea141`.
+- `refactor/plug-ui-unification` is finished and should not be reused after branch cleanup.
+- Frozen Climate recovery branch intentionally remains: `golden/climate-ui-20260928` at `823b51ef0d58ff731d8d25df8d54db968d97cea5`.
+- `work/kvs-datalogger` intentionally remains parked source material for the History/Datalogger slice; do not mechanically merge or rebase it into current `main`.
+- `agent-control` remains the Local Agent control branch; it is not a product work branch.
 
-Because this file and `UX_VISUAL_CONTRACT.md` are updated as docs-only commits after the product commit above, verify the actual branch HEAD instead of hard-coding the handoff SHA.
+Always verify actual refs before acting because docs-only closeout commits may move `main` beyond the product merge SHA above.
 
-## Non-negotiable UX target
+## Frozen UX contract
 
-The accepted Climate/humidity Plug dashboard card and Plug detail tabs are the **golden master**. They took substantial iteration and must not drift during refactors.
+The accepted Climate/humidity Plug dashboard card and Plug detail tabs remain the **golden master**.
 
-Do not build a second similar design for Time, Thermometers or another device. Reuse the same components/tokens/geometry where the role is the same. Product-specific content may differ; the shell and interaction pattern should not.
+Do not create parallel Time-, Thermometer- or device-specific designs when the role is already shared. Reuse the same components, tokens and geometry. Product-specific content may differ; the shell and interaction role should not.
 
-`pnpm quality:ux` protects the frozen Climate baselines. Do not refresh those snapshots as part of unrelated work.
+`pnpm quality:ux` protects the frozen Climate baselines. Do not refresh Climate golden snapshots as part of unrelated work and do not weaken quality gates or raise hotspot budgets to land a refactor.
 
-## Completed on `refactor/plug-ui-unification`
+## Completed UX unification
 
-### Plug dashboard / Time automation
+### Time / Plug dashboard
 
-- Climate was frozen first and kept visually unchanged while shared Plug UI was modularized.
-- Time no longer uses the old `Working` / `Daily schedule` / bottom `Details` presentation.
-- Time uses the shared Plug dashboard language:
-  - Plug identity/header and `⋮` detail affordance;
-  - AUTO / MANUAL;
-  - ON / OFF in MANUAL;
-  - Plug telemetry;
-  - Time-specific schedule content only where automation content actually differs.
-- Time AUTO/MANUAL is real runtime behavior: AUTO owns native Shelly Schedule; MANUAL pauses schedule control and permits explicit relay ON/OFF.
+- Time uses the shared Plug card structure rather than the retired `Working` / `Daily schedule` / separate `Details` pattern.
+- AUTO/MANUAL is real runtime behavior over native Shelly Schedule ownership.
+- MANUAL exposes explicit relay ON/OFF on the dashboard only.
+- Plug telemetry and detail affordances reuse the shared Plug surfaces.
 
-### Plug detail
+### Time detail
 
-- Time uses the canonical Plug detail structure rather than the old parallel detail page.
-- Time exposes shared `Automation / Bluetooth / Device / Info` capabilities; native Schedule does not invent a Script tab.
-- Device settings reuse the shared Plug surfaces.
-- Time Info has the same saved-Plug forget behavior as Climate; forgetting the saved Plug does not uninstall durable automation ownership.
-- Managed Climate Button Mode is now a read-only managed-state explanation instead of a disabled select/save form.
+- Time uses the shared capability-driven Plug detail shell with `Automation / Bluetooth / Device / Info`; native Schedule does not invent a Script tab.
+- The Automation tab uses the Time-specific **clock** icon.
+- Duplicate detail-level AUTO/MANUAL and relay ON/OFF controls are removed.
+- `Turn ON at` / `Turn OFF at` are edited inline and saved directly with `Save changes`.
+- The old nested `Edit` route was removed in final cleanup instead of being left as dead navigation scaffolding.
+- Save/Delete are serialized so destructive deletion cannot race an in-flight Schedule update.
 
-### Shared UI / add flows
+### Thermometers / shared UI
 
-- Add Plug and Add Thermometer use the shared `@lcl/ui` `SegmentedControl` instead of copied tablist JSX.
-- Add Plug keeps IP range editing behind the compact `Zakres skanowania` disclosure; the current range remains visible while collapsed.
-- Discovery cards were audited but deliberately **not** abstracted into a mega-component; their interaction models differ enough that forced abstraction would add variants without improving ownership.
+- Thermometer dashboard cards prioritize identity and live readings.
+- Rename, PVVX time sync, delete and technical identity live in nested Thermometer settings.
+- Thermometer presentation ownership lives under `features/thermometers`.
+- Add Plug and Add Thermometer use shared `@lcl/ui` segmented navigation.
+- Add Plug keeps technical scan-range editing under the compact disclosure.
+- Managed Climate Button Mode remains read-only while Climate owns the relay.
 
-### Thermometers
+## Final verification
 
-- Thermometer dashboard cards were simplified to prioritize identity, live temperature/humidity and compact telemetry.
-- Permanent technical/edit/delete/PVVX action clutter was moved to nested Thermometer settings.
-- Nested Thermometer settings are routed through the existing hardware setup ownership rather than duplicating BLE/PVVX orchestration.
-- Thermometer presentation lives under `features/thermometers`; saved-card/list presentation was extracted to satisfy feature and module boundaries.
-- Canonical visual coverage includes the updated Thermometers dashboard and the nested Thermometer detail/settings state.
+Final closeout head `7220c8f2f8116d84d4a8796eca033464a05ea141` passed:
 
-## Verification of latest product commit
+- `pnpm check`;
+- mobile tests: **84/84 files, 394/394 tests**;
+- responsive Playwright: **36/36**;
+- canonical visual contract: **4/4**;
+- `quality:ux`, repository gate, feature-boundary gate and quality self-test;
+- clean worktree before merge.
 
-The latest product commit is `ec813098cad17c3cf01225706b8e996ef251c705` (`Inline Time detail schedule editing`). It incorporates the user's real-device review of Time Detail without changing the Climate golden master.
+The final audit also removed the retired automation edit route and related test/navigation scaffolding (about 200 deleted lines). Two long hardware-setup UI tests received explicit per-test timeout headroom after repeated host-load-only 5 s timeouts; no repository gate, coverage requirement or product invariant was weakened.
 
-Acceptance evidence:
-
-- Time Detail now uses the clock icon in the shared Plug tabs;
-- duplicate detail-level AUTO/MANUAL and relay ON/OFF controls were removed; those remain on the dashboard card;
-- ON/OFF schedule times are edited inline using the existing Time schedule picker, with `Save changes` directly on the detail surface;
-- the separate `Edit` step was removed;
-- Save and Delete are serialized so a destructive delete cannot race an in-flight Schedule update;
-- focused Time detail tests: **12/12**;
-- typecheck/mobile build passed;
-- `quality:ux`, repository gate, feature-boundary gate and quality self-test passed;
-- full responsive Playwright: **36/36**;
-- canonical visual verification: **4/4**; only the intentional `11-time-detail-darwin.png` baseline changed;
-- pre-push reran the full mobile suite: **396/396** and completed successfully.
-
-Samsung SM-S906B / Android 16 then installed exact product commit `ec813098cad17c3cf01225706b8e996ef251c705` with `adb install -r`, preserving app data and the user's existing 08:00/20:00 Time schedule. Read-only inspection confirmed the Time Detail surface contains Output, Shelly clock, inline `Turn ON at` / `Turn OFF at`, `Save changes`, and delete, with no duplicate AUTO/MANUAL, relay ON/OFF, or Edit action. No schedule or relay mutation was performed during this verification. The branch is again ready for deliberate merge/closeout.
-
-## Visual contract
-
-Read `docs/UX_VISUAL_CONTRACT.md` for the durable rules. Important points:
-
-- canonical screenshots use macOS at `412×915`;
-- `apps/mobile/e2e/visual-contract.ts` is the source of truth for current baseline names;
-- Climate golden states are immutable unless the user explicitly changes the target design;
-- snapshot refresh is never a substitute for explaining a visual delta;
-- shared roles reuse shared components/classes instead of parallel JSX/CSS.
+Real-device acceptance is recorded in `docs/testing/hardware-matrix.md`. Most recently, Samsung SM-S906B / Android 16 accepted the Time Detail correction at product commit `ec813098cad17c3cf01225706b8e996ef251c705`, preserving app data and the existing 08:00/20:00 native Schedule. The screen showed the clock icon, inline ON/OFF time editing and Save/Delete without duplicate AUTO/MANUAL, relay controls or nested Edit. Earlier closeout also verified the Thermometer dashboard/settings and real Time Schedule lifecycle on the physical device.
 
 ## Architecture contracts to preserve
 
@@ -112,31 +91,18 @@ Read `docs/UX_VISUAL_CONTRACT.md` for the durable rules. Important points:
 - managed Climate state changes through the script/runtime owner, not raw relay RPC from presentation;
 - Time remains native Shelly Schedule ownership;
 - UI presents state; flows own side effects/RPC/lifecycle;
-- identity must be verified before destructive/runtime mutation;
+- identity is verified before destructive/runtime mutation;
 - `packages/*` never import `apps/*`;
-- new cohesive product capabilities belong under `features/<feature>` rather than regrowing legacy screen/flow god objects.
+- new cohesive product capabilities belong under `features/<feature>` rather than regrowing screen/flow god objects.
 
-## What remains
+## Next slice
 
-The broad UX audit is mostly past the original Time problem. Do **not** reopen already-fixed areas without screenshot/user evidence.
+The next planned major slice is **History / Datalogger**.
 
-Good next choices are:
+Start it from fresh `main`, not from the closed UX branch. Treat `work/kvs-datalogger` only as source material: audit it against current exclusive Climate ownership, runtime arbitration, identity gates and current architecture before deciding what to reuse. Do not mechanically merge the parked branch.
 
-1. close out/merge `refactor/plug-ui-unification` deliberately;
-2. do not reopen the completed UX slices without new screenshot/user evidence;
-3. after merge, the next major roadmap slice is History / Datalogger. `work/kvs-datalogger` is parked source material and must be reconciled with current exclusive Climate ownership rather than mechanically merged.
+Suggested first task for a new chat: perform a preimplementation audit of the current History/Datalogger requirements and the parked `work/kvs-datalogger` diff against fresh `main`, with **no behavior change**, then propose the smallest implementation plan.
 
-Avoid starting History while the user is still reviewing this UX branch.
+## Working rule
 
-## Testing workflow
-
-For each implementation slice:
-
-- verify fresh branch + daemon first;
-- make the smallest cohesive change;
-- run focused tests/type/quality during iteration;
-- use screenshots for geometry changes;
-- run exactly one final full repository gate before push;
-- do not weaken quality gates or raise hotspot budgets merely to land a refactor.
-
-The current UX work deliberately used repository/feature-boundary failures to extract real component boundaries instead of adding exceptions.
+For each new slice: verify fresh refs + daemon first, branch from current `main`, make the smallest cohesive change, use focused tests during iteration, use screenshots for geometry changes, and run one final full repository gate before merge. Hardware-facing changes require real-device evidence and an explicit final relay state whenever relay mutation is exercised.
