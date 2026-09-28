@@ -1,5 +1,5 @@
 import type { ShellyPlugsUiButtonInputMode } from '@lcl/shelly-client';
-import { SelectField } from '@lcl/ui';
+import { DiagnosticRow, SelectField } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceButtonModeCopy } from '../../../app/locales/deviceButtonMode.js';
@@ -73,6 +73,24 @@ export const PlugButtonModeSettingsCard = ({
       <section className="plug-settings-section installation-detail-device-button">
         <h2>{copy.title}</h2>
         <p className="plug-settings-feedback">{copy.unsupported}</p>
+      </section>
+    );
+  }
+
+  if (locked) {
+    const modeLabel = draft === 'momentary' ? copy.momentary : copy.detached;
+    return (
+      <section className="plug-settings-section installation-detail-device-button">
+        <div className="plug-settings-section__heading">
+          <h2>{copy.title}</h2>
+          <p>{copy.managedDescription}</p>
+        </div>
+
+        <div className="plug-info-grid">
+          <DiagnosticRow label={copy.currentMode} value={modeLabel} />
+        </div>
+
+        <p className="plug-settings-feedback">{copy.managedHint}</p>
       </section>
     );
   }

@@ -77,3 +77,7 @@ Canonical viewport: **412 × 915 CSS px**. These images are the committed Playwr
 ## 19-climate-advanced-open
 
 ![19-climate-advanced-open](../apps/mobile/e2e/responsive.spec.ts-snapshots/19-climate-advanced-open-darwin.png)
+
+## 20-climate-button-mode-managed
+
+![20-climate-button-mode-managed](../apps/mobile/e2e/responsive.spec.ts-snapshots/20-climate-button-mode-managed-darwin.png)

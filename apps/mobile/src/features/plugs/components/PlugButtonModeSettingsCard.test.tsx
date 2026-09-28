@@ -140,11 +140,12 @@ describe('PlugButtonModeSettingsCard', () => {
     );
 
     renderCard(true);
-    const modeSelect = await screen.findByRole('button', { name: copy.currentMode });
-    const save = screen.getByRole('button', { name: copy.save });
-    expect(modeSelect).toHaveTextContent(copy.detached);
-    expect(modeSelect).toBeDisabled();
-    expect(save).toBeDisabled();
+    expect(await screen.findByText(copy.managedDescription)).toBeVisible();
+    expect(screen.getByText(copy.currentMode)).toBeVisible();
+    expect(screen.getByText(copy.detached)).toBeVisible();
+    expect(screen.getByText(copy.managedHint)).toBeVisible();
+    expect(screen.queryByRole('button', { name: copy.currentMode })).toBeNull();
+    expect(screen.queryByRole('button', { name: copy.save })).toBeNull();
   });
 
   it('does not overwrite a dirty button-mode draft when the device query refetches', async () => {

@@ -73,13 +73,16 @@ const seedTimeDraft = async (page: Page) => {
   }, timeDraft);
 };
 
-const mockShellyRpc = async (page: Page) => {
+const mockShellyRpc = async (
+  page: Page,
+  options: { buttonMode?: 'momentary' | 'detached' } = {}
+) => {
   let scriptRunning = true;
   let relayOn = true;
   let runtimeMode = 0;
   let manualRequestOn = false;
   let automationFault: string | null = null;
-  let buttonMode: 'momentary' | 'detached' = 'momentary';
+  let buttonMode: 'momentary' | 'detached' = options.buttonMode ?? 'momentary';
 
   const handleRpc = async (route: Route) => {
     const requestUrl = new URL(route.request().url());
@@ -650,7 +653,7 @@ for (const viewport of viewports) {
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await seedInstalledAutomation(page);
-    await mockShellyRpc(page);
+    await mockShellyRpc(page, { buttonMode: 'detached' });
     await page.goto('/');
 
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -732,6 +735,18 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
     await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+    await expect(
+      page.getByText(
+        'Automatyka Climate zarządza tym ustawieniem, dopóki steruje przekaźnikiem.'
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByText('Odłączony od przekaźnika', { exact: true })
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Tryb przycisku' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Zapisz tryb przycisku' })).toHaveCount(
+      0
+    );
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '05-climate-device');
     }
@@ -751,6 +766,13 @@ for (const viewport of viewports) {
       page.getByRole('button', { name: 'Zapisz ustawienia LED' })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
+
+    if (viewport.name === 'phone-large') {
+      const managedButtonMode = page.locator('.installation-detail-device-button');
+      await managedButtonMode.scrollIntoViewIfNeeded();
+      await expect(managedButtonMode).toBeInViewport();
+      await expectVisualScreen(page, '20-climate-button-mode-managed');
+    }
 
     if (viewport.name === 'phone-large') {
       await page.locator('.plug-detail-tabs__item').nth(3).click();
