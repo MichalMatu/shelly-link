@@ -879,18 +879,39 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
-    await expect(page.getByText('Harmonogram dzienny')).toBeVisible();
-    if (viewport.name === 'phone-large') {
-      await expectVisualScreen(page, '10-time-dashboard');
-    }
-    await expect(page.getByText('08:00')).toBeVisible();
-    await expect(page.getByText('20:00')).toBeVisible();
-    await expect(page.getByText('Działa')).toBeVisible();
-    expect(rpcState.createCount).toBe(2);
-
     const timeCard = page
       .getByRole('heading', { name: 'Shelly Plug S Gen3' })
       .locator('xpath=ancestor::article[1]');
+    await expect(timeCard.getByText('08:00')).toBeVisible();
+    await expect(timeCard.getByText('20:00')).toBeVisible();
+    await expect(timeCard.getByText('Harmonogram dzienny')).toHaveCount(0);
+    await expect(timeCard.getByText('Działa')).toHaveCount(0);
+    await expect(timeCard.getByText('42.3 W')).toBeVisible();
+    await expect(timeCard.getByText('230 V')).toBeVisible();
+    await expect(timeCard.getByText('1.25 kWh')).toBeVisible();
+    const auto = timeCard.getByRole('button', { name: 'AUTO', exact: true });
+    const manual = timeCard.getByRole('button', { name: 'MANUAL', exact: true });
+    const on = timeCard.getByRole('button', { name: 'ON', exact: true });
+    const off = timeCard.getByRole('button', { name: 'OFF', exact: true });
+    await expect(auto).toHaveAttribute('aria-pressed', 'true');
+    await expect(manual).toHaveAttribute('aria-pressed', 'false');
+    await expect(on).toBeDisabled();
+    await expect(off).toBeDisabled();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '10-time-dashboard');
+      await manual.click();
+      await expect(manual).toHaveAttribute('aria-pressed', 'true');
+      await expect(off).toHaveAttribute('aria-pressed', 'true');
+      await expect(on).toBeEnabled();
+      await on.click();
+      await expect(on).toHaveAttribute('aria-pressed', 'true');
+      await off.click();
+      await expect(off).toHaveAttribute('aria-pressed', 'true');
+      await auto.click();
+      await expect(auto).toHaveAttribute('aria-pressed', 'true');
+    }
+    expect(rpcState.createCount).toBe(2);
+
     await timeCard
       .getByRole('button', { name: 'Szczegóły: Shelly Plug S Gen3 · Wi-Fi' })
       .click();

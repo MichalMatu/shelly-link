@@ -92,6 +92,7 @@ export {
   type PlugDeleteConfirmModalProps
 } from './components/PlugDeleteConfirmModal.js';
 export { PlugDeviceSettingsSurface } from './components/PlugDeviceSettingsSurface.js';
+export { PlugAutomationModeControl } from './components/PlugAutomationModeControl.js';
 export { PlugButtonModeSettingsCard } from './components/PlugButtonModeSettingsCard.js';
 export {
   detachPlugButtonForManagedAutomation,

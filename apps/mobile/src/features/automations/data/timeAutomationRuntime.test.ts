@@ -14,6 +14,7 @@ import {
   installDailyTimeAutomation,
   pauseTimeAutomation,
   resumeTimeAutomation,
+  setTimeAutomationManualRelay,
   updateDailyTimeAutomation
 } from './timeAutomationRuntime.js';
 import {
@@ -220,6 +221,7 @@ describe('native Shelly time automation runtime', () => {
     const mutations = [
       () => pauseTimeAutomation(installation, fake.bundle()),
       () => resumeTimeAutomation(installation, fake.bundle()),
+      () => setTimeAutomationManualRelay(installation, true, fake.bundle()),
       () =>
         updateDailyTimeAutomation({
           installation,
@@ -255,6 +257,37 @@ describe('native Shelly time automation runtime', () => {
     expect(resumed.scheduleState).toBe('running');
     expect(fake.relayOn).toBe(true);
     expect(fake.jobs.every((job) => job.enable)).toBe(true);
+  });
+
+  it('allows explicit relay control only while the Time automation is in MANUAL', async () => {
+    const fake = new FakeTimeAutomationClients();
+    const ids = await installDailyTimeAutomation({
+      clients: fake.bundle(),
+      config: { relayId: 0, onTime: '08:00', offTime: '20:00' }
+    });
+    const installation = installationFor(fake, ids.onJobId, ids.offJobId);
+
+    await expect(
+      setTimeAutomationManualRelay(installation, false, fake.bundle())
+    ).rejects.toMatchObject({ code: 'manual-relay-requires-paused' });
+
+    await pauseTimeAutomation(installation, fake.bundle());
+    const onRuntime = await setTimeAutomationManualRelay(
+      installation,
+      true,
+      fake.bundle()
+    );
+    expect(onRuntime.scheduleState).toBe('paused');
+    expect(onRuntime.relayOn).toBe(true);
+    expect(fake.jobs.every((job) => !job.enable)).toBe(true);
+
+    const offRuntime = await setTimeAutomationManualRelay(
+      installation,
+      false,
+      fake.bundle()
+    );
+    expect(offRuntime.scheduleState).toBe('paused');
+    expect(offRuntime.relayOn).toBe(false);
   });
 
   it('updates both times while keeping the relay safely synchronized', async () => {

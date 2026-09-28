@@ -33,6 +33,7 @@ export type TimeAutomationRuntimeErrorCode =
   | 'schedule-state-attention'
   | 'pause-unconfirmed'
   | 'resume-unconfirmed'
+  | 'manual-relay-requires-paused'
   | 'update-unconfirmed'
   | 'delete-unconfirmed';
 
@@ -197,6 +198,23 @@ export const resumeTimeAutomation = async (
     );
   }
   return runtime;
+};
+
+export const setTimeAutomationManualRelay = async (
+  installation: OwnedTimeAutomationRuntimeInstallation,
+  on: boolean,
+  clients = createTimeAutomationClients(installation.shelly.baseUrl)
+): Promise<TimeAutomationRuntimeSnapshot> => {
+  await requireStoredTimeAutomationDeviceIdentity(installation, clients);
+  const before = await readTimeAutomationRuntime(installation, clients);
+  if (before.scheduleState !== 'paused') {
+    throw runtimeError(
+      'manual-relay-requires-paused',
+      'Manual relay control requires a paused time automation.'
+    );
+  }
+  await setRelayStateAndConfirm(clients, installation.config.relayId, on);
+  return readTimeAutomationRuntime(installation, clients);
 };
 
 export const updateDailyTimeAutomation = async ({

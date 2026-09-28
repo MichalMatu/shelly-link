@@ -11,6 +11,7 @@ import {
   hasBleLocator,
   isSameShellyDevice,
   PlugAddSpeedDial,
+  PlugAutomationModeControl,
   PlugDashboardCardShell,
   savedPlugToWifiDevice,
   useSavedPlugStore,
@@ -204,34 +205,17 @@ const ClimateAutomationCard = ({
         </div>
       </div>
 
-      <div
-        className="automation-control-group automation-card__mode-control"
-        role="group"
-        aria-label={t('detail.automation')}
-      >
-        <button
-          className="automation-control-button"
-          type="button"
-          aria-pressed={automationRunning}
-          disabled={action.isPending || !runtimeControllable}
-          onClick={() => {
-            if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
-          }}
-        >
-          AUTO
-        </button>
-        <button
-          className="automation-control-button"
-          type="button"
-          aria-pressed={manualControl}
-          disabled={action.isPending || !runtimeControllable}
-          onClick={() => {
-            if (!manualControl) action.mutate('manual');
-          }}
-        >
-          MANUAL
-        </button>
-      </div>
+      <PlugAutomationModeControl
+        autoActive={automationRunning}
+        manualActive={manualControl}
+        disabled={action.isPending || !runtimeControllable}
+        onAuto={() => {
+          if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
+        }}
+        onManual={() => {
+          if (!manualControl) action.mutate('manual');
+        }}
+      />
     </div>
   );
 

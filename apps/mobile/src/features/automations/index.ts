@@ -21,6 +21,7 @@ export {
   installDailyTimeAutomation,
   pauseTimeAutomation,
   resumeTimeAutomation,
+  setTimeAutomationManualRelay,
   TimeAutomationRuntimeError,
   updateDailyTimeAutomation
 } from './data/timeAutomationRuntime.js';

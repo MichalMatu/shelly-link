@@ -15,6 +15,7 @@ export type TimeAutomationRuntimeInstallation = {
 
 export type TimeAutomationRuntimeSnapshot = {
   relayOn: boolean;
+  telemetry: ShellyStatus['telemetry'];
   clock: ShellyStatus['clock'];
   scheduleState: TimeAutomationScheduleState;
   onJob: ShellyScheduleJob | null;
@@ -33,6 +34,7 @@ export const readTimeAutomationRuntime = async (
   const scheduleList = unwrapShellyResult(schedulesResult);
   return {
     relayOn: status.relayOn,
+    telemetry: status.telemetry,
     clock: status.clock,
     ...schedulePairState(installation, scheduleList.jobs)
   };
