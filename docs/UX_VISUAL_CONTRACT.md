@@ -27,7 +27,7 @@ These are not fixed by adding more one-off selectors. Shared interaction geometr
 4. Every canonical screen state is guarded by `expectVisualScreen()` and a committed Playwright screenshot baseline.
 5. Baselines are refreshed intentionally with `pnpm e2e:visual:update`, reviewed as images, then verified with `pnpm e2e:visual`.
 6. Do not update snapshots to make a failing refactor green without first explaining the visual delta.
-7. The accepted Climate dashboard card remains frozen unless a task explicitly changes its design.
+7. The accepted Climate humidity dashboard card and Plug detail tab layout are frozen golden UI. Refactors must preserve their committed macOS screenshots byte-for-byte; changing them requires an explicit product-design decision, not snapshot refresh as part of unrelated work.
 8. Shared `Disclosure` owns collapsed visibility: the body is hidden by default and rendered as grid only under `[open]`; screen CSS must not bypass this state contract. Both collapsed and expanded product states are visually baseline-protected.
 9. Navigation chevrons are icon components, never font glyphs such as `‹` or `›`, so their geometry is stable across browser and Android font fallback.
 10. Inline titles that cross a `plug-detail-framed-section` border use one consistent legend treatment: the title text is masked by the owning page/surface background and uses the shared tight line-height. Do not mix transparent-border-crossing titles with background-masked titles for the same surface role.
@@ -46,6 +46,12 @@ Surface differences are intentional only when they map to one of these roles:
 - `lcl-card` — reusable package-level card primitive; do not assume it is interchangeable with every product surface.
 
 Do not normalize these roles by copying padding/radius values between selectors. If two screens represent the same role, they must reuse the same role/class or a shared primitive. A new surface role requires an explicit visual-contract update and reviewed screenshot delta.
+
+## Frozen Climate golden master
+
+The accepted target is permanently recoverable from branch `golden/climate-ui-20260928` at commit `823b51ef0d58ff731d8d25df8d54db968d97cea5`. The frozen visual contract covers the Plugs dashboard Climate card plus the Climate Automation, BLE, Device, Script, and Info detail states (`01`, `02`, `03`, `05`, `06`, `07`). `pnpm quality:ux` verifies the Git blob identity of those baselines so a routine refactor or `e2e:visual:update` cannot silently redefine the accepted design.
+
+This freeze protects visual composition, geometry, ordering, spacing, controls, and tab chrome. Internal implementation may be modularized and reused by other automation types as long as these golden renders remain unchanged.
 
 ## Canonical states
 

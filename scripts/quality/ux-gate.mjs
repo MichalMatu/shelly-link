@@ -1,7 +1,23 @@
+import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 
 const repoRoot = new URL('../../', import.meta.url);
 const failures = [];
+
+const frozenClimateVisuals = Object.freeze({
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/01-plugs-dashboard-darwin.png':
+    '91ecf3b388a6360f60ed0396add6539647988c20',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/02-climate-automation-darwin.png':
+    '8a0080b8f47d8457dd8e134c02c7379dbb93e6c4',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/03-climate-ble-darwin.png':
+    '0449d4c2779a2d309c96d085fa1e486d58699f26',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/05-climate-device-darwin.png':
+    '680848e54cc180f58fbfa183ca1b55ed637bff21',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/06-climate-script-darwin.png':
+    'da898ad737411dab276508fe92e7f502152b5569',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/07-climate-info-darwin.png':
+    '05f2aaa22c0349c97616883e97b8f0f6f53684cd'
+});
 const cssPaths = [
   'apps/mobile/src/theme/theme.css',
   'apps/mobile/src/theme/runtimeStatus.css',
@@ -859,6 +875,22 @@ const checkCanonicalVisualPlatformContract = async () => {
   }
 };
 
+const checkFrozenClimateVisualContract = async () => {
+  for (const [path, expectedGitBlobSha] of Object.entries(frozenClimateVisuals)) {
+    const bytes = await readFile(new URL(path, repoRoot));
+    const actualGitBlobSha = createHash('sha1')
+      .update(`blob ${bytes.length}\0`)
+      .update(bytes)
+      .digest('hex');
+    if (actualGitBlobSha !== expectedGitBlobSha) {
+      addFailure(
+        path,
+        `accepted Climate golden UI is frozen at branch golden/climate-ui-20260928 (expected ${expectedGitBlobSha}, got ${actualGitBlobSha})`
+      );
+    }
+  }
+};
+
 const checkDisclosureContract = async () => {
   const path = 'packages/ui/src/primitives/Disclosure.css';
   const source = await readRepoFile(path);
@@ -1034,6 +1066,7 @@ await checkMobileProductionMarkupHygiene();
 await checkPageTitleTypographyContract();
 await checkPageHeaderContract();
 await checkCanonicalVisualPlatformContract();
+await checkFrozenClimateVisualContract();
 await checkDisclosureContract();
 await checkSegmentedControlContract();
 await checkPackageRuntimeCopy();
