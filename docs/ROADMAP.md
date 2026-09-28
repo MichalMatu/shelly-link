@@ -28,6 +28,12 @@ Diagnostics expose control mode, manual request, automation-requested relay stat
 
 For Plug S Gen3, managed Climate ownership keeps the physical button `detached` and restores the prior mode on uninstall. Firmware 1.7.5 exposes no usable local Input/Button event for the built-in button while detached, so **physical takeover is not a Plug S Gen3 capability**. Manual takeover is app-driven. Future hardware may support physical takeover only through an explicitly verified input/button capability.
 
+### Plug surface stabilization — completed 2026-09-28
+
+BLE-only Plug cards now keep confirmed offline state visible across background polling instead of changing geometry on every retry. Relay controls remain disabled until a successful runtime read restores reachability.
+
+Plug Detail now starts directly with the five-tab surface; the intermediate identity summary card was removed and identity/model/transport detail remains owned by **Info**. This did not change managed Button Mode ownership: Climate still keeps Plug S Gen3 `detached` while it owns the relay.
+
 ## Now — feature-complete v1 track
 
 Develop these slices in order rather than in parallel.
