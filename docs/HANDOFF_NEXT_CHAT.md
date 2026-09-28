@@ -84,7 +84,7 @@ Acceptance evidence:
 - full responsive Playwright: **36/36**;
 - pre-push reran **396/396** plus the four deterministic canonical responsive scenarios and pushed successfully.
 
-The current product branch after later docs-only commits has not been reinstalled on the physical phone since the newest UX slices. If continuing visual review, installing the current branch on the Samsung SM-S906B is a sensible first verification step.
+Physical-device closeout is now complete for the current UX product tree. Samsung SM-S906B / Android 16 installed exact branch head `1c63f415fa77c02fe016dfb067d3b129b38fe494` with app data preserved. Thermometer dashboard/settings were exercised with live Xiaomi/PVVX readings. A real native Time schedule was installed on Plug S Gen3 firmware 1.7.5, its dashboard/detail were inspected, and the automation was then deleted; final `Schedule.List` was empty and the relay was verified OFF. The branch is ready for deliberate merge/closeout rather than another UX refactor pass.
 
 ## Visual contract
 
@@ -118,10 +118,9 @@ The broad UX audit is mostly past the original Time problem. Do **not** reopen a
 
 Good next choices are:
 
-1. install the current branch on the phone and review the real Time + Thermometer UX;
-2. continue the audit only where screenshots/code show a real inconsistency;
-3. if UX is accepted, close out/merge the branch deliberately before starting the next roadmap feature;
-4. the next major roadmap slice remains History / Datalogger. `work/kvs-datalogger` is parked source material and must be reconciled with current exclusive Climate ownership rather than mechanically merged.
+1. close out/merge `refactor/plug-ui-unification` deliberately;
+2. do not reopen the completed UX slices without new screenshot/user evidence;
+3. after merge, the next major roadmap slice is History / Datalogger. `work/kvs-datalogger` is parked source material and must be reconciled with current exclusive Climate ownership rather than mechanically merged.
 
 Avoid starting History while the user is still reviewing this UX branch.
 
