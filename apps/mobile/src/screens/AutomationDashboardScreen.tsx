@@ -1,12 +1,11 @@
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { calculateVpdKpa } from '@lcl/automation-core';
-import { IconAlertTriangle, IconDotsVertical, IconPlug } from '@tabler/icons-react';
+import { IconAlertTriangle, IconPlug } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
-import { EditablePlugName } from '../components/EditablePlugName.js';
 import {
   BleOnlyPlugDashboardCards,
   hasBleLocator,
@@ -47,11 +46,6 @@ type AutomationCardProps = {
   installation: InstalledAutomation;
   onOpen(installationId: string): void;
   onNameChange(installation: InstalledAutomation, value: string): void;
-};
-
-const formatPlugEnergy = (value: number | null | undefined): string => {
-  if (value == null || !Number.isFinite(value)) return '—';
-  return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
 };
 
 const CLIMATE_READING_PULSE_MS = 650;
@@ -185,151 +179,107 @@ const ClimateAutomationCard = ({
     warningLabel = t('dashboard.health.attention');
   }
 
-  return (
-    <article className="automation-card automation-card--climate">
-      <header className="automation-card__header">
-        <span
-          className={`automation-card__leading-icon${
-            relayState === true ? ' automation-card__leading-icon--active' : ''
-          }${isReadingPulseActive ? ' automation-card__leading-icon--fresh' : ''}`}
-          aria-hidden="true"
-        >
-          <IconPlug key={readingPulseSequence} className="automation-card__icon" />
-        </span>
+  const body = (
+    <div className="automation-card__main" aria-label={t('dashboard.currentValues')}>
+      <div className="automation-card__primary-metric">
+        <strong aria-label={`${primaryMetric.label}: ${primaryMetric.value}`}>
+          {primaryMetric.value}
+        </strong>
+        <small aria-label={`${t('dashboard.thresholds')}: ${thresholdSummary}`}>
+          {thresholdLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </small>
+      </div>
 
-        <div className="automation-card__identity">
-          <EditablePlugName
-            name={installation.shelly.name}
-            variant="card"
-            onCommit={onNameChange}
-          />
-        </div>
-
-        <div className="automation-card__header-actions">
-          <button
-            className="automation-card__menu"
-            type="button"
-            aria-label={`${t('dashboard.openSystem')}: ${installation.shelly.name} · Wi-Fi`}
-            title={t('dashboard.openSystem')}
-            onClick={() => onOpen(installation.id)}
-          >
-            <IconDotsVertical className="automation-card__menu-icon" />
-          </button>
-        </div>
-      </header>
-
-      <div className="automation-card__main" aria-label={t('dashboard.currentValues')}>
-        <div className="automation-card__primary-metric">
-          <strong aria-label={`${primaryMetric.label}: ${primaryMetric.value}`}>
-            {primaryMetric.value}
+      <div className="automation-card__secondary-metrics">
+        <div>
+          <strong aria-label={`${secondaryMetric.label}: ${secondaryMetric.value}`}>
+            {secondaryMetric.value}
           </strong>
-          <small aria-label={`${t('dashboard.thresholds')}: ${thresholdSummary}`}>
-            {thresholdLines.map((line) => (
-              <span key={line}>{line}</span>
-            ))}
-          </small>
         </div>
-
-        <div className="automation-card__secondary-metrics">
-          <div>
-            <strong aria-label={`${secondaryMetric.label}: ${secondaryMetric.value}`}>
-              {secondaryMetric.value}
-            </strong>
-          </div>
-          <div>
-            <span>{t('dashboard.vpd')}</span>
-            <strong>{formatInstallationVpd(currentVpdKpa, targetVpdKpa)}</strong>
-          </div>
-        </div>
-
-        <div
-          className="automation-control-group automation-card__mode-control"
-          role="group"
-          aria-label={t('detail.automation')}
-        >
-          <button
-            className="automation-control-button"
-            type="button"
-            aria-pressed={automationRunning}
-            disabled={action.isPending || !runtimeControllable}
-            onClick={() => {
-              if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
-            }}
-          >
-            AUTO
-          </button>
-          <button
-            className="automation-control-button"
-            type="button"
-            aria-pressed={manualControl}
-            disabled={action.isPending || !runtimeControllable}
-            onClick={() => {
-              if (!manualControl) action.mutate('manual');
-            }}
-          >
-            MANUAL
-          </button>
+        <div>
+          <span>{t('dashboard.vpd')}</span>
+          <strong>{formatInstallationVpd(currentVpdKpa, targetVpdKpa)}</strong>
         </div>
       </div>
 
       <div
-        className="automation-card__plug-runtime"
-        aria-label={t('hardware.shelly.statusMetricsLabel')}
-      >
-        <span>{formatInstallationMetric(snapshot?.plug?.powerW, ' W', 1)}</span>
-        <span>{formatInstallationMetric(snapshot?.plug?.voltageV, ' V', 0)}</span>
-        <span>{formatPlugEnergy(snapshot?.plug?.energyWh)}</span>
-        <span>{snapshot?.time.localTime ?? '—'}</span>
-      </div>
-
-      <div
-        className="automation-relay-actions automation-card__relay-actions"
+        className="automation-control-group automation-card__mode-control"
         role="group"
-        aria-label={t('dashboard.output')}
+        aria-label={t('detail.automation')}
       >
         <button
-          className="automation-relay-button"
+          className="automation-control-button"
           type="button"
-          aria-pressed={relayState === true}
-          disabled={action.isPending || !manualControl}
+          aria-pressed={automationRunning}
+          disabled={action.isPending || !runtimeControllable}
           onClick={() => {
-            if (controlStatus?.manualRequestOn !== true) action.mutate('on');
+            if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
           }}
         >
-          ON
+          AUTO
         </button>
         <button
-          className="automation-relay-button"
+          className="automation-control-button"
           type="button"
-          aria-pressed={relayState === false}
-          disabled={action.isPending || !manualControl}
+          aria-pressed={manualControl}
+          disabled={action.isPending || !runtimeControllable}
           onClick={() => {
-            if (controlStatus?.manualRequestOn !== false) action.mutate('off');
+            if (!manualControl) action.mutate('manual');
           }}
         >
-          OFF
+          MANUAL
         </button>
       </div>
+    </div>
+  );
 
-      {(warningLabel || action.isError) && (
-        <footer className="automation-card__footer">
-          {warningLabel && (
-            <div
-              className={`automation-card__status automation-card__status--${warningClass}`}
-              role="status"
-            >
-              <IconAlertTriangle aria-hidden="true" />
-              <span>{warningLabel}</span>
-            </div>
-          )}
-          {action.isError && (
-            <span className="automation-control-error" role="alert">
-              {t('detail.actionFailed')}
-            </span>
-          )}
-        </footer>
-      )}
-    </article>
+  const footer =
+    warningLabel || action.isError ? (
+      <footer className="automation-card__footer">
+        {warningLabel && (
+          <div
+            className={`automation-card__status automation-card__status--${warningClass}`}
+            role="status"
+          >
+            <IconAlertTriangle aria-hidden="true" />
+            <span>{warningLabel}</span>
+          </div>
+        )}
+        {action.isError && (
+          <span className="automation-control-error" role="alert">
+            {t('detail.actionFailed')}
+          </span>
+        )}
+      </footer>
+    ) : undefined;
+
+  return (
+    <PlugDashboardCardShell
+      name={installation.shelly.name}
+      relayState={relayState}
+      busy={action.isPending}
+      telemetry={{
+        powerW: snapshot?.plug?.powerW,
+        voltageV: snapshot?.plug?.voltageV,
+        energyWh: snapshot?.plug?.energyWh,
+        localTime: snapshot?.time.localTime
+      }}
+      body={body}
+      className="automation-card automation-card--climate"
+      detailContext="Wi-Fi"
+      footer={footer}
+      leadingIconFresh={isReadingPulseActive}
+      leadingIconKey={readingPulseSequence}
+      openDetailsOnCardClick={false}
+      relayActionState={controlStatus?.manualRequestOn}
+      relayControlsDisabled={!manualControl}
+      onNameChange={onNameChange}
+      onOpenDetails={() => onOpen(installation.id)}
+      onTurnRelayOn={() => action.mutate('on')}
+      onTurnRelayOff={() => action.mutate('off')}
+    />
   );
 };
 

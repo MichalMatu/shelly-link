@@ -1,5 +1,5 @@
 import { IconDotsVertical, IconPlug } from '@tabler/icons-react';
-import type { ReactNode } from 'react';
+import type { Key, ReactNode } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { EditablePlugName } from '../../../components/EditablePlugName.js';
 
@@ -20,9 +20,16 @@ export type PlugDashboardCardShellProps = {
   relayState: boolean | undefined;
   busy: boolean;
   telemetry: PlugDashboardTelemetry;
-  automationAction: PlugDashboardAutomationAction;
+  automationAction?: PlugDashboardAutomationAction;
+  body?: ReactNode;
+  className?: string;
   detailContext?: string;
   footer?: ReactNode;
+  leadingIconFresh?: boolean;
+  leadingIconKey?: Key;
+  openDetailsOnCardClick?: boolean;
+  relayActionState?: boolean | undefined;
+  relayControlsDisabled?: boolean;
   onNameChange(value: string): void;
   onOpenDetails(): void;
   onTurnRelayOn(): void;
@@ -53,8 +60,15 @@ export const PlugDashboardCardShell = ({
   busy,
   telemetry,
   automationAction,
+  body,
+  className = 'automation-card plug-card plug-card--unconfigured',
   detailContext,
   footer,
+  leadingIconFresh = false,
+  leadingIconKey,
+  openDetailsOnCardClick = true,
+  relayActionState,
+  relayControlsDisabled = false,
   onNameChange,
   onOpenDetails,
   onTurnRelayOn,
@@ -64,23 +78,28 @@ export const PlugDashboardCardShell = ({
   const detailLabel = `${t('dashboard.openSystem')}: ${name}${
     detailContext ? ` · ${detailContext}` : ''
   }`;
+  const requestedRelayState = relayActionState ?? relayState;
 
   return (
     <article
-      className="automation-card plug-card plug-card--unconfigured"
+      className={className}
       aria-busy={busy}
-      onClick={(event) => {
-        if (!isInteractiveTarget(event.target)) onOpenDetails();
-      }}
+      {...(openDetailsOnCardClick
+        ? {
+            onClick: (event: React.MouseEvent<HTMLElement>) => {
+              if (!isInteractiveTarget(event.target)) onOpenDetails();
+            }
+          }
+        : {})}
     >
       <header className="automation-card__header">
         <span
           className={`automation-card__leading-icon${
             relayState === true ? ' automation-card__leading-icon--active' : ''
-          }`}
+          }${leadingIconFresh ? ' automation-card__leading-icon--fresh' : ''}`}
           aria-hidden="true"
         >
-          <IconPlug className="automation-card__icon" />
+          <IconPlug key={leadingIconKey} className="automation-card__icon" />
         </span>
         <div className="automation-card__identity">
           <EditablePlugName name={name} variant="card" onCommit={onNameChange} />
@@ -97,6 +116,8 @@ export const PlugDashboardCardShell = ({
           </button>
         </div>
       </header>
+
+      {body}
 
       <div
         className="automation-card__plug-runtime"
@@ -117,9 +138,9 @@ export const PlugDashboardCardShell = ({
           className="automation-relay-button"
           type="button"
           aria-pressed={relayState === true}
-          disabled={busy}
+          disabled={busy || relayControlsDisabled}
           onClick={() => {
-            if (relayState !== true) onTurnRelayOn();
+            if (requestedRelayState !== true) onTurnRelayOn();
           }}
         >
           ON
@@ -128,23 +149,25 @@ export const PlugDashboardCardShell = ({
           className="automation-relay-button"
           type="button"
           aria-pressed={relayState === false}
-          disabled={busy}
+          disabled={busy || relayControlsDisabled}
           onClick={() => {
-            if (relayState !== false) onTurnRelayOff();
+            if (requestedRelayState !== false) onTurnRelayOff();
           }}
         >
           OFF
         </button>
       </div>
 
-      <button
-        className="primary-action plug-card__automation-action"
-        type="button"
-        disabled={automationAction.disabled}
-        onClick={automationAction.onClick}
-      >
-        {t('dashboard.addAutomation')}
-      </button>
+      {automationAction && (
+        <button
+          className="primary-action plug-card__automation-action"
+          type="button"
+          disabled={automationAction.disabled}
+          onClick={automationAction.onClick}
+        >
+          {t('dashboard.addAutomation')}
+        </button>
+      )}
 
       {footer}
     </article>
