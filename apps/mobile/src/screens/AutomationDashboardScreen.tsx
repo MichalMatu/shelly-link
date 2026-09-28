@@ -282,7 +282,13 @@ const AutomationCard = ({ installation, onOpen, onNameChange }: AutomationCardPr
     />
   );
 
-const ThermometerDashboardSection = ({ onAdd }: { onAdd(): void }) => {
+const ThermometerDashboardSection = ({
+  onAdd,
+  onOpenSettings
+}: {
+  onAdd(): void;
+  onOpenSettings(sensorId: string): void;
+}) => {
   const flow = useSensorSetupFlow();
   return (
     <SensorSetupPage
@@ -290,6 +296,7 @@ const ThermometerDashboardSection = ({ onAdd }: { onAdd(): void }) => {
       primaryAddAction="phone-scan"
       embedded
       onAddRequest={onAdd}
+      onOpenSensorSettings={onOpenSettings}
     />
   );
 };
@@ -333,6 +340,7 @@ type AutomationDashboardScreenProps = {
   initialKind?: AppNavigationKind;
   onAddPlug(transport: PlugAddTransport): void;
   onAddThermometer(): void;
+  onOpenThermometerSettings?: (sensorId: string) => void;
   onAddAutomation(kind: AppNavigationKind, shellyId?: string): void;
   onOpenInstallation(installationId: string): void;
   onOpenBlePlug(physicalId: string): void;
@@ -343,6 +351,7 @@ export const AutomationDashboardScreen = ({
   initialKind,
   onAddPlug,
   onAddThermometer,
+  onOpenThermometerSettings = () => undefined,
   onAddAutomation,
   onOpenInstallation,
   onOpenBlePlug,
@@ -422,7 +431,10 @@ export const AutomationDashboardScreen = ({
     >
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
         {activeKind === 'time' ? (
-          <ThermometerDashboardSection onAdd={onAddThermometer} />
+          <ThermometerDashboardSection
+            onAdd={onAddThermometer}
+            onOpenSettings={onOpenThermometerSettings}
+          />
         ) : hasPlugEntries ? (
           <>
             {plugEntries.map(({ device, installation }) =>

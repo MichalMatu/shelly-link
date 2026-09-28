@@ -34,6 +34,8 @@ type HardwareSetupScreenProps = {
   plugAddOnly?: boolean;
   sensorAddOnly?: boolean;
   sensorAddMode?: 'manual' | 'phone-scan';
+  sensorSettingsOnlyId?: string;
+  onSensorSettingsRemoved?: () => void;
 };
 
 export const HardwareSetupScreen = ({
@@ -46,7 +48,9 @@ export const HardwareSetupScreen = ({
   editInstallationId,
   plugAddOnly = false,
   sensorAddOnly = false,
-  sensorAddMode = 'phone-scan'
+  sensorAddMode = 'phone-scan',
+  sensorSettingsOnlyId,
+  onSensorSettingsRemoved
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
   const flow = useHardwareSetupFlow(
@@ -135,6 +139,35 @@ export const HardwareSetupScreen = ({
     if (localAddPage === 'sensor') flow.stopPhoneBleScan();
     setLocalAddPage(null);
   };
+
+  if (sensorSettingsOnlyId) {
+    const normalizedSensorId = sensorSettingsOnlyId.toUpperCase();
+    const sensorSettingsFlow = {
+      ...flow,
+      sensorDevices: flow.sensorDevices.filter(
+        (device) =>
+          device.id.toUpperCase() === normalizedSensorId ||
+          device.runtimeAddress.toUpperCase() === normalizedSensorId
+      )
+    };
+    return (
+      <main
+        className="demo-shell hardware-shell"
+        aria-label={t('hardware.sensor.settingsTitle')}
+      >
+        <header className="demo-header app-page-header">
+          <h1>{t('hardware.sensor.settingsTitle')}</h1>
+        </header>
+        <SensorSetupPage
+          flow={sensorSettingsFlow}
+          hideAddAction
+          {...(onSensorSettingsRemoved
+            ? { onSensorRemoved: onSensorSettingsRemoved }
+            : {})}
+        />
+      </main>
+    );
+  }
 
   if (localShellyPage !== null) {
     const localShelly = flow.shellyDevices.find(

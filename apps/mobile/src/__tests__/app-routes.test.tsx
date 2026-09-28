@@ -83,7 +83,9 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
     onBackToIntent,
     onSetupComplete,
     plugAddOnly,
-    sensorAddOnly
+    sensorAddOnly,
+    sensorSettingsOnlyId,
+    onSensorSettingsRemoved
   }: {
     setupIntent?: SetupIntent;
     fixedShellyId?: string;
@@ -92,6 +94,8 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
     onSetupComplete?: () => void;
     plugAddOnly?: boolean;
     sensorAddOnly?: boolean;
+    sensorSettingsOnlyId?: string;
+    onSensorSettingsRemoved?: () => void;
   }) => (
     <section>
       <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
@@ -99,6 +103,10 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
       <p>{`mock-edit-installation-${editInstallationId ?? 'none'}`}</p>
       <p>{`mock-plug-add-${plugAddOnly ? 'yes' : 'no'}`}</p>
       <p>{`mock-sensor-add-${sensorAddOnly ? 'yes' : 'no'}`}</p>
+      <p>{`mock-sensor-settings-${sensorSettingsOnlyId ?? 'none'}`}</p>
+      <button type="button" onClick={onSensorSettingsRemoved}>
+        mock-sensor-settings-remove
+      </button>
       <button type="button" onClick={onBackToIntent}>
         mock-back
       </button>
@@ -412,5 +420,31 @@ describe('AppRoutes navigation shell', () => {
       'aria-current',
       'page'
     );
+  });
+
+  it('opens Thermometer settings as a nested Thermometers route', async () => {
+    useHardwareSetupDraftStore.getState().upsertSensorDevice({
+      id: 'A4:C1:38:4F:24:CD',
+      name: 'Przedpokój',
+      runtimeAddress: 'A4:C1:38:4F:24:CD',
+      profileId: 'xiaomi_lywsd03mmc_bthome_v2'
+    });
+
+    renderRoutes();
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Ustawienia termometru Przedpokój' })
+    );
+
+    expect(
+      await screen.findByText('mock-sensor-settings-A4:C1:38:4F:24:CD')
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Termometry' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
   });
 });

@@ -24,6 +24,7 @@ type InstallationRoute = {
   kind: AppNavigationKind;
 };
 type PlugSettingsRoute = { type: 'plug-settings'; deviceId: string };
+type SensorSettingsRoute = { type: 'sensor-settings'; sensorId: string };
 type BlePlugDetailRoute = { type: 'ble-plug-detail'; physicalId: string };
 type PlugBleReturnRoute = PlugSettingsRoute | InstallationRoute;
 type PlugBleDiscoveryRoute = {
@@ -35,6 +36,7 @@ type PrimaryAppRoute =
   | DashboardRoute
   | DeviceAddRoute
   | PlugSettingsRoute
+  | SensorSettingsRoute
   | BlePlugDetailRoute
   | PlugBleDiscoveryRoute
   | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
@@ -49,6 +51,7 @@ export const activeNavigationForRoute = (
   if (route.type === 'settings') return 'settings';
   if (route.type === 'dashboard') return route.kind ?? 'climate';
   if (route.type === 'installation') return route.kind;
+  if (route.type === 'sensor-settings') return 'time';
   if (
     route.type === 'plug-settings' ||
     route.type === 'ble-plug-detail' ||

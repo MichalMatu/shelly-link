@@ -54,6 +54,7 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   if (route.type === 'settings') return route.returnTo;
   if (route.type === 'installation') return { type: 'dashboard', kind: route.kind };
   if (route.type === 'device-add') return route.returnTo;
+  if (route.type === 'sensor-settings') return { type: 'dashboard', kind: 'time' };
   if (route.type === 'plug-ble-discovery') return route.returnTo;
   if (route.type === 'plug-settings' || route.type === 'ble-plug-detail') {
     return { type: 'dashboard', kind: 'climate' };
@@ -175,6 +176,9 @@ export const AppRoutes = () => {
             sensorMode: 'phone-scan'
           })
         }
+        onOpenThermometerSettings={(sensorId) =>
+          navigate({ type: 'sensor-settings', sensorId })
+        }
         onAddAutomation={(kind, shellyId) => {
           if (shellyId) selectShellyDevice(shellyId);
           if (kind === 'time') {
@@ -197,6 +201,15 @@ export const AppRoutes = () => {
         onOpenBlePlug={(physicalId) => navigate({ type: 'ble-plug-detail', physicalId })}
         onOpenPlugSettings={(deviceId) => navigate({ type: 'plug-settings', deviceId })}
       />
+    );
+  } else if (route.type === 'sensor-settings') {
+    content = (
+      <Suspense fallback={<RouteFallback />}>
+        <HardwareSetupScreen
+          sensorSettingsOnlyId={route.sensorId}
+          onSensorSettingsRemoved={() => navigate({ type: 'dashboard', kind: 'time' })}
+        />
+      </Suspense>
     );
   } else if (route.type === 'ble-plug-detail') {
     content = (

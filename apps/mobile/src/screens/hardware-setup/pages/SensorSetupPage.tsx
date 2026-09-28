@@ -2,7 +2,7 @@ import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
 import { Modal, SegmentedControl } from '@lcl/ui';
 import { AppToastViewport } from '../../../components/AppToastViewport.js';
-import { IconPlus, IconTemperature } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
@@ -10,10 +10,10 @@ import type { HardwarePageProps } from '../helpers.js';
 import { useSensorSetupFeedback } from './useSensorSetupFeedback.js';
 import {
   formatSensorMetric,
-  SavedSensorCard,
-  SensorAddForm,
+  SavedSensorList,
   sensorProfileDisplayLabels
-} from './SensorSetupPresentation.js';
+} from '../../../features/thermometers/index.js';
+import { SensorAddForm } from './SensorSetupPresentation.js';
 
 type SensorDraftDevice = SensorSetupFlow['sensorDevices'][number];
 type SensorDialogState = { kind: 'none' } | { kind: 'remove'; device: SensorDraftDevice };
@@ -24,6 +24,9 @@ type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
   embedded?: boolean;
   addOnly?: boolean;
   onAddRequest?: (mode: SensorAddMode) => void;
+  onOpenSensorSettings?: (sensorId: string) => void;
+  hideAddAction?: boolean;
+  onSensorRemoved?: () => void;
 };
 
 export const SensorSetupPage = ({
@@ -31,7 +34,10 @@ export const SensorSetupPage = ({
   primaryAddAction = 'manual',
   embedded = false,
   addOnly = false,
-  onAddRequest
+  onAddRequest,
+  onOpenSensorSettings,
+  hideAddAction = false,
+  onSensorRemoved
 }: SensorSetupPageProps) => {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<SensorDialogState>({ kind: 'none' });
@@ -130,10 +136,8 @@ export const SensorSetupPage = ({
     flow.removeSensorDevice(sensorPendingRemoval.id);
     setDialog({ kind: 'none' });
     pushToast('ok', t('hardware.sensor.removed'));
+    onSensorRemoved?.();
   };
-
-  const readingsForSensor = (device: SensorDraftDevice) =>
-    flow.sensorSamplesById[device.id.toUpperCase()] ?? [];
 
   const scanContent = (
     <section
@@ -317,34 +321,36 @@ export const SensorSetupPage = ({
       }
       aria-label={t('hardware.nav.sensorTitle')}
     >
-      <button
-        className={
-          primaryAddAction === 'phone-scan'
-            ? 'primary-action dashboard-fab'
-            : 'primary-action setup-add-fab'
-        }
-        type="button"
-        aria-label={
-          primaryAddAction === 'phone-scan'
-            ? t('hardware.sensor.scanPhoneTitle')
-            : t('hardware.sensor.add')
-        }
-        title={
-          primaryAddAction === 'phone-scan'
-            ? t('hardware.sensor.scanPhoneTitle')
-            : t('hardware.sensor.addTitle')
-        }
-        onClick={() => onAddRequest?.(primaryAddAction)}
-      >
-        <IconPlus
+      {!hideAddAction && (
+        <button
           className={
             primaryAddAction === 'phone-scan'
-              ? 'dashboard-fab__icon'
-              : 'setup-add-fab__icon'
+              ? 'primary-action dashboard-fab'
+              : 'primary-action setup-add-fab'
           }
-          aria-hidden="true"
-        />
-      </button>
+          type="button"
+          aria-label={
+            primaryAddAction === 'phone-scan'
+              ? t('hardware.sensor.scanPhoneTitle')
+              : t('hardware.sensor.add')
+          }
+          title={
+            primaryAddAction === 'phone-scan'
+              ? t('hardware.sensor.scanPhoneTitle')
+              : t('hardware.sensor.addTitle')
+          }
+          onClick={() => onAddRequest?.(primaryAddAction)}
+        >
+          <IconPlus
+            className={
+              primaryAddAction === 'phone-scan'
+                ? 'dashboard-fab__icon'
+                : 'setup-add-fab__icon'
+            }
+            aria-hidden="true"
+          />
+        </button>
+      )}
 
       <Modal
         closeLabel={t('common.cancel')}
@@ -372,34 +378,19 @@ export const SensorSetupPage = ({
         onDismiss={dismissToast}
       />
 
-      <div className="saved-list" aria-label={t('hardware.sensor.savedListLabel')}>
-        {flow.sensorDevices.length === 0 &&
-          (embedded ? (
-            <div className="dashboard-kind-empty">
-              <IconTemperature
-                className="dashboard-kind-empty__icon"
-                aria-hidden="true"
-              />
-              <strong>{t('hardware.sensor.empty')}</strong>
-            </div>
-          ) : (
-            <p>{t('hardware.sensor.empty')}</p>
-          ))}
-        {flow.sensorDevices.map((device) => (
-          <SavedSensorCard
-            key={device.id}
-            device={device}
-            samples={readingsForSensor(device)}
-            isEditing={editingSensorId === device.id}
-            pvvxTimePending={flow.setPvvxTimeMutation.isPending}
-            onEditStart={() => setEditingSensorId(device.id)}
-            onEditEnd={() => setEditingSensorId(null)}
-            onNameChange={(value) => flow.setSensorDeviceName(device.id, value)}
-            onPvvxSetTime={() => flow.setPvvxTimeMutation.mutate(device)}
-            onRemove={() => setDialog({ kind: 'remove', device })}
-          />
-        ))}
-      </div>
+      <SavedSensorList
+        devices={flow.sensorDevices}
+        samplesById={flow.sensorSamplesById}
+        editingSensorId={editingSensorId}
+        pvvxTimePending={flow.setPvvxTimeMutation.isPending}
+        embedded={embedded}
+        onEditStart={setEditingSensorId}
+        onEditEnd={() => setEditingSensorId(null)}
+        onNameChange={flow.setSensorDeviceName}
+        onPvvxSetTime={(device) => flow.setPvvxTimeMutation.mutate(device)}
+        onRemove={(device) => setDialog({ kind: 'remove', device })}
+        {...(onOpenSensorSettings ? { onOpenDetails: onOpenSensorSettings } : {})}
+      />
     </section>
   );
 };
