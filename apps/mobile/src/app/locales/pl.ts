@@ -392,6 +392,7 @@ export const pl = {
       scanNetworkFailedTitle: 'Nie udało się przeskanować sieci.',
       scanRangeEnd: 'Do',
       scanRangeFailed: 'Sprawdź zakres skanu.',
+      scanRangeLabel: 'Zakres skanowania',
       scanRangeStart: 'Od',
       scanResultEmpty: 'Nie znalazłem gniazdka Shelly w tym zakresie.',
       scanShellyTitle: 'Skanuj sieć Shelly',

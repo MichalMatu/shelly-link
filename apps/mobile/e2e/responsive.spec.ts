@@ -1113,6 +1113,10 @@ for (const viewport of viewports) {
     ).toBeVisible();
     await page.getByRole('button', { name: 'Wi-Fi', exact: true }).click();
     await expect(page.getByRole('tablist', { name: 'Dodaj gniazdko' })).toBeVisible();
+    const scanRangeDisclosure = page.locator('.shelly-network-scan__range-disclosure');
+    await expect(scanRangeDisclosure.getByText('Zakres skanowania')).toBeVisible();
+    await expect(scanRangeDisclosure).not.toHaveAttribute('open', '');
+    await expect(page.getByLabel('Od', { exact: true })).toBeHidden();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '15-add-plug');
     }

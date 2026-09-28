@@ -398,6 +398,7 @@ export const fr = {
       scanNetworkFailedTitle: 'Impossible de scanner le réseau.',
       scanRangeEnd: 'À',
       scanRangeFailed: 'Vérifie la plage de scan.',
+      scanRangeLabel: 'Plage de scan',
       scanRangeStart: 'De',
       scanResultEmpty: 'Aucune prise Shelly trouvée dans cette plage.',
       scanShellyTitle: 'Scanner le réseau Shelly',

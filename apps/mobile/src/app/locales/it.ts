@@ -392,6 +392,7 @@ export const it = {
       scanNetworkFailedTitle: 'Impossibile scansionare la rete.',
       scanRangeEnd: 'A',
       scanRangeFailed: 'Controlla intervallo scansione.',
+      scanRangeLabel: 'Intervallo di scansione',
       scanRangeStart: 'Da',
       scanResultEmpty: 'Nessuna presa Shelly trovata in questo intervallo.',
       scanShellyTitle: 'Scansiona rete Shelly',
