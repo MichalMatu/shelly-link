@@ -53,7 +53,6 @@ export const WifiPlugDetailScreen = ({
   return (
     <main className="demo-shell installation-detail-shell">
       <PlugDetailTop
-        plug={device}
         tabs={[activeTab, setActiveTab]}
         disabledTabs={disabledWifiDetailTabs}
       />

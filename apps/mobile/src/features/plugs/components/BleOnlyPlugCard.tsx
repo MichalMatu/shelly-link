@@ -21,8 +21,12 @@ export const BleOnlyPlugCard = ({ plug, onNameChange, onOpen }: BleOnlyPlugCardP
   const { t } = useTranslation();
   const runtime = useSavedBlePlugRuntime(plug);
   const relayState = runtime.status?.relayOn;
-  const isBusy = runtime.isPending || runtime.isRelayPending || runtime.status === null;
-  const hasError = runtime.isError || runtime.isRelayError;
+  const isBusy =
+    runtime.isPending ||
+    runtime.isRelayPending ||
+    runtime.isOffline ||
+    runtime.status === null;
+  const hasError = runtime.isOffline || runtime.isRelayError;
   const displayName = dashboardName(plug);
 
   return (
@@ -41,7 +45,7 @@ export const BleOnlyPlugCard = ({ plug, onNameChange, onOpen }: BleOnlyPlugCardP
       footer={
         hasError ? (
           <footer className="automation-card__footer">
-            {runtime.isError && (
+            {runtime.isOffline && (
               <div
                 className="automation-card__status automation-card__status--offline"
                 role="alert"

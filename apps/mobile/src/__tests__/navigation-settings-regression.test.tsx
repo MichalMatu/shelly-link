@@ -153,14 +153,16 @@ describe('navigation and settings regression coverage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'open-plug-settings-test' }));
 
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(await screen.findByRole('heading', { name: 'Nawilżacz' })).toBeVisible();
-    expect(screen.getByText('Wi-Fi · S3PL-00112EU')).toBeVisible();
+    await screen.findByRole('button', { name: 'Ustawienia gniazdka' });
+    expect(screen.queryByRole('heading', { name: 'Nawilżacz' })).toBeNull();
+    expect(screen.queryByText('Wi-Fi · S3PL-00112EU')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Wstecz: Gniazdka' })).toBeNull();
     const detailShell = document.querySelector('.installation-detail-shell');
     const detailTabs = detailShell?.querySelector('.plug-detail-tabs');
-    const detailIdentity = detailShell?.querySelector('.installation-detail-identity');
+    const detailSurface = detailShell?.querySelector('.plug-detail-surface');
     expect(detailShell?.firstElementChild).toBe(detailTabs);
-    expect(detailTabs?.nextElementSibling).toBe(detailIdentity);
+    expect(detailTabs?.nextElementSibling).toBe(detailSurface);
+    expect(detailShell?.querySelector('.installation-detail-identity')).toBeNull();
     expect(screen.getByRole('button', { name: 'Automatyka' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Skrypt' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toHaveAttribute(
@@ -192,7 +194,7 @@ describe('navigation and settings regression coverage', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Nawilżacz' }));
-    expect(await screen.findByRole('heading', { name: 'Nawilżacz' })).toBeVisible();
+    await screen.findByRole('button', { name: 'Ustawienia gniazdka' });
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toHaveAttribute(
       'aria-current',
       'page'

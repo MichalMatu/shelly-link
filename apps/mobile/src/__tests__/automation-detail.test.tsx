@@ -426,9 +426,10 @@ describe('InstallationDetailScreen', () => {
     expect(screen.queryByRole('button', { name: 'Wstecz: Gniazdka' })).toBeNull();
     const detailShell = document.querySelector('.installation-detail-shell');
     const detailTabs = detailShell?.querySelector('.plug-detail-tabs');
-    const detailIdentity = detailShell?.querySelector('.installation-detail-identity');
+    const detailSurface = detailShell?.querySelector('.plug-detail-surface');
     expect(detailShell?.firstElementChild).toBe(detailTabs);
-    expect(detailTabs?.nextElementSibling).toBe(detailIdentity);
+    expect(detailTabs?.nextElementSibling).toBe(detailSurface);
+    expect(detailShell?.querySelector('.installation-detail-identity')).toBeNull();
     expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
       'aria-current',
       'page'
@@ -452,8 +453,8 @@ describe('InstallationDetailScreen', () => {
 
     renderDetail(saved.id);
 
-    expect(screen.getByRole('heading', { name: 'Salon' })).toBeVisible();
-    expect(screen.getByText('Wi-Fi · S3PL-00112EU')).toBeVisible();
+    expect(screen.queryByRole('heading', { name: 'Salon' })).toBeNull();
+    expect(screen.queryByText('Wi-Fi · S3PL-00112EU')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Nazwa gniazdka' })).toBeNull();
     expect(screen.queryByText('Sterowanie temperaturą')).toBeNull();
   });

@@ -44,13 +44,9 @@ export const BlePlugDetailScreen = ({
   const firmwareTarget = plug.wifiBaseUrl
     ? { physicalId: plug.physicalId, baseUrl: plug.wifiBaseUrl }
     : undefined;
-  const preferredTransport = plug.wifiBaseUrl ? 'wifi' : 'bluetooth';
-
   return (
     <main className="demo-shell installation-detail-shell">
       <PlugDetailTop
-        plug={plug}
-        transport={preferredTransport}
         tabs={[activeTab, setActiveTab]}
         disabledTabs={disabledBleDetailTabs}
       />

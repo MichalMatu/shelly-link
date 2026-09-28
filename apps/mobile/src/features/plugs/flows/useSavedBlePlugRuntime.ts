@@ -50,6 +50,9 @@ export const useSavedBlePlugRuntime = (
     refetchOnReconnect: true
   });
 
+  const isOffline =
+    query.isError || (query.isFetching && query.errorUpdatedAt > query.dataUpdatedAt);
+
   const relayMutation = useMutation({
     mutationFn: async (relayOn: boolean) => {
       if (wifiTarget) {
@@ -86,6 +89,7 @@ export const useSavedBlePlugRuntime = (
     isPending: query.isPending,
     isFetching: query.isFetching,
     isError: query.isError,
+    isOffline,
     statusError: query.error ?? null,
     isRelayPending: relayMutation.isPending,
     isRelayError: relayMutation.isError,

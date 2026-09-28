@@ -689,8 +689,8 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }).click();
     await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Wstecz: Gniazdka' })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Salon' })).toBeVisible();
-    await expect(page.getByText('Wi-Fi · S3PL-00112EU')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Salon' })).toHaveCount(0);
+    await expect(page.getByText('Wi-Fi · S3PL-00112EU')).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Automatyka' })).toHaveCount(0);
     await expect(page.getByText('Powód automatyzacji')).toBeVisible();
     if (viewport.name === 'phone-large') {

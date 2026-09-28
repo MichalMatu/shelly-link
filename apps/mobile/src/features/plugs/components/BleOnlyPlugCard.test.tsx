@@ -13,6 +13,7 @@ const runtime = vi.hoisted(() => ({
   isPending: false,
   isFetching: false,
   isError: false,
+  isOffline: false,
   statusError: null,
   isRelayPending: false,
   isRelayError: false,
@@ -49,6 +50,8 @@ describe('BleOnlyPlugCard', () => {
     runtime.isPending = false;
     runtime.isRelayPending = false;
     runtime.isError = false;
+    runtime.isOffline = false;
+    runtime.isFetching = false;
     runtime.isRelayError = false;
     runtime.turnRelayOn.mockReset();
     runtime.turnRelayOff.mockReset();
@@ -98,6 +101,7 @@ describe('BleOnlyPlugCard', () => {
   it('keeps pending state accessible without rendering a Refreshing footer', () => {
     runtime.isPending = true;
     runtime.isError = true;
+    runtime.isOffline = true;
 
     renderCard();
 
@@ -106,6 +110,52 @@ describe('BleOnlyPlugCard', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Cannot reach Shelly');
     expect(screen.getByRole('button', { name: 'ON' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'OFF' })).toBeDisabled();
+  });
+
+  it('keeps the offline status mounted through a background refresh attempt', () => {
+    runtime.isError = true;
+    runtime.isOffline = true;
+    const rendered = renderCard();
+    const footer = rendered.container.querySelector('.automation-card__footer');
+
+    expect(footer).not.toBeNull();
+    expect(screen.getByRole('alert')).toHaveTextContent('Cannot reach Shelly');
+    expect(screen.getByRole('button', { name: 'ON' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'OFF' })).toBeDisabled();
+
+    runtime.isError = false;
+    runtime.isFetching = true;
+    rendered.rerender(
+      <I18nProvider>
+        <BleOnlyPlugCard plug={plug} onNameChange={vi.fn()} onOpen={vi.fn()} />
+      </I18nProvider>
+    );
+
+    expect(rendered.container.querySelector('.automation-card__footer')).toBe(footer);
+    expect(screen.getByRole('alert')).toHaveTextContent('Cannot reach Shelly');
+    expect(screen.getByRole('button', { name: 'ON' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'OFF' })).toBeDisabled();
+  });
+
+  it('clears the offline status only after a successful runtime read', () => {
+    runtime.isOffline = true;
+    runtime.isError = true;
+    const rendered = renderCard();
+    expect(screen.getByRole('alert')).toHaveTextContent('Cannot reach Shelly');
+
+    runtime.isOffline = false;
+    runtime.isError = false;
+    runtime.isFetching = false;
+    rendered.rerender(
+      <I18nProvider>
+        <BleOnlyPlugCard plug={plug} onNameChange={vi.fn()} onOpen={vi.fn()} />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('Cannot reach Shelly')).not.toBeInTheDocument();
+    expect(rendered.container.querySelector('.automation-card__footer')).toBeNull();
+    expect(screen.getByRole('button', { name: 'ON' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'OFF' })).toBeEnabled();
   });
 
   it('keeps relay mutation errors visible without a normal pending footer', () => {
