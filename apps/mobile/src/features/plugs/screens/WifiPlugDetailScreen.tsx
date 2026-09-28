@@ -2,14 +2,12 @@ import { DiagnosticRow } from '@lcl/ui';
 import { IconBluetooth, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import { PlugButtonModeSettingsCard } from '../components/PlugButtonModeSettingsCard.js';
-import { PlugCloudSettingsCard } from '../components/PlugCloudSettingsCard.js';
 import { PlugDeleteConfirmModal } from '../components/PlugDeleteConfirmModal.js';
+import { PlugDeviceSettingsSurface } from '../components/PlugDeviceSettingsSurface.js';
 import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
 import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
-import { PlugLedSettingsCard } from '../components/PlugLedSettingsCard.js';
 import { usePlugInformationFlow } from '../flows/usePlugInformationFlow.js';
 
 export type WifiPlugDetailDevice = {
@@ -119,11 +117,10 @@ export const WifiPlugDetailScreen = ({
         )}
 
         {activeTab === 'device' && (
-          <div className="plug-settings-surface">
-            <PlugLedSettingsCard target={target} />
-            <PlugButtonModeSettingsCard target={target} locked={buttonModeLocked} />
-            <PlugCloudSettingsCard target={target} />
-          </div>
+          <PlugDeviceSettingsSurface
+            target={target}
+            buttonModeLocked={buttonModeLocked}
+          />
         )}
 
         {activeTab === 'info' && (

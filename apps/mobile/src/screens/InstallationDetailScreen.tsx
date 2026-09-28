@@ -15,13 +15,11 @@ import {
   ClimateScriptDiagnosticsSection
 } from '../features/automations/index.js';
 import {
-  PlugButtonModeSettingsCard,
-  PlugCloudSettingsCard,
   PlugDeleteConfirmModal,
+  PlugDeviceSettingsSurface,
   PlugDetailNotFound,
   PlugDetailTop,
   PlugInfoPanel,
-  PlugLedSettingsCard,
   isSameShellyDevice,
   usePlugInformationFlow,
   useSavedPlugStore,
@@ -341,11 +339,7 @@ const ClimateInstallationDetail = ({
         )}
 
         {activeTab === 'device' && (
-          <div className="plug-settings-surface">
-            <PlugLedSettingsCard target={installation.shelly} />
-            <PlugButtonModeSettingsCard target={installation.shelly} locked />
-            <PlugCloudSettingsCard target={installation.shelly} />
-          </div>
+          <PlugDeviceSettingsSurface target={installation.shelly} buttonModeLocked />
         )}
 
         {activeTab === 'script' && (

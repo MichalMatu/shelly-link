@@ -92,6 +92,10 @@ export {
   type PlugDeleteConfirmModalProps
 } from './components/PlugDeleteConfirmModal.js';
 export {
+  PlugDeviceSettingsSurface,
+  type PlugDeviceSettingsSurfaceProps
+} from './components/PlugDeviceSettingsSurface.js';
+export {
   PlugButtonModeSettingsCard,
   type PlugButtonModeSettingsCardProps
 } from './components/PlugButtonModeSettingsCard.js';
