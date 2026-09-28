@@ -154,7 +154,8 @@ Rules:
   footer, not arbitrary empty space;
 - standalone actions align with the established action edge or intentionally use full
   width on mobile;
-- standalone Add Plug and Add Thermometer pages must never render `AppPageBack`, a custom Back button, or another page-local return control; users return with persistent bottom navigation or platform/browser Back;
+- top-level screens whose only return target is a persistent bottom-navigation destination must not render `AppPageBack`, a custom Back button or another duplicate page-local return control; users return with bottom navigation or platform/browser Back;
+- reserve `AppPageBack` for true nested subflows that return to a specific parent context, for example Plug Detail -> BLE Discovery or an inner setup step;
 - use shared patterns before creating one-off card/button/status styles;
 - user-facing copy goes through i18n;
 - technical detail belongs in diagnostics;

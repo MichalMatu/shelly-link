@@ -34,6 +34,10 @@ BLE-only Plug cards now keep confirmed offline state visible across background p
 
 Plug Detail now starts directly with the five-tab surface; the intermediate identity summary card was removed and identity/model/transport detail remains owned by **Info**. This did not change managed Button Mode ownership: Climate still keeps Plug S Gen3 `detached` while it owns the relay.
 
+Plain saved Plugs remain directly navigable after automation removal. Their Detail opens on an active **Automation** empty state with a Plug-scoped **Add automation** CTA, while Device/BLE/Info remain available.
+
+Redundant top-level `← Plugs` controls were removed from automation intent, Time detail and top-level not-found states; page-local Back remains only for true nested subflows that return to a specific parent context.
+
 ## Now — feature-complete v1 track
 
 Develop these slices in order rather than in parallel.

@@ -43,6 +43,8 @@ Only dated real-device evidence establishes hardware support. Automated tests pr
 
 | 2026-09-27 | Runtime arbitration + Plug S Gen3 physical-button capability | PASS | Configured Plug `shellyplugsg3-e4b063d7f530`, model `S3PL-00112EU`, firmware 1.7.5: managed button mode was verified `detached`; repeated physical single presses left the relay OFF and runtime in AUTO, while a temporary script event observer received no physical-button event. `Button.GetConfig` / `Button.GetStatus` for id 0 and `Webhook.Create` for `button.single_push` with cid 0 were rejected as nonexistent. This confirms that physical takeover is not available on this model/firmware while detached; managed manual control is app-driven. Final relay state was verified OFF. |
 
+| 2026-09-28 | Plain Plug/navigation Android acceptance | PASS | Samsung SM-S906B / Android 16 clean-installed exact `main` `738fb0b48dd839dfb8a9c86cc862d5ebb35b336e` via `pnpm android:phone-alpha`; uninstall/install succeeded, package `2.0.10` / versionCode `20010` cold-started successfully, and the user preliminarily confirmed the resulting navigation/UI looked correct. This final acceptance was presentation/navigation only; no deliberate relay, managed-runtime or schedule mutation was part of the check. |
+
 Current stabilization Shelly identity: `shellyplugsg3-e4b063d7f530`, model `S3PL-00112EU`, firmware `1.7.5`. IP addresses are test transport locations and are not durable identity.
 
 Persistent-config smoke generated a 6480 B runtime and observed roughly `mem_peak` 4.3 KB with about 21.3 KB script memory free on firmware 1.7.5. Continue measuring as new operators are added.

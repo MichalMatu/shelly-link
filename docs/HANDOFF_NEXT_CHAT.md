@@ -1,6 +1,6 @@
-# Handoff — post-runtime / Plug surface stabilization checkpoint
+# Handoff — golden checkpoint after Plug navigation stabilization
 
-Status: **2026-09-28 — Climate runtime and Plug-surface stabilization audited; no active implementation slice**
+Status: **2026-09-28 — golden checkpoint; runtime, Plug surfaces and navigation audited; no active implementation slice**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -23,6 +23,8 @@ Accepted state:
 - Time automation remains native Shelly Schedule ownership. Its `paused` state is a schedule state, not a Climate control mode;
 - BLE-only Plug dashboard reachability remains visibly offline across background refresh attempts; relay controls stay disabled while reachability is unknown/offline and the offline state clears only after a successful runtime read;
 - Plug Detail starts directly with the five tabs `Automation | BLE | Device | Script | Info`; the separate identity summary card was removed. Identity/model/transport detail belongs in `Info`.
+- a saved Plug without automation still opens the same Plug Detail; **Automation** is selected by default and shows a no-automation empty state with a Plug-scoped **Add automation** CTA;
+- top-level `← Plugs` / `AppPageBack` duplication is removed where bottom navigation or platform/browser Back already owns return navigation; page-local Back remains only for true nested subflows.
 
 ## Re-audit results
 
@@ -34,7 +36,9 @@ The post-change audit confirmed:
 - sensor loss is an automation fault: AUTO fails OFF, while MANUAL retains explicit user ON/OFF authority;
 - hard safety remains independent and higher priority than AUTO/MANUAL;
 - multi-sensor freshness is per member; stale members are ignored and AUTO faults only when no configured member can produce a usable aggregate;
-- BLE discovery state preservation, config-update safety and reboot/recovery semantics remain covered by the runtime tests.
+- BLE discovery state preservation, config-update safety and reboot/recovery semantics remain covered by the runtime tests;
+- plain Plug card-surface navigation opens Detail without stealing relay/name/menu/CTA interactions;
+- `AppPageBack` remains only in true nested contexts such as Plug BLE discovery and inner hardware-setup steps.
 
 ## Plug S Gen3 physical-button capability
 
@@ -48,14 +52,16 @@ Detailed real-device evidence belongs in `docs/testing/hardware-matrix.md`.
 
 ## Verification checkpoint
 
-Product code through commit `62a865fb3` passed:
+Golden product commit `738fb0b48dd839dfb8a9c86cc862d5ebb35b336e` passed:
 
-- focused BLE/detail regressions;
-- responsive Playwright: `36/36`;
 - full `pnpm check`;
-- Android `phone-alpha` build/install/cold-start on Samsung SM-S906B, Android 16, app `2.0.10`.
+- responsive Playwright: `36/36`;
+- focused Plug settings/navigation browser coverage;
+- clean Android `phone-alpha` uninstall/install/cold-start on Samsung SM-S906B, Android 16, app `2.0.10` / versionCode `20010`.
 
-The documentation cleanup after that code checkpoint does not change product behavior.
+The user preliminarily accepted the resulting phone UI. This final navigation acceptance did not deliberately mutate relay state, managed runtime or schedules.
+
+Remote branch hygiene at this checkpoint is intentionally minimal: `main`, `agent-control` and parked `work/kvs-datalogger`.
 
 ## Next work
 
@@ -90,6 +96,8 @@ A smaller known UX follow-up also remains available if selected explicitly: repl
 - UI presents state; flows own RPC side effects and lifecycle;
 - BLE dashboard offline state must not flicker with background polling;
 - Plug Detail has tabs first and no duplicate identity summary card;
+- a saved Plug remains navigable without automation; **Automation** shows the explicit empty state and Plug-scoped Add automation CTA;
+- top-level screens do not duplicate Plugs return navigation with `AppPageBack`; reserve page-local Back for true nested subflows;
 - `packages/*` never import `apps/*`;
 - no compatibility shims for unreleased development states unless they are deliberate migrations;
 - hardware-facing acceptance records the final relay state;
