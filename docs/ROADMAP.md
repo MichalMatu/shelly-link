@@ -38,11 +38,15 @@ Plain saved Plugs remain directly navigable after automation removal. Their Deta
 
 Redundant top-level `← Plugs` controls were removed from automation intent, Time detail and top-level not-found states; page-local Back remains only for true nested subflows that return to a specific parent context.
 
-### UX component unification — completed 2026-09-28
+### UX component unification — completed and merged 2026-09-28
 
-Climate remains the frozen visual target while Time now uses the same Plug dashboard/control language and capability-driven detail shell. Time AUTO/MANUAL maps to native Schedule ownership, MANUAL exposes explicit ON/OFF, and Plug telemetry/detail affordances reuse the shared Plug patterns rather than a parallel Time design.
+Climate remains the frozen visual target while Time now uses the same Plug dashboard/control language and capability-driven detail shell. Time AUTO/MANUAL maps to native Schedule ownership, MANUAL exposes explicit ON/OFF on the dashboard, and Plug telemetry/detail affordances reuse the shared Plug patterns rather than a parallel Time design.
 
-Shared add-device segmented navigation now lives in `@lcl/ui`. Managed Climate Button Mode is presented as read-only while Climate owns the relay. Add Plug keeps technical scan-range editing behind a compact disclosure. Thermometer dashboard cards prioritize readings and compact telemetry, while rename/PVVX/delete/technical identity live in nested Thermometer settings under `features/thermometers`.
+Time Detail uses the clock icon and edits ON/OFF schedule times inline with direct Save/Delete. Duplicate detail AUTO/MANUAL, relay controls and the retired nested Edit route are gone. Final cleanup removed the obsolete route/navigation scaffolding instead of carrying dead compatibility code forward.
+
+Shared add-device segmented navigation lives in `@lcl/ui`. Managed Climate Button Mode is presented as read-only while Climate owns the relay. Add Plug keeps technical scan-range editing behind a compact disclosure. Thermometer dashboard cards prioritize readings and compact telemetry, while rename/PVVX/delete/technical identity live in nested Thermometer settings under `features/thermometers`.
+
+The closeout passed the full repository gate, responsive Playwright and canonical visual verification before PR #38 was merged to `main`. Climate golden snapshots and quality budgets were not relaxed.
 
 ## Now — feature-complete v1 track
 
@@ -50,7 +54,7 @@ Develop these slices in order rather than in parallel.
 
 ### 1. History / Datalogger
 
-Resume from `work/kvs-datalogger` as source material, not a mechanical merge. Reconcile it with current exclusive Climate script ownership first.
+Start with a preimplementation audit from fresh `main`. Treat `work/kvs-datalogger` as source material, not a mechanical merge or rebase. Reconcile its ideas with current exclusive Climate script ownership, runtime arbitration, identity gates and current feature boundaries before choosing what to reuse.
 
 History should explain **why** output changed. Record useful operational context such as timestamp, climate values, VPD, automation-requested and final relay state, control mode, manual request, reason code, automation-fault context, hard-safety context and power/current where available. History failure must not affect Climate safety.
 
@@ -97,6 +101,8 @@ Notifications, richer outlier handling, persistent BLE pairing/bonding, offline 
 ## Parked
 
 `work/kvs-datalogger` remains intentional source material until the History slice begins. Do not mechanically rebase/merge it.
+
+`golden/climate-ui-20260928` remains an intentional frozen recovery/reference branch for the accepted Climate UI; do not treat it as stale cleanup while the golden contract depends on it.
 
 ## Working rule
 
