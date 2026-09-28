@@ -98,6 +98,7 @@ export const InstallationDetailScreen = ({
         installation={installation}
         onBack={onBack}
         {...(onEdit ? { onEdit } : {})}
+        {...(onOpenBleDiscovery ? { onOpenBleDiscovery } : {})}
       />
     );
   }

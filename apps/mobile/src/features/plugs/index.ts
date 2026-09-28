@@ -93,6 +93,8 @@ export {
 } from './components/PlugDeleteConfirmModal.js';
 export { PlugDeviceSettingsSurface } from './components/PlugDeviceSettingsSurface.js';
 export { PlugAutomationModeControl } from './components/PlugAutomationModeControl.js';
+export { PlugRelayControls } from './components/PlugRelayControls.js';
+export { PlugBleDetailSurface } from './components/PlugBleDetailSurface.js';
 export { PlugButtonModeSettingsCard } from './components/PlugButtonModeSettingsCard.js';
 export {
   detachPlugButtonForManagedAutomation,

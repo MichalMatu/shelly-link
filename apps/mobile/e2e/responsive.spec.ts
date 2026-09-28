@@ -540,19 +540,20 @@ const expectClimateDetailHierarchy = async (page: Page) => {
 };
 
 const expectTimeDetailHierarchy = async (page: Page) => {
-  const [tabsBox, surfaceBox, liveBox] = await Promise.all([
+  const [tabsBox, surfaceBox, liveStateBox] = await Promise.all([
     requiredBox(page.locator('.plug-detail-tabs')),
     requiredBox(page.locator('.plug-detail-surface')),
-    requiredBox(page.locator('.installation-detail-live'))
+    requiredBox(page.locator('.installation-automation-live-state'))
   ]);
 
   expect(Math.abs(tabsBox.x - surfaceBox.x)).toBeLessThanOrEqual(2);
   expect(Math.abs(tabsBox.width - surfaceBox.width)).toBeLessThanOrEqual(2);
-  expect(liveBox.x).toBeGreaterThanOrEqual(surfaceBox.x - 1);
-  expect(liveBox.x + liveBox.width).toBeLessThanOrEqual(
+  expect(liveStateBox.x).toBeGreaterThanOrEqual(surfaceBox.x - 1);
+  expect(liveStateBox.x + liveStateBox.width).toBeLessThanOrEqual(
     surfaceBox.x + surfaceBox.width + 1
   );
   await expect(page.locator('.installation-detail-header')).toHaveCount(0);
+  await expect(page.locator('.installation-detail-live')).toHaveCount(0);
   await expect(page.locator('.app-page-back-row')).toHaveCount(0);
 };
 
@@ -919,7 +920,9 @@ for (const viewport of viewports) {
     await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toHaveCount(
       0
     );
-    await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Harmonogram' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '11-time-detail');
     }
@@ -931,14 +934,14 @@ for (const viewport of viewports) {
     await expect(
       page.getByRole('button', { name: 'Ustawienia', exact: true })
     ).toBeVisible();
-    await expect(page.getByText('Natywny Shelly Schedule')).toBeVisible();
+    await expect(page.getByText('Natywny Shelly Schedule')).toHaveCount(0);
     await expectTimeDetailHierarchy(page);
     await expectNoHorizontalOverflow(page);
     expect(consoleProblems).toEqual([]);
   });
 }
 
-test('daily time automation completes pause, resume, edit and delete lifecycle', async ({
+test('daily time automation completes manual, auto, edit and delete lifecycle', async ({
   page
 }) => {
   const consoleProblems: string[] = [];
@@ -967,18 +970,25 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
     .getByRole('button', { name: 'Szczegóły: Shelly Plug S Gen3 · Wi-Fi' })
     .click();
 
-  await page.getByRole('button', { name: 'Wstrzymaj automatykę' }).click();
-  await expect(
-    page.getByText('Harmonogram wstrzymany, wyjście potwierdzone jako OFF.')
-  ).toBeVisible();
-  await expect(page.getByText('Wstrzymana')).toBeVisible();
-  await expect(page.getByText('OFF', { exact: true })).toBeVisible();
+  const detailAuto = page.getByRole('button', { name: 'AUTO', exact: true });
+  const detailManual = page.getByRole('button', { name: 'MANUAL', exact: true });
+  const detailOn = page.getByRole('button', { name: 'ON', exact: true });
+  const detailOff = page.getByRole('button', { name: 'OFF', exact: true });
+  await expect(detailAuto).toHaveAttribute('aria-pressed', 'true');
+  await expect(detailOn).toBeDisabled();
+  await expect(detailOff).toBeDisabled();
 
-  await page.getByRole('button', { name: 'Wznów automatykę' }).click();
-  await expect(
-    page.getByText('Harmonogram wznowiony i stan wyjścia dopasowany do bieżącej godziny.')
-  ).toBeVisible();
-  await expect(page.getByText('Działa')).toBeVisible();
+  await detailManual.click();
+  await expect(detailManual).toHaveAttribute('aria-pressed', 'true');
+  await expect(detailOff).toHaveAttribute('aria-pressed', 'true');
+  await expect(detailOn).toBeEnabled();
+  await detailOn.click();
+  await expect(detailOn).toHaveAttribute('aria-pressed', 'true');
+  await detailOff.click();
+  await expect(detailOff).toHaveAttribute('aria-pressed', 'true');
+
+  await detailAuto.click();
+  await expect(detailAuto).toHaveAttribute('aria-pressed', 'true');
 
   await page.getByRole('button', { name: 'Edytuj' }).click();
   await expect(page.getByRole('heading', { name: 'Edytuj godziny' })).toBeVisible();
@@ -996,7 +1006,8 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   await picker.getByRole('button', { name: 'Wybierz' }).click();
 
   await page.getByRole('button', { name: 'Zapisz zmiany' }).click();
-  await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toHaveCount(0);
   await expect(page.getByText('06:30')).toBeVisible();
   await expect(page.getByText('22:15')).toBeVisible();
 

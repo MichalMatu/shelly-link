@@ -565,21 +565,39 @@ describe('InstallationDetailScreen', () => {
 
     const rendered = renderDetail(saved.id, onBack);
 
-    expect(await screen.findByText('Działa')).toBeVisible();
+    const auto = await screen.findByRole('button', { name: 'AUTO' });
+    const manual = screen.getByRole('button', { name: 'MANUAL' });
+    const relayGroup = screen.getByRole('group', { name: 'Wyjście' });
+    const relayOn = within(relayGroup).getByRole('button', { name: 'ON' });
+    const relayOff = within(relayGroup).getByRole('button', { name: 'OFF' });
+
     expect(screen.queryByRole('heading', { name: 'Lampa' })).toBeNull();
     expect(screen.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
     expect(screen.getAllByText('08:00').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('20:00').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
-    expect(screen.getByText('ON', { exact: true })).toBeVisible();
+    expect(screen.queryByText('Natywny Shelly Schedule')).toBeNull();
+    await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
+    expect(manual).toHaveAttribute('aria-pressed', 'false');
+    expect(relayOn).toBeDisabled();
+    expect(relayOff).toBeDisabled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Wstrzymaj automatykę' }));
-    expect(await screen.findByText('Wstrzymana')).toBeVisible();
+    fireEvent.click(manual);
+    await waitFor(() => expect(manual).toHaveAttribute('aria-pressed', 'true'));
     expect(shelly.relayOn).toBe(false);
     expect(shelly.jobs.every((job) => !job.enable)).toBe(true);
+    expect(relayOn).toBeEnabled();
+    expect(relayOff).toBeEnabled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Wznów automatykę' }));
-    expect(await screen.findByText('Działa')).toBeVisible();
+    fireEvent.click(relayOn);
+    await waitFor(() => expect(shelly.relayOn).toBe(true));
+    await waitFor(() => expect(relayOn).toHaveAttribute('aria-pressed', 'true'));
+
+    fireEvent.click(relayOff);
+    await waitFor(() => expect(shelly.relayOn).toBe(false));
+    await waitFor(() => expect(relayOff).toHaveAttribute('aria-pressed', 'true'));
+
+    fireEvent.click(auto);
+    await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
     expect(shelly.relayOn).toBe(true);
     expect(shelly.jobs.every((job) => job.enable)).toBe(true);
 

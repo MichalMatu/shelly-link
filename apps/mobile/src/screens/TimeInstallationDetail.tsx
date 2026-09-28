@@ -5,59 +5,53 @@ import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   deleteTimeAutomation,
-  pauseTimeAutomation,
-  resumeTimeAutomation,
   useInstalledAutomationStore,
   type TimeInstalledAutomation
 } from '../features/automations/index.js';
 import {
+  PlugAutomationModeControl,
+  PlugBleDetailSurface,
   PlugDeviceSettingsSurface,
   PlugDetailTop,
   PlugInfoPanel,
+  PlugRelayControls,
   usePlugInformationFlow,
   type PlugDetailTab
 } from '../features/plugs/index.js';
 import {
   timeAutomationRuntimeQueryKey,
-  useTimeAutomationRuntime
+  useTimeAutomationActions,
+  useTimeAutomationRuntime,
+  type TimeAutomationAction
 } from '../flows/time-automation/useTimeAutomationRuntime.js';
 
 const TIME_DETAIL_TABS = [
   'automation',
+  'ble',
   'device',
   'info'
 ] as const satisfies readonly PlugDetailTab[];
-
-const healthClass = (state: 'running' | 'paused' | 'attention' | 'offline' | 'loading') =>
-  `automation-health automation-health--${
-    state === 'running'
-      ? 'ok'
-      : state === 'paused'
-        ? 'paused'
-        : state === 'offline'
-          ? 'offline'
-          : state === 'loading'
-            ? 'unknown'
-            : 'attention'
-  }`;
 
 type TimeInstallationDetailProps = {
   installation: TimeInstalledAutomation;
   onBack(): void;
   onEdit?: () => void;
+  onOpenBleDiscovery?: (deviceId: string) => void;
 };
 
 export const TimeInstallationDetail = ({
   installation,
   onBack,
-  onEdit
+  onEdit,
+  onOpenBleDiscovery
 }: TimeInstallationDetailProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const runtimeQuery = useTimeAutomationRuntime(installation);
+  const runtimeAction = useTimeAutomationActions(installation);
   const informationQuery = usePlugInformationFlow(installation.shelly, {
-    enabled: activeTab === 'info'
+    enabled: activeTab === 'ble' || activeTab === 'info'
   });
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
@@ -78,24 +72,6 @@ export const TimeInstallationDetail = ({
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
 
-  const pauseMutation = useMutation({
-    mutationFn: () => pauseTimeAutomation(installation),
-    onSuccess: async (runtime) => {
-      queryClient.setQueryData(timeAutomationRuntimeQueryKey(installation), runtime);
-      pushToast('ok', t('time.detail.pauseSuccess'));
-    },
-    onError: () => pushToast('warning', t('time.detail.actionFailed'))
-  });
-
-  const resumeMutation = useMutation({
-    mutationFn: () => resumeTimeAutomation(installation),
-    onSuccess: async (runtime) => {
-      queryClient.setQueryData(timeAutomationRuntimeQueryKey(installation), runtime);
-      pushToast('ok', t('time.detail.resumeSuccess'));
-    },
-    onError: () => pushToast('warning', t('time.detail.actionFailed'))
-  });
-
   const deleteMutation = useMutation({
     mutationFn: () => deleteTimeAutomation(installation),
     onSuccess: () => {
@@ -115,17 +91,15 @@ export const TimeInstallationDetail = ({
     : runtimeQuery.isError
       ? 'offline'
       : (runtimeQuery.data?.scheduleState ?? 'attention');
-  const stateLabel =
-    runtimeState === 'running'
-      ? t('dashboard.health.ok')
-      : runtimeState === 'paused'
-        ? t('dashboard.health.paused')
-        : runtimeState === 'offline'
-          ? t('dashboard.health.offline')
-          : runtimeState === 'loading'
-            ? t('dashboard.health.loading')
-            : t('dashboard.health.attention');
-  const actionBusy = pauseMutation.isPending || resumeMutation.isPending;
+  const automationRunning = runtimeState === 'running';
+  const manualControl = runtimeState === 'paused';
+  const runtimeControllable = automationRunning || manualControl;
+  const actionBusy = runtimeAction.isPending;
+  const runRuntimeAction = (action: TimeAutomationAction) => {
+    runtimeAction.mutate(action, {
+      onError: () => pushToast('warning', t('time.detail.actionFailed'))
+    });
+  };
 
   return (
     <main className="demo-shell installation-detail-shell">
@@ -134,94 +108,101 @@ export const TimeInstallationDetail = ({
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
         {activeTab === 'automation' && (
           <>
-            <article className="automation-card installation-detail-live">
-              <div className="installation-section-heading">
-                <div>
-                  <div className="automation-status-row">
-                    <span className={healthClass(runtimeState)}>{stateLabel}</span>
-                    <span className="automation-status-mode">{t('time.family')}</span>
-                  </div>
-                  <h2>{t('time.scheduleSummary')}</h2>
-                </div>
+            {runtimeState === 'loading' && (
+              <div
+                className="plug-detail-loading plug-detail-loading--section"
+                role="status"
+              >
+                <span className="plug-detail-loading__spinner" aria-hidden="true" />
+                <span>{t('common.refreshing')}</span>
               </div>
+            )}
+            {(runtimeState === 'offline' || runtimeState === 'attention') && (
+              <FeedbackPanel
+                tone="warning"
+                title={
+                  runtimeState === 'offline'
+                    ? t('dashboard.health.offline')
+                    : t('dashboard.health.attention')
+                }
+              >
+                {t('time.detail.needsAttention')}
+              </FeedbackPanel>
+            )}
 
-              <div className="automation-metrics" aria-label={t('time.scheduleSummary')}>
+            <section className="installation-automation-live-state plug-detail-section">
+              <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
                 <div>
-                  <span>{t('time.onTime')}</span>
-                  <strong>{installation.config.onTime}</strong>
+                  <dt>{t('time.onTime')}</dt>
+                  <dd>{installation.config.onTime}</dd>
                 </div>
                 <div>
-                  <span>{t('time.offTime')}</span>
-                  <strong>{installation.config.offTime}</strong>
+                  <dt>{t('time.offTime')}</dt>
+                  <dd>{installation.config.offTime}</dd>
                 </div>
                 <div>
-                  <span>{t('dashboard.output')}</span>
-                  <strong>
+                  <dt>{t('dashboard.output')}</dt>
+                  <dd>
                     {runtimeQuery.data ? (runtimeQuery.data.relayOn ? 'ON' : 'OFF') : '—'}
-                  </strong>
+                  </dd>
                 </div>
-              </div>
-
-              <dl className="automation-summary installation-detail-summary">
                 <div>
                   <dt>{t('time.clock')}</dt>
                   <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
                 </div>
-                <div>
-                  <dt>{t('time.owner')}</dt>
-                  <dd>{t('time.nativeSchedule')}</dd>
-                </div>
               </dl>
 
-              <div className="installation-detail-actions">
-                {runtimeState === 'paused' ? (
-                  <button
-                    className="primary-action"
-                    type="button"
-                    disabled={actionBusy}
-                    onClick={() => resumeMutation.mutate()}
-                  >
-                    {actionBusy ? t('detail.changingState') : t('detail.resume')}
-                  </button>
-                ) : (
-                  <button
-                    className="secondary-action"
-                    type="button"
-                    disabled={actionBusy || runtimeState !== 'running'}
-                    onClick={() => pauseMutation.mutate()}
-                  >
-                    {actionBusy ? t('detail.changingState') : t('detail.pause')}
-                  </button>
-                )}
-              </div>
-            </article>
+              <PlugAutomationModeControl
+                autoActive={automationRunning}
+                manualActive={manualControl}
+                disabled={actionBusy || !runtimeControllable}
+                onAuto={() => {
+                  if (!automationRunning) runRuntimeAction('auto');
+                }}
+                onManual={() => {
+                  if (!manualControl) runRuntimeAction('manual');
+                }}
+              />
 
-            <article className="automation-card installation-detail-config">
-              <div className="installation-section-heading">
-                <h2>{t('time.detail.editTitle')}</h2>
-              </div>
+              <PlugRelayControls
+                relayState={runtimeQuery.data?.relayOn}
+                busy={actionBusy}
+                disabled={!manualControl}
+                onTurnOn={() => runRuntimeAction('on')}
+                onTurnOff={() => runRuntimeAction('off')}
+              />
+            </section>
+
+            {onEdit && (
               <div className="installation-detail-actions">
-                {onEdit && (
-                  <button className="primary-action" type="button" onClick={onEdit}>
-                    {t('detail.edit')}
-                  </button>
-                )}
-                <button
-                  className="secondary-action secondary-action--danger"
-                  type="button"
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  {t('time.detail.delete')}
+                <button className="primary-action" type="button" onClick={onEdit}>
+                  {t('detail.edit')}
                 </button>
               </div>
+            )}
 
-              {runtimeState === 'attention' && (
-                <p className="installation-detail-note">
-                  {t('time.detail.needsAttention')}
-                </p>
-              )}
-            </article>
+            <div className="installation-detail-delete-action">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={deleteMutation.isPending}
+                onClick={() => setDeleteOpen(true)}
+              >
+                {t('time.detail.delete')}
+              </button>
+            </div>
           </>
+        )}
+
+        {activeTab === 'ble' && (
+          <PlugBleDetailSurface
+            information={informationQuery.data}
+            loading={informationQuery.isPending}
+            error={informationQuery.isError}
+            {...(onOpenBleDiscovery
+              ? { onScan: () => onOpenBleDiscovery(installation.shelly.deviceId) }
+              : {})}
+          />
         )}
 
         {activeTab === 'device' && (
@@ -257,9 +238,7 @@ export const TimeInstallationDetail = ({
         open={deleteOpen}
         title={t('time.detail.deleteConfirmTitle')}
         onClose={() => {
-          if (!deleteMutation.isPending) {
-            setDeleteOpen(false);
-          }
+          if (!deleteMutation.isPending) setDeleteOpen(false);
         }}
       >
         <FeedbackPanel tone="warning" title={t('time.detail.delete')}>

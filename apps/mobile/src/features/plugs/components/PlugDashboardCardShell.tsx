@@ -2,6 +2,7 @@ import { IconDotsVertical, IconPlug } from '@tabler/icons-react';
 import type { Key, ReactNode } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { EditablePlugName } from '../../../components/EditablePlugName.js';
+import { PlugRelayControls } from './PlugRelayControls.js';
 
 export type PlugDashboardTelemetry = {
   powerW: number | null | undefined;
@@ -82,8 +83,6 @@ export const PlugDashboardCardShell = ({
   const detailLabel = `${t('dashboard.openSystem')}: ${name}${
     detailContext ? ` · ${detailContext}` : ''
   }`;
-  const requestedRelayState = relayActionState ?? relayState;
-
   return (
     <article
       className={className}
@@ -136,34 +135,14 @@ export const PlugDashboardCardShell = ({
       )}
 
       {showRelayControls && (
-        <div
-          className="automation-relay-actions automation-card__relay-actions"
-          role="group"
-          aria-label={t('dashboard.output')}
-        >
-          <button
-            className="automation-relay-button"
-            type="button"
-            aria-pressed={relayState === true}
-            disabled={busy || relayControlsDisabled}
-            onClick={() => {
-              if (requestedRelayState !== true) onTurnRelayOn();
-            }}
-          >
-            ON
-          </button>
-          <button
-            className="automation-relay-button"
-            type="button"
-            aria-pressed={relayState === false}
-            disabled={busy || relayControlsDisabled}
-            onClick={() => {
-              if (requestedRelayState !== false) onTurnRelayOff();
-            }}
-          >
-            OFF
-          </button>
-        </div>
+        <PlugRelayControls
+          relayState={relayState}
+          busy={busy}
+          disabled={relayControlsDisabled}
+          requestedState={relayActionState}
+          onTurnOn={onTurnRelayOn}
+          onTurnOff={onTurnRelayOff}
+        />
       )}
 
       {automationAction && (
