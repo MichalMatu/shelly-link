@@ -32,11 +32,17 @@ For Plug S Gen3, managed Climate ownership keeps the physical button `detached` 
 
 BLE-only Plug cards now keep confirmed offline state visible across background polling instead of changing geometry on every retry. Relay controls remain disabled until a successful runtime read restores reachability.
 
-Plug Detail now starts directly with the five-tab surface; the intermediate identity summary card was removed and identity/model/transport detail remains owned by **Info**. This did not change managed Button Mode ownership: Climate still keeps Plug S Gen3 `detached` while it owns the relay.
+Plug Detail now starts directly with the shared capability-driven tab surface; the intermediate identity summary card was removed and identity/model/transport detail remains owned by **Info**. Climate exposes Script because it owns a managed runtime; native Time Schedule does not invent a Script tab. This did not change managed Button Mode ownership: Climate still keeps Plug S Gen3 `detached` while it owns the relay.
 
 Plain saved Plugs remain directly navigable after automation removal. Their Detail opens on an active **Automation** empty state with a Plug-scoped **Add automation** CTA, while Device/BLE/Info remain available.
 
 Redundant top-level `← Plugs` controls were removed from automation intent, Time detail and top-level not-found states; page-local Back remains only for true nested subflows that return to a specific parent context.
+
+### UX component unification — completed 2026-09-28
+
+Climate remains the frozen visual target while Time now uses the same Plug dashboard/control language and capability-driven detail shell. Time AUTO/MANUAL maps to native Schedule ownership, MANUAL exposes explicit ON/OFF, and Plug telemetry/detail affordances reuse the shared Plug patterns rather than a parallel Time design.
+
+Shared add-device segmented navigation now lives in `@lcl/ui`. Managed Climate Button Mode is presented as read-only while Climate owns the relay. Add Plug keeps technical scan-range editing behind a compact disclosure. Thermometer dashboard cards prioritize readings and compact telemetry, while rename/PVVX/delete/technical identity live in nested Thermometer settings under `features/thermometers`.
 
 ## Now — feature-complete v1 track
 
@@ -56,9 +62,9 @@ Expand the explicit hard-safety layer above AUTO/MANUAL behavior: maximum power/
 
 Extend the stable runtime with reusable actions and timing: Set ON/OFF, Pulse ON/OFF, minimum ON/OFF, cooldown, debounce, time windows, scheduled conditions and small explicit AND/OR composition. Every requested action passes through the same final relay arbiter.
 
-### 4. Dashboard control/status polish
+### 4. Dashboard status polish
 
-Present the two Climate control modes clearly without introducing another user mode. Keep AUTO/MANUAL, requested output, final output, automation-fault state and hard-safety state understandable at a glance.
+Keep the frozen shared card/control geometry. Improve only the operational status layer after History/safety data exists: requested output, final output, reason, automation-fault state and hard-safety state should be understandable at a glance without introducing another Climate mode or another card design.
 
 ### 5. UX redesign round 2
 

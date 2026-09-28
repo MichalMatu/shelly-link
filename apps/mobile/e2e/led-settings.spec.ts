@@ -353,15 +353,13 @@ const consoleProblems = (page: Page) => {
   return problems;
 };
 
-const openDetail = async (page: Page, kind: InstallationKind = 'climate') => {
+const openDetail = async (page: Page) => {
   await page.goto('/');
   const details = page.getByRole('button', { name: 'Szczegóły' });
   await expect(details).toBeVisible();
   await details.click();
-  if (kind === 'climate') {
-    await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
-    await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
-  }
+  await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
 };
 
@@ -513,9 +511,9 @@ test('time installation exposes the same device-level LED settings', async ({ pa
   await page.setViewportSize({ width: 390, height: 844 });
   await seedInstallation(page, 'time');
   await mockShelly(page, 'time');
-  await openDetail(page, 'time');
+  await openDetail(page);
 
-  await expect(page.getByRole('heading', { name: 'Lampa' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Lampa' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
   await expect(page.getByText('Zużycie energii')).toBeVisible();
   await expectNoHorizontalOverflow(page);

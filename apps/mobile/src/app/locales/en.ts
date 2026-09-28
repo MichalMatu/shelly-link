@@ -387,6 +387,7 @@ export const en = {
       scanNetworkFailedTitle: 'Could not scan network.',
       scanRangeEnd: 'To',
       scanRangeFailed: 'Check scan range.',
+      scanRangeLabel: 'Scan range',
       scanRangeStart: 'From',
       scanResultEmpty: 'No Shelly plug was found in this range.',
       scanShellyTitle: 'Scan Shelly network',

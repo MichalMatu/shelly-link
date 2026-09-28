@@ -19,6 +19,7 @@ const installation = createTimeInstalledAutomation({
 const editedConfig = { relayId: 0, onTime: '18:00', offTime: '23:00' } as const;
 const runtime: TimeAutomationRuntimeSnapshot = {
   relayOn: false,
+  telemetry: {},
   clock: { localTime: '12:00', unixTimeSec: 1_800_000_000, timeSynced: true },
   scheduleState: 'running',
   onJob: null,

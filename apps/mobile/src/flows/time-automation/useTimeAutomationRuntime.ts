@@ -1,6 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  pauseTimeAutomation,
+  readTimeAutomationRuntime,
+  resumeTimeAutomation,
+  setTimeAutomationManualRelay
+} from '../../features/automations/index.js';
 import type { TimeInstalledAutomation } from '../installations/model.js';
-import { readTimeAutomationRuntime } from '../../features/automations/index.js';
 
 export const timeAutomationRuntimeQueryKey = (installation: TimeInstalledAutomation) =>
   [
@@ -28,3 +33,27 @@ export const useTimeAutomationRuntime = (
     refetchOnWindowFocus: true,
     refetchOnReconnect: true
   });
+
+export type TimeAutomationAction = 'auto' | 'manual' | 'on' | 'off';
+
+export const useTimeAutomationActions = (installation: TimeInstalledAutomation) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (action: TimeAutomationAction) => {
+      switch (action) {
+        case 'auto':
+          return resumeTimeAutomation(installation);
+        case 'manual':
+          return pauseTimeAutomation(installation);
+        case 'on':
+          return setTimeAutomationManualRelay(installation, true);
+        case 'off':
+          return setTimeAutomationManualRelay(installation, false);
+      }
+    },
+    onSuccess: (runtime) => {
+      queryClient.setQueryData(timeAutomationRuntimeQueryKey(installation), runtime);
+    }
+  });
+};

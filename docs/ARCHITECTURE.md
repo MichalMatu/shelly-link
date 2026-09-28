@@ -167,13 +167,13 @@ Persistent BLE pairing/bonding and offline OTA remain separate research/feature 
 
 ## Plug detail ownership
 
-Plug Detail is one product surface with five local sections:
+Plug Detail is one physical-device surface with capability-driven local sections. The shared capability vocabulary is:
 
 ```text
 Automation | BLE | Device | Script | Info
 ```
 
-They are presentation boundaries, not new domain owners:
+A Plug shows only the sections supported by its ownership model. Climate exposes all five. Native Time Schedule omits `Script`. A plain saved Plug keeps the physical-device surfaces and an Automation empty state rather than inventing another detail shell. These sections are presentation boundaries, not new domain owners:
 
 - **Automation** — installed automation state/configuration and deletion;
 - **BLE** — BLE state, configured sensors, readings and diagnostics;
@@ -181,7 +181,7 @@ They are presentation boundaries, not new domain owners:
 - **Script** — managed runtime source/preview;
 - **Info** — identity, firmware/network/health and runtime resource diagnostics.
 
-The five tabs remain the first Plug Detail content. Top-level detail/intent pages do not render a duplicate page-local Back when persistent bottom navigation or platform/browser Back already returns to the parent product section. `AppPageBack` is reserved for true nested subflows that return to a specific parent context. The top chrome intentionally contains the tab strip only: do not insert a separate identity summary card between the tabs and the owning section. Identity, model, transport, firmware and network detail belong under **Info** unless a future product design gives them a new explicit owner.
+The available capability tabs remain the first Plug Detail content. Top-level detail/intent pages do not render a duplicate page-local Back when persistent bottom navigation or platform/browser Back already returns to the parent product section. `AppPageBack` is reserved for true nested subflows that return to a specific parent context. The top chrome intentionally contains the tab strip only: do not insert a separate identity summary card between the tabs and the owning section. Identity, model, transport, firmware and network detail belong under **Info** unless a future product design gives them a new explicit owner.
 
 A saved Plug remains navigable after its automation is removed. Plain Plug Detail selects **Automation** by default and shows an explicit no-automation state with a Plug-scoped **Add automation** action; the physical-device detail surface does not disappear with automation ownership. Dashboard card-surface navigation must not steal events from relay controls, inline name editing, menu actions or the Add automation CTA.
 

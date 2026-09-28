@@ -337,8 +337,7 @@ const installTimeShellyFetchMock = () => {
 const renderDetail = (
   installationId: string,
   onBack = vi.fn(),
-  onOpenBleDiscovery = vi.fn(),
-  onEdit = vi.fn()
+  onOpenBleDiscovery = vi.fn()
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
@@ -346,7 +345,6 @@ const renderDetail = (
   return {
     onBack,
     onOpenBleDiscovery,
-    onEdit,
     ...renderWithAppToastHost(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
@@ -354,7 +352,6 @@ const renderDetail = (
             installationId={installationId}
             onBack={onBack}
             onOpenBleDiscovery={onOpenBleDiscovery}
-            onEdit={onEdit}
           />
         </QueryClientProvider>
       </I18nProvider>
@@ -557,34 +554,27 @@ describe('InstallationDetailScreen', () => {
     expect(rpcMethods).not.toContain('Switch.Set');
   });
 
-  it('manages a native daily schedule end to end without a climate script owner', async () => {
+  it('renders native Time settings inline without duplicating dashboard controls', async () => {
     const saved = timeInstallation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const shelly = installTimeShellyFetchMock();
     const onBack = vi.fn();
 
-    const rendered = renderDetail(saved.id, onBack);
+    renderDetail(saved.id, onBack);
 
-    expect(await screen.findByText('Działa')).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Lampa' })).toBeVisible();
-    expect(screen.getAllByText('08:00').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('20:00').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
-    expect(screen.getByText('ON', { exact: true })).toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Wstrzymaj automatykę' }));
-    expect(await screen.findByText('Wstrzymana')).toBeVisible();
-    expect(shelly.relayOn).toBe(false);
-    expect(shelly.jobs.every((job) => !job.enable)).toBe(true);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Wznów automatykę' }));
-    expect(await screen.findByText('Działa')).toBeVisible();
-    expect(shelly.relayOn).toBe(true);
-    expect(shelly.jobs.every((job) => job.enable)).toBe(true);
-
-    const edit = screen.getByRole('button', { name: 'Edytuj' });
-    fireEvent.click(edit);
-    expect(rendered.onEdit).toHaveBeenCalledTimes(1);
+    expect(await screen.findByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
+      'data-automation-icon',
+      'clock'
+    );
+    expect(screen.queryByRole('button', { name: 'AUTO' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'MANUAL' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Wyjście' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Edytuj' })).toBeNull();
+    expect(screen.queryByText('Natywny Shelly Schedule')).toBeNull();
+    expect(await screen.findByText('12:00')).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Usuń automatykę czasową' }));
     const dialog = screen.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
@@ -597,7 +587,6 @@ describe('InstallationDetailScreen', () => {
     expect(shelly.relayOn).toBe(false);
     expect(useInstalledAutomationStore.getState().installations).toEqual([]);
     expect(onBack).toHaveBeenCalledTimes(1);
-    expect(shelly.rpcMethods).toContain('Schedule.Update');
     expect(shelly.rpcMethods).toContain('Schedule.Delete');
   });
 });

@@ -1,8 +1,8 @@
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import { I18nProvider, setLocalePreference, translate } from '../../../app/i18n.js';
 import type { SensorReadingSample } from '../../../flows/hardware-setup/sensorReadingsStore.js';
-import { SavedSensorCard } from './SensorSetupPresentation.js';
+import { SavedSensorCard } from '../../../features/thermometers/index.js';
 
 const device = {
   id: 'sensor-a4c1384f24cd',
@@ -79,5 +79,48 @@ describe('SavedSensorCard live sample affordance', () => {
     expect(leadingIcon()).not.toHaveClass('sensor-card-leading-icon--fresh');
     rerender(card([sample(1000)]));
     expect(leadingIcon()).toHaveClass('sensor-card-leading-icon--fresh');
+  });
+
+  it('uses one settings affordance on dashboard cards and keeps technical actions for detail', () => {
+    const onOpenDetails = vi.fn();
+    render(
+      <I18nProvider>
+        <SavedSensorCard
+          device={device}
+          samples={[sample(1000)]}
+          isEditing={false}
+          pvvxTimePending={false}
+          onEditStart={vi.fn()}
+          onEditEnd={vi.fn()}
+          onNameChange={vi.fn()}
+          onPvvxSetTime={vi.fn()}
+          onRemove={vi.fn()}
+          onOpenDetails={onOpenDetails}
+        />
+      </I18nProvider>
+    );
+
+    screen
+      .getByRole('button', {
+        name: translate('pl', 'hardware.sensor.settingsAria', { name: device.name })
+      })
+      .click();
+    expect(onOpenDetails).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole('button', {
+        name: translate('pl', 'hardware.sensor.nameLabel')
+      })
+    ).toBeNull();
+    expect(
+      screen.queryByRole('button', {
+        name: translate('pl', 'hardware.sensor.pvvxSetTimeTitle')
+      })
+    ).toBeNull();
+    expect(
+      screen.queryByRole('button', {
+        name: translate('pl', 'hardware.sensor.deleteTitle')
+      })
+    ).toBeNull();
+    expect(screen.queryByText(device.runtimeAddress)).toBeNull();
   });
 });

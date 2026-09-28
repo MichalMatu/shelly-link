@@ -9,6 +9,8 @@ type DeviceButtonModeCopy = {
   detached: string;
   momentaryHint: string;
   detachedHint: string;
+  managedDescription: string;
+  managedHint: string;
   save: string;
   saving: string;
   noChanges: string;
@@ -28,6 +30,8 @@ const en: DeviceButtonModeCopy = {
   detached: 'Detached from relay',
   momentaryHint: 'The physical button switches the relay on and off.',
   detachedHint: 'The physical button no longer changes the relay state.',
+  managedDescription: 'Climate automation manages this setting while it owns the relay.',
+  managedHint: 'Remove the Climate automation to change the button mode.',
   save: 'Save button mode',
   saving: 'Saving…',
   noChanges: 'No button mode changes to save.',
@@ -51,6 +55,9 @@ export const deviceButtonModeCopy: Record<Locale, DeviceButtonModeCopy> = {
     detached: 'Odłączony od przekaźnika',
     momentaryHint: 'Fizyczny przycisk przełącza przekaźnik ON/OFF.',
     detachedHint: 'Fizyczny przycisk nie zmienia stanu przekaźnika.',
+    managedDescription:
+      'Automatyka Climate zarządza tym ustawieniem, dopóki steruje przekaźnikiem.',
+    managedHint: 'Usuń automatykę Climate, aby zmienić tryb przycisku.',
     save: 'Zapisz tryb przycisku',
     saving: 'Zapisuję…',
     noChanges: 'Brak zmian trybu przycisku do zapisania.',

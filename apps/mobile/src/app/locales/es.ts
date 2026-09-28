@@ -391,6 +391,7 @@ export const es = {
       scanNetworkFailedTitle: 'No se pudo escanear la red.',
       scanRangeEnd: 'Hasta',
       scanRangeFailed: 'Comprueba el rango de escaneo.',
+      scanRangeLabel: 'Rango de escaneo',
       scanRangeStart: 'Desde',
       scanResultEmpty: 'No se encontró ningún enchufe Shelly en este rango.',
       scanShellyTitle: 'Escanear red Shelly',

@@ -73,13 +73,16 @@ const seedTimeDraft = async (page: Page) => {
   }, timeDraft);
 };
 
-const mockShellyRpc = async (page: Page) => {
+const mockShellyRpc = async (
+  page: Page,
+  options: { buttonMode?: 'momentary' | 'detached' } = {}
+) => {
   let scriptRunning = true;
   let relayOn = true;
   let runtimeMode = 0;
   let manualRequestOn = false;
   let automationFault: string | null = null;
-  let buttonMode: 'momentary' | 'detached' = 'momentary';
+  let buttonMode: 'momentary' | 'detached' = options.buttonMode ?? 'momentary';
 
   const handleRpc = async (route: Route) => {
     const requestUrl = new URL(route.request().url());
@@ -540,18 +543,21 @@ const expectClimateDetailHierarchy = async (page: Page) => {
 };
 
 const expectTimeDetailHierarchy = async (page: Page) => {
-  const [gridBox, liveBox, refreshBox] = await Promise.all([
-    requiredBox(page.locator('.installation-detail-grid')),
-    requiredBox(page.locator('.installation-detail-live')),
-    requiredBox(
-      page.locator('.installation-detail-header').getByRole('button', { name: 'Odśwież' })
-    )
+  const [tabsBox, surfaceBox, liveStateBox] = await Promise.all([
+    requiredBox(page.locator('.plug-detail-tabs')),
+    requiredBox(page.locator('.plug-detail-surface')),
+    requiredBox(page.locator('.installation-automation-live-state'))
   ]);
 
-  expect(Math.abs(liveBox.x - gridBox.x)).toBeLessThanOrEqual(2);
-  expect(Math.abs(liveBox.width - gridBox.width)).toBeLessThanOrEqual(2);
-  expect(refreshBox.width).toBeLessThanOrEqual(48);
-  await expect(page.getByRole('button', { name: /Wróć do automatyki/ })).toHaveCount(0);
+  expect(Math.abs(tabsBox.x - surfaceBox.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(tabsBox.width - surfaceBox.width)).toBeLessThanOrEqual(2);
+  expect(liveStateBox.x).toBeGreaterThanOrEqual(surfaceBox.x - 1);
+  expect(liveStateBox.x + liveStateBox.width).toBeLessThanOrEqual(
+    surfaceBox.x + surfaceBox.width + 1
+  );
+  await expect(page.locator('.installation-detail-header')).toHaveCount(0);
+  await expect(page.locator('.installation-detail-live')).toHaveCount(0);
+  await expect(page.locator('.app-page-back-row')).toHaveCount(0);
 };
 
 const expectScriptPreviewFillsModalBody = async (page: Page, label: string) => {
@@ -647,7 +653,7 @@ for (const viewport of viewports) {
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await seedInstalledAutomation(page);
-    await mockShellyRpc(page);
+    await mockShellyRpc(page, { buttonMode: 'detached' });
     await page.goto('/');
 
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -729,6 +735,18 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
     await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+    await expect(
+      page.getByText(
+        'Automatyka Climate zarządza tym ustawieniem, dopóki steruje przekaźnikiem.'
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByText('Odłączony od przekaźnika', { exact: true })
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Tryb przycisku' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Zapisz tryb przycisku' })).toHaveCount(
+      0
+    );
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '05-climate-device');
     }
@@ -748,6 +766,13 @@ for (const viewport of viewports) {
       page.getByRole('button', { name: 'Zapisz ustawienia LED' })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
+
+    if (viewport.name === 'phone-large') {
+      const managedButtonMode = page.locator('.installation-detail-device-button');
+      await managedButtonMode.scrollIntoViewIfNeeded();
+      await expect(managedButtonMode).toBeInViewport();
+      await expectVisualScreen(page, '20-climate-button-mode-managed');
+    }
 
     if (viewport.name === 'phone-large') {
       await page.locator('.plug-detail-tabs__item').nth(3).click();
@@ -877,21 +902,55 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
-    await expect(page.getByText('Harmonogram dzienny')).toBeVisible();
-    if (viewport.name === 'phone-large') {
-      await expectVisualScreen(page, '10-time-dashboard');
-    }
-    await expect(page.getByText('08:00')).toBeVisible();
-    await expect(page.getByText('20:00')).toBeVisible();
-    await expect(page.getByText('Działa')).toBeVisible();
-    expect(rpcState.createCount).toBe(2);
-
     const timeCard = page
       .getByRole('heading', { name: 'Shelly Plug S Gen3' })
       .locator('xpath=ancestor::article[1]');
-    await timeCard.getByRole('button', { name: 'Szczegóły' }).click();
-    await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
+    await expect(timeCard.getByText('08:00')).toBeVisible();
+    await expect(timeCard.getByText('20:00')).toBeVisible();
+    await expect(timeCard.getByText('Harmonogram dzienny')).toHaveCount(0);
+    await expect(timeCard.getByText('Działa')).toHaveCount(0);
+    await expect(timeCard.getByText('42.3 W')).toBeVisible();
+    await expect(timeCard.getByText('230 V')).toBeVisible();
+    await expect(timeCard.getByText('1.25 kWh')).toBeVisible();
+    const auto = timeCard.getByRole('button', { name: 'AUTO', exact: true });
+    const manual = timeCard.getByRole('button', { name: 'MANUAL', exact: true });
+    const on = timeCard.getByRole('button', { name: 'ON', exact: true });
+    const off = timeCard.getByRole('button', { name: 'OFF', exact: true });
+    await expect(auto).toHaveAttribute('aria-pressed', 'true');
+    await expect(manual).toHaveAttribute('aria-pressed', 'false');
+    await expect(on).toBeDisabled();
+    await expect(off).toBeDisabled();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '10-time-dashboard');
+      await manual.click();
+      await expect(manual).toHaveAttribute('aria-pressed', 'true');
+      await expect(off).toHaveAttribute('aria-pressed', 'true');
+      await expect(on).toBeEnabled();
+      await on.click();
+      await expect(on).toHaveAttribute('aria-pressed', 'true');
+      await off.click();
+      await expect(off).toHaveAttribute('aria-pressed', 'true');
+      await auto.click();
+      await expect(auto).toHaveAttribute('aria-pressed', 'true');
+    }
+    expect(rpcState.createCount).toBe(2);
+
+    await timeCard
+      .getByRole('button', { name: 'Szczegóły: Shelly Plug S Gen3 · Wi-Fi' })
+      .click();
+    await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toHaveCount(
+      0
+    );
+    await expect(page.getByRole('heading', { name: 'Harmonogram' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(
+      0
+    );
+    await expect(page.getByRole('button', { name: 'Edytuj' })).toHaveCount(0);
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '11-time-detail');
     }
@@ -903,14 +962,30 @@ for (const viewport of viewports) {
     await expect(
       page.getByRole('button', { name: 'Ustawienia', exact: true })
     ).toBeVisible();
-    await expect(page.getByText('Natywny Shelly Schedule')).toBeVisible();
+    await expect(page.getByText('Natywny Shelly Schedule')).toHaveCount(0);
     await expectTimeDetailHierarchy(page);
+
+    await page.getByRole('button', { name: 'Informacje', exact: true }).click();
+    const forgetPlugButton = page.getByRole('button', {
+      name: 'Usuń gniazdko tylko z aplikacji'
+    });
+    await expect(forgetPlugButton).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '21-time-info');
+    }
+    await forgetPlugButton.click();
+    const forgetPlugDialog = page.getByRole('dialog', { name: 'Usunąć gniazdko?' });
+    await expect(forgetPlugDialog).toBeVisible();
+    await expect(forgetPlugDialog).toContainText('Shelly Plug S Gen3');
+    await forgetPlugDialog.getByRole('button', { name: 'Anuluj' }).click();
+    await expect(forgetPlugDialog).toHaveCount(0);
+
     await expectNoHorizontalOverflow(page);
     expect(consoleProblems).toEqual([]);
   });
 }
 
-test('daily time automation completes pause, resume, edit and delete lifecycle', async ({
+test('daily time automation completes inline edit and delete lifecycle', async ({
   page
 }) => {
   const consoleProblems: string[] = [];
@@ -935,23 +1010,13 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   const timeCard = page
     .getByRole('heading', { name: 'Shelly Plug S Gen3' })
     .locator('xpath=ancestor::article[1]');
-  await timeCard.getByRole('button', { name: 'Szczegóły' }).click();
+  await timeCard
+    .getByRole('button', { name: 'Szczegóły: Shelly Plug S Gen3 · Wi-Fi' })
+    .click();
 
-  await page.getByRole('button', { name: 'Wstrzymaj automatykę' }).click();
-  await expect(
-    page.getByText('Harmonogram wstrzymany, wyjście potwierdzone jako OFF.')
-  ).toBeVisible();
-  await expect(page.getByText('Wstrzymana')).toBeVisible();
-  await expect(page.getByText('OFF', { exact: true })).toBeVisible();
-
-  await page.getByRole('button', { name: 'Wznów automatykę' }).click();
-  await expect(
-    page.getByText('Harmonogram wznowiony i stan wyjścia dopasowany do bieżącej godziny.')
-  ).toBeVisible();
-  await expect(page.getByText('Działa')).toBeVisible();
-
-  await page.getByRole('button', { name: 'Edytuj' }).click();
-  await expect(page.getByRole('heading', { name: 'Edytuj godziny' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Edytuj' })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Włącz o: 08:00' }).click();
   let picker = page.getByRole('dialog', { name: 'Włącz o' });
@@ -966,11 +1031,15 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   await picker.getByRole('button', { name: 'Wybierz' }).click();
 
   await page.getByRole('button', { name: 'Zapisz zmiany' }).click();
-  await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
-  await expect(page.getByText('06:30')).toBeVisible();
-  await expect(page.getByText('22:15')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Włącz o: 06:30' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Wyłącz o: 22:15' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeEnabled();
 
-  await page.getByRole('button', { name: 'Usuń automatykę czasową' }).click();
+  const deleteTime = page.getByRole('button', { name: 'Usuń automatykę czasową' });
+  await expect(deleteTime).toBeEnabled();
+  await deleteTime.click();
   const deleteDialog = page.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
   await expect(deleteDialog).toBeVisible();
   await deleteDialog.getByRole('button', { name: 'Potwierdź usuń' }).click();
@@ -1021,9 +1090,32 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '12-thermometers-dashboard');
     }
+    const thermometerCard = page
+      .getByRole('heading', { name: 'Przedpokój' })
+      .locator('xpath=ancestor::article[1]');
+    await expect(thermometerCard.getByText('A4:C1:38:4F:24:CD')).toHaveCount(0);
+    await expect(
+      thermometerCard.getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
+    ).toHaveCount(0);
     await page.getByRole('button', { name: 'Skanuj termometry BLE telefonem' }).click();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '13-add-thermometer');
+    }
+    await page.getByRole('button', { name: 'Termometry', exact: true }).click();
+    await expect(page.getByRole('main', { name: 'Termometry' })).toBeVisible();
+    await thermometerCard
+      .getByRole('button', { name: 'Ustawienia termometru Przedpokój' })
+      .click();
+    await expect(page.getByRole('main', { name: 'Ustawienia termometru' })).toBeVisible();
+    await expect(page.getByText('A4:C1:38:4F:24:CD')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Termometry', exact: true })
+    ).toHaveAttribute('aria-current', 'page');
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '22-thermometer-detail');
     }
     await page.getByRole('button', { name: 'Termometry', exact: true }).click();
     await page.getByRole('button', { name: 'Ustawienia', exact: true }).click();
@@ -1050,6 +1142,10 @@ for (const viewport of viewports) {
     ).toBeVisible();
     await page.getByRole('button', { name: 'Wi-Fi', exact: true }).click();
     await expect(page.getByRole('tablist', { name: 'Dodaj gniazdko' })).toBeVisible();
+    const scanRangeDisclosure = page.locator('.shelly-network-scan__range-disclosure');
+    await expect(scanRangeDisclosure.getByText('Zakres skanowania')).toBeVisible();
+    await expect(scanRangeDisclosure).not.toHaveAttribute('open', '');
+    await expect(page.getByLabel('Od', { exact: true })).toBeHidden();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '15-add-plug');
     }

@@ -394,6 +394,7 @@ export const de = {
       scanNetworkFailedTitle: 'Netzwerk konnte nicht gescannt werden.',
       scanRangeEnd: 'Bis',
       scanRangeFailed: 'Scanbereich prüfen.',
+      scanRangeLabel: 'Scanbereich',
       scanRangeStart: 'Von',
       scanResultEmpty: 'Keine Shelly-Steckdose in diesem Bereich gefunden.',
       scanShellyTitle: 'Shelly-Netzwerk scannen',

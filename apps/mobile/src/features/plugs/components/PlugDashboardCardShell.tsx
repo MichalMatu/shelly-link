@@ -1,7 +1,8 @@
 import { IconDotsVertical, IconPlug } from '@tabler/icons-react';
-import type { ReactNode } from 'react';
+import type { Key, ReactNode } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { EditablePlugName } from '../../../components/EditablePlugName.js';
+import { PlugRelayControls } from './PlugRelayControls.js';
 
 export type PlugDashboardTelemetry = {
   powerW: number | null | undefined;
@@ -20,9 +21,18 @@ export type PlugDashboardCardShellProps = {
   relayState: boolean | undefined;
   busy: boolean;
   telemetry: PlugDashboardTelemetry;
-  automationAction: PlugDashboardAutomationAction;
+  automationAction?: PlugDashboardAutomationAction;
+  body?: ReactNode;
+  className?: string;
   detailContext?: string;
   footer?: ReactNode;
+  leadingIconFresh?: boolean;
+  leadingIconKey?: Key;
+  openDetailsOnCardClick?: boolean;
+  showTelemetry?: boolean;
+  showRelayControls?: boolean;
+  relayActionState?: boolean | undefined;
+  relayControlsDisabled?: boolean;
   onNameChange(value: string): void;
   onOpenDetails(): void;
   onTurnRelayOn(): void;
@@ -53,8 +63,17 @@ export const PlugDashboardCardShell = ({
   busy,
   telemetry,
   automationAction,
+  body,
+  className = 'automation-card plug-card plug-card--unconfigured',
   detailContext,
   footer,
+  leadingIconFresh = false,
+  leadingIconKey,
+  openDetailsOnCardClick = true,
+  showTelemetry = true,
+  showRelayControls = true,
+  relayActionState,
+  relayControlsDisabled = false,
   onNameChange,
   onOpenDetails,
   onTurnRelayOn,
@@ -64,23 +83,26 @@ export const PlugDashboardCardShell = ({
   const detailLabel = `${t('dashboard.openSystem')}: ${name}${
     detailContext ? ` · ${detailContext}` : ''
   }`;
-
   return (
     <article
-      className="automation-card plug-card plug-card--unconfigured"
+      className={className}
       aria-busy={busy}
-      onClick={(event) => {
-        if (!isInteractiveTarget(event.target)) onOpenDetails();
-      }}
+      {...(openDetailsOnCardClick
+        ? {
+            onClick: (event: React.MouseEvent<HTMLElement>) => {
+              if (!isInteractiveTarget(event.target)) onOpenDetails();
+            }
+          }
+        : {})}
     >
       <header className="automation-card__header">
         <span
           className={`automation-card__leading-icon${
             relayState === true ? ' automation-card__leading-icon--active' : ''
-          }`}
+          }${leadingIconFresh ? ' automation-card__leading-icon--fresh' : ''}`}
           aria-hidden="true"
         >
-          <IconPlug className="automation-card__icon" />
+          <IconPlug key={leadingIconKey} className="automation-card__icon" />
         </span>
         <div className="automation-card__identity">
           <EditablePlugName name={name} variant="card" onCommit={onNameChange} />
@@ -98,53 +120,41 @@ export const PlugDashboardCardShell = ({
         </div>
       </header>
 
-      <div
-        className="automation-card__plug-runtime"
-        aria-label={t('hardware.shelly.statusMetricsLabel')}
-      >
-        <span>{formatMetric(telemetry.powerW, ' W', 1)}</span>
-        <span>{formatMetric(telemetry.voltageV, ' V', 0)}</span>
-        <span>{formatEnergy(telemetry.energyWh)}</span>
-        <span>{telemetry.localTime ?? '—'}</span>
-      </div>
+      {body}
 
-      <div
-        className="automation-relay-actions automation-card__relay-actions"
-        role="group"
-        aria-label={t('dashboard.output')}
-      >
-        <button
-          className="automation-relay-button"
-          type="button"
-          aria-pressed={relayState === true}
-          disabled={busy}
-          onClick={() => {
-            if (relayState !== true) onTurnRelayOn();
-          }}
+      {showTelemetry && (
+        <div
+          className="automation-card__plug-runtime"
+          aria-label={t('hardware.shelly.statusMetricsLabel')}
         >
-          ON
-        </button>
-        <button
-          className="automation-relay-button"
-          type="button"
-          aria-pressed={relayState === false}
-          disabled={busy}
-          onClick={() => {
-            if (relayState !== false) onTurnRelayOff();
-          }}
-        >
-          OFF
-        </button>
-      </div>
+          <span>{formatMetric(telemetry.powerW, ' W', 1)}</span>
+          <span>{formatMetric(telemetry.voltageV, ' V', 0)}</span>
+          <span>{formatEnergy(telemetry.energyWh)}</span>
+          <span>{telemetry.localTime ?? '—'}</span>
+        </div>
+      )}
 
-      <button
-        className="primary-action plug-card__automation-action"
-        type="button"
-        disabled={automationAction.disabled}
-        onClick={automationAction.onClick}
-      >
-        {t('dashboard.addAutomation')}
-      </button>
+      {showRelayControls && (
+        <PlugRelayControls
+          relayState={relayState}
+          busy={busy}
+          disabled={relayControlsDisabled}
+          requestedState={relayActionState}
+          onTurnOn={onTurnRelayOn}
+          onTurnOff={onTurnRelayOff}
+        />
+      )}
+
+      {automationAction && (
+        <button
+          className="primary-action plug-card__automation-action"
+          type="button"
+          disabled={automationAction.disabled}
+          onClick={automationAction.onClick}
+        >
+          {t('dashboard.addAutomation')}
+        </button>
+      )}
 
       {footer}
     </article>

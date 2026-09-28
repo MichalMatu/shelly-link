@@ -55,6 +55,27 @@ describe('PlugAddPage', () => {
     expect(screen.getByLabelText('Plug name')).toHaveValue('Grow plug');
   });
 
+  it('keeps the technical scan range behind a compact disclosure', () => {
+    const props = createProps();
+    renderPage(props);
+
+    const summary = screen.getByText('Scan range');
+    const disclosure = summary.closest('details');
+    expect(disclosure).not.toBeNull();
+    expect(disclosure).not.toHaveAttribute('open');
+    expect(screen.getByText('192.168.0.1–99')).toBeInTheDocument();
+
+    fireEvent.click(summary);
+
+    expect(disclosure).toHaveAttribute('open');
+    expect(screen.getByLabelText('From')).toHaveValue('192.168.0.1');
+    expect(screen.getByLabelText('To')).toHaveValue('192.168.0.99');
+    fireEvent.change(screen.getByLabelText('From'), {
+      target: { value: '192.168.1.1' }
+    });
+    expect(props.scan.onStartInputChange).toHaveBeenCalledWith('192.168.1.1');
+  });
+
   it('keeps manual validation local and submits only valid input', () => {
     const props = createProps();
     props.manual.valid = false;

@@ -1,68 +1,103 @@
 # UX visual contract
 
-This contract exists to stop small layout differences from reappearing after refactors.
+This document defines the current visual rules. Historical audit notes, one-off debugging details and superseded measurements do not belong here.
 
-## Canonical audit
+## Source of truth
 
-The 2026-09-24 Local Agent audit rendered 19 application states in Chromium. All canonical visual baselines use the shared 412×915 phone viewport.
+- Canonical screen names live in `apps/mobile/e2e/visual-contract.ts`.
+- Canonical screenshot baselines live next to `apps/mobile/e2e/responsive.spec.ts`.
+- Canonical visual viewport: `412×915`.
+- Canonical renderer: macOS (`darwin`).
+- `pnpm quality:ux` protects frozen visual assets and shared UX rules.
 
-Canonical renderer: **macOS (`darwin`)**. Direct `pnpm e2e:visual` and `pnpm e2e:visual:update` runs fail closed on other platforms. `prepush` is platform-aware: macOS runs the canonical visual contract, while Linux/CI/Raspberry Pi runs `pnpm e2e:responsive`; on non-macOS those responsive tests keep behavioral/layout coverage but skip Darwin screenshot assertions, so font rasterization differences cannot masquerade as product regressions.
+New top-level screens or materially different full-screen states must be added to `visual-contract.ts` and receive a reviewed baseline in the same change.
 
-The 2026-09-25 screenshot-driven closeout intentionally refreshed only the baselines affected by the accepted Device/Info changes. The closeout also captured one class of defect that the earlier contract did not describe explicitly: inconsistent inline-title masking where a title crosses a framed-section border.
+## Frozen Climate golden master
 
-Measured drift before this contract included:
+The accepted Climate/humidity Plug UI is frozen on branch `golden/climate-ui-20260928` at commit `823b51ef0d58ff731d8d25df8d54db968d97cea5`.
 
-- page-level H1 geometry split between 26px/31.2px and 32px with two different line-heights;
-- add-device segmented tabs at 50px / radius 8 while Plug detail tabs were 54px / radius 12;
-- multiple surface padding/radius signatures (`12/r12`, `16/r12`, and the Plug info framed `16/12/.../r8` pattern);
-- repeated geometry rules living in screen CSS and the global mobile theme even when they represented the same interaction pattern.
+Protected states include the Plugs dashboard Climate card and Climate Automation, BLE, Device, Script and Info detail surfaces. Their composition, ordering, spacing, controls and tab chrome are the target design. Refactors may change implementation only if these golden renders stay unchanged.
 
-These are not fixed by adding more one-off selectors. Shared interaction geometry belongs in `@lcl/ui`; product composition remains in the mobile app.
+Do not refresh Climate snapshots as part of unrelated work. Changing the frozen design requires an explicit product-design decision.
 
-## Rules
+## Shared UI ownership
 
-1. `@lcl/design-tokens` owns raw values.
-2. `@lcl/ui` owns reusable interaction geometry. `lcl-segmented-control` owns add-device tabs, Plug detail tabs, and the hardware setup top navigation.
-3. Mobile screen CSS may choose layout/composition and a semantic state treatment, but must not re-declare the shared geometry for migrated primitives. Page-title typography uses `--lcl-font-size-3xl`; spacing tokens must never participate in font-size calculations. Page-level H1 geometry is owned by `app-page-header`; smaller headings inside panels remain a separate hierarchy.
-4. Every canonical screen state is guarded by `expectVisualScreen()` and a committed Playwright screenshot baseline.
-5. Baselines are refreshed intentionally with `pnpm e2e:visual:update`, reviewed as images, then verified with `pnpm e2e:visual`.
-6. Do not update snapshots to make a failing refactor green without first explaining the visual delta.
-7. The accepted Climate dashboard card remains frozen unless a task explicitly changes its design.
-8. Shared `Disclosure` owns collapsed visibility: the body is hidden by default and rendered as grid only under `[open]`; screen CSS must not bypass this state contract. Both collapsed and expanded product states are visually baseline-protected.
-9. Navigation chevrons are icon components, never font glyphs such as `‹` or `›`, so their geometry is stable across browser and Android font fallback.
-10. Inline titles that cross a `plug-detail-framed-section` border use one consistent legend treatment: the title text is masked by the owning page/surface background and uses the shared tight line-height. Do not mix transparent-border-crossing titles with background-masked titles for the same surface role.
-11. The Add Plug speed-dial keeps the primary `+` fixed with no layout shift. When expanded, Wi-Fi sits exactly above the trigger and Bluetooth exactly to its left at the same center-to-center distance; transport actions take the accent treatment while the `+` becomes a muted anchor. Trigger re-press, outside pointer interaction and Escape collapse the dial, and `prefers-reduced-motion` removes transition timing.
+1. `@lcl/design-tokens` owns raw visual values.
+2. `@lcl/ui` owns reusable interaction geometry and generic primitives.
+3. Product composition stays in the mobile app or the owning feature.
+4. If two screens represent the same role, they must reuse the same component/role instead of copying JSX or CSS.
+5. Do not create parallel Time-, Climate- or device-specific visual systems when the role is already shared.
 
-## Surface taxonomy
+Current shared patterns include:
 
-Surface differences are intentional only when they map to one of these roles:
+- `SegmentedControl` for add-device segmented navigation;
+- shared Plug dashboard shell and Plug controls;
+- shared Plug detail tabs and Plug Device/Info surfaces;
+- shared `Disclosure` behavior;
+- Thermometer presentation under `features/thermometers`.
 
-- `demo-panel` — page-level working panel; large radius, elevated glass surface, fluid panel padding.
-- `automation-card` — dashboard/detail object card; large radius, object-level density controlled by context.
-- `app-settings__section` — settings group; large radius, flat surface, medium spacing/padding.
-- `saved-list__item` — compact saved-device row/card; medium radius and medium density.
-- `plug-detail-framed-section` — diagnostic fieldset with a title crossing the border; medium radius and asymmetric top padding are intentional.
-- `installation-ble-card` — bordered list container; medium radius with clipped child rows.
-- `lcl-card` — reusable package-level card primitive; do not assume it is interchangeable with every product surface.
+## Product contracts
 
-Do not normalize these roles by copying padding/radius values between selectors. If two screens represent the same role, they must reuse the same role/class or a shared primitive. A new surface role requires an explicit visual-contract update and reviewed screenshot delta.
+### Plug dashboard
 
-## Canonical states
+Climate is the visual reference. Time uses the same card structure and control language; only automation-specific content may differ.
 
-`apps/mobile/e2e/visual-contract.ts` is the source of truth for the 19 names. New top-level screens or materially different full-screen states must be added there and receive a baseline in the same change.
+Time must not reintroduce legacy `Working`, `Daily schedule` badges, a separate `Details` footer or a parallel card layout. AUTO/MANUAL, ON/OFF, telemetry and the detail affordance follow the shared Plug pattern.
 
-## Local Agent workflow
+### Plug detail
 
-Run visual checks locally. GitHub Actions availability is not assumed. `prepush` runs the four deterministic scenarios that cover all 19 canonical baselines.
+Physical Plug detail is capability-driven. Reuse the shared tab and surface components. Time and Climate may expose different capabilities, but must not own separate detail chrome.
+
+Saved-Plug forget actions remove the saved device from the app without uninstalling durable automation ownership.
+
+Managed Climate Button Mode is read-only while Climate owns the relay; do not show a disabled editable form.
+
+### Thermometers
+
+Dashboard cards prioritize identity, live readings and compact telemetry. Rename, PVVX time sync, delete and technical identity belong in nested Thermometer settings, not as a cluster of permanent dashboard actions.
+
+### Add Plug
+
+The normal flow stays simple. Technical scan range is available through the compact `Zakres skanowania` disclosure and remains visible in its collapsed summary.
+
+## Surface roles
+
+Keep intentional roles distinct:
+
+- `demo-panel` — page-level working panel;
+- `automation-card` — object card;
+- `app-settings__section` — settings group;
+- `saved-list__item` — saved-device card/row;
+- `plug-detail-framed-section` — titled diagnostic/settings fieldset;
+- `installation-ble-card` — bordered list container;
+- `lcl-card` — generic package-level card primitive.
+
+Do not normalize these by copying radius/padding values between selectors. A new surface role requires an explicit contract update and reviewed visual delta.
+
+## Visual rules
+
+- Page-level H1 geometry belongs to `app-page-header`.
+- Shared component geometry must not be redeclared in screen CSS.
+- `Disclosure` controls collapsed/expanded visibility; screen CSS must not bypass it.
+- Navigation chevrons use icon components, not font glyphs.
+- Inline titles crossing `plug-detail-framed-section` borders use the shared masked legend treatment.
+- Add Plug speed-dial keeps the primary `+` fixed; Wi-Fi is above it and Bluetooth to its left with matching center distance.
+- Snapshot updates are never used only to make a failing refactor green. Explain and review the visual delta first.
+
+## Verification
+
+Normal visual verification:
 
 ```sh
 pnpm quality:ux
 pnpm e2e:visual
 ```
 
-When a design change is intentional:
+For an intentional visual change:
 
 ```sh
 pnpm e2e:visual:update
 pnpm e2e:visual
 ```
+
+Before pushing a completed UX slice, run the repository-required focused checks and the final full gate. On macOS, pre-push also exercises the canonical visual contract; non-macOS environments keep responsive/behavioral coverage without redefining Darwin screenshots.

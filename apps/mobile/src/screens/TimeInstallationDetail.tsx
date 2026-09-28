@@ -1,53 +1,66 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
-import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import {
   deleteTimeAutomation,
-  pauseTimeAutomation,
-  resumeTimeAutomation,
   useInstalledAutomationStore,
   type TimeInstalledAutomation
 } from '../features/automations/index.js';
 import {
+  PlugBleDetailSurface,
+  PlugDeleteConfirmModal,
+  PlugDeviceSettingsSurface,
+  PlugDetailTop,
+  PlugInfoPanel,
+  isSameShellyDevice,
+  usePlugInformationFlow,
+  useSavedPlugStore,
+  type PlugDetailTab
+} from '../features/plugs/index.js';
+import {
   timeAutomationRuntimeQueryKey,
   useTimeAutomationRuntime
 } from '../flows/time-automation/useTimeAutomationRuntime.js';
-import { PlugLedSettingsCard } from '../features/plugs/index.js';
+import { TimeScheduleSetupPage } from './hardware-setup/pages/TimeScheduleSetupPage.js';
 
-const healthClass = (state: 'running' | 'paused' | 'attention' | 'offline' | 'loading') =>
-  `automation-health automation-health--${
-    state === 'running'
-      ? 'ok'
-      : state === 'paused'
-        ? 'paused'
-        : state === 'offline'
-          ? 'offline'
-          : state === 'loading'
-            ? 'unknown'
-            : 'attention'
-  }`;
+const TIME_DETAIL_TABS = [
+  'automation',
+  'ble',
+  'device',
+  'info'
+] as const satisfies readonly PlugDetailTab[];
 
 type TimeInstallationDetailProps = {
   installation: TimeInstalledAutomation;
   onBack(): void;
-  onEdit?: () => void;
+  onOpenBleDiscovery?: (deviceId: string) => void;
 };
 
 export const TimeInstallationDetail = ({
   installation,
   onBack,
-  onEdit
+  onOpenBleDiscovery
 }: TimeInstallationDetailProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const runtimeQuery = useTimeAutomationRuntime(installation);
+  const informationQuery = usePlugInformationFlow(installation.shelly, {
+    enabled: activeTab === 'ble' || activeTab === 'info'
+  });
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
+  const savedPlugs = useSavedPlugStore((state) => state.plugs);
+  const removePlug = useSavedPlugStore((state) => state.removePlug);
+  const savedDevice = savedPlugs.find((device) =>
+    isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
+  );
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [timeEditPending, setTimeEditPending] = useState(false);
+  const [forgetOpen, setForgetOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
 
@@ -62,24 +75,6 @@ export const TimeInstallationDetail = ({
   const dismissToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
-
-  const pauseMutation = useMutation({
-    mutationFn: () => pauseTimeAutomation(installation),
-    onSuccess: async (runtime) => {
-      queryClient.setQueryData(timeAutomationRuntimeQueryKey(installation), runtime);
-      pushToast('ok', t('time.detail.pauseSuccess'));
-    },
-    onError: () => pushToast('warning', t('time.detail.actionFailed'))
-  });
-
-  const resumeMutation = useMutation({
-    mutationFn: () => resumeTimeAutomation(installation),
-    onSuccess: async (runtime) => {
-      queryClient.setQueryData(timeAutomationRuntimeQueryKey(installation), runtime);
-      pushToast('ok', t('time.detail.resumeSuccess'));
-    },
-    onError: () => pushToast('warning', t('time.detail.actionFailed'))
-  });
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteTimeAutomation(installation),
@@ -100,117 +95,125 @@ export const TimeInstallationDetail = ({
     : runtimeQuery.isError
       ? 'offline'
       : (runtimeQuery.data?.scheduleState ?? 'attention');
-  const stateLabel =
-    runtimeState === 'running'
-      ? t('dashboard.health.ok')
-      : runtimeState === 'paused'
-        ? t('dashboard.health.paused')
-        : runtimeState === 'offline'
-          ? t('dashboard.health.offline')
-          : runtimeState === 'loading'
-            ? t('dashboard.health.loading')
-            : t('dashboard.health.attention');
-  const actionBusy = pauseMutation.isPending || resumeMutation.isPending;
-
   return (
     <main className="demo-shell installation-detail-shell">
-      <header className="demo-header installation-detail-header app-page-header">
-        <div>
-          <div className="automation-status-row">
-            <span className={healthClass(runtimeState)}>{stateLabel}</span>
-            <span className="automation-status-mode">{t('time.family')}</span>
-          </div>
-          <h1>{installation.shelly.name}</h1>
-        </div>
-        <RefreshIconButton
-          busy={runtimeQuery.isFetching}
-          label={t('common.refresh')}
-          onRefresh={() => void runtimeQuery.refetch()}
-        />
-      </header>
+      <PlugDetailTop
+        tabs={[activeTab, setActiveTab]}
+        availableTabs={TIME_DETAIL_TABS}
+        automationIcon="clock"
+      />
 
-      <section className="installation-detail-grid" aria-label={t('detail.currentState')}>
-        <article className="automation-card installation-detail-live">
-          <div className="installation-section-heading">
-            <h2>{t('time.scheduleSummary')}</h2>
-          </div>
-
-          <div className="automation-metrics" aria-label={t('time.scheduleSummary')}>
-            <div>
-              <span>{t('time.onTime')}</span>
-              <strong>{installation.config.onTime}</strong>
-            </div>
-            <div>
-              <span>{t('time.offTime')}</span>
-              <strong>{installation.config.offTime}</strong>
-            </div>
-            <div>
-              <span>{t('dashboard.output')}</span>
-              <strong>
-                {runtimeQuery.data ? (runtimeQuery.data.relayOn ? 'ON' : 'OFF') : '—'}
-              </strong>
-            </div>
-          </div>
-
-          <dl className="automation-summary installation-detail-summary">
-            <div>
-              <dt>{t('time.clock')}</dt>
-              <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
-            </div>
-            <div>
-              <dt>{t('time.owner')}</dt>
-              <dd>{t('time.nativeSchedule')}</dd>
-            </div>
-          </dl>
-
-          <div className="installation-detail-actions">
-            {runtimeState === 'paused' ? (
-              <button
-                className="primary-action"
-                type="button"
-                disabled={actionBusy}
-                onClick={() => resumeMutation.mutate()}
+      <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
+        {activeTab === 'automation' && (
+          <>
+            {runtimeState === 'loading' && (
+              <div
+                className="plug-detail-loading plug-detail-loading--section"
+                role="status"
               >
-                {actionBusy ? t('detail.changingState') : t('detail.resume')}
-              </button>
-            ) : (
-              <button
-                className="secondary-action"
-                type="button"
-                disabled={actionBusy || runtimeState !== 'running'}
-                onClick={() => pauseMutation.mutate()}
+                <span className="plug-detail-loading__spinner" aria-hidden="true" />
+                <span>{t('common.refreshing')}</span>
+              </div>
+            )}
+            {(runtimeState === 'offline' || runtimeState === 'attention') && (
+              <FeedbackPanel
+                tone="warning"
+                title={
+                  runtimeState === 'offline'
+                    ? t('dashboard.health.offline')
+                    : t('dashboard.health.attention')
+                }
               >
-                {actionBusy ? t('detail.changingState') : t('detail.pause')}
-              </button>
+                {t('time.detail.needsAttention')}
+              </FeedbackPanel>
             )}
-          </div>
-        </article>
 
-        <article className="automation-card installation-detail-config">
-          <div className="installation-section-heading">
-            <h2>{t('time.detail.editTitle')}</h2>
-          </div>
-          <div className="installation-detail-actions">
-            {onEdit && (
-              <button className="primary-action" type="button" onClick={onEdit}>
-                {t('detail.edit')}
+            <section className="installation-automation-live-state plug-detail-section">
+              <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
+                <div>
+                  <dt>{t('dashboard.output')}</dt>
+                  <dd>
+                    {runtimeQuery.data ? (runtimeQuery.data.relayOn ? 'ON' : 'OFF') : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t('time.clock')}</dt>
+                  <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <TimeScheduleSetupPage
+              flow={{
+                selectedShelly: {
+                  id: installation.shelly.deviceId,
+                  name: installation.shelly.name,
+                  baseUrl: installation.shelly.baseUrl,
+                  scriptIdInput: '1',
+                  model: installation.shelly.model,
+                  gen: installation.shelly.gen
+                }
+              }}
+              editInstallationId={installation.id}
+              inline
+              onInstalled={() => {
+                void runtimeQuery.refetch();
+              }}
+              onPendingChange={setTimeEditPending}
+            />
+
+            <div className="installation-detail-delete-action">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={deleteMutation.isPending || timeEditPending}
+                onClick={() => setDeleteOpen(true)}
+              >
+                {t('time.detail.delete')}
               </button>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'ble' && (
+          <PlugBleDetailSurface
+            information={informationQuery.data}
+            loading={informationQuery.isPending}
+            error={informationQuery.isError}
+            {...(onOpenBleDiscovery
+              ? { onScan: () => onOpenBleDiscovery(installation.shelly.deviceId) }
+              : {})}
+          />
+        )}
+
+        {activeTab === 'device' && (
+          <PlugDeviceSettingsSurface target={installation.shelly} />
+        )}
+
+        {activeTab === 'info' && (
+          <section>
+            <PlugInfoPanel
+              connection={{
+                transport: 'wifi',
+                baseUrl: installation.shelly.baseUrl
+              }}
+              information={informationQuery.data}
+              loading={informationQuery.isPending}
+              error={informationQuery.isError}
+            />
+            {savedDevice && (
+              <div className="installation-detail-delete-action">
+                <button
+                  className="secondary-action secondary-action--danger"
+                  type="button"
+                  onClick={() => setForgetOpen(true)}
+                >
+                  {t('hardware.shelly.deleteTitle')}
+                </button>
+              </div>
             )}
-            <button
-              className="secondary-action secondary-action--danger"
-              type="button"
-              onClick={() => setDeleteOpen(true)}
-            >
-              {t('time.detail.delete')}
-            </button>
-          </div>
-
-          {runtimeState === 'attention' && (
-            <p className="installation-detail-note">{t('time.detail.needsAttention')}</p>
-          )}
-        </article>
-
-        <PlugLedSettingsCard target={installation.shelly} />
+          </section>
+        )}
       </section>
 
       <Modal
@@ -218,7 +221,7 @@ export const TimeInstallationDetail = ({
           <button
             className="secondary-action secondary-action--danger"
             type="button"
-            disabled={deleteMutation.isPending}
+            disabled={deleteMutation.isPending || timeEditPending}
             onClick={() => deleteMutation.mutate()}
           >
             {deleteMutation.isPending ? t('time.deleting') : t('common.confirmDelete')}
@@ -229,15 +232,24 @@ export const TimeInstallationDetail = ({
         open={deleteOpen}
         title={t('time.detail.deleteConfirmTitle')}
         onClose={() => {
-          if (!deleteMutation.isPending) {
-            setDeleteOpen(false);
-          }
+          if (!deleteMutation.isPending) setDeleteOpen(false);
         }}
       >
         <FeedbackPanel tone="warning" title={t('time.detail.delete')}>
           {t('time.detail.deleteConfirmDetail')}
         </FeedbackPanel>
       </Modal>
+
+      <PlugDeleteConfirmModal
+        deviceName={forgetOpen && savedDevice ? savedDevice.name : null}
+        onClose={() => setForgetOpen(false)}
+        onConfirm={() => {
+          if (!savedDevice) return;
+          removePlug(savedDevice.physicalId);
+          setForgetOpen(false);
+          pushToast('ok', t('hardware.shelly.removed'));
+        }}
+      />
 
       <AppToastViewport
         dismissLabel={t('toast.dismiss')}

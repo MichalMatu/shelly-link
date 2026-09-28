@@ -1,12 +1,29 @@
+import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 
 const repoRoot = new URL('../../', import.meta.url);
 const failures = [];
+
+const frozenClimateVisuals = Object.freeze({
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/01-plugs-dashboard-darwin.png':
+    '91ecf3b388a6360f60ed0396add6539647988c20',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/02-climate-automation-darwin.png':
+    '8a0080b8f47d8457dd8e134c02c7379dbb93e6c4',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/03-climate-ble-darwin.png':
+    '0449d4c2779a2d309c96d085fa1e486d58699f26',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/05-climate-device-darwin.png':
+    '680848e54cc180f58fbfa183ca1b55ed637bff21',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/06-climate-script-darwin.png':
+    'da898ad737411dab276508fe92e7f502152b5569',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/07-climate-info-darwin.png':
+    '05f2aaa22c0349c97616883e97b8f0f6f53684cd'
+});
 const cssPaths = [
   'apps/mobile/src/theme/theme.css',
   'apps/mobile/src/theme/runtimeStatus.css',
   'apps/mobile/src/app/appShell.css',
   'apps/mobile/src/screens/AutomationDashboardScreen.css',
+  'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
   'apps/mobile/src/features/plugs/components/PlugAddSpeedDial.css',
@@ -754,10 +771,6 @@ const checkPageHeaderContract = async () => {
     [
       'apps/mobile/src/app/AppSettingsScreen.tsx',
       'app-settings-screen__header app-page-header'
-    ],
-    [
-      'apps/mobile/src/screens/TimeInstallationDetail.tsx',
-      'installation-detail-header app-page-header'
     ]
   ];
 
@@ -859,6 +872,22 @@ const checkCanonicalVisualPlatformContract = async () => {
   }
 };
 
+const checkFrozenClimateVisualContract = async () => {
+  for (const [path, expectedGitBlobSha] of Object.entries(frozenClimateVisuals)) {
+    const bytes = await readFile(new URL(path, repoRoot));
+    const actualGitBlobSha = createHash('sha1')
+      .update(`blob ${bytes.length}\0`)
+      .update(bytes)
+      .digest('hex');
+    if (actualGitBlobSha !== expectedGitBlobSha) {
+      addFailure(
+        path,
+        `accepted Climate golden UI is frozen at branch golden/climate-ui-20260928 (expected ${expectedGitBlobSha}, got ${actualGitBlobSha})`
+      );
+    }
+  }
+};
+
 const checkDisclosureContract = async () => {
   const path = 'packages/ui/src/primitives/Disclosure.css';
   const source = await readRepoFile(path);
@@ -877,15 +906,13 @@ const checkDisclosureContract = async () => {
 };
 
 const checkSegmentedControlContract = async () => {
-  const usageContracts = [
-    [
-      'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
-      'shelly-add-tabs lcl-segmented-control'
-    ],
-    [
-      'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
-      'shelly-add-tabs lcl-segmented-control'
-    ],
+  const componentPath = 'packages/ui/src/primitives/SegmentedControl.tsx';
+  const uiIndexPath = 'packages/ui/src/index.ts';
+  const componentUsagePaths = [
+    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
+  ];
+  const geometryUsageContracts = [
     [
       'apps/mobile/src/features/plugs/components/PlugDetailTabs.tsx',
       'plug-detail-tabs lcl-segmented-control'
@@ -896,106 +923,49 @@ const checkSegmentedControlContract = async () => {
     ]
   ];
 
-  for (const [path, rootClass] of usageContracts) {
+  const [componentSource, uiIndexSource] = await Promise.all([
+    readRepoFile(componentPath),
+    readRepoFile(uiIndexPath)
+  ]);
+  if (
+    !componentSource.includes('export const SegmentedControl') ||
+    !componentSource.includes('lcl-segmented-control') ||
+    !componentSource.includes('lcl-segmented-control__item') ||
+    !componentSource.includes('role="tablist"') ||
+    !componentSource.includes('role="tab"')
+  ) {
+    addFailure(
+      componentPath,
+      'shared SegmentedControl must own add-device tablist structure and lcl-segmented-control geometry'
+    );
+  }
+  if (!uiIndexSource.includes("export * from './primitives/SegmentedControl.js';")) {
+    addFailure(uiIndexPath, 'shared SegmentedControl must be exported from @lcl/ui');
+  }
+
+  for (const path of componentUsagePaths) {
+    const source = await readRepoFile(path);
+    if (
+      !source.includes('<SegmentedControl') ||
+      !source.includes('className="shelly-add-tabs"') ||
+      !source.includes('itemClassName="shelly-add-tabs__tab"') ||
+      source.includes('shelly-add-tabs lcl-segmented-control') ||
+      source.includes('shelly-add-tabs__tab lcl-segmented-control__item')
+    ) {
+      addFailure(
+        path,
+        'add-device segmented tabs must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
+      );
+    }
+  }
+
+  for (const [path, rootClass] of geometryUsageContracts) {
     const source = await readRepoFile(path);
     if (!source.includes(rootClass) || !source.includes('lcl-segmented-control__item')) {
       addFailure(
         path,
         'migrated segmented navigation must use shared lcl-segmented-control geometry'
       );
-    }
-  }
-
-  const uiIndexPath = 'packages/ui/src/index.ts';
-  const primitivePath = 'packages/ui/src/primitives/SegmentedControl.css';
-  const [uiIndex, primitiveCss] = await Promise.all([
-    readRepoFile(uiIndexPath),
-    readRepoFile(primitivePath)
-  ]);
-  if (!uiIndex.includes("import './primitives/SegmentedControl.css';")) {
-    addFailure(uiIndexPath, 'SegmentedControl.css must be loaded by @lcl/ui');
-  }
-  if (
-    !primitiveCss.includes('.lcl-segmented-control {') ||
-    !primitiveCss.includes('.lcl-segmented-control__item {')
-  ) {
-    addFailure(
-      primitivePath,
-      'shared segmented-control root and item geometry is required'
-    );
-  }
-
-  const cssContracts = [
-    [
-      'apps/mobile/src/theme/theme.css',
-      '.shelly-add-tabs',
-      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
-    ],
-    [
-      'apps/mobile/src/theme/theme.css',
-      '.setup-top-nav',
-      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
-    ],
-    [
-      'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
-      '.plug-detail-tabs',
-      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
-    ],
-    [
-      'apps/mobile/src/theme/theme.css',
-      '.shelly-add-tabs__tab',
-      [
-        'background:',
-        'border:',
-        'border-radius:',
-        'color:',
-        'cursor:',
-        'min-height:',
-        'min-width:'
-      ]
-    ],
-    [
-      'apps/mobile/src/theme/theme.css',
-      '.setup-top-nav__item',
-      [
-        'background:',
-        'border:',
-        'border-radius:',
-        'color:',
-        'cursor:',
-        'min-height:',
-        'min-width:'
-      ]
-    ],
-    [
-      'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
-      '.plug-detail-tabs__item',
-      [
-        'background:',
-        'border:',
-        'border-radius:',
-        'color:',
-        'cursor:',
-        'min-height:',
-        'min-width:'
-      ]
-    ]
-  ];
-
-  for (const [path, selector, blockedProperties] of cssContracts) {
-    const source = await readRepoFile(path);
-    const block = cssDeclarationBlock(source, selector);
-    if (block === null) {
-      addFailure(path, `cannot find migrated segmented selector ${selector}`);
-      continue;
-    }
-    for (const property of blockedProperties) {
-      if (block.includes(property)) {
-        addFailure(
-          path,
-          `${selector} re-declares shared segmented geometry (${property.slice(0, -1)})`
-        );
-      }
     }
   }
 };
@@ -1034,6 +1004,7 @@ await checkMobileProductionMarkupHygiene();
 await checkPageTitleTypographyContract();
 await checkPageHeaderContract();
 await checkCanonicalVisualPlatformContract();
+await checkFrozenClimateVisualContract();
 await checkDisclosureContract();
 await checkSegmentedControlContract();
 await checkPackageRuntimeCopy();

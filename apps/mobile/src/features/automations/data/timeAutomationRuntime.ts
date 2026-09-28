@@ -8,6 +8,8 @@ import {
   createTimeAutomationClients,
   type TimeAutomationClients
 } from './timeAutomationClients.js';
+import { setTimeAutomationRelayStateAndConfirm } from './timeAutomationRelayControl.js';
+import { timeAutomationRuntimeError as runtimeError } from './timeAutomationRuntimeError.js';
 import {
   requireStoredTimeAutomationDeviceIdentity,
   type OwnedTimeAutomationRuntimeInstallation
@@ -24,58 +26,11 @@ import {
   type TimeAutomationScheduleState
 } from './timeAutomationSchedule.js';
 
-export type TimeAutomationRuntimeErrorCode =
-  | 'clock-unsynced'
-  | 'schedule-slots'
-  | 'native-schedule-conflict'
-  | 'relay-state-unconfirmed'
-  | 'schedule-pair-unconfirmed'
-  | 'schedule-state-attention'
-  | 'pause-unconfirmed'
-  | 'resume-unconfirmed'
-  | 'update-unconfirmed'
-  | 'delete-unconfirmed';
-
-export class TimeAutomationRuntimeError extends Error {
-  constructor(
-    readonly code: TimeAutomationRuntimeErrorCode,
-    message: string
-  ) {
-    super(message);
-    this.name = 'TimeAutomationRuntimeError';
-  }
-}
-
-const runtimeError = (
-  code: TimeAutomationRuntimeErrorCode,
-  message: string
-): TimeAutomationRuntimeError => new TimeAutomationRuntimeError(code, message);
-
 const requireSyncedClock = (status: ShellyStatus): string => {
   if (!status.clock.timeSynced || !status.clock.localTime) {
     throw runtimeError('clock-unsynced', 'Shelly clock is not synchronized.');
   }
   return status.clock.localTime;
-};
-
-const setRelayStateAndConfirm = async (
-  clients: TimeAutomationClients,
-  relayId: number,
-  on: boolean
-): Promise<ShellyStatus> => {
-  unwrapShellyResult(
-    on
-      ? await clients.device.setRelayOn({ relayId })
-      : await clients.device.setRelayOff({ relayId })
-  );
-  const status = unwrapShellyResult(await clients.device.getStatus());
-  if (status.relayOn !== on) {
-    throw runtimeError(
-      'relay-state-unconfirmed',
-      `Shelly relay did not confirm ${on ? 'ON' : 'OFF'}.`
-    );
-  }
-  return status;
 };
 
 const deleteIfPresent = async (
@@ -118,7 +73,7 @@ export const installDailyTimeAutomation = async ({
     );
     offJobId = offCreate.id;
     const expectedOn = expectedRelayOnForClockTime(config, localTime);
-    await setRelayStateAndConfirm(clients, config.relayId, expectedOn);
+    await setTimeAutomationRelayStateAndConfirm(clients, config.relayId, expectedOn);
 
     const installedJobs = unwrapShellyResult(await clients.schedules.list()).jobs;
     const pair = schedulePairState(
@@ -137,7 +92,9 @@ export const installDailyTimeAutomation = async ({
     if (offJobId !== null) {
       await deleteIfPresent(clients, offJobId).catch(() => undefined);
     }
-    await setRelayStateAndConfirm(clients, config.relayId, false).catch(() => undefined);
+    await setTimeAutomationRelayStateAndConfirm(clients, config.relayId, false).catch(
+      () => undefined
+    );
     throw error;
   }
 };
@@ -162,9 +119,17 @@ export const pauseTimeAutomation = async (
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<TimeAutomationRuntimeSnapshot> => {
   await requireStoredTimeAutomationDeviceIdentity(installation, clients);
-  await setRelayStateAndConfirm(clients, installation.config.relayId, false);
+  await setTimeAutomationRelayStateAndConfirm(
+    clients,
+    installation.config.relayId,
+    false
+  );
   await updatePairEnabled(installation, clients, false);
-  await setRelayStateAndConfirm(clients, installation.config.relayId, false);
+  await setTimeAutomationRelayStateAndConfirm(
+    clients,
+    installation.config.relayId,
+    false
+  );
   const runtime = await readTimeAutomationRuntime(installation, clients);
   if (runtime.scheduleState !== 'paused' || runtime.relayOn) {
     throw runtimeError(
@@ -180,7 +145,7 @@ export const resumeTimeAutomation = async (
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<TimeAutomationRuntimeSnapshot> => {
   await requireStoredTimeAutomationDeviceIdentity(installation, clients);
-  const status = await setRelayStateAndConfirm(
+  const status = await setTimeAutomationRelayStateAndConfirm(
     clients,
     installation.config.relayId,
     false
@@ -188,7 +153,11 @@ export const resumeTimeAutomation = async (
   const localTime = requireSyncedClock(status);
   await updatePairEnabled(installation, clients, true);
   const expectedOn = expectedRelayOnForClockTime(installation.config, localTime);
-  await setRelayStateAndConfirm(clients, installation.config.relayId, expectedOn);
+  await setTimeAutomationRelayStateAndConfirm(
+    clients,
+    installation.config.relayId,
+    expectedOn
+  );
   const runtime = await readTimeAutomationRuntime(installation, clients);
   if (runtime.scheduleState !== 'running') {
     throw runtimeError(
@@ -247,7 +216,11 @@ export const updateDailyTimeAutomation = async ({
   };
   const wasRunning = currentPair.scheduleState === 'running';
 
-  await setRelayStateAndConfirm(clients, installation.config.relayId, false);
+  await setTimeAutomationRelayStateAndConfirm(
+    clients,
+    installation.config.relayId,
+    false
+  );
   await updatePairEnabled(installation, clients, false);
 
   try {
@@ -271,9 +244,9 @@ export const updateDailyTimeAutomation = async ({
     if (wasRunning) {
       await updatePairEnabled(updatedInstallation, clients, true);
       const expectedOn = expectedRelayOnForClockTime(config, localTime);
-      await setRelayStateAndConfirm(clients, config.relayId, expectedOn);
+      await setTimeAutomationRelayStateAndConfirm(clients, config.relayId, expectedOn);
     } else {
-      await setRelayStateAndConfirm(clients, config.relayId, false);
+      await setTimeAutomationRelayStateAndConfirm(clients, config.relayId, false);
     }
 
     const runtime = await readTimeAutomationRuntime(updatedInstallation, clients);
@@ -286,9 +259,11 @@ export const updateDailyTimeAutomation = async ({
     }
     return runtime;
   } catch (error) {
-    await setRelayStateAndConfirm(clients, installation.config.relayId, false).catch(
-      () => undefined
-    );
+    await setTimeAutomationRelayStateAndConfirm(
+      clients,
+      installation.config.relayId,
+      false
+    ).catch(() => undefined);
     const restoreResults = await Promise.allSettled([
       clients.schedules.update(installation.schedule.onJobId, previousOnJob),
       clients.schedules.update(installation.schedule.offJobId, previousOffJob)
@@ -301,7 +276,7 @@ export const updateDailyTimeAutomation = async ({
         installation.config,
         localTime
       );
-      await setRelayStateAndConfirm(
+      await setTimeAutomationRelayStateAndConfirm(
         clients,
         installation.config.relayId,
         previousExpectedOn
@@ -316,7 +291,11 @@ export const deleteTimeAutomation = async (
   clients = createTimeAutomationClients(installation.shelly.baseUrl)
 ): Promise<void> => {
   await requireStoredTimeAutomationDeviceIdentity(installation, clients);
-  await setRelayStateAndConfirm(clients, installation.config.relayId, false);
+  await setTimeAutomationRelayStateAndConfirm(
+    clients,
+    installation.config.relayId,
+    false
+  );
   const list = unwrapShellyResult(await clients.schedules.list());
   const ids = new Set(list.jobs.map((job) => job.id));
   if (ids.has(installation.schedule.onJobId)) {
@@ -325,7 +304,11 @@ export const deleteTimeAutomation = async (
   if (ids.has(installation.schedule.offJobId)) {
     unwrapShellyResult(await clients.schedules.delete(installation.schedule.offJobId));
   }
-  await setRelayStateAndConfirm(clients, installation.config.relayId, false);
+  await setTimeAutomationRelayStateAndConfirm(
+    clients,
+    installation.config.relayId,
+    false
+  );
   const remaining = unwrapShellyResult(await clients.schedules.list()).jobs;
   if (
     remaining.some(

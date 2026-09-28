@@ -3,10 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
-import {
-  createInstalledAutomation,
-  createTimeInstalledAutomation
-} from '../flows/installations/model.js';
+import { createInstalledAutomation } from '../flows/installations/model.js';
 import {
   resetInstalledAutomationStore,
   useInstalledAutomationStore
@@ -51,25 +48,15 @@ vi.mock(import('@capacitor/core'), async (importOriginal) => {
 vi.mock('../screens/InstallationDetailScreen.js', () => ({
   InstallationDetailScreen: ({
     installationId,
-    onBack,
-    onNavigateDashboard,
-    onEdit
+    onBack
   }: {
     installationId: string;
     onBack: () => void;
-    onNavigateDashboard?: (kind: 'climate' | 'time') => void;
-    onEdit?: () => void;
   }) => (
     <section>
       <p>{`mock-installation-${installationId}`}</p>
       <button type="button" onClick={onBack}>
         mock-dashboard-back
-      </button>
-      <button type="button" onClick={() => onNavigateDashboard?.('time')}>
-        mock-dashboard-time
-      </button>
-      <button type="button" onClick={onEdit}>
-        mock-edit
       </button>
     </section>
   )
@@ -79,26 +66,31 @@ vi.mock('../screens/hardware-setup/HardwareSetupScreen.js', () => ({
   HardwareSetupScreen: ({
     setupIntent,
     fixedShellyId,
-    editInstallationId,
     onBackToIntent,
     onSetupComplete,
     plugAddOnly,
-    sensorAddOnly
+    sensorAddOnly,
+    sensorSettingsOnlyId,
+    onSensorSettingsRemoved
   }: {
     setupIntent?: SetupIntent;
     fixedShellyId?: string;
-    editInstallationId?: string;
     onBackToIntent?: () => void;
     onSetupComplete?: () => void;
     plugAddOnly?: boolean;
     sensorAddOnly?: boolean;
+    sensorSettingsOnlyId?: string;
+    onSensorSettingsRemoved?: () => void;
   }) => (
     <section>
       <p>{`mock-setup-${setupIntent ?? 'none'}`}</p>
       <p>{`mock-fixed-shelly-${fixedShellyId ?? 'none'}`}</p>
-      <p>{`mock-edit-installation-${editInstallationId ?? 'none'}`}</p>
       <p>{`mock-plug-add-${plugAddOnly ? 'yes' : 'no'}`}</p>
       <p>{`mock-sensor-add-${sensorAddOnly ? 'yes' : 'no'}`}</p>
+      <p>{`mock-sensor-settings-${sensorSettingsOnlyId ?? 'none'}`}</p>
+      <button type="button" onClick={onSensorSettingsRemoved}>
+        mock-sensor-settings-remove
+      </button>
       <button type="button" onClick={onBackToIntent}>
         mock-back
       </button>
@@ -138,26 +130,6 @@ const addClimateInstallation = (suffix = 'route') => {
     nowMs: 1000
   });
   useInstalledAutomationStore.getState().upsertInstallation(installation);
-  return installation;
-};
-
-const addTimeInstallation = (suffix = 'time-route') => {
-  const installation = createTimeInstalledAutomation({
-    shelly: { id: `shellyplugsg3-${suffix}`, model: 'S3PL-00112EU', gen: 3 },
-    shellyName: 'Lampa',
-    baseUrl: 'http://192.168.0.24/',
-    onJobId: 7,
-    offJobId: 8,
-    config: { relayId: 0, onTime: '08:00', offTime: '20:00' },
-    nowMs: 1000
-  });
-  useInstalledAutomationStore.getState().upsertInstallation(installation);
-  useSavedPlugStore.getState().saveWifiDevice({
-    physicalId: installation.shelly.deviceId,
-    name: installation.shelly.name,
-    wifiBaseUrl: installation.shelly.baseUrl,
-    scriptIdInput: '1'
-  });
   return installation;
 };
 
@@ -335,63 +307,6 @@ describe('AppRoutes navigation shell', () => {
     );
   });
 
-  it('opens climate edit from detail, hydrates the existing editor draft, and returns to detail', async () => {
-    const installation = addClimateInstallation('edit');
-    renderRoutes();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }));
-    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
-
-    expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
-    expect(
-      screen.getByText(`mock-fixed-shelly-${installation.shelly.deviceId}`)
-    ).toBeVisible();
-    expect(screen.getByText(`mock-edit-installation-${installation.id}`)).toBeVisible();
-
-    const draft = useHardwareSetupDraftStore.getState();
-    expect(draft.selectedShellyId).toBe(installation.shelly.deviceId);
-    expect(draft.selectedSensorId).toBe(installation.config.sensor.runtimeAddress);
-    expect(draft.rulePreset).toBe(installation.config.rule.mode);
-    expect(draft.onThresholdInput).toBe(
-      String(installation.config.rule.control.onThreshold)
-    );
-    expect(draft.offThresholdInput).toBe(
-      String(installation.config.rule.control.offThreshold)
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
-    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
-    expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
-    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
-  });
-
-  it('opens Time edit from detail and returns to the same installed automation', async () => {
-    const installation = addTimeInstallation('edit-time');
-    renderRoutes();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
-    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
-
-    expect(await screen.findByText('mock-setup-time')).toBeVisible();
-    expect(
-      screen.getByText(`mock-fixed-shelly-${installation.shelly.deviceId}`)
-    ).toBeVisible();
-    expect(screen.getByText(`mock-edit-installation-${installation.id}`)).toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { name: 'mock-back' }));
-    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
-    expect(await screen.findByText('mock-setup-time')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));
-    expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
-  });
-
   it('completes per-plug Time setup back to the Plugs dashboard', async () => {
     useSavedPlugStore.getState().saveWifiDevice({
       physicalId: 'shellyplugsg3-route-34',
@@ -412,5 +327,31 @@ describe('AppRoutes navigation shell', () => {
       'aria-current',
       'page'
     );
+  });
+
+  it('opens Thermometer settings as a nested Thermometers route', async () => {
+    useHardwareSetupDraftStore.getState().upsertSensorDevice({
+      id: 'A4:C1:38:4F:24:CD',
+      name: 'Przedpokój',
+      runtimeAddress: 'A4:C1:38:4F:24:CD',
+      profileId: 'xiaomi_lywsd03mmc_bthome_v2'
+    });
+
+    renderRoutes();
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Ustawienia termometru Przedpokój' })
+    );
+
+    expect(
+      await screen.findByText('mock-sensor-settings-A4:C1:38:4F:24:CD')
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Termometry' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
   });
 });

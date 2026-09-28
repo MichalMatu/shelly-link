@@ -1,3 +1,4 @@
+import { Disclosure, SegmentedControl } from '@lcl/ui';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 
@@ -43,6 +44,19 @@ export type PlugAddPageProps = {
   scan: PlugNetworkScanProps;
 };
 
+const formatScanRangeSummary = (startInput: string, endInput: string): string => {
+  const startParts = startInput.split('.');
+  const endParts = endInput.split('.');
+  if (
+    startParts.length === 4 &&
+    endParts.length === 4 &&
+    startParts.slice(0, 3).join('.') === endParts.slice(0, 3).join('.')
+  ) {
+    return `${startInput}–${endParts[3]}`;
+  }
+  return `${startInput}–${endInput}`;
+};
+
 export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<'manual' | 'scan'>('scan');
@@ -58,6 +72,9 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
   const showScanRangeError = didSubmitScan && scan.rangeError !== null;
   const shouldShowEmptyScanResult =
     scan.success && !scan.stopped && scan.results.length === 0;
+  const scanRangeSummary = scan.rangeError
+    ? t('hardware.shelly.scanRangeFailed')
+    : formatScanRangeSummary(scan.startInput, scan.endInput);
 
   const selectSection = (section: 'manual' | 'scan') => {
     if (section === activeSection) return;
@@ -83,30 +100,17 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
 
   return (
     <div className="device-add-page__body">
-      <div
-        className="shelly-add-tabs lcl-segmented-control"
-        role="tablist"
-        aria-label={t('hardware.shelly.add')}
-      >
-        <button
-          className="shelly-add-tabs__tab lcl-segmented-control__item"
-          type="button"
-          role="tab"
-          aria-selected={activeSection === 'scan'}
-          onClick={() => selectSection('scan')}
-        >
-          {t('hardware.shelly.scanNetwork')}
-        </button>
-        <button
-          className="shelly-add-tabs__tab lcl-segmented-control__item"
-          type="button"
-          role="tab"
-          aria-selected={activeSection === 'manual'}
-          onClick={() => selectSection('manual')}
-        >
-          {t('hardware.shelly.addManual')}
-        </button>
-      </div>
+      <SegmentedControl
+        ariaLabel={t('hardware.shelly.add')}
+        className="shelly-add-tabs"
+        itemClassName="shelly-add-tabs__tab"
+        value={activeSection}
+        options={[
+          { value: 'scan', label: t('hardware.shelly.scanNetwork') },
+          { value: 'manual', label: t('hardware.shelly.addManual') }
+        ]}
+        onChange={selectSection}
+      />
 
       {activeSection === 'manual' && (
         <section
@@ -186,37 +190,45 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
           aria-label={t('hardware.shelly.scanNetwork')}
         >
           <div className="shelly-network-scan__body">
-            <div className="shelly-network-scan__range">
-              <label className={showScanRangeError ? 'field field--invalid' : 'field'}>
-                {t('hardware.shelly.scanRangeStart')}
-                <input
-                  aria-describedby={showScanRangeError ? scanRangeErrorId : undefined}
-                  aria-invalid={showScanRangeError}
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="192.168.0.1"
-                  value={scan.startInput}
-                  onChange={(event) => scan.onStartInputChange(event.currentTarget.value)}
-                />
-              </label>
-              <label className={showScanRangeError ? 'field field--invalid' : 'field'}>
-                {t('hardware.shelly.scanRangeEnd')}
-                <input
-                  aria-describedby={showScanRangeError ? scanRangeErrorId : undefined}
-                  aria-invalid={showScanRangeError}
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="192.168.0.99"
-                  value={scan.endInput}
-                  onChange={(event) => scan.onEndInputChange(event.currentTarget.value)}
-                />
-                {showScanRangeError && (
-                  <span className="field__error" id={scanRangeErrorId}>
-                    {scan.rangeError}
-                  </span>
-                )}
-              </label>
-            </div>
+            <Disclosure
+              className="shelly-network-scan__range-disclosure"
+              summary={t('hardware.shelly.scanRangeLabel')}
+              summaryEnd={scanRangeSummary}
+            >
+              <div className="shelly-network-scan__range">
+                <label className={showScanRangeError ? 'field field--invalid' : 'field'}>
+                  {t('hardware.shelly.scanRangeStart')}
+                  <input
+                    aria-describedby={showScanRangeError ? scanRangeErrorId : undefined}
+                    aria-invalid={showScanRangeError}
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="192.168.0.1"
+                    value={scan.startInput}
+                    onChange={(event) =>
+                      scan.onStartInputChange(event.currentTarget.value)
+                    }
+                  />
+                </label>
+                <label className={showScanRangeError ? 'field field--invalid' : 'field'}>
+                  {t('hardware.shelly.scanRangeEnd')}
+                  <input
+                    aria-describedby={showScanRangeError ? scanRangeErrorId : undefined}
+                    aria-invalid={showScanRangeError}
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="192.168.0.99"
+                    value={scan.endInput}
+                    onChange={(event) => scan.onEndInputChange(event.currentTarget.value)}
+                  />
+                  {showScanRangeError && (
+                    <span className="field__error" id={scanRangeErrorId}>
+                      {scan.rangeError}
+                    </span>
+                  )}
+                </label>
+              </div>
+            </Disclosure>
 
             {shouldShowEmptyScanResult && <p>{t('hardware.shelly.scanResultEmpty')}</p>}
             {scan.results.length > 0 && (

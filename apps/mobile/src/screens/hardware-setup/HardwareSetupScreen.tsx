@@ -30,10 +30,11 @@ type HardwareSetupScreenProps = {
   onOpenPlugAdd?: () => void;
   onOpenSensorAdd?: (mode: 'manual' | 'phone-scan') => void;
   fixedShellyId?: string;
-  editInstallationId?: string;
   plugAddOnly?: boolean;
   sensorAddOnly?: boolean;
   sensorAddMode?: 'manual' | 'phone-scan';
+  sensorSettingsOnlyId?: string;
+  onSensorSettingsRemoved?: () => void;
 };
 
 export const HardwareSetupScreen = ({
@@ -43,15 +44,14 @@ export const HardwareSetupScreen = ({
   onOpenPlugAdd,
   onOpenSensorAdd,
   fixedShellyId,
-  editInstallationId,
   plugAddOnly = false,
   sensorAddOnly = false,
-  sensorAddMode = 'phone-scan'
+  sensorAddMode = 'phone-scan',
+  sensorSettingsOnlyId,
+  onSensorSettingsRemoved
 }: HardwareSetupScreenProps = {}) => {
   const { t } = useTranslation();
-  const flow = useHardwareSetupFlow(
-    setupIntent === 'time' ? undefined : editInstallationId
-  );
+  const flow = useHardwareSetupFlow();
   const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
   const availableTabs = useMemo(
     () => availableTabsForIntent(setupIntent, fixedShellyId, plugAddOnly, sensorAddOnly),
@@ -136,6 +136,35 @@ export const HardwareSetupScreen = ({
     setLocalAddPage(null);
   };
 
+  if (sensorSettingsOnlyId) {
+    const normalizedSensorId = sensorSettingsOnlyId.toUpperCase();
+    const sensorSettingsFlow = {
+      ...flow,
+      sensorDevices: flow.sensorDevices.filter(
+        (device) =>
+          device.id.toUpperCase() === normalizedSensorId ||
+          device.runtimeAddress.toUpperCase() === normalizedSensorId
+      )
+    };
+    return (
+      <main
+        className="demo-shell hardware-shell"
+        aria-label={t('hardware.sensor.settingsTitle')}
+      >
+        <header className="demo-header app-page-header">
+          <h1>{t('hardware.sensor.settingsTitle')}</h1>
+        </header>
+        <SensorSetupPage
+          flow={sensorSettingsFlow}
+          hideAddAction
+          {...(onSensorSettingsRemoved
+            ? { onSensorRemoved: onSensorSettingsRemoved }
+            : {})}
+        />
+      </main>
+    );
+  }
+
   if (localShellyPage !== null) {
     const localShelly = flow.shellyDevices.find(
       (device) => device.id === localShellyPage.deviceId
@@ -214,7 +243,7 @@ export const HardwareSetupScreen = ({
       {setupIntent && onBackToIntent && !plugAddOnly && !sensorAddOnly && (
         <AppPageBack
           context={t(`intent.${setupIntent}.context`)}
-          label={editInstallationId ? t('detail.automation') : t('intent.back')}
+          label={t('intent.back')}
           onBack={onBackToIntent}
         />
       )}
@@ -276,15 +305,11 @@ export const HardwareSetupScreen = ({
           flow={flow}
           selectablePresets={selectableRulePresets}
           showShellySelector={!fixedShellyId}
-          {...(editInstallationId && onSetupComplete
-            ? { onEditSaved: onSetupComplete }
-            : {})}
         />
       )}
       {setupIntent === 'time' && activeTab === 'schedule' && (
         <TimeScheduleSetupPage
           flow={flow}
-          {...(editInstallationId ? { editInstallationId } : {})}
           {...(onSetupComplete ? { onInstalled: onSetupComplete } : {})}
         />
       )}

@@ -389,6 +389,7 @@ export const ptBr = {
       scanNetworkFailedTitle: 'Não foi possível escanear a rede.',
       scanRangeEnd: 'Até',
       scanRangeFailed: 'Verifique o intervalo de scan.',
+      scanRangeLabel: 'Intervalo de escaneamento',
       scanRangeStart: 'De',
       scanResultEmpty: 'Nenhuma tomada Shelly foi encontrada nessa faixa.',
       scanShellyTitle: 'Escanear rede Shelly',

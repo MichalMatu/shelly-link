@@ -26,7 +26,6 @@ type RuleSetupPageProps = HardwarePageProps<RuleSetupFlow> & {
   showShellySelector?: boolean;
   inline?: boolean;
   canSubmit?: boolean;
-  onEditSaved?: () => void;
 };
 
 export const RuleSetupPage = ({
@@ -34,8 +33,7 @@ export const RuleSetupPage = ({
   selectablePresets = ALL_RULE_PRESETS,
   showShellySelector = true,
   inline = false,
-  canSubmit,
-  onEditSaved
+  canSubmit
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<RuleDialogState>('none');
@@ -72,8 +70,7 @@ export const RuleSetupPage = ({
     if (!flow.installMutation.isSuccess || !flow.isEditingClimateAutomation) return;
     pushToast('ok', t('hardware.rule.editSaved'));
     flow.installMutation.reset();
-    onEditSaved?.();
-  }, [flow.installMutation, flow.isEditingClimateAutomation, onEditSaved, pushToast, t]);
+  }, [flow.installMutation, flow.isEditingClimateAutomation, pushToast, t]);
 
   const confirmLoadScriptFromShelly = () => {
     if (!flow.selectedShelly) {

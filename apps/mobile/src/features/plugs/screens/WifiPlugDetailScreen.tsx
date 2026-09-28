@@ -1,15 +1,13 @@
-import { DiagnosticRow } from '@lcl/ui';
-import { IconBluetooth, IconTrash } from '@tabler/icons-react';
+import { IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import { PlugButtonModeSettingsCard } from '../components/PlugButtonModeSettingsCard.js';
-import { PlugCloudSettingsCard } from '../components/PlugCloudSettingsCard.js';
+import { PlugBleDetailSurface } from '../components/PlugBleDetailSurface.js';
 import { PlugDeleteConfirmModal } from '../components/PlugDeleteConfirmModal.js';
+import { PlugDeviceSettingsSurface } from '../components/PlugDeviceSettingsSurface.js';
 import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
 import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
 import { PlugInfoPanel } from '../components/PlugInfoPanel.js';
-import { PlugLedSettingsCard } from '../components/PlugLedSettingsCard.js';
 import { usePlugInformationFlow } from '../flows/usePlugInformationFlow.js';
 
 export type WifiPlugDetailDevice = {
@@ -50,7 +48,6 @@ export const WifiPlugDetailScreen = ({
 
   if (!device) return <PlugDetailNotFound />;
 
-  const bluetoothState = informationQuery.data?.status.bluetooth;
   const disabledTabs: readonly PlugDetailTab[] = buttonModeLocked
     ? ['automation', 'script']
     : ['script'];
@@ -77,53 +74,19 @@ export const WifiPlugDetailScreen = ({
         )}
 
         {activeTab === 'ble' && (
-          <section className="plug-detail-framed-section">
-            <h3 className="plug-detail-framed-section__title">{t('common.bluetooth')}</h3>
-            {informationQuery.isPending && (
-              <div className="plug-detail-loading" role="status">
-                <span className="plug-detail-loading__spinner" aria-hidden="true" />
-                <span>{t('common.refreshing')}</span>
-              </div>
-            )}
-            {informationQuery.isError && (
-              <p className="plug-settings-feedback plug-settings-feedback--warning">
-                {t('dashboard.readFailed')}
-              </p>
-            )}
-            {informationQuery.data && (
-              <div className="plug-info-grid">
-                <DiagnosticRow
-                  label={t('common.bluetooth')}
-                  value={
-                    bluetoothState === 'enabled'
-                      ? t('common.enabled')
-                      : bluetoothState === 'disabled'
-                        ? t('common.disabled')
-                        : t('common.missing')
-                  }
-                />
-              </div>
-            )}
-            <div className="plug-settings-actions">
-              <button
-                className="secondary-action"
-                type="button"
-                title={t('hardware.shelly.scanBleViaShellyTitle')}
-                onClick={() => onOpenBleDiscovery(device.deviceId)}
-              >
-                <IconBluetooth className="icon-action__svg" aria-hidden="true" />
-                <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
-              </button>
-            </div>
-          </section>
+          <PlugBleDetailSurface
+            information={informationQuery.data}
+            loading={informationQuery.isPending}
+            error={informationQuery.isError}
+            onScan={() => onOpenBleDiscovery(device.deviceId)}
+          />
         )}
 
         {activeTab === 'device' && (
-          <div className="plug-settings-surface">
-            <PlugLedSettingsCard target={target} />
-            <PlugButtonModeSettingsCard target={target} locked={buttonModeLocked} />
-            <PlugCloudSettingsCard target={target} />
-          </div>
+          <PlugDeviceSettingsSurface
+            target={target}
+            buttonModeLocked={buttonModeLocked}
+          />
         )}
 
         {activeTab === 'info' && (

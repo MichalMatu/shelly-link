@@ -168,7 +168,14 @@ const installTimeShellyFetchMock = () => {
         matter: { enabled: false },
         script: { enable: true },
         ble: { enable: true },
-        'switch:0': { id: 0, output: true },
+        'switch:0': {
+          id: 0,
+          output: true,
+          apower: 42.3,
+          voltage: 230.1,
+          current: 0.2,
+          aenergy: { total: 1234 }
+        },
         wifi: { rssi: -55 },
         sys: {
           time: '12:00',
@@ -755,23 +762,35 @@ describe('AutomationDashboardScreen', () => {
 
     const { rerenderKind } = renderDashboard(vi.fn(), onOpenInstallation);
 
-    expect(await screen.findByText('Harmonogram dzienny')).toBeVisible();
-    expect(screen.getByText('Lampa')).toBeVisible();
-    expect(screen.getByText('08:00')).toBeVisible();
-    expect(screen.getByText('20:00')).toBeVisible();
-    expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();
-    expect(await screen.findByText('Działa')).toBeVisible();
-    expect(screen.getByText('ON')).toBeVisible();
-    const timeCard = screen.getByText('Lampa').closest('article') as HTMLElement;
+    const timeCard = (await screen.findByText('Lampa')).closest('article') as HTMLElement;
+    expect(within(timeCard).getByText('08:00')).toBeVisible();
+    expect(within(timeCard).getByText('20:00')).toBeVisible();
+    expect(within(timeCard).queryByText('Harmonogram dzienny')).toBeNull();
+    expect(within(timeCard).queryByText('Działa')).toBeNull();
+    expect(within(timeCard).queryByText('Natywny Shelly Schedule')).toBeNull();
+    expect(await within(timeCard).findByText('42.3 W')).toBeVisible();
+    expect(within(timeCard).getByText('230 V')).toBeVisible();
+    expect(within(timeCard).getByText('1.23 kWh')).toBeVisible();
+    expect(within(timeCard).getByText('12:00')).toBeVisible();
+    expect(within(timeCard).getByRole('button', { name: 'AUTO' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(within(timeCard).getByRole('button', { name: 'MANUAL' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(within(timeCard).getByRole('button', { name: 'ON' })).toBeDisabled();
+    expect(within(timeCard).getByRole('button', { name: 'OFF' })).toBeDisabled();
     const timeLeadingIcon = timeCard.querySelector('.automation-card__leading-icon');
     expect(timeLeadingIcon?.querySelector('.tabler-icon-plug')).not.toBeNull();
     expect(timeLeadingIcon).toHaveClass('automation-card__leading-icon--active');
     rerenderKind('time');
     expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
     rerenderKind('climate');
-    expect(screen.getByText('Harmonogram dzienny')).toBeVisible();
+    expect(screen.queryByText('Harmonogram dzienny')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Lampa · Wi-Fi' }));
     expect(onOpenInstallation).toHaveBeenCalledWith(installation.id);
   });
 

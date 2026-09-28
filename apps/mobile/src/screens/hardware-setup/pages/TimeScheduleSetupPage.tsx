@@ -4,10 +4,13 @@ import { useEffect, useState, type UIEvent } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { useTimeAutomationSetupFlow } from '../../../flows/time-automation/useTimeAutomationSetupFlow.js';
 import { mutationError, type HardwarePageProps } from '../helpers.js';
+import './TimeScheduleSetupPage.css';
 
 type TimeScheduleSetupPageProps = HardwarePageProps<TimeScheduleSetupFlow> & {
   editInstallationId?: string;
   onInstalled?(): void;
+  onPendingChange?(pending: boolean): void;
+  inline?: boolean;
 };
 
 type TimePickerTarget = 'on' | 'off';
@@ -50,7 +53,9 @@ const centerWheelOption = (
 export const TimeScheduleSetupPage = ({
   flow,
   editInstallationId,
-  onInstalled
+  onInstalled,
+  onPendingChange,
+  inline = false
 }: TimeScheduleSetupPageProps) => {
   const { t } = useTranslation();
   const timeFlow = useTimeAutomationSetupFlow(flow.selectedShelly, editInstallationId);
@@ -64,6 +69,11 @@ export const TimeScheduleSetupPage = ({
       setIsInstallErrorOpen(true);
     }
   }, [timeFlow.installMutation.isError]);
+
+  useEffect(() => {
+    onPendingChange?.(timeFlow.installMutation.isPending);
+    return () => onPendingChange?.(false);
+  }, [onPendingChange, timeFlow.installMutation.isPending]);
 
   const install = async () => {
     try {
@@ -169,25 +179,32 @@ export const TimeScheduleSetupPage = ({
   );
 
   return (
-    <section className="demo-panel time-schedule-panel">
-      <div className="installation-section-heading">
-        <div>
-          <p className="automation-card__eyebrow">{t('time.eyebrow')}</p>
+    <section
+      aria-label={
+        timeFlow.isEditingTimeAutomation ? t('time.detail.editTitle') : t('time.title')
+      }
+      className={`time-schedule-panel${inline ? ' time-schedule-panel--inline' : ''}`}
+    >
+      {!inline && (
+        <header className="time-schedule-heading">
+          <p className="time-schedule-eyebrow">{t('time.eyebrow')}</p>
           <h1>
             {timeFlow.isEditingTimeAutomation
               ? t('time.detail.editTitle')
               : t('time.title')}
           </h1>
-          <p>{t('time.description')}</p>
+          <p className="time-schedule-description">{t('time.description')}</p>
+        </header>
+      )}
+
+      {!inline && (
+        <div className="time-schedule-device">
+          <span>{t('time.device')}</span>
+          <strong>{flow.selectedShelly?.name ?? t('time.noDevice')}</strong>
         </div>
-      </div>
+      )}
 
-      <div className="time-schedule-device">
-        <span>{t('time.device')}</span>
-        <strong>{flow.selectedShelly?.name ?? t('time.noDevice')}</strong>
-      </div>
-
-      <div className="time-schedule-grid">
+      <div className="time-schedule-setup-grid">
         <div className="field-stack">
           <span>{t('time.onTime')}</span>
           <button
@@ -216,10 +233,12 @@ export const TimeScheduleSetupPage = ({
         </div>
       </div>
 
-      <p className="time-schedule-note">{t('time.localClockHint')}</p>
-      <p className="time-schedule-note time-schedule-note--ownership">
-        {t('time.ownershipHint')}
-      </p>
+      {!inline && (
+        <div className="time-schedule-guidance">
+          <p className="time-schedule-note">{t('time.localClockHint')}</p>
+          <p className="time-schedule-note">{t('time.ownershipHint')}</p>
+        </div>
+      )}
 
       <div className="time-schedule-actions">
         <button

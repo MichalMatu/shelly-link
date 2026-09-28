@@ -15,13 +15,11 @@ import {
   ClimateScriptDiagnosticsSection
 } from '../features/automations/index.js';
 import {
-  PlugButtonModeSettingsCard,
-  PlugCloudSettingsCard,
   PlugDeleteConfirmModal,
+  PlugDeviceSettingsSurface,
   PlugDetailNotFound,
   PlugDetailTop,
   PlugInfoPanel,
-  PlugLedSettingsCard,
   isSameShellyDevice,
   usePlugInformationFlow,
   useSavedPlugStore,
@@ -65,14 +63,12 @@ type InstallationDetailScreenProps = {
   installationId: string;
   onBack(): void;
   onOpenBleDiscovery?: (deviceId: string) => void;
-  onEdit?: () => void;
 };
 
 export const InstallationDetailScreen = ({
   installationId,
   onBack,
-  onOpenBleDiscovery,
-  onEdit
+  onOpenBleDiscovery
 }: InstallationDetailScreenProps) => {
   const installation = useInstalledAutomationStore((state) =>
     state.installations.find((candidate) => candidate.id === installationId)
@@ -99,7 +95,7 @@ export const InstallationDetailScreen = ({
       <TimeInstallationDetail
         installation={installation}
         onBack={onBack}
-        {...(onEdit ? { onEdit } : {})}
+        {...(onOpenBleDiscovery ? { onOpenBleDiscovery } : {})}
       />
     );
   }
@@ -341,11 +337,7 @@ const ClimateInstallationDetail = ({
         )}
 
         {activeTab === 'device' && (
-          <div className="plug-settings-surface">
-            <PlugLedSettingsCard target={installation.shelly} />
-            <PlugButtonModeSettingsCard target={installation.shelly} locked />
-            <PlugCloudSettingsCard target={installation.shelly} />
-          </div>
+          <PlugDeviceSettingsSurface target={installation.shelly} buttonModeLocked />
         )}
 
         {activeTab === 'script' && (
