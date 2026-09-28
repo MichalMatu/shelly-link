@@ -943,8 +943,14 @@ for (const viewport of viewports) {
       0
     );
     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(
+      0
+    );
+    await expect(page.getByRole('button', { name: 'Edytuj' })).toHaveCount(0);
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '11-time-detail');
     }
@@ -979,7 +985,7 @@ for (const viewport of viewports) {
   });
 }
 
-test('daily time automation completes manual, auto, edit and delete lifecycle', async ({
+test('daily time automation completes inline edit and delete lifecycle', async ({
   page
 }) => {
   const consoleProblems: string[] = [];
@@ -1008,28 +1014,9 @@ test('daily time automation completes manual, auto, edit and delete lifecycle', 
     .getByRole('button', { name: 'Szczegóły: Shelly Plug S Gen3 · Wi-Fi' })
     .click();
 
-  const detailAuto = page.getByRole('button', { name: 'AUTO', exact: true });
-  const detailManual = page.getByRole('button', { name: 'MANUAL', exact: true });
-  const detailOn = page.getByRole('button', { name: 'ON', exact: true });
-  const detailOff = page.getByRole('button', { name: 'OFF', exact: true });
-  await expect(detailAuto).toHaveAttribute('aria-pressed', 'true');
-  await expect(detailOn).toBeDisabled();
-  await expect(detailOff).toBeDisabled();
-
-  await detailManual.click();
-  await expect(detailManual).toHaveAttribute('aria-pressed', 'true');
-  await expect(detailOff).toHaveAttribute('aria-pressed', 'true');
-  await expect(detailOn).toBeEnabled();
-  await detailOn.click();
-  await expect(detailOn).toHaveAttribute('aria-pressed', 'true');
-  await detailOff.click();
-  await expect(detailOff).toHaveAttribute('aria-pressed', 'true');
-
-  await detailAuto.click();
-  await expect(detailAuto).toHaveAttribute('aria-pressed', 'true');
-
-  await page.getByRole('button', { name: 'Edytuj' }).click();
-  await expect(page.getByRole('heading', { name: 'Edytuj godziny' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Edytuj' })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Włącz o: 08:00' }).click();
   let picker = page.getByRole('dialog', { name: 'Włącz o' });
@@ -1046,10 +1033,13 @@ test('daily time automation completes manual, auto, edit and delete lifecycle', 
   await page.getByRole('button', { name: 'Zapisz zmiany' }).click();
   await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toHaveCount(0);
-  await expect(page.getByText('06:30')).toBeVisible();
-  await expect(page.getByText('22:15')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Włącz o: 06:30' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Wyłącz o: 22:15' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeEnabled();
 
-  await page.getByRole('button', { name: 'Usuń automatykę czasową' }).click();
+  const deleteTime = page.getByRole('button', { name: 'Usuń automatykę czasową' });
+  await expect(deleteTime).toBeEnabled();
+  await deleteTime.click();
   const deleteDialog = page.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
   await expect(deleteDialog).toBeVisible();
   await deleteDialog.getByRole('button', { name: 'Potwierdź usuń' }).click();

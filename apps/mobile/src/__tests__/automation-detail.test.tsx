@@ -557,53 +557,27 @@ describe('InstallationDetailScreen', () => {
     expect(rpcMethods).not.toContain('Switch.Set');
   });
 
-  it('manages a native daily schedule end to end without a climate script owner', async () => {
+  it('renders native Time settings inline without duplicating dashboard controls', async () => {
     const saved = timeInstallation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
     const shelly = installTimeShellyFetchMock();
     const onBack = vi.fn();
 
-    const rendered = renderDetail(saved.id, onBack);
+    renderDetail(saved.id, onBack);
 
-    const auto = await screen.findByRole('button', { name: 'AUTO' });
-    const manual = screen.getByRole('button', { name: 'MANUAL' });
-    const relayGroup = screen.getByRole('group', { name: 'Wyjście' });
-    const relayOn = within(relayGroup).getByRole('button', { name: 'ON' });
-    const relayOff = within(relayGroup).getByRole('button', { name: 'OFF' });
-
-    expect(screen.queryByRole('heading', { name: 'Lampa' })).toBeNull();
-    expect(screen.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
-    expect(screen.getAllByText('08:00').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('20:00').length).toBeGreaterThanOrEqual(1);
+    expect(await screen.findByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
+      'data-automation-icon',
+      'clock'
+    );
+    expect(screen.queryByRole('button', { name: 'AUTO' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'MANUAL' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Wyjście' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Edytuj' })).toBeNull();
     expect(screen.queryByText('Natywny Shelly Schedule')).toBeNull();
-    await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
-    expect(manual).toHaveAttribute('aria-pressed', 'false');
-    expect(relayOn).toBeDisabled();
-    expect(relayOff).toBeDisabled();
-
-    fireEvent.click(manual);
-    await waitFor(() => expect(manual).toHaveAttribute('aria-pressed', 'true'));
-    expect(shelly.relayOn).toBe(false);
-    expect(shelly.jobs.every((job) => !job.enable)).toBe(true);
-    expect(relayOn).toBeEnabled();
-    expect(relayOff).toBeEnabled();
-
-    fireEvent.click(relayOn);
-    await waitFor(() => expect(shelly.relayOn).toBe(true));
-    await waitFor(() => expect(relayOn).toHaveAttribute('aria-pressed', 'true'));
-
-    fireEvent.click(relayOff);
-    await waitFor(() => expect(shelly.relayOn).toBe(false));
-    await waitFor(() => expect(relayOff).toHaveAttribute('aria-pressed', 'true'));
-
-    fireEvent.click(auto);
-    await waitFor(() => expect(auto).toHaveAttribute('aria-pressed', 'true'));
-    expect(shelly.relayOn).toBe(true);
-    expect(shelly.jobs.every((job) => job.enable)).toBe(true);
-
-    const edit = screen.getByRole('button', { name: 'Edytuj' });
-    fireEvent.click(edit);
-    expect(rendered.onEdit).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText('12:00')).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Usuń automatykę czasową' }));
     const dialog = screen.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
@@ -616,7 +590,6 @@ describe('InstallationDetailScreen', () => {
     expect(shelly.relayOn).toBe(false);
     expect(useInstalledAutomationStore.getState().installations).toEqual([]);
     expect(onBack).toHaveBeenCalledTimes(1);
-    expect(shelly.rpcMethods).toContain('Schedule.Update');
     expect(shelly.rpcMethods).toContain('Schedule.Delete');
   });
 });

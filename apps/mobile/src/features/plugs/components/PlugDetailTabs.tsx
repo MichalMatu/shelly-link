@@ -1,5 +1,6 @@
 import {
   IconBluetooth,
+  IconClock,
   IconCode,
   IconSettings,
   IconTemperature
@@ -8,12 +9,14 @@ import { useTranslation } from '../../../app/i18n.js';
 import './PlugDetailTabs.css';
 
 export type PlugDetailTab = 'automation' | 'ble' | 'device' | 'script' | 'info';
+export type PlugDetailAutomationIcon = 'temperature' | 'clock';
 
 type PlugDetailTabsProps = {
   activeTab: PlugDetailTab;
   onChange(tab: PlugDetailTab): void;
   availableTabs?: readonly PlugDetailTab[];
   disabledTabs?: readonly PlugDetailTab[];
+  automationIcon?: PlugDetailAutomationIcon;
 };
 
 const tabs: readonly {
@@ -37,7 +40,8 @@ export const PlugDetailTabs = ({
   activeTab,
   onChange,
   availableTabs,
-  disabledTabs = []
+  disabledTabs = [],
+  automationIcon = 'temperature'
 }: PlugDetailTabsProps) => {
   const { t } = useTranslation();
   const visibleTabs = availableTabs
@@ -52,7 +56,8 @@ export const PlugDetailTabs = ({
     >
       {visibleTabs.map((tab) => {
         const label = t(tab.labelKey);
-        const Icon = tab.icon;
+        const Icon =
+          tab.id === 'automation' && automationIcon === 'clock' ? IconClock : tab.icon;
         const disabled = disabledTabs.includes(tab.id);
         return (
           <button
@@ -60,6 +65,7 @@ export const PlugDetailTabs = ({
             aria-current={activeTab === tab.id ? 'page' : undefined}
             aria-label={label}
             className="plug-detail-tabs__item lcl-segmented-control__item"
+            data-automation-icon={tab.id === 'automation' ? automationIcon : undefined}
             disabled={disabled}
             title={label}
             type="button"

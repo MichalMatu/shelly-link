@@ -9,13 +9,11 @@ import {
   type TimeInstalledAutomation
 } from '../features/automations/index.js';
 import {
-  PlugAutomationModeControl,
   PlugBleDetailSurface,
   PlugDeleteConfirmModal,
   PlugDeviceSettingsSurface,
   PlugDetailTop,
   PlugInfoPanel,
-  PlugRelayControls,
   isSameShellyDevice,
   usePlugInformationFlow,
   useSavedPlugStore,
@@ -23,10 +21,9 @@ import {
 } from '../features/plugs/index.js';
 import {
   timeAutomationRuntimeQueryKey,
-  useTimeAutomationActions,
-  useTimeAutomationRuntime,
-  type TimeAutomationAction
+  useTimeAutomationRuntime
 } from '../flows/time-automation/useTimeAutomationRuntime.js';
+import { TimeScheduleSetupPage } from './hardware-setup/pages/TimeScheduleSetupPage.js';
 
 const TIME_DETAIL_TABS = [
   'automation',
@@ -45,14 +42,12 @@ type TimeInstallationDetailProps = {
 export const TimeInstallationDetail = ({
   installation,
   onBack,
-  onEdit,
   onOpenBleDiscovery
 }: TimeInstallationDetailProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const runtimeQuery = useTimeAutomationRuntime(installation);
-  const runtimeAction = useTimeAutomationActions(installation);
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
   });
@@ -65,6 +60,7 @@ export const TimeInstallationDetail = ({
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [timeEditPending, setTimeEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
@@ -100,19 +96,13 @@ export const TimeInstallationDetail = ({
     : runtimeQuery.isError
       ? 'offline'
       : (runtimeQuery.data?.scheduleState ?? 'attention');
-  const automationRunning = runtimeState === 'running';
-  const manualControl = runtimeState === 'paused';
-  const runtimeControllable = automationRunning || manualControl;
-  const actionBusy = runtimeAction.isPending;
-  const runRuntimeAction = (action: TimeAutomationAction) => {
-    runtimeAction.mutate(action, {
-      onError: () => pushToast('warning', t('time.detail.actionFailed'))
-    });
-  };
-
   return (
     <main className="demo-shell installation-detail-shell">
-      <PlugDetailTop tabs={[activeTab, setActiveTab]} availableTabs={TIME_DETAIL_TABS} />
+      <PlugDetailTop
+        tabs={[activeTab, setActiveTab]}
+        availableTabs={TIME_DETAIL_TABS}
+        automationIcon="clock"
+      />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
         {activeTab === 'automation' && (
@@ -142,14 +132,6 @@ export const TimeInstallationDetail = ({
             <section className="installation-automation-live-state plug-detail-section">
               <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
                 <div>
-                  <dt>{t('time.onTime')}</dt>
-                  <dd>{installation.config.onTime}</dd>
-                </div>
-                <div>
-                  <dt>{t('time.offTime')}</dt>
-                  <dd>{installation.config.offTime}</dd>
-                </div>
-                <div>
                   <dt>{t('dashboard.output')}</dt>
                   <dd>
                     {runtimeQuery.data ? (runtimeQuery.data.relayOn ? 'ON' : 'OFF') : '—'}
@@ -160,41 +142,32 @@ export const TimeInstallationDetail = ({
                   <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
                 </div>
               </dl>
-
-              <PlugAutomationModeControl
-                autoActive={automationRunning}
-                manualActive={manualControl}
-                disabled={actionBusy || !runtimeControllable}
-                onAuto={() => {
-                  if (!automationRunning) runRuntimeAction('auto');
-                }}
-                onManual={() => {
-                  if (!manualControl) runRuntimeAction('manual');
-                }}
-              />
-
-              <PlugRelayControls
-                relayState={runtimeQuery.data?.relayOn}
-                busy={actionBusy}
-                disabled={!manualControl}
-                onTurnOn={() => runRuntimeAction('on')}
-                onTurnOff={() => runRuntimeAction('off')}
-              />
             </section>
 
-            {onEdit && (
-              <div className="installation-detail-actions">
-                <button className="primary-action" type="button" onClick={onEdit}>
-                  {t('detail.edit')}
-                </button>
-              </div>
-            )}
+            <TimeScheduleSetupPage
+              flow={{
+                selectedShelly: {
+                  id: installation.shelly.deviceId,
+                  name: installation.shelly.name,
+                  baseUrl: installation.shelly.baseUrl,
+                  scriptIdInput: '1',
+                  model: installation.shelly.model,
+                  gen: installation.shelly.gen
+                }
+              }}
+              editInstallationId={installation.id}
+              inline
+              onInstalled={() => {
+                void runtimeQuery.refetch();
+              }}
+              onPendingChange={setTimeEditPending}
+            />
 
             <div className="installation-detail-delete-action">
               <button
                 className="secondary-action secondary-action--danger"
                 type="button"
-                disabled={deleteMutation.isPending}
+                disabled={deleteMutation.isPending || timeEditPending}
                 onClick={() => setDeleteOpen(true)}
               >
                 {t('time.detail.delete')}
@@ -249,7 +222,7 @@ export const TimeInstallationDetail = ({
           <button
             className="secondary-action secondary-action--danger"
             type="button"
-            disabled={deleteMutation.isPending}
+            disabled={deleteMutation.isPending || timeEditPending}
             onClick={() => deleteMutation.mutate()}
           >
             {deleteMutation.isPending ? t('time.deleting') : t('common.confirmDelete')}
