@@ -14,9 +14,9 @@ import {
   installDailyTimeAutomation,
   pauseTimeAutomation,
   resumeTimeAutomation,
-  setTimeAutomationManualRelay,
   updateDailyTimeAutomation
 } from './timeAutomationRuntime.js';
+import { setTimeAutomationManualRelay } from './timeAutomationRelayControl.js';
 import {
   readTimeAutomationRuntime,
   type TimeAutomationRuntimeInstallation
