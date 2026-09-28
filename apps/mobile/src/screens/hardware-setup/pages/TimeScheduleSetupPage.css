@@ -1,0 +1,202 @@
+.time-schedule-panel {
+  align-content: start;
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-lg);
+  display: grid;
+  gap: var(--lcl-spacing-lg);
+  min-width: 0;
+  padding: var(--lcl-fluid-panel-padding);
+}
+
+.time-schedule-heading {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
+.time-schedule-heading h1 {
+  font-size: var(--lcl-font-size-2xl);
+  line-height: var(--lcl-line-height-tight);
+  margin: 0;
+}
+
+.time-schedule-eyebrow {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+}
+
+.time-schedule-description {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  line-height: var(--lcl-line-height-normal);
+  margin: 0;
+  max-width: var(--lcl-size-prose-max-width);
+}
+
+.time-schedule-device {
+  align-items: center;
+  border-bottom: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  display: flex;
+  gap: var(--lcl-spacing-md);
+  justify-content: space-between;
+  min-width: 0;
+  padding: var(--lcl-spacing-sm) 0;
+}
+
+.time-schedule-device span {
+  color: var(--lcl-color-text-muted);
+  flex: 0 0 auto;
+  font-size: var(--lcl-font-size-sm);
+}
+
+.time-schedule-device strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.time-schedule-setup-grid {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+}
+
+.time-schedule-setup-grid .field-stack {
+  align-items: stretch;
+  gap: var(--lcl-spacing-sm);
+  min-width: 0;
+  text-align: left;
+}
+
+.time-schedule-setup-grid .field-stack > span {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+}
+
+.time-schedule-time-input {
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text);
+  cursor: pointer;
+  font-size: var(--lcl-font-size-2xl);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--lcl-font-weight-bold);
+  min-height: calc(var(--lcl-size-control-min-height) + var(--lcl-spacing-md));
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
+  text-align: center;
+  width: 100%;
+}
+
+.time-schedule-time-input:focus-visible {
+  border-color: var(--lcl-color-accent);
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-focus-ring);
+  outline-offset: var(--lcl-border-width-sm);
+}
+
+.time-schedule-guidance {
+  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  padding-top: var(--lcl-spacing-md);
+}
+
+.time-schedule-note {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  line-height: var(--lcl-line-height-normal);
+  margin: 0;
+}
+
+.time-schedule-actions {
+  display: grid;
+}
+
+.time-schedule-actions .primary-action {
+  width: 100%;
+}
+
+/* Keep the picker local to the Time setup feature. */
+.time-schedule-time-button {
+  appearance: none;
+  line-height: 1;
+}
+
+.time-wheel-picker {
+  display: grid;
+  gap: var(--lcl-spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  margin: 0 auto;
+  max-width: 22rem;
+  width: 100%;
+}
+
+.time-wheel-column-shell {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 0;
+}
+
+.time-wheel-column-label {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-sm);
+  font-weight: var(--lcl-font-weight-bold);
+  text-align: center;
+}
+
+.time-wheel-column {
+  -webkit-overflow-scrolling: touch;
+  height: 15rem;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 24%,
+    black 76%,
+    transparent 100%
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: 6rem;
+  scrollbar-width: none;
+  scroll-snap-type: y mandatory;
+}
+
+.time-wheel-column::-webkit-scrollbar {
+  display: none;
+}
+
+.time-wheel-option {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text-muted);
+  cursor: pointer;
+  display: flex;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--lcl-font-size-xl);
+  height: 3rem;
+  justify-content: center;
+  margin: 0;
+  padding: 0 var(--lcl-spacing-sm);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  width: 100%;
+}
+
+.time-wheel-option[data-selected='true'] {
+  background: var(--lcl-color-surface-muted);
+  color: var(--lcl-color-text);
+  font-size: var(--lcl-font-size-2xl);
+  font-weight: var(--lcl-font-weight-bold);
+}
+
+.time-wheel-option:focus-visible {
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-focus-ring);
+  outline-offset: calc(-1 * var(--lcl-border-width-md));
+}
