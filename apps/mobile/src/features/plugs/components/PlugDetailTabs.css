@@ -6,6 +6,26 @@
   z-index: var(--lcl-z-index-header);
 }
 
+.plug-detail-tabs[data-tab-count='1'] {
+  --plug-detail-tab-count: 1;
+}
+
+.plug-detail-tabs[data-tab-count='2'] {
+  --plug-detail-tab-count: 2;
+}
+
+.plug-detail-tabs[data-tab-count='3'] {
+  --plug-detail-tab-count: 3;
+}
+
+.plug-detail-tabs[data-tab-count='4'] {
+  --plug-detail-tab-count: 4;
+}
+
+.plug-detail-tabs[data-tab-count='5'] {
+  --plug-detail-tab-count: 5;
+}
+
 .plug-detail-tabs__item {
   padding: 0;
 }

@@ -12,6 +12,7 @@ export type PlugDetailTab = 'automation' | 'ble' | 'device' | 'script' | 'info';
 type PlugDetailTabsProps = {
   activeTab: PlugDetailTab;
   onChange(tab: PlugDetailTab): void;
+  availableTabs?: readonly PlugDetailTab[];
   disabledTabs?: readonly PlugDetailTab[];
 };
 
@@ -35,16 +36,21 @@ const tabs: readonly {
 export const PlugDetailTabs = ({
   activeTab,
   onChange,
+  availableTabs,
   disabledTabs = []
 }: PlugDetailTabsProps) => {
   const { t } = useTranslation();
+  const visibleTabs = availableTabs
+    ? tabs.filter((tab) => availableTabs.includes(tab.id))
+    : tabs;
 
   return (
     <nav
       className="plug-detail-tabs lcl-segmented-control"
       aria-label={t('hardware.shelly.actionsLabel')}
+      data-tab-count={visibleTabs.length}
     >
-      {tabs.map((tab) => {
+      {visibleTabs.map((tab) => {
         const label = t(tab.labelKey);
         const Icon = tab.icon;
         const disabled = disabledTabs.includes(tab.id);
