@@ -7,7 +7,6 @@ type SetupRoute = {
   intent: SetupIntent;
   sourceKind: AppNavigationKind;
   shellyId?: string;
-  editInstallationId?: string;
 };
 type DeviceAddReturnRoute = DashboardRoute | SetupRoute;
 type DeviceAddRoute = {

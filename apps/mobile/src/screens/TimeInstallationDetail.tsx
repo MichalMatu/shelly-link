@@ -35,7 +35,6 @@ const TIME_DETAIL_TABS = [
 type TimeInstallationDetailProps = {
   installation: TimeInstalledAutomation;
   onBack(): void;
-  onEdit?: () => void;
   onOpenBleDiscovery?: (deviceId: string) => void;
 };
 

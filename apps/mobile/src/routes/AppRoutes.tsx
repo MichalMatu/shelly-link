@@ -23,10 +23,6 @@ import {
   WifiPlugDetailScreen
 } from '../features/plugs/index.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
-import {
-  automationDetailRoute,
-  prepareAutomationEditRoute
-} from './automationEditNavigation.js';
 import { activeNavigationForRoute, type AppRoute } from './appRouteModel.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
@@ -60,9 +56,6 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
     return { type: 'dashboard', kind: 'climate' };
   }
   if (route.type === 'setup') {
-    if (route.editInstallationId) {
-      return automationDetailRoute(route.editInstallationId);
-    }
     return {
       type: 'intent',
       sourceKind: route.sourceKind,
@@ -76,9 +69,6 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
 export const AppRoutes = () => {
   const selectShellyDevice = useHardwareSetupDraftStore(
     (state) => state.selectShellyDevice
-  );
-  const loadClimateAutomationDraft = useHardwareSetupDraftStore(
-    (state) => state.loadClimateAutomationDraft
   );
   const savedPlugs = useSavedPlugStore((state) => state.plugs);
   const installations = useInstalledAutomationStore((state) => state.installations);
@@ -133,14 +123,6 @@ export const AppRoutes = () => {
       sourceKind,
       ...(shellyId ? { shellyId } : {})
     });
-  };
-
-  const openAutomationEdit = (installationId: string) => {
-    const editRoute = prepareAutomationEditRoute(
-      installationId,
-      loadClimateAutomationDraft
-    );
-    if (editRoute) navigate(editRoute);
   };
 
   let content: ReactNode;
@@ -291,7 +273,6 @@ export const AppRoutes = () => {
             returnTo: route
           })
         }
-        onEdit={() => openAutomationEdit(route.installationId)}
       />
     );
   } else {
@@ -311,25 +292,16 @@ export const AppRoutes = () => {
         <HardwareSetupScreen
           setupIntent={route.intent}
           {...(route.shellyId ? { fixedShellyId: route.shellyId } : {})}
-          {...(route.editInstallationId
-            ? { editInstallationId: route.editInstallationId }
-            : {})}
           onBackToIntent={() =>
-            route.editInstallationId
-              ? navigate(automationDetailRoute(route.editInstallationId))
-              : navigate({
-                  type: 'intent',
-                  sourceKind: route.sourceKind,
-                  ...(route.shellyId ? { shellyId: route.shellyId } : {})
-                })
+            navigate({
+              type: 'intent',
+              sourceKind: route.sourceKind,
+              ...(route.shellyId ? { shellyId: route.shellyId } : {})
+            })
           }
           onOpenPlugAdd={() => openDeviceAdd('plug')}
           onOpenSensorAdd={(mode) => openDeviceAdd('sensor', mode)}
-          onSetupComplete={() =>
-            route.editInstallationId
-              ? navigate(automationDetailRoute(route.editInstallationId))
-              : navigate({ type: 'dashboard', kind: route.sourceKind })
-          }
+          onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
         />
       </Suspense>
     );

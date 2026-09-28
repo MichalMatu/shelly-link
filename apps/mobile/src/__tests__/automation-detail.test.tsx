@@ -337,8 +337,7 @@ const installTimeShellyFetchMock = () => {
 const renderDetail = (
   installationId: string,
   onBack = vi.fn(),
-  onOpenBleDiscovery = vi.fn(),
-  onEdit = vi.fn()
+  onOpenBleDiscovery = vi.fn()
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
@@ -346,7 +345,6 @@ const renderDetail = (
   return {
     onBack,
     onOpenBleDiscovery,
-    onEdit,
     ...renderWithAppToastHost(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
@@ -354,7 +352,6 @@ const renderDetail = (
             installationId={installationId}
             onBack={onBack}
             onOpenBleDiscovery={onOpenBleDiscovery}
-            onEdit={onEdit}
           />
         </QueryClientProvider>
       </I18nProvider>

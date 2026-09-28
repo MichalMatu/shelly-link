@@ -63,14 +63,12 @@ type InstallationDetailScreenProps = {
   installationId: string;
   onBack(): void;
   onOpenBleDiscovery?: (deviceId: string) => void;
-  onEdit?: () => void;
 };
 
 export const InstallationDetailScreen = ({
   installationId,
   onBack,
-  onOpenBleDiscovery,
-  onEdit
+  onOpenBleDiscovery
 }: InstallationDetailScreenProps) => {
   const installation = useInstalledAutomationStore((state) =>
     state.installations.find((candidate) => candidate.id === installationId)
@@ -97,7 +95,6 @@ export const InstallationDetailScreen = ({
       <TimeInstallationDetail
         installation={installation}
         onBack={onBack}
-        {...(onEdit ? { onEdit } : {})}
         {...(onOpenBleDiscovery ? { onOpenBleDiscovery } : {})}
       />
     );
