@@ -181,11 +181,15 @@ They are presentation boundaries, not new domain owners:
 - **Script** — managed runtime source/preview;
 - **Info** — identity, firmware/network/health and runtime resource diagnostics.
 
-The five tabs remain the first Plug Detail content; page-level duplicate Back navigation is not reintroduced.
+The five tabs remain the first Plug Detail content; page-level duplicate Back navigation is not reintroduced. The top chrome intentionally contains the tab strip only: do not insert a separate identity summary card between the tabs and the owning section. Identity, model, transport, firmware and network detail belong under **Info** unless a future product design gives them a new explicit owner.
 
 Device-setting forms keep local drafts. Background refresh may update the device baseline but must not overwrite a dirty user draft.
 
 Legacy nested Settings/Diagnostics/Script pages remain retired after their data moved to the owning surface.
+
+### BLE Plug dashboard reachability
+
+A saved BLE Plug card treats confirmed reachability failure as state, not a transient render artifact. Once a runtime read fails, the card remains visibly offline through background refresh attempts, relay controls remain disabled while reachability is unknown/offline, and the offline state clears only after a successful runtime read. Polling must not repeatedly mount/unmount status geometry and make the card collapse or flicker.
 
 ## Dependency direction
 
