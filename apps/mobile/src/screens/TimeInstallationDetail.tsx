@@ -11,11 +11,14 @@ import {
 import {
   PlugAutomationModeControl,
   PlugBleDetailSurface,
+  PlugDeleteConfirmModal,
   PlugDeviceSettingsSurface,
   PlugDetailTop,
   PlugInfoPanel,
   PlugRelayControls,
+  isSameShellyDevice,
   usePlugInformationFlow,
+  useSavedPlugStore,
   type PlugDetailTab
 } from '../features/plugs/index.js';
 import {
@@ -56,7 +59,13 @@ export const TimeInstallationDetail = ({
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
+  const savedPlugs = useSavedPlugStore((state) => state.plugs);
+  const removePlug = useSavedPlugStore((state) => state.removePlug);
+  const savedDevice = savedPlugs.find((device) =>
+    isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
+  );
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [forgetOpen, setForgetOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
 
@@ -210,15 +219,28 @@ export const TimeInstallationDetail = ({
         )}
 
         {activeTab === 'info' && (
-          <PlugInfoPanel
-            connection={{
-              transport: 'wifi',
-              baseUrl: installation.shelly.baseUrl
-            }}
-            information={informationQuery.data}
-            loading={informationQuery.isPending}
-            error={informationQuery.isError}
-          />
+          <section>
+            <PlugInfoPanel
+              connection={{
+                transport: 'wifi',
+                baseUrl: installation.shelly.baseUrl
+              }}
+              information={informationQuery.data}
+              loading={informationQuery.isPending}
+              error={informationQuery.isError}
+            />
+            {savedDevice && (
+              <div className="installation-detail-delete-action">
+                <button
+                  className="secondary-action secondary-action--danger"
+                  type="button"
+                  onClick={() => setForgetOpen(true)}
+                >
+                  {t('hardware.shelly.deleteTitle')}
+                </button>
+              </div>
+            )}
+          </section>
         )}
       </section>
 
@@ -245,6 +267,17 @@ export const TimeInstallationDetail = ({
           {t('time.detail.deleteConfirmDetail')}
         </FeedbackPanel>
       </Modal>
+
+      <PlugDeleteConfirmModal
+        deviceName={forgetOpen && savedDevice ? savedDevice.name : null}
+        onClose={() => setForgetOpen(false)}
+        onConfirm={() => {
+          if (!savedDevice) return;
+          removePlug(savedDevice.physicalId);
+          setForgetOpen(false);
+          pushToast('ok', t('hardware.shelly.removed'));
+        }}
+      />
 
       <AppToastViewport
         dismissLabel={t('toast.dismiss')}

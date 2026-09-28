@@ -958,6 +958,22 @@ for (const viewport of viewports) {
     ).toBeVisible();
     await expect(page.getByText('Natywny Shelly Schedule')).toHaveCount(0);
     await expectTimeDetailHierarchy(page);
+
+    await page.getByRole('button', { name: 'Informacje', exact: true }).click();
+    const forgetPlugButton = page.getByRole('button', {
+      name: 'Usuń gniazdko tylko z aplikacji'
+    });
+    await expect(forgetPlugButton).toBeVisible();
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '21-time-info');
+    }
+    await forgetPlugButton.click();
+    const forgetPlugDialog = page.getByRole('dialog', { name: 'Usunąć gniazdko?' });
+    await expect(forgetPlugDialog).toBeVisible();
+    await expect(forgetPlugDialog).toContainText('Shelly Plug S Gen3');
+    await forgetPlugDialog.getByRole('button', { name: 'Anuluj' }).click();
+    await expect(forgetPlugDialog).toHaveCount(0);
+
     await expectNoHorizontalOverflow(page);
     expect(consoleProblems).toEqual([]);
   });
