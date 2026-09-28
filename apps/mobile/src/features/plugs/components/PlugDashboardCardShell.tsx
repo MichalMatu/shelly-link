@@ -28,6 +28,8 @@ export type PlugDashboardCardShellProps = {
   leadingIconFresh?: boolean;
   leadingIconKey?: Key;
   openDetailsOnCardClick?: boolean;
+  showTelemetry?: boolean;
+  showRelayControls?: boolean;
   relayActionState?: boolean | undefined;
   relayControlsDisabled?: boolean;
   onNameChange(value: string): void;
@@ -67,6 +69,8 @@ export const PlugDashboardCardShell = ({
   leadingIconFresh = false,
   leadingIconKey,
   openDetailsOnCardClick = true,
+  showTelemetry = true,
+  showRelayControls = true,
   relayActionState,
   relayControlsDisabled = false,
   onNameChange,
@@ -119,44 +123,48 @@ export const PlugDashboardCardShell = ({
 
       {body}
 
-      <div
-        className="automation-card__plug-runtime"
-        aria-label={t('hardware.shelly.statusMetricsLabel')}
-      >
-        <span>{formatMetric(telemetry.powerW, ' W', 1)}</span>
-        <span>{formatMetric(telemetry.voltageV, ' V', 0)}</span>
-        <span>{formatEnergy(telemetry.energyWh)}</span>
-        <span>{telemetry.localTime ?? '—'}</span>
-      </div>
+      {showTelemetry && (
+        <div
+          className="automation-card__plug-runtime"
+          aria-label={t('hardware.shelly.statusMetricsLabel')}
+        >
+          <span>{formatMetric(telemetry.powerW, ' W', 1)}</span>
+          <span>{formatMetric(telemetry.voltageV, ' V', 0)}</span>
+          <span>{formatEnergy(telemetry.energyWh)}</span>
+          <span>{telemetry.localTime ?? '—'}</span>
+        </div>
+      )}
 
-      <div
-        className="automation-relay-actions automation-card__relay-actions"
-        role="group"
-        aria-label={t('dashboard.output')}
-      >
-        <button
-          className="automation-relay-button"
-          type="button"
-          aria-pressed={relayState === true}
-          disabled={busy || relayControlsDisabled}
-          onClick={() => {
-            if (requestedRelayState !== true) onTurnRelayOn();
-          }}
+      {showRelayControls && (
+        <div
+          className="automation-relay-actions automation-card__relay-actions"
+          role="group"
+          aria-label={t('dashboard.output')}
         >
-          ON
-        </button>
-        <button
-          className="automation-relay-button"
-          type="button"
-          aria-pressed={relayState === false}
-          disabled={busy || relayControlsDisabled}
-          onClick={() => {
-            if (requestedRelayState !== false) onTurnRelayOff();
-          }}
-        >
-          OFF
-        </button>
-      </div>
+          <button
+            className="automation-relay-button"
+            type="button"
+            aria-pressed={relayState === true}
+            disabled={busy || relayControlsDisabled}
+            onClick={() => {
+              if (requestedRelayState !== true) onTurnRelayOn();
+            }}
+          >
+            ON
+          </button>
+          <button
+            className="automation-relay-button"
+            type="button"
+            aria-pressed={relayState === false}
+            disabled={busy || relayControlsDisabled}
+            onClick={() => {
+              if (requestedRelayState !== false) onTurnRelayOff();
+            }}
+          >
+            OFF
+          </button>
+        </div>
+      )}
 
       {automationAction && (
         <button

@@ -771,7 +771,7 @@ describe('AutomationDashboardScreen', () => {
     rerenderKind('climate');
     expect(screen.getByText('Harmonogram dzienny')).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Lampa · Wi-Fi' }));
     expect(onOpenInstallation).toHaveBeenCalledWith(installation.id);
   });
 

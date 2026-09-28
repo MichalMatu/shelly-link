@@ -540,18 +540,20 @@ const expectClimateDetailHierarchy = async (page: Page) => {
 };
 
 const expectTimeDetailHierarchy = async (page: Page) => {
-  const [gridBox, liveBox, refreshBox] = await Promise.all([
-    requiredBox(page.locator('.installation-detail-grid')),
-    requiredBox(page.locator('.installation-detail-live')),
-    requiredBox(
-      page.locator('.installation-detail-header').getByRole('button', { name: 'Odśwież' })
-    )
+  const [tabsBox, surfaceBox, liveBox] = await Promise.all([
+    requiredBox(page.locator('.plug-detail-tabs')),
+    requiredBox(page.locator('.plug-detail-surface')),
+    requiredBox(page.locator('.installation-detail-live'))
   ]);
 
-  expect(Math.abs(liveBox.x - gridBox.x)).toBeLessThanOrEqual(2);
-  expect(Math.abs(liveBox.width - gridBox.width)).toBeLessThanOrEqual(2);
-  expect(refreshBox.width).toBeLessThanOrEqual(48);
-  await expect(page.getByRole('button', { name: /Wróć do automatyki/ })).toHaveCount(0);
+  expect(Math.abs(tabsBox.x - surfaceBox.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(tabsBox.width - surfaceBox.width)).toBeLessThanOrEqual(2);
+  expect(liveBox.x).toBeGreaterThanOrEqual(surfaceBox.x - 1);
+  expect(liveBox.x + liveBox.width).toBeLessThanOrEqual(
+    surfaceBox.x + surfaceBox.width + 1
+  );
+  await expect(page.locator('.installation-detail-header')).toHaveCount(0);
+  await expect(page.locator('.app-page-back-row')).toHaveCount(0);
 };
 
 const expectScriptPreviewFillsModalBody = async (page: Page, label: string) => {
@@ -889,8 +891,13 @@ for (const viewport of viewports) {
     const timeCard = page
       .getByRole('heading', { name: 'Shelly Plug S Gen3' })
       .locator('xpath=ancestor::article[1]');
-    await timeCard.getByRole('button', { name: 'Szczegóły' }).click();
-    await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toBeVisible();
+    await timeCard
+      .getByRole('button', { name: 'Szczegóły: Shelly Plug S Gen3 · Wi-Fi' })
+      .click();
+    await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toHaveCount(
+      0
+    );
     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toBeVisible();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '11-time-detail');
@@ -935,7 +942,9 @@ test('daily time automation completes pause, resume, edit and delete lifecycle',
   const timeCard = page
     .getByRole('heading', { name: 'Shelly Plug S Gen3' })
     .locator('xpath=ancestor::article[1]');
-  await timeCard.getByRole('button', { name: 'Szczegóły' }).click();
+  await timeCard
+    .getByRole('button', { name: 'Szczegóły: Shelly Plug S Gen3 · Wi-Fi' })
+    .click();
 
   await page.getByRole('button', { name: 'Wstrzymaj automatykę' }).click();
   await expect(

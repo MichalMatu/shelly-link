@@ -373,7 +373,7 @@ describe('AppRoutes navigation shell', () => {
     const installation = addTimeInstallation('edit-time');
     renderRoutes();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Lampa · Wi-Fi' }));
     expect(screen.getByText(`mock-installation-${installation.id}`)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-edit' }));
 

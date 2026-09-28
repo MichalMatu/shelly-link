@@ -1,11 +1,12 @@
-import { IconChevronRight, IconPlug } from '@tabler/icons-react';
+import { useTranslation } from '../app/i18n.js';
+import { PlugDashboardCardShell } from '../features/plugs/index.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import { useTimeAutomationRuntime } from '../flows/time-automation/useTimeAutomationRuntime.js';
-import { useTranslation } from '../app/i18n.js';
 
 type TimeAutomationCardProps = {
   installation: TimeInstalledAutomation;
   onOpen(installationId: string): void;
+  onNameChange(value: string): void;
 };
 
 const healthClass = (state: 'running' | 'paused' | 'attention' | 'offline' | 'loading') =>
@@ -21,7 +22,11 @@ const healthClass = (state: 'running' | 'paused' | 'attention' | 'offline' | 'lo
             : 'attention'
   }`;
 
-export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardProps) => {
+export const TimeAutomationCard = ({
+  installation,
+  onOpen,
+  onNameChange
+}: TimeAutomationCardProps) => {
   const { t } = useTranslation();
   const query = useTimeAutomationRuntime(installation);
   const state = query.isPending
@@ -40,25 +45,12 @@ export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardP
             ? t('dashboard.health.loading')
             : t('dashboard.health.attention');
 
-  return (
-    <article className="automation-card">
-      <header className="automation-card__header">
-        <span
-          className={`automation-card__leading-icon${
-            query.data?.relayOn === true ? ' automation-card__leading-icon--active' : ''
-          }`}
-          aria-hidden="true"
-        >
-          <IconPlug className="automation-card__icon" />
-        </span>
-        <div className="automation-card__identity">
-          <div className="automation-status-row">
-            <span className={healthClass(state)}>{stateLabel}</span>
-            <span className="automation-status-mode">{t('time.family')}</span>
-          </div>
-          <h2>{installation.shelly.name}</h2>
-        </div>
-      </header>
+  const body = (
+    <>
+      <div className="automation-status-row">
+        <span className={healthClass(state)}>{stateLabel}</span>
+        <span className="automation-status-mode">{t('time.family')}</span>
+      </div>
 
       <div className="automation-metrics" aria-label={t('time.scheduleSummary')}>
         <div>
@@ -85,17 +77,30 @@ export const TimeAutomationCard = ({ installation, onOpen }: TimeAutomationCardP
           <dd>{t('time.nativeSchedule')}</dd>
         </div>
       </dl>
+    </>
+  );
 
-      <footer className="automation-card__footer">
-        <button
-          className="automation-card__detail-link"
-          type="button"
-          onClick={() => onOpen(installation.id)}
-        >
-          <span>{t('dashboard.openSystem')}</span>
-          <IconChevronRight className="automation-card__detail-icon" aria-hidden="true" />
-        </button>
-      </footer>
-    </article>
+  return (
+    <PlugDashboardCardShell
+      name={installation.shelly.name}
+      relayState={query.data?.relayOn}
+      busy={query.isFetching}
+      telemetry={{
+        powerW: undefined,
+        voltageV: undefined,
+        energyWh: undefined,
+        localTime: query.data?.clock.localTime
+      }}
+      body={body}
+      className="automation-card automation-card--time"
+      detailContext="Wi-Fi"
+      openDetailsOnCardClick={false}
+      showTelemetry={false}
+      showRelayControls={false}
+      onNameChange={onNameChange}
+      onOpenDetails={() => onOpen(installation.id)}
+      onTurnRelayOn={() => undefined}
+      onTurnRelayOff={() => undefined}
+    />
   );
 };

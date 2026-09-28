@@ -566,7 +566,8 @@ describe('InstallationDetailScreen', () => {
     const rendered = renderDetail(saved.id, onBack);
 
     expect(await screen.findByText('Działa')).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Lampa' })).toBeVisible();
+    expect(screen.queryByRole('heading', { name: 'Lampa' })).toBeNull();
+    expect(screen.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
     expect(screen.getAllByText('08:00').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('20:00').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Natywny Shelly Schedule')).toBeVisible();

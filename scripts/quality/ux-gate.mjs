@@ -770,10 +770,6 @@ const checkPageHeaderContract = async () => {
     [
       'apps/mobile/src/app/AppSettingsScreen.tsx',
       'app-settings-screen__header app-page-header'
-    ],
-    [
-      'apps/mobile/src/screens/TimeInstallationDetail.tsx',
-      'installation-detail-header app-page-header'
     ]
   ];
 
