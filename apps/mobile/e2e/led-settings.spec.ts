@@ -476,6 +476,14 @@ test('plain saved Plug exposes the same LED settings without an installed automa
 
   await page.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }).click();
   await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
+    'aria-current',
+    'page'
+  );
+  await expect(page.getByText('Brak automatyzacji')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
   await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
   await expectVisualScreen(page, '17-plain-plug-settings');

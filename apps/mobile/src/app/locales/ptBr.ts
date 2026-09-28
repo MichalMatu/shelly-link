@@ -123,6 +123,8 @@ export const ptBr = {
     }
   },
   detail: {
+    noAutomationDescription:
+      'Este plugue não tem automação, então ainda não há dados de automação para mostrar.',
     notFoundTitle: 'Automação não encontrada',
     notFoundDescription: 'Esta automação não está mais salva no aplicativo.',
     backToDashboard: 'Voltar às automações',

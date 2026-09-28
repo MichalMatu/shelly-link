@@ -378,9 +378,15 @@ describe('AutomationDashboardScreen', () => {
     expect(within(plugCard).getByText('Nawilżacz salon')).toBeVisible();
     expect(useSavedPlugStore.getState().plugs[0]?.name).toBe('Nawilżacz salon');
     expect(await within(plugCard).findByText('0.0 W')).toBeVisible();
-    expect(within(plugCard).getByText('243 V')).toBeVisible();
+    const voltageMetric = within(plugCard).getByText('243 V');
+    expect(voltageMetric).toBeVisible();
     expect(within(plugCard).getByText('25.16 kWh')).toBeVisible();
     expect(within(plugCard).getByText('09:48')).toBeVisible();
+
+    expect(onOpenPlugSettings).not.toHaveBeenCalled();
+    fireEvent.click(voltageMetric);
+    expect(onOpenPlugSettings).toHaveBeenCalledWith('shellyplugsg3-dashboard-30');
+    onOpenPlugSettings.mockClear();
 
     fireEvent.click(
       within(plugCard).getByRole('button', {
@@ -389,12 +395,14 @@ describe('AutomationDashboardScreen', () => {
     );
     expect(onOpenPlugSettings).toHaveBeenCalledWith('shellyplugsg3-dashboard-30');
     expect(screen.queryByRole('dialog')).toBeNull();
+    onOpenPlugSettings.mockClear();
 
     const onButton = within(plugCard).getByRole('button', { name: 'ON' });
     const offButton = within(plugCard).getByRole('button', { name: 'OFF' });
     expect(offButton).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(onButton);
     await waitFor(() => expect(onButton).toHaveAttribute('aria-pressed', 'true'));
+    expect(onOpenPlugSettings).not.toHaveBeenCalled();
     expect(
       fetchMock.mock.calls.some(([, init]) => {
         const body = JSON.parse(String(init?.body ?? '{}')) as {
@@ -407,6 +415,7 @@ describe('AutomationDashboardScreen', () => {
 
     fireEvent.click(within(plugCard).getByRole('button', { name: 'Dodaj automatykę' }));
     expect(onAddAutomation).toHaveBeenCalledWith('climate', 'shellyplugsg3-dashboard-30');
+    expect(onOpenPlugSettings).not.toHaveBeenCalled();
   });
 
   it('refreshes plain plug power after relay telemetry settles without remounting', async () => {

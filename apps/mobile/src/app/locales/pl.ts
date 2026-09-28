@@ -123,6 +123,8 @@ export const pl = {
     }
   },
   detail: {
+    noAutomationDescription:
+      'To gniazdko nie ma automatyzacji, dlatego nie ma jeszcze danych automatyki do wyświetlenia.',
     notFoundTitle: 'Nie znaleziono automatyki',
     notFoundDescription: 'Ta automatyka nie jest już zapisana w aplikacji.',
     backToDashboard: 'Wróć do automatyki',

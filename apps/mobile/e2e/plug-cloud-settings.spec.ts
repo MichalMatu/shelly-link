@@ -154,6 +154,7 @@ const openPlugSettings = async (page: Page) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' }).click();
   await expect(page.getByRole('navigation', { name: 'Akcje gniazdka' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
   await expect(page.getByRole('heading', { name: 'Shelly Cloud' })).toBeVisible();
 };
 

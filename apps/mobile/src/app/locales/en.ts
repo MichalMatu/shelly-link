@@ -124,6 +124,8 @@ export const en = {
     }
   },
   detail: {
+    noAutomationDescription:
+      'This Plug has no automation, so there is no automation data to show.',
     notFoundTitle: 'Automation not found',
     notFoundDescription: 'This automation is no longer saved in the app.',
     backToDashboard: 'Back to automations',

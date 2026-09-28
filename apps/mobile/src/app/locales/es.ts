@@ -123,6 +123,8 @@ export const es = {
     }
   },
   detail: {
+    noAutomationDescription:
+      'Este enchufe no tiene automatización, por lo que todavía no hay datos de automatización que mostrar.',
     notFoundTitle: 'Automatización no encontrada',
     notFoundDescription: 'Esta automatización ya no está guardada en la aplicación.',
     backToDashboard: 'Volver a automatizaciones',

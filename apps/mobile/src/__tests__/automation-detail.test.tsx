@@ -387,10 +387,8 @@ describe('InstallationDetailScreen', () => {
       screen.getByRole('heading', { name: 'Nie znaleziono automatyki' })
     ).toBeVisible();
     expect(screen.queryByText('Shelly Link')).toBeNull();
-    const back = screen.getByRole('button', { name: 'Wstecz: Gniazdka' });
-    expect(back).toBeVisible();
-    fireEvent.click(back);
-    expect(onBack).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: 'Wstecz: Gniazdka' })).toBeNull();
+    expect(onBack).not.toHaveBeenCalled();
   });
 
   it('keeps physical Plug settings in the Device tab instead of a nested settings page', async () => {

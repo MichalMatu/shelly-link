@@ -43,6 +43,10 @@ const formatEnergy = (value: number | null | undefined): string => {
   return value >= 1000 ? `${(value / 1000).toFixed(2)} kWh` : `${value.toFixed(0)} Wh`;
 };
 
+const isInteractiveTarget = (target: EventTarget | null): boolean =>
+  target instanceof Element &&
+  target.closest('button, a, input, textarea, select, [contenteditable="true"]') !== null;
+
 export const PlugDashboardCardShell = ({
   name,
   relayState,
@@ -65,6 +69,9 @@ export const PlugDashboardCardShell = ({
     <article
       className="automation-card plug-card plug-card--unconfigured"
       aria-busy={busy}
+      onClick={(event) => {
+        if (!isInteractiveTarget(event.target)) onOpenDetails();
+      }}
     >
       <header className="automation-card__header">
         <span

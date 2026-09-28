@@ -37,7 +37,7 @@ export const BlePlugDetailScreen = ({
   );
   const detailQuery = useBlePlugReadOnlyDetailFlow(plug);
 
-  if (!plug) return <PlugDetailNotFound onBack={onBack} />;
+  if (!plug) return <PlugDetailNotFound />;
 
   const currentFirmware =
     detailQuery.data?.information.deviceInfo.firmwareId ?? plug.firmwareId ?? undefined;

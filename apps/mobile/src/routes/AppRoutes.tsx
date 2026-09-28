@@ -149,8 +149,6 @@ export const AppRoutes = () => {
   } else if (route.type === 'intent') {
     content = (
       <SetupIntentScreen
-        activeKind={route.sourceKind}
-        onCancel={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
         onSelect={(intent) => selectIntent(intent, route.sourceKind, route.shellyId)}
       />
     );
@@ -232,6 +230,11 @@ export const AppRoutes = () => {
             : null
         }
         buttonModeLocked={buttonModeLocked}
+        onAddAutomation={() => {
+          if (!wifiDevice) return;
+          selectShellyDevice(wifiDevice.id);
+          navigate({ type: 'intent', sourceKind: 'climate', shellyId: wifiDevice.id });
+        }}
         onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onOpenBleDiscovery={(deviceId) =>
           navigate({

@@ -22,22 +22,24 @@ export type WifiPlugDetailDevice = {
 export type WifiPlugDetailScreenProps = {
   device: WifiPlugDetailDevice | null;
   onBack(): void;
+  onAddAutomation(): void;
   onOpenBleDiscovery(deviceId: string): void;
   onRemove(deviceId: string): void;
   buttonModeLocked?: boolean;
 };
 
-const disabledWifiDetailTabs: readonly PlugDetailTab[] = ['automation', 'script'];
-
 export const WifiPlugDetailScreen = ({
   device,
   onBack,
+  onAddAutomation,
   onOpenBleDiscovery,
   onRemove,
   buttonModeLocked = false
 }: WifiPlugDetailScreenProps) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<PlugDetailTab>('device');
+  const [activeTab, setActiveTab] = useState<PlugDetailTab>(() =>
+    buttonModeLocked ? 'device' : 'automation'
+  );
   const [deleteOpen, setDeleteOpen] = useState(false);
   const target = device
     ? { deviceId: device.deviceId, baseUrl: device.baseUrl }
@@ -46,18 +48,34 @@ export const WifiPlugDetailScreen = ({
     enabled: device !== null && (activeTab === 'ble' || activeTab === 'info')
   });
 
-  if (!device) return <PlugDetailNotFound onBack={onBack} />;
+  if (!device) return <PlugDetailNotFound />;
 
   const bluetoothState = informationQuery.data?.status.bluetooth;
+  const disabledTabs: readonly PlugDetailTab[] = buttonModeLocked
+    ? ['automation', 'script']
+    : ['script'];
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <PlugDetailTop
-        tabs={[activeTab, setActiveTab]}
-        disabledTabs={disabledWifiDetailTabs}
-      />
+      <PlugDetailTop tabs={[activeTab, setActiveTab]} disabledTabs={disabledTabs} />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
+        {!buttonModeLocked && activeTab === 'automation' && (
+          <section className="plug-detail-framed-section">
+            <h3 className="plug-detail-framed-section__title">
+              {t('dashboard.emptyCategory')}
+            </h3>
+            <p className="installation-detail-note">
+              {t('detail.noAutomationDescription')}
+            </p>
+            <div className="plug-settings-actions">
+              <button className="primary-action" type="button" onClick={onAddAutomation}>
+                {t('dashboard.addAutomation')}
+              </button>
+            </div>
+          </section>
+        )}
+
         {activeTab === 'ble' && (
           <section className="plug-detail-framed-section">
             <h3 className="plug-detail-framed-section__title">{t('common.bluetooth')}</h3>

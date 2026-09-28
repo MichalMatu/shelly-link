@@ -92,7 +92,7 @@ export const InstallationDetailScreen = ({
     ]);
   }, []);
 
-  if (!installation) return <PlugDetailNotFound onBack={onBack} />;
+  if (!installation) return <PlugDetailNotFound />;
 
   if (installation.kind === 'time') {
     return (

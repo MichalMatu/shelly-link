@@ -125,6 +125,8 @@ export const it = {
     }
   },
   detail: {
+    noAutomationDescription:
+      'Questa presa non ha un’automazione, quindi non ci sono ancora dati di automazione da mostrare.',
     notFoundTitle: 'Automazione non trovata',
     notFoundDescription: 'Questa automazione non è più salvata nell’app.',
     backToDashboard: 'Torna alle automazioni',

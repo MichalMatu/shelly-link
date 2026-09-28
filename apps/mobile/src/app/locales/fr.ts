@@ -127,6 +127,8 @@ export const fr = {
     }
   },
   detail: {
+    noAutomationDescription:
+      'Cette prise n’a pas d’automatisation, il n’y a donc pas encore de données d’automatisation à afficher.',
     notFoundTitle: 'Automatisation introuvable',
     notFoundDescription:
       'Cette automatisation n’est plus enregistrée dans l’application.',

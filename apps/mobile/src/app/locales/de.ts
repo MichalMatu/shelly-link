@@ -125,6 +125,8 @@ export const de = {
     }
   },
   detail: {
+    noAutomationDescription:
+      'Dieser Plug hat keine Automation, daher gibt es noch keine Automationsdaten anzuzeigen.',
     notFoundTitle: 'Automation nicht gefunden',
     notFoundDescription: 'Diese Automation ist nicht mehr in der App gespeichert.',
     backToDashboard: 'Zurück zu Automationen',

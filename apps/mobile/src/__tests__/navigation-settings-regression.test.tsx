@@ -78,7 +78,7 @@ describe('navigation and settings regression coverage', () => {
     expect(content?.contains(navigation ?? null)).toBe(false);
   });
 
-  it('returns visibly from Add automation to an existing dashboard', () => {
+  it('returns from Add automation through persistent navigation without a duplicate page back', () => {
     const config = createDefaultShellyThermostatConfig(
       'xiaomi_lywsd03mmc_bthome_v2',
       'heating'
@@ -100,16 +100,13 @@ describe('navigation and settings regression coverage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'add-automation-test' }));
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    expect(document.querySelector('.app-page-back-row .setup-context__back')).toBeNull();
 
-    const back = document.querySelector<HTMLButtonElement>(
-      '.app-page-back-row .setup-context__back'
-    );
-    expect(back).not.toBeNull();
-    fireEvent.click(back!);
+    fireEvent.click(screen.getByRole('button', { name: 'Gniazdka' }));
     expect(screen.getByRole('heading', { name: 'dashboard-test' })).toBeVisible();
   });
 
-  it('opens a saved Plug in the shared five-tab detail shell', async () => {
+  it('opens a plain saved Plug with an Automation empty state and keeps nested back navigation', async () => {
     useSavedPlugStore.getState().saveWifiDevice({
       physicalId: 'plug-settings-test',
       name: 'Nawilżacz',
@@ -163,12 +160,20 @@ describe('navigation and settings regression coverage', () => {
     expect(detailShell?.firstElementChild).toBe(detailTabs);
     expect(detailTabs?.nextElementSibling).toBe(detailSurface);
     expect(detailShell?.querySelector('.installation-detail-identity')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Automatyka' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Skrypt' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Automatyka' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
+    expect(screen.getByRole('button', { name: 'Skrypt' })).toBeDisabled();
+    expect(screen.getByText('Brak automatyzacji')).toBeVisible();
+    expect(
+      screen.getByText(
+        'To gniazdko nie ma automatyzacji, dlatego nie ma jeszcze danych automatyki do wyświetlenia.'
+      )
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Bluetooth' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Informacje' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Gniazdka' })).toHaveAttribute(
@@ -195,7 +200,7 @@ describe('navigation and settings regression coverage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Nawilżacz' }));
     await screen.findByRole('button', { name: 'Ustawienia gniazdka' });
-    expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
       'aria-current',
       'page'
     );
@@ -204,5 +209,10 @@ describe('navigation and settings regression coverage', () => {
     expect(
       screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
     ).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Automatyka' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
+    expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    expect(document.querySelector('.app-page-back-row .setup-context__back')).toBeNull();
   });
 });

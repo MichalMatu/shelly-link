@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import { AppPageBack } from '../components/AppPageBack.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import { RefreshIconButton } from '../components/RefreshIconButton.js';
 import {
@@ -115,7 +114,6 @@ export const TimeInstallationDetail = ({
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <AppPageBack label={t('dashboard.climateTab')} onBack={onBack} />
       <header className="demo-header installation-detail-header app-page-header">
         <div>
           <div className="automation-status-row">
