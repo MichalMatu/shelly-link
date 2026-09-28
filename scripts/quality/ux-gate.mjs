@@ -906,15 +906,13 @@ const checkDisclosureContract = async () => {
 };
 
 const checkSegmentedControlContract = async () => {
-  const usageContracts = [
-    [
-      'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
-      'shelly-add-tabs lcl-segmented-control'
-    ],
-    [
-      'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
-      'shelly-add-tabs lcl-segmented-control'
-    ],
+  const componentPath = 'packages/ui/src/primitives/SegmentedControl.tsx';
+  const uiIndexPath = 'packages/ui/src/index.ts';
+  const componentUsagePaths = [
+    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
+  ];
+  const geometryUsageContracts = [
     [
       'apps/mobile/src/features/plugs/components/PlugDetailTabs.tsx',
       'plug-detail-tabs lcl-segmented-control'
@@ -925,106 +923,49 @@ const checkSegmentedControlContract = async () => {
     ]
   ];
 
-  for (const [path, rootClass] of usageContracts) {
+  const [componentSource, uiIndexSource] = await Promise.all([
+    readRepoFile(componentPath),
+    readRepoFile(uiIndexPath)
+  ]);
+  if (
+    !componentSource.includes('export const SegmentedControl') ||
+    !componentSource.includes('lcl-segmented-control') ||
+    !componentSource.includes('lcl-segmented-control__item') ||
+    !componentSource.includes('role="tablist"') ||
+    !componentSource.includes('role="tab"')
+  ) {
+    addFailure(
+      componentPath,
+      'shared SegmentedControl must own add-device tablist structure and lcl-segmented-control geometry'
+    );
+  }
+  if (!uiIndexSource.includes("export * from './primitives/SegmentedControl.js';")) {
+    addFailure(uiIndexPath, 'shared SegmentedControl must be exported from @lcl/ui');
+  }
+
+  for (const path of componentUsagePaths) {
+    const source = await readRepoFile(path);
+    if (
+      !source.includes('<SegmentedControl') ||
+      !source.includes('className="shelly-add-tabs"') ||
+      !source.includes('itemClassName="shelly-add-tabs__tab"') ||
+      source.includes('shelly-add-tabs lcl-segmented-control') ||
+      source.includes('shelly-add-tabs__tab lcl-segmented-control__item')
+    ) {
+      addFailure(
+        path,
+        'add-device segmented tabs must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
+      );
+    }
+  }
+
+  for (const [path, rootClass] of geometryUsageContracts) {
     const source = await readRepoFile(path);
     if (!source.includes(rootClass) || !source.includes('lcl-segmented-control__item')) {
       addFailure(
         path,
         'migrated segmented navigation must use shared lcl-segmented-control geometry'
       );
-    }
-  }
-
-  const uiIndexPath = 'packages/ui/src/index.ts';
-  const primitivePath = 'packages/ui/src/primitives/SegmentedControl.css';
-  const [uiIndex, primitiveCss] = await Promise.all([
-    readRepoFile(uiIndexPath),
-    readRepoFile(primitivePath)
-  ]);
-  if (!uiIndex.includes("import './primitives/SegmentedControl.css';")) {
-    addFailure(uiIndexPath, 'SegmentedControl.css must be loaded by @lcl/ui');
-  }
-  if (
-    !primitiveCss.includes('.lcl-segmented-control {') ||
-    !primitiveCss.includes('.lcl-segmented-control__item {')
-  ) {
-    addFailure(
-      primitivePath,
-      'shared segmented-control root and item geometry is required'
-    );
-  }
-
-  const cssContracts = [
-    [
-      'apps/mobile/src/theme/theme.css',
-      '.shelly-add-tabs',
-      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
-    ],
-    [
-      'apps/mobile/src/theme/theme.css',
-      '.setup-top-nav',
-      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
-    ],
-    [
-      'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
-      '.plug-detail-tabs',
-      ['background:', 'border:', 'border-radius:', 'gap:', 'padding:']
-    ],
-    [
-      'apps/mobile/src/theme/theme.css',
-      '.shelly-add-tabs__tab',
-      [
-        'background:',
-        'border:',
-        'border-radius:',
-        'color:',
-        'cursor:',
-        'min-height:',
-        'min-width:'
-      ]
-    ],
-    [
-      'apps/mobile/src/theme/theme.css',
-      '.setup-top-nav__item',
-      [
-        'background:',
-        'border:',
-        'border-radius:',
-        'color:',
-        'cursor:',
-        'min-height:',
-        'min-width:'
-      ]
-    ],
-    [
-      'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
-      '.plug-detail-tabs__item',
-      [
-        'background:',
-        'border:',
-        'border-radius:',
-        'color:',
-        'cursor:',
-        'min-height:',
-        'min-width:'
-      ]
-    ]
-  ];
-
-  for (const [path, selector, blockedProperties] of cssContracts) {
-    const source = await readRepoFile(path);
-    const block = cssDeclarationBlock(source, selector);
-    if (block === null) {
-      addFailure(path, `cannot find migrated segmented selector ${selector}`);
-      continue;
-    }
-    for (const property of blockedProperties) {
-      if (block.includes(property)) {
-        addFailure(
-          path,
-          `${selector} re-declares shared segmented geometry (${property.slice(0, -1)})`
-        );
-      }
     }
   }
 };

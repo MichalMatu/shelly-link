@@ -1,3 +1,4 @@
+import { SegmentedControl } from '@lcl/ui';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 
@@ -83,30 +84,17 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
 
   return (
     <div className="device-add-page__body">
-      <div
-        className="shelly-add-tabs lcl-segmented-control"
-        role="tablist"
-        aria-label={t('hardware.shelly.add')}
-      >
-        <button
-          className="shelly-add-tabs__tab lcl-segmented-control__item"
-          type="button"
-          role="tab"
-          aria-selected={activeSection === 'scan'}
-          onClick={() => selectSection('scan')}
-        >
-          {t('hardware.shelly.scanNetwork')}
-        </button>
-        <button
-          className="shelly-add-tabs__tab lcl-segmented-control__item"
-          type="button"
-          role="tab"
-          aria-selected={activeSection === 'manual'}
-          onClick={() => selectSection('manual')}
-        >
-          {t('hardware.shelly.addManual')}
-        </button>
-      </div>
+      <SegmentedControl
+        ariaLabel={t('hardware.shelly.add')}
+        className="shelly-add-tabs"
+        itemClassName="shelly-add-tabs__tab"
+        value={activeSection}
+        options={[
+          { value: 'scan', label: t('hardware.shelly.scanNetwork') },
+          { value: 'manual', label: t('hardware.shelly.addManual') }
+        ]}
+        onChange={selectSection}
+      />
 
       {activeSection === 'manual' && (
         <section

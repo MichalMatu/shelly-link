@@ -1,6 +1,6 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
-import { Modal } from '@lcl/ui';
+import { Modal, SegmentedControl } from '@lcl/ui';
 import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { IconPlus, IconTemperature } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
@@ -267,31 +267,21 @@ export const SensorSetupPage = ({
         className="device-add-page sensor-add-page"
         aria-label={t('hardware.sensor.add')}
       >
-        <div
-          className="shelly-add-tabs lcl-segmented-control"
-          role="tablist"
-          aria-label={t('hardware.sensor.add')}
-        >
-          <button
-            className="shelly-add-tabs__tab lcl-segmented-control__item"
-            type="button"
-            role="tab"
-            aria-selected={addMode === 'phone-scan'}
-            title={t('hardware.sensor.scanPhoneTitle')}
-            onClick={() => selectAddMode('phone-scan')}
-          >
-            {t('hardware.sensor.scanBle')}
-          </button>
-          <button
-            className="shelly-add-tabs__tab lcl-segmented-control__item"
-            type="button"
-            role="tab"
-            aria-selected={addMode === 'manual'}
-            onClick={() => selectAddMode('manual')}
-          >
-            {t('hardware.shelly.addManual')}
-          </button>
-        </div>
+        <SegmentedControl
+          ariaLabel={t('hardware.sensor.add')}
+          className="shelly-add-tabs"
+          itemClassName="shelly-add-tabs__tab"
+          value={addMode}
+          options={[
+            {
+              value: 'phone-scan',
+              label: t('hardware.sensor.scanBle'),
+              title: t('hardware.sensor.scanPhoneTitle')
+            },
+            { value: 'manual', label: t('hardware.shelly.addManual') }
+          ]}
+          onChange={selectAddMode}
+        />
         {addMode === 'phone-scan' ? (
           scanContent
         ) : (
