@@ -45,8 +45,7 @@ export interface HistoryCodecError {
 }
 
 export type HistoryCodecResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: HistoryCodecError };
+  { ok: true; value: T } | { ok: false; error: HistoryCodecError };
 
 export interface HistoryKvsItem {
   key: string;
@@ -74,10 +73,7 @@ type EncodedRecord = [
   currentMilliA: number | null
 ];
 
-type EncodedSegment = [
-  version: typeof HISTORY_FORMAT_VERSION,
-  records: EncodedRecord[]
-];
+type EncodedSegment = [version: typeof HISTORY_FORMAT_VERSION, records: EncodedRecord[]];
 
 type EncodedMeta = [
   version: typeof HISTORY_FORMAT_VERSION,
@@ -118,28 +114,20 @@ const validShortText = (value: string | null, allowNull: boolean): boolean =>
     ? allowNull
     : value.length > 0 && value.length <= 24 && !/[\u0000-\u001f]/.test(value);
 
-const validateRecord = (
-  record: HistoryRecord
-): HistoryCodecResult<HistoryRecord> => {
-  if (
-    record.timestampUnixSec !== null &&
-    !isIntegerAtLeast(record.timestampUnixSec, 0)
-  ) {
+const validateRecord = (record: HistoryRecord): HistoryCodecResult<HistoryRecord> => {
+  if (record.timestampUnixSec !== null && !isIntegerAtLeast(record.timestampUnixSec, 0)) {
     return failure('invalid-value', 'History timestamp is invalid.');
   }
   if (!isIntegerAtLeast(record.uptimeSec, 0)) {
     return failure('invalid-value', 'History uptime is invalid.');
   }
-  if (
-    record.temperatureC !== null &&
-    !isFiniteInRange(record.temperatureC, -100, 200)
-  ) {
-    return failure('invalid-value', 'History temperature is outside the supported range.');
+  if (record.temperatureC !== null && !isFiniteInRange(record.temperatureC, -100, 200)) {
+    return failure(
+      'invalid-value',
+      'History temperature is outside the supported range.'
+    );
   }
-  if (
-    record.humidityPct !== null &&
-    !isFiniteInRange(record.humidityPct, 0, 100)
-  ) {
+  if (record.humidityPct !== null && !isFiniteInRange(record.humidityPct, 0, 100)) {
     return failure('invalid-value', 'History humidity is outside the supported range.');
   }
   if (record.vpdKpa !== null && !isFiniteInRange(record.vpdKpa, 0, 20)) {
@@ -329,10 +317,7 @@ export const encodeHistorySegment = (
     records.push(encodeRecord(record));
   }
 
-  const text = JSON.stringify([
-    HISTORY_FORMAT_VERSION,
-    records
-  ] satisfies EncodedSegment);
+  const text = JSON.stringify([HISTORY_FORMAT_VERSION, records] satisfies EncodedSegment);
   return text.length <= HISTORY_MAX_VALUE_CHARS
     ? success(text)
     : failure('value-too-long', 'History segment exceeds the Shelly KVS value limit.');
@@ -399,7 +384,11 @@ export const appendHistoryRecord = (
 export const historyRecordChangedEnough = (
   previous: HistoryRecord | null,
   next: HistoryRecord,
-  thresholds: { temperatureDeltaC: number; humidityDeltaPct: number; vpdDeltaKpa: number } = {
+  thresholds: {
+    temperatureDeltaC: number;
+    humidityDeltaPct: number;
+    vpdDeltaKpa: number;
+  } = {
     temperatureDeltaC: 0.3,
     humidityDeltaPct: 1,
     vpdDeltaKpa: 0.05
