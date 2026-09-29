@@ -5,6 +5,7 @@ import {
   generateShellyThermostatScript,
   normalizeConfig,
   stableStringify,
+  SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES,
   type ShellyThermostatConfig
 } from '../index.js';
 
@@ -23,7 +24,7 @@ const modes = [
 ] as const satisfies readonly RuleMode[];
 const vpdOptions = [false, true] as const;
 
-const runtimeBudgetBytes = 8_000;
+const runtimeBudgetBytes = SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES;
 
 const byteLength = (value: string): number => new TextEncoder().encode(value).length;
 

@@ -3,7 +3,8 @@ import {
   createDefaultShellyThermostatConfig,
   decodeShellyThermostatScript,
   generateShellyBleDiscoveryScript,
-  generateShellyThermostatScript
+  generateShellyThermostatScript,
+  SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES
 } from '../index.js';
 
 const byteLength = (value: string): number => new TextEncoder().encode(value).length;
@@ -340,7 +341,7 @@ describe('generateShellyThermostatScript', () => {
       }
     });
 
-    expect(byteLength(script)).toBeLessThanOrEqual(8000);
+    expect(byteLength(script)).toBeLessThanOrEqual(SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES);
     expect(() => new Function(script)).not.toThrow();
   });
 
@@ -365,7 +366,7 @@ describe('generateShellyThermostatScript', () => {
           additionalSensors: [sensor(2), sensor(3), sensor(4)]
         }
       })
-    ).toThrow(/maximum is 8000/);
+    ).toThrow(new RegExp(`maximum is ${SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES}`));
   });
 
   it('returns null for unsupported or malformed thermostat scripts', () => {
@@ -412,7 +413,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).not.toContain('parseBthomeV2Payload');
     expect(script).not.toContain('readUint16LE');
     expect(script).not.toContain('function dataLength');
-    expect(byteLength(script)).toBeLessThanOrEqual(8000);
+    expect(byteLength(script)).toBeLessThanOrEqual(SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES);
     expect(() => new Function(script)).not.toThrow();
   });
 
@@ -897,7 +898,7 @@ describe('generateShellyThermostatScript', () => {
     expect(script).not.toContain('BTHome.parseData');
     expect(script).not.toContain('parseBthomeV2Payload');
     expect(script).not.toContain('xiaomi_lywsd03mmc_bthome_v2');
-    expect(byteLength(script)).toBeLessThanOrEqual(8000);
+    expect(byteLength(script)).toBeLessThanOrEqual(SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES);
     expect(() => new Function(script)).not.toThrow();
   });
 
