@@ -34,7 +34,10 @@ export interface ShellyKvsPage {
 
 const validateKey = (key: string): Result<string> => {
   if (key.length === 0 || key.length > 42) {
-    return { ok: false, error: validationError('KVS key must contain 1 to 42 characters.') };
+    return {
+      ok: false,
+      error: validationError('KVS key must contain 1 to 42 characters.')
+    };
   }
   return { ok: true, value: key };
 };
@@ -58,7 +61,10 @@ const parseSetResult = (value: unknown): Result<ShellyKvsSetResult> => {
     return { ok: false, error: validationError('Invalid KVS.Set response.') };
   }
   const candidate = value as { etag?: unknown; rev?: unknown };
-  if (typeof candidate.etag !== 'string' || !isNonNegativeInteger(candidate.rev)) {
+  if (
+    typeof candidate.etag !== 'string' ||
+    !isNonNegativeInteger(candidate.rev)
+  ) {
     return { ok: false, error: validationError('Invalid KVS.Set response.') };
   }
   return { ok: true, value: { etag: candidate.etag, rev: candidate.rev } };
@@ -66,7 +72,10 @@ const parseSetResult = (value: unknown): Result<ShellyKvsSetResult> => {
 
 const parseDeleteResult = (value: unknown): Result<ShellyKvsDeleteResult> => {
   if (typeof value !== 'object' || value === null) {
-    return { ok: false, error: validationError('Invalid KVS.Delete response.') };
+    return {
+      ok: false,
+      error: validationError('Invalid KVS.Delete response.')
+    };
   }
   const rev = (value as { rev?: unknown }).rev;
   return isNonNegativeInteger(rev)
@@ -129,7 +138,9 @@ const parseGetManyItems = (value: unknown): readonly ShellyKvsItem[] | null => {
     for (const [key, rawItem] of Object.entries(value)) {
       if (typeof rawItem !== 'object' || rawItem === null) return null;
       const candidate = rawItem as { etag?: unknown; value?: unknown };
-      if (typeof candidate.etag !== 'string' || !('value' in candidate)) return null;
+      if (typeof candidate.etag !== 'string' || !('value' in candidate)) {
+        return null;
+      }
       items.push({ key, etag: candidate.etag, value: candidate.value });
     }
     return items;
@@ -139,16 +150,26 @@ const parseGetManyItems = (value: unknown): readonly ShellyKvsItem[] | null => {
 
 const parseGetManyResult = (value: unknown): Result<ShellyKvsPage> => {
   if (typeof value !== 'object' || value === null) {
-    return { ok: false, error: validationError('Invalid KVS.GetMany response.') };
+    return {
+      ok: false,
+      error: validationError('Invalid KVS.GetMany response.')
+    };
   }
-  const candidate = value as { items?: unknown; offset?: unknown; total?: unknown };
+  const candidate = value as {
+    items?: unknown;
+    offset?: unknown;
+    total?: unknown;
+  };
   const items = parseGetManyItems(candidate.items);
   if (
     items === null ||
     !isNonNegativeInteger(candidate.offset) ||
     !isNonNegativeInteger(candidate.total)
   ) {
-    return { ok: false, error: validationError('Invalid KVS.GetMany response.') };
+    return {
+      ok: false,
+      error: validationError('Invalid KVS.GetMany response.')
+    };
   }
   return {
     ok: true,
@@ -169,7 +190,11 @@ export class ShellyKvsClient {
     return response.ok ? parseKvsValue(response.value) : response;
   }
 
-  async set(key: string, value: unknown, etag?: string): Promise<Result<ShellyKvsSetResult>> {
+  async set(
+    key: string,
+    value: unknown,
+    etag?: string
+  ): Promise<Result<ShellyKvsSetResult>> {
     const validKey = validateKey(key);
     if (!validKey.ok) return validKey;
     const params: { key: string; value: unknown; etag?: string } = {
@@ -184,7 +209,10 @@ export class ShellyKvsClient {
     return response.ok ? parseSetResult(response.value) : response;
   }
 
-  async delete(key: string, etag?: string): Promise<Result<ShellyKvsDeleteResult>> {
+  async delete(
+    key: string,
+    etag?: string
+  ): Promise<Result<ShellyKvsDeleteResult>> {
     const validKey = validateKey(key);
     if (!validKey.ok) return validKey;
     const params: { key: string; etag?: string } = { key: validKey.value };
@@ -206,7 +234,10 @@ export class ShellyKvsClient {
 
   async getMany(match = '*', offset = 0): Promise<Result<ShellyKvsPage>> {
     if (!isNonNegativeInteger(offset)) {
-      return { ok: false, error: validationError('KVS.GetMany offset must be non-negative.') };
+      return {
+        ok: false,
+        error: validationError('KVS.GetMany offset must be non-negative.')
+      };
     }
     const response = await this.transport.call<unknown>({
       method: RPC_METHODS.KvsGetMany,
@@ -215,9 +246,15 @@ export class ShellyKvsClient {
     return response.ok ? parseGetManyResult(response.value) : response;
   }
 
-  async getAllMatching(match: string, maxPages = 50): Promise<Result<readonly ShellyKvsItem[]>> {
+  async getAllMatching(
+    match: string,
+    maxPages = 50
+  ): Promise<Result<readonly ShellyKvsItem[]>> {
     if (!isNonNegativeInteger(maxPages) || maxPages < 1) {
-      return { ok: false, error: validationError('KVS page limit must be a positive integer.') };
+      return {
+        ok: false,
+        error: validationError('KVS page limit must be a positive integer.')
+      };
     }
     const all: ShellyKvsItem[] = [];
     let offset = 0;
@@ -228,10 +265,16 @@ export class ShellyKvsClient {
       if (all.length >= page.value.total) return { ok: true, value: all };
       const nextOffset = page.value.offset + page.value.items.length;
       if (nextOffset <= offset) {
-        return { ok: false, error: validationError('KVS.GetMany pagination made no progress.') };
+        return {
+          ok: false,
+          error: validationError('KVS.GetMany pagination made no progress.')
+        };
       }
       offset = nextOffset;
     }
-    return { ok: false, error: validationError('KVS.GetMany exceeded the page safety limit.') };
+    return {
+      ok: false,
+      error: validationError('KVS.GetMany exceeded the page safety limit.')
+    };
   }
 }
