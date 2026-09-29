@@ -196,6 +196,7 @@ describe('History v2 KVS codec', () => {
 
     const invalidMeta: HistoryMeta[] = [
       { ...valid, version: 1 as typeof HISTORY_FORMAT_VERSION },
+      { ...valid, slots: 'bad' as unknown as number },
       { ...valid, slots: 0 },
       { ...valid, slots: 1.5 },
       { ...valid, slots: HISTORY_MAX_SLOT_COUNT + 1 },
@@ -364,23 +365,37 @@ describe('History v2 KVS codec', () => {
     expect(corruptMeta.invalidKeys).toEqual([HISTORY_KVS_META_KEY]);
   });
 
-  it('skips missing ring slots without inventing records', () => {
+  it('skips missing and zero-length ring windows without inventing records', () => {
     const meta = encodeHistoryMeta({
       version: HISTORY_FORMAT_VERSION,
       slots: 3,
       nextSlot: 0,
       validSlots: 2
     });
-    expect(meta.ok).toBe(true);
-    if (!meta.ok) return;
+    const emptyMeta = encodeHistoryMeta({
+      version: HISTORY_FORMAT_VERSION,
+      slots: 3,
+      nextSlot: 0,
+      validSlots: 0
+    });
+    expect(meta.ok && emptyMeta.ok).toBe(true);
+    if (!meta.ok || !emptyMeta.ok) return;
 
-    const decoded = decodeHistoryKvsItems([
-      { key: HISTORY_KVS_META_KEY, value: meta.value },
-      {
-        key: historySegmentKey(1),
-        value: encodedSegment(record({ timestampUnixSec: 1 }))
-      }
-    ]);
-    expect(decoded.segments.map(({ slot }) => slot)).toEqual([1]);
+    const onlySlot = {
+      key: historySegmentKey(1),
+      value: encodedSegment(record({ timestampUnixSec: 1 }))
+    };
+    expect(
+      decodeHistoryKvsItems([
+        { key: HISTORY_KVS_META_KEY, value: meta.value },
+        onlySlot
+      ]).segments.map(({ slot }) => slot)
+    ).toEqual([1]);
+    expect(
+      decodeHistoryKvsItems([
+        { key: HISTORY_KVS_META_KEY, value: emptyMeta.value },
+        onlySlot
+      ]).segments
+    ).toEqual([]);
   });
 });
