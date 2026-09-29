@@ -109,10 +109,17 @@ const isFiniteInRange = (value: number, minimum: number, maximum: number): boole
 const isNullableInteger = (value: unknown): value is number | null =>
   value === null || (typeof value === 'number' && Number.isInteger(value));
 
+const hasControlCharacter = (value: string): boolean => {
+  for (let index = 0; index < value.length; index += 1) {
+    if (value.charCodeAt(index) < 32) return true;
+  }
+  return false;
+};
+
 const validShortText = (value: string | null, allowNull: boolean): boolean =>
   value === null
     ? allowNull
-    : value.length > 0 && value.length <= 24 && !/[\u0000-\u001f]/.test(value);
+    : value.length > 0 && value.length <= 24 && !hasControlCharacter(value);
 
 const validateRecord = (record: HistoryRecord): HistoryCodecResult<HistoryRecord> => {
   if (record.timestampUnixSec !== null && !isIntegerAtLeast(record.timestampUnixSec, 0)) {
