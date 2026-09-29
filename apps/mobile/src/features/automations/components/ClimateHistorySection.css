@@ -51,7 +51,8 @@
 
 .climate-history__metrics {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--lcl-spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
   margin: 0;
 }
 
@@ -63,10 +64,6 @@
   padding: var(--lcl-spacing-sm) 0;
 }
 
-.climate-history__metrics > div:nth-child(even) {
-  padding-left: var(--lcl-spacing-md);
-}
-
 .climate-history__metrics dt,
 .climate-history__metrics dd {
   margin: 0;
@@ -75,14 +72,4 @@
 .climate-history__metrics dd {
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
-}
-
-@media (max-width: 359px) {
-  .climate-history__metrics {
-    grid-template-columns: 1fr;
-  }
-
-  .climate-history__metrics > div:nth-child(even) {
-    padding-left: 0;
-  }
 }
