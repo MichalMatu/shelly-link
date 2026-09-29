@@ -19,8 +19,6 @@ export const readClimateHistory = async (
 
   return {
     ok: true,
-    value: decodeHistoryKvsItems(
-      response.value.map(({ key, value }) => ({ key, value }))
-    )
+    value: decodeHistoryKvsItems(response.value.map(({ key, value }) => ({ key, value })))
   };
 };
