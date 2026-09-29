@@ -19,6 +19,9 @@ import {
 
 const encoder = new TextEncoder();
 
+const createTestRpcShellyClient = (transport: ShellyRpcTransport): RpcShellyClient =>
+  new RpcShellyClient(transport, { sleepMs: async () => undefined });
+
 interface RecordedScript {
   id: number;
   name: string;
@@ -330,7 +333,7 @@ describe('RpcShellyClient', () => {
   it('sends the expected RPC request shape during script install', async () => {
     const transport = new RecordingTransport();
     transport.relayOn = true;
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.installScript(createInstallPlan('print("safe off");'));
 
     expect(result.ok).toBe(true);
@@ -421,7 +424,7 @@ describe('RpcShellyClient', () => {
   it('refuses a fresh exclusive install when relay OFF cannot be established', async () => {
     const transport = new RecordingTransport({ failOffCommand: true });
     transport.relayOn = true;
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     const result = await client.installScript(createInstallPlan('print("new");'));
 
@@ -433,7 +436,7 @@ describe('RpcShellyClient', () => {
 
   it('installs the BLE discovery script without enabling run on boot', async () => {
     const transport = new RecordingTransport();
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.installScript(
       createBleDiscoveryInstallPlan('print("scan");')
     );
@@ -472,7 +475,7 @@ describe('RpcShellyClient', () => {
         }
       ]
     });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     transport.relayOn = true;
     const result = await client.installScript(createInstallPlan('print("new");'));
 
@@ -526,7 +529,7 @@ describe('RpcShellyClient', () => {
       failOffCommand: true
     });
     transport.relayOn = true;
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     const result = await client.installScript(createInstallPlan('print("new");'));
 
@@ -542,7 +545,7 @@ describe('RpcShellyClient', () => {
   it('hashes the installed automation from code only', async () => {
     const code = 'print("new");';
     const transport = new RecordingTransport();
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.installScript(createInstallPlan(code));
 
     expect(result.ok).toBe(true);
@@ -552,7 +555,7 @@ describe('RpcShellyClient', () => {
 
   it('uploads script code in 1024-byte chunks by default', async () => {
     const transport = new RecordingTransport();
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.installScript(createInstallPlan('x'.repeat(2050)));
 
     expect(result.ok).toBe(true);
@@ -569,7 +572,7 @@ describe('RpcShellyClient', () => {
 
   it('blocks install when Matter is enabled before script upload starts', async () => {
     const transport = new RecordingTransport({ matterEnabled: true });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.installScript(createInstallPlan('print("demo");'));
 
     expect(result.ok).toBe(false);
@@ -585,7 +588,7 @@ describe('RpcShellyClient', () => {
 
   it('uses Script.List rather than a synthetic GetStatus Scripts component', async () => {
     const transport = new RecordingTransport({ scriptComponent: null });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     const status = await client.getStatus();
     const install = await client.installScript(createInstallPlan('print("demo");'));
@@ -596,7 +599,7 @@ describe('RpcShellyClient', () => {
 
   it('blocks install when Script.List is unavailable', async () => {
     const transport = new RecordingTransport({ failScriptList: true });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     const install = await client.installScript(createInstallPlan('print("demo");'));
 
@@ -612,7 +615,7 @@ describe('RpcShellyClient', () => {
     const transport = new RecordingTransport({
       bleComponent: null
     });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     const status = await client.getStatus();
     const install = await client.installScript(createInstallPlan('print("demo");'));
@@ -653,7 +656,7 @@ describe('RpcShellyClient', () => {
 
   it('fails install when Script.GetStatus does not confirm running', async () => {
     const transport = new RecordingTransport({ scriptRunning: false });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.installScript(createInstallPlan('print("demo");'));
 
     expect(result.ok).toBe(false);
@@ -665,7 +668,7 @@ describe('RpcShellyClient', () => {
 
   it('safe relay test confirms ON before ending OFF', async () => {
     const transport = new RecordingTransport();
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.safeRelayTest({ onDurationMs: 0 });
 
     expect(result.ok).toBe(true);
@@ -684,7 +687,7 @@ describe('RpcShellyClient', () => {
 
   it('fails if the relay never reaches ON and still ends OFF', async () => {
     const transport = new RecordingTransport({ forceRelayOffStatus: true });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.safeRelayTest({ onDurationMs: 0 });
 
     expect(result.ok).toBe(false);
@@ -698,7 +701,7 @@ describe('RpcShellyClient', () => {
 
   it('can stop and start scripts and control relay state', async () => {
     const transport = new RecordingTransport();
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     expect((await client.stopScript(1)).ok).toBe(true);
     expect((await client.startScript(1)).ok).toBe(true);
@@ -717,7 +720,7 @@ describe('RpcShellyClient', () => {
 
   it('validates script and relay ids before control commands', async () => {
     const transport = new RecordingTransport();
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     expect((await client.stopScript(-1)).ok).toBe(false);
     expect((await client.startScript(1.5)).ok).toBe(false);
@@ -728,7 +731,7 @@ describe('RpcShellyClient', () => {
 
   it('reports an error when final OFF command cannot be confirmed', async () => {
     const transport = new RecordingTransport({ failOffCommand: true });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.safeRelayTest({ onDurationMs: 0 });
 
     expect(result.ok).toBe(false);
@@ -741,7 +744,7 @@ describe('RpcShellyClient', () => {
 
   it('sends OFF even when the ON command fails', async () => {
     const transport = new RecordingTransport({ failOnCommand: true });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
     const result = await client.safeRelayTest({ onDurationMs: 0 });
 
     expect(result.ok).toBe(false);
@@ -1114,7 +1117,7 @@ describe('FetchShellyRpcTransport', () => {
       baseUrl: 'http://192.168.1.50',
       fetchImpl
     });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     const result = await client.installScript(createInstallPlan('print("safe off");'));
 
@@ -1169,7 +1172,7 @@ describe('FakeShellyClient', () => {
       },
       wifiStatus: { rssi: -54 }
     });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     const status = await client.getStatus();
 
@@ -1192,7 +1195,7 @@ describe('FakeShellyClient', () => {
         last_sync_ts: 1_782_800_000
       }
     });
-    const client = new RpcShellyClient(transport);
+    const client = createTestRpcShellyClient(transport);
 
     const status = await client.getStatus();
 
