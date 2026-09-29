@@ -104,11 +104,14 @@ describe('History v2 KVS codec', () => {
     expect(appended).toBeGreaterThan(0);
     const encoded = encodeHistorySegment(segment);
     expect(encoded.ok).toBe(true);
-    if (encoded.ok) expect(encoded.value.length).toBeLessThanOrEqual(HISTORY_MAX_VALUE_CHARS);
+    if (encoded.ok)
+      expect(encoded.value.length).toBeLessThanOrEqual(HISTORY_MAX_VALUE_CHARS);
   });
 
   it('rejects malformed flags, out-of-range values and unknown versions', () => {
-    expect(decodeHistorySegment('[2,[[1,2,230,500,1000,32,"ok",null,null,0,0]]]')).toMatchObject({
+    expect(
+      decodeHistorySegment('[2,[[1,2,230,500,1000,32,"ok",null,null,0,0]]]')
+    ).toMatchObject({
       ok: false,
       error: { code: 'invalid-value' }
     });
@@ -123,7 +126,10 @@ describe('History v2 KVS codec', () => {
   });
 
   it('orders wrapped ring slots using metadata and reports corrupt slots', () => {
-    const a = encodeHistorySegment({ version: HISTORY_FORMAT_VERSION, records: [record()] });
+    const a = encodeHistorySegment({
+      version: HISTORY_FORMAT_VERSION,
+      records: [record()]
+    });
     const b = encodeHistorySegment({
       version: HISTORY_FORMAT_VERSION,
       records: [record({ timestampUnixSec: 1_790_700_001 })]
