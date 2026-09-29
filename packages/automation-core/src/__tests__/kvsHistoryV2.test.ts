@@ -179,7 +179,10 @@ describe('History v2 KVS codec', () => {
     expect(encoded.ok).toBe(true);
     if (!encoded.ok) return;
     expect(encoded.value.length).toBeLessThanOrEqual(HISTORY_MAX_VALUE_CHARS);
-    expect(decodeHistorySegment(encoded.value)).toEqual({ ok: true, value: segment.value });
+    expect(decodeHistorySegment(encoded.value)).toEqual({
+      ok: true,
+      value: segment.value
+    });
   });
 
   it('validates every metadata bound and decode failure mode', () => {
@@ -292,7 +295,8 @@ describe('History v2 KVS codec', () => {
       { ...base, safetyReason: 'safe' }
     ];
     expect(historyRecordChangedEnough(null, base)).toBe(true);
-    for (const next of transitions) expect(historyRecordChangedEnough(base, next)).toBe(true);
+    for (const next of transitions)
+      expect(historyRecordChangedEnough(base, next)).toBe(true);
   });
 
   it('checks climate deltas, nullable values and explicit thresholds', () => {
@@ -310,11 +314,15 @@ describe('History v2 KVS codec', () => {
       )
     ).toBe(false);
     expect(
-      historyRecordChangedEnough(base, { ...base, temperatureC: 23.8 }, {
-        temperatureDeltaC: 1,
-        humidityDeltaPct: 2,
-        vpdDeltaKpa: 0.2
-      })
+      historyRecordChangedEnough(
+        base,
+        { ...base, temperatureC: 23.8 },
+        {
+          temperatureDeltaC: 1,
+          humidityDeltaPct: 2,
+          vpdDeltaKpa: 0.2
+        }
+      )
     ).toBe(false);
   });
 
@@ -341,7 +349,9 @@ describe('History v2 KVS codec', () => {
     ]);
 
     expect(decoded.segments.map(({ slot }) => slot)).toEqual([1, 2, 0]);
-    expect(decoded.records.map(({ timestampUnixSec }) => timestampUnixSec)).toEqual([2, 3, 1]);
+    expect(decoded.records.map(({ timestampUnixSec }) => timestampUnixSec)).toEqual([
+      2, 3, 1
+    ]);
     expect(decoded.invalidKeys).toEqual([historySegmentKey(3)]);
 
     const corruptMeta = decodeHistoryKvsItems([
@@ -366,7 +376,10 @@ describe('History v2 KVS codec', () => {
 
     const decoded = decodeHistoryKvsItems([
       { key: HISTORY_KVS_META_KEY, value: meta.value },
-      { key: historySegmentKey(1), value: encodedSegment(record({ timestampUnixSec: 1 })) }
+      {
+        key: historySegmentKey(1),
+        value: encodedSegment(record({ timestampUnixSec: 1 }))
+      }
     ]);
     expect(decoded.segments.map(({ slot }) => slot)).toEqual([1]);
   });
