@@ -61,10 +61,7 @@ const parseSetResult = (value: unknown): Result<ShellyKvsSetResult> => {
     return { ok: false, error: validationError('Invalid KVS.Set response.') };
   }
   const candidate = value as { etag?: unknown; rev?: unknown };
-  if (
-    typeof candidate.etag !== 'string' ||
-    !isNonNegativeInteger(candidate.rev)
-  ) {
+  if (typeof candidate.etag !== 'string' || !isNonNegativeInteger(candidate.rev)) {
     return { ok: false, error: validationError('Invalid KVS.Set response.') };
   }
   return { ok: true, value: { etag: candidate.etag, rev: candidate.rev } };
@@ -209,10 +206,7 @@ export class ShellyKvsClient {
     return response.ok ? parseSetResult(response.value) : response;
   }
 
-  async delete(
-    key: string,
-    etag?: string
-  ): Promise<Result<ShellyKvsDeleteResult>> {
+  async delete(key: string, etag?: string): Promise<Result<ShellyKvsDeleteResult>> {
     const validKey = validateKey(key);
     if (!validKey.ok) return validKey;
     const params: { key: string; etag?: string } = { key: validKey.value };
