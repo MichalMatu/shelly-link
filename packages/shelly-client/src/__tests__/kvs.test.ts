@@ -20,9 +20,7 @@ class QueueTransport implements ShellyRpcTransport {
 
 describe('ShellyKvsClient', () => {
   it('reads and validates a KVS value', async () => {
-    const transport = new QueueTransport([
-      { etag: 'abc', value: '[1,[[234,551,0]]]' }
-    ]);
+    const transport = new QueueTransport([{ etag: 'abc', value: '[1,[[234,551,0]]]' }]);
     const client = new ShellyKvsClient(transport);
     await expect(client.get('history.00')).resolves.toEqual({
       ok: true,
