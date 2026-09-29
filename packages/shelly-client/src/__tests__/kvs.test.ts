@@ -20,7 +20,9 @@ class QueueTransport implements ShellyRpcTransport {
 
 describe('ShellyKvsClient', () => {
   it('reads and validates a KVS value', async () => {
-    const transport = new QueueTransport([{ etag: 'abc', value: '[1,[[234,551,0]]]' }]);
+    const transport = new QueueTransport([
+      { etag: 'abc', value: '[1,[[234,551,0]]]' }
+    ]);
     const client = new ShellyKvsClient(transport);
     await expect(client.get('history.00')).resolves.toEqual({
       ok: true,
@@ -34,7 +36,8 @@ describe('ShellyKvsClient', () => {
   it('passes etags for atomic KVS updates', async () => {
     const transport = new QueueTransport([{ etag: 'next', rev: 7 }]);
     const client = new ShellyKvsClient(transport);
-    await expect(client.set('history.meta', '[1,32,1,1]', 'old')).resolves.toEqual({
+    const result = client.set('history.meta', '[1,32,1,1]', 'old');
+    await expect(result).resolves.toEqual({
       ok: true,
       value: { etag: 'next', rev: 7 }
     });
@@ -44,7 +47,7 @@ describe('ShellyKvsClient', () => {
     });
   });
 
-  it('paginates GetMany until the complete matching set is available', async () => {
+  it('paginates GetMany across matching items', async () => {
     const transport = new QueueTransport([
       {
         items: [
@@ -54,7 +57,11 @@ describe('ShellyKvsClient', () => {
         offset: 0,
         total: 3
       },
-      { items: [{ key: 'history.02', etag: 'c', value: 'v2' }], offset: 2, total: 3 }
+      {
+        items: [{ key: 'history.02', etag: 'c', value: 'v2' }],
+        offset: 2,
+        total: 3
+      }
     ]);
     const client = new ShellyKvsClient(transport);
     const result = await client.getAllMatching('history.*');
@@ -66,14 +73,24 @@ describe('ShellyKvsClient', () => {
       'history.02'
     ]);
     expect(transport.requests).toEqual([
-      { method: RPC_METHODS.KvsGetMany, params: { match: 'history.*', offset: 0 } },
-      { method: RPC_METHODS.KvsGetMany, params: { match: 'history.*', offset: 2 } }
+      {
+        method: RPC_METHODS.KvsGetMany,
+        params: { match: 'history.*', offset: 0 }
+      },
+      {
+        method: RPC_METHODS.KvsGetMany,
+        params: { match: 'history.*', offset: 2 }
+      }
     ]);
   });
 
-  it('accepts object-shaped GetMany items from the current API contract', async () => {
+  it('accepts object-shaped GetMany items', async () => {
     const transport = new QueueTransport([
-      { items: { 'history.00': { etag: 'a', value: 'v0' } }, offset: 0, total: 1 }
+      {
+        items: { 'history.00': { etag: 'a', value: 'v0' } },
+        offset: 0,
+        total: 1
+      }
     ]);
     const client = new ShellyKvsClient(transport);
     await expect(client.getMany('history.*')).resolves.toEqual({
@@ -86,12 +103,18 @@ describe('ShellyKvsClient', () => {
     });
   });
 
-  it('rejects invalid keys and malformed responses at the boundary', async () => {
+  it('rejects invalid keys and malformed responses', async () => {
     const transport = new QueueTransport([{ etag: 7, value: 'bad' }]);
     const client = new ShellyKvsClient(transport);
     const invalidKey = await client.get('x'.repeat(43));
-    expect(invalidKey).toMatchObject({ ok: false, error: { kind: 'validation-failed' } });
+    expect(invalidKey).toMatchObject({
+      ok: false,
+      error: { kind: 'validation-failed' }
+    });
     const invalidResponse = await client.get('valid');
-    expect(invalidResponse).toMatchObject({ ok: false, error: { kind: 'validation-failed' } });
+    expect(invalidResponse).toMatchObject({
+      ok: false,
+      error: { kind: 'validation-failed' }
+    });
   });
 });
