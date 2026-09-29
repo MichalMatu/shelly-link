@@ -98,15 +98,14 @@ export const encodeHistoryMeta = (meta: HistoryMeta): HistoryCodecResult<string>
     return failure('invalid-value', 'History metadata is invalid.');
   }
 
-  const text = JSON.stringify([
-    HISTORY_FORMAT_VERSION,
-    meta.slots,
-    meta.nextSlot,
-    meta.validSlots
-  ] satisfies EncodedMeta);
-  return text.length <= HISTORY_MAX_VALUE_CHARS
-    ? success(text)
-    : failure('value-too-long', 'History metadata exceeds the Shelly KVS value limit.');
+  return success(
+    JSON.stringify([
+      HISTORY_FORMAT_VERSION,
+      meta.slots,
+      meta.nextSlot,
+      meta.validSlots
+    ] satisfies EncodedMeta)
+  );
 };
 
 export const decodeHistoryMeta = (value: unknown): HistoryCodecResult<HistoryMeta> => {
