@@ -8,6 +8,7 @@ import {
 } from '@lcl/automation-core';
 import {
   RPC_METHODS,
+  type Result,
   type ShellyClientError,
   type ShellyRpcRequest,
   type ShellyRpcTransport
@@ -108,7 +109,7 @@ describe('readClimateHistory', () => {
       retryable: true
     };
     const transport: ShellyRpcTransport = {
-      async call<TResponse>() {
+      async call<TResponse>(): Promise<Result<TResponse>> {
         return { ok: false, error };
       }
     };
