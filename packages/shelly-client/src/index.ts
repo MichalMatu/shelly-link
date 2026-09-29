@@ -15,3 +15,4 @@ export * from './schedules.js';
 export * from './plugsUi.js';
 export * from './cloud.js';
 export * from './wifi.js';
+export * from './kvs.js';
