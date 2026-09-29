@@ -19,7 +19,7 @@ pnpm --filter @lcl/mobile exec cap sync android
 printf 'sdk.dir=%s\n' "$SDK" > apps/mobile/android/local.properties
 (
   cd apps/mobile/android
-  ./gradlew --no-daemon assembleDebug
+  ./gradlew assembleDebug
 )
 
 [[ -f "$APK" ]]
