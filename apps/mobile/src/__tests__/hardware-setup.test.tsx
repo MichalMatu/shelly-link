@@ -3142,6 +3142,14 @@ describe('HardwareSetupScreen', () => {
 
     renderHardwareSetup();
     await addShellyThroughUi();
+
+    const nativeSetInterval = window.setInterval.bind(window);
+    vi.spyOn(window, 'setInterval').mockImplementation(
+      (handler, _timeout, ...args) =>
+        nativeSetInterval(handler, 50, ...args) as unknown as ReturnType<
+          typeof setInterval
+        >
+    );
     await openShellyBleScanFromSettings();
 
     const dialog = await findShellyBleScanPage();
