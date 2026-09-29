@@ -15,6 +15,7 @@ export {
   type ShellyAutomationScriptState,
   type ShellyControlStatus
 } from './data/shellyManagedAutomation.js';
+export { readClimateHistory } from './data/climateHistory.js';
 
 export {
   deleteTimeAutomation,
