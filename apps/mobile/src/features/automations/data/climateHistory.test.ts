@@ -9,6 +9,7 @@ import {
 import {
   RPC_METHODS,
   type ShellyClientError,
+  type ShellyRpcRequest,
   type ShellyRpcTransport
 } from '@lcl/shelly-client';
 import { readClimateHistory } from './climateHistory.js';
@@ -52,7 +53,7 @@ const encodedSegment = (value: HistoryRecord): string => {
 };
 
 const successfulTransport = (): ShellyRpcTransport => ({
-  async call<TResponse>(request) {
+  async call<TResponse>(request: ShellyRpcRequest) {
     if (request.method !== RPC_METHODS.KvsGetMany) {
       throw new Error(`Unexpected RPC method: ${request.method}`);
     }
@@ -60,9 +61,17 @@ const successfulTransport = (): ShellyRpcTransport => ({
       ok: true,
       value: {
         items: [
-          { key: historySegmentKey(1), etag: 's1', value: encodedSegment(record(20, true)) },
+          {
+            key: historySegmentKey(1),
+            etag: 's1',
+            value: encodedSegment(record(20, true))
+          },
           { key: HISTORY_KVS_META_KEY, etag: 'meta', value: encodedMeta() },
-          { key: historySegmentKey(0), etag: 's0', value: encodedSegment(record(10, false)) },
+          {
+            key: historySegmentKey(0),
+            etag: 's0',
+            value: encodedSegment(record(10, false))
+          },
           { key: historySegmentKey(2), etag: 'bad', value: '{not-json' },
           { key: 'shellylink.history.extra', etag: 'extra', value: 'ignored' }
         ],
