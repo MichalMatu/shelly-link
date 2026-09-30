@@ -9,7 +9,7 @@ Repository: `MichalMatu/shelly-link`
 1. Verify remote `main`, Local Agent binding/status and that there is no active task or open PR.
 2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md` and the relevant testing docs before changing behavior.
 3. Inspect the real current branch list; do not recreate or reuse completed feature branches.
-4. Create a fresh branch only after the audit identifies a concrete change.
+4. Create a fresh work branch only after the audit identifies a concrete change.
 
 Current code and canonical docs are the source of truth. Session-specific Local Agent ids/state do not belong in product documentation.
 
@@ -41,6 +41,8 @@ The accepted maximum four-sensor runtime with minimum ON + debounce is **9413 B 
 Before adding more generated-runtime code, re-measure current byte budgets and decide whether the next behavior can be represented by config/data, reuse existing code, or needs another deliberate compaction/refactor. Do not simply raise the limit.
 
 The existing `minChangeMs`/minimum-OFF behavior already covers the classic cooldown concept. Do not introduce a duplicate cooldown owner.
+
+One discarded work branch explored another relevant budget guard: limiting the **escaped** Climate sensor display name to 32 runtime bytes. That branch is intentionally removed during this cleanup rather than carried forward. Re-audit the issue from current `main`: `climateSensorSchema.displayName` is currently only `.min(1)`, so determine whether an explicit runtime-byte/name bound is still needed and, if so, implement it cleanly with current generator/config constraints.
 
 ## Real-device baseline
 
@@ -83,11 +85,12 @@ Before continuing the roadmap, perform a **behavior-preserving re-audit**:
 1. sync to fresh `main` and inspect repo/branch/task cleanliness;
 2. audit architecture boundaries, generated runtime size, config/decode/recovery symmetry and rule/action ownership;
 3. inspect recent Rule/action code for duplication, dead paths, naming/API rough edges, test blind spots and docs drift;
-4. run focused tests and the canonical full gate; fix real defects and low-risk code-quality issues in small commits;
-5. debug the mobile app locally and on the physical Android phone, preserving user data unless a clean-install test is deliberately selected;
-6. verify navigation, Climate/History state, runtime diagnostics and logcat on-device;
-7. if Shelly is mutated, identity-check first and finish with an explicitly known relay state (normally OFF);
-8. only after the baseline is clean, decide the next Rule/action runtime slice from measured byte headroom and architecture evidence.
+4. re-evaluate the sensor display-name/runtime-byte budget alongside the overall 9500 B constraint;
+5. run focused tests and the canonical full gate; fix real defects and low-risk code-quality issues in small commits;
+6. debug the mobile app locally and on the physical Android phone, preserving user data unless a clean-install test is deliberately selected;
+7. verify navigation, Climate/History state, runtime diagnostics and logcat on-device;
+8. if Shelly is mutated, identity-check first and finish with an explicitly known relay state (normally OFF);
+9. only after the baseline is clean, decide the next Rule/action runtime slice from measured byte headroom and architecture evidence.
 
 Do not redesign the dashboard during this first pass. Dashboard status polish and UX redesign are later roadmap stages.
 
@@ -108,4 +111,4 @@ Do not redesign the dashboard during this first pass. Dashboard status polish an
 
 Copy this into the new chat after opening the repository with Local Agent:
 
-> `https://github.com/MichalMatu/shelly-link` — kontynuuj pracę w trybie local-agent zgodnie z `AGENTS.md` i `docs/HANDOFF_NEXT_CHAT.md`. Zacznij od świeżego `main` i **nie wdrażaj od razu kolejnej funkcji**. Najpierw zrób kompletny re-audit aktualnego kodu i dokumentacji po ostatnich zmianach Rule/action: architektura, ownership, generated-runtime byte budget, config/decode/recovery, dead/duplicate code, test gaps i niespójności dokumentacji. Następnie zrób małe bezpieczne poprawki jakościowe/refaktory bez zmiany zachowania, uruchom focused testy oraz pełny canonical gate, debuguj aplikację i wgraj aktualny debug APK na podłączony Samsung S22+ **z zachowaniem danych przez `adb install -r`**. Sprawdź cold start, logcat, nawigację, Climate/History i diagnostykę runtime na telefonie. Jeżeli dotykasz realnego Shelly, najpierw zweryfikuj identity, nie przepisuj pasywnie poprawnego runtime i zakończ test ze zweryfikowanym relay OFF. Dopiero po czystym baseline zaproponuj następny najmniejszy slice Rule/action, uwzględniając aktualny limit 9500 B i bardzo mały zapas runtime.
+> `https://github.com/MichalMatu/shelly-link` — kontynuuj pracę w trybie local-agent zgodnie z `AGENTS.md` i `docs/HANDOFF_NEXT_CHAT.md`. Zacznij od świeżego `main` i **nie wdrażaj od razu kolejnej funkcji**. Najpierw zrób kompletny re-audit aktualnego kodu i dokumentacji po ostatnich zmianach Rule/action: architektura, ownership, generated-runtime byte budget, config/decode/recovery, sensor display-name/runtime-byte budget, dead/duplicate code, test gaps i niespójności dokumentacji. Następnie zrób małe bezpieczne poprawki jakościowe/refaktory bez zmiany zachowania, uruchom focused testy oraz pełny canonical gate, debuguj aplikację i wgraj aktualny debug APK na podłączony Samsung S22+ **z zachowaniem danych przez `adb install -r`**. Sprawdź cold start, logcat, nawigację, Climate/History i diagnostykę runtime na telefonie. Jeżeli dotykasz realnego Shelly, najpierw zweryfikuj identity, nie przepisuj pasywnie poprawnego runtime i zakończ test ze zweryfikowanym relay OFF. Dopiero po czystym baseline zaproponuj następny najmniejszy slice Rule/action, uwzględniając aktualny limit 9500 B i bardzo mały zapas runtime.
