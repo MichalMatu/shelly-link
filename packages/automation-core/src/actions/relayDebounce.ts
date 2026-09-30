@@ -58,9 +58,10 @@ export const evaluateRelayDebounce = (input: RelayDebounceInput): RelayDebounceD
     };
   }
 
-  const pendingMatches =
-    state.pendingRelayOn === action.relayOn && state.pendingSinceMs !== undefined;
-  const pendingSinceMs = pendingMatches ? state.pendingSinceMs! : nowMs;
+  const pendingSinceMs =
+    state.pendingRelayOn === action.relayOn && state.pendingSinceMs !== undefined
+      ? state.pendingSinceMs
+      : nowMs;
   const nextState: RelayDebounceState = {
     pendingRelayOn: action.relayOn,
     pendingSinceMs
