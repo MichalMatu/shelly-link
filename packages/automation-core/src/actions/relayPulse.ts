@@ -21,6 +21,7 @@ const setAction = (relayOn: boolean): RelaySetAction => ({
 
 export const startRelayPulse = (
   action: RelayPulseAction,
+  currentRelayOn: boolean,
   nowMs: number
 ): RelayPulseDecision => {
   if (!Number.isFinite(action.durationMs) || action.durationMs <= 0) {
@@ -29,7 +30,7 @@ export const startRelayPulse = (
 
   const nextState: RelayPulseState = {
     relayOn: action.relayOn,
-    restoreRelayOn: !action.relayOn,
+    restoreRelayOn: currentRelayOn,
     expiresAtMs: nowMs + action.durationMs
   };
 
