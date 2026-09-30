@@ -1,3 +1,7 @@
+import {
+  evaluateRelayTiming,
+  relayTimingPolicyFromLegacyMinChange
+} from '../actions/relayTiming.js';
 import type {
   AutomationDecision,
   AutomationInput,
@@ -208,12 +212,19 @@ const applyRelayTarget = (
     };
   }
 
-  const lastChangeMs = state.lastChangeMs;
-  if (
-    requestedRelayOn &&
-    lastChangeMs !== undefined &&
-    nowMs - lastChangeMs < rule.minChangeMs
-  ) {
+  const timingDecision = evaluateRelayTiming({
+    action: {
+      type: 'set',
+      relayOn: requestedRelayOn
+    },
+    policy: relayTimingPolicyFromLegacyMinChange(rule.minChangeMs),
+    state: {
+      relayOn: state.relayOn,
+      lastChangeMs: state.lastChangeMs
+    },
+    nowMs
+  });
+  if (timingDecision.blockedBy) {
     return {
       requestedRelayOn: state.relayOn,
       shouldCallRelay: false,
