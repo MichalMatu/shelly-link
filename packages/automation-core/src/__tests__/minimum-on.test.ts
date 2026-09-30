@@ -57,6 +57,32 @@ describe('thermostat minimum ON timing', () => {
     });
   });
 
+  it('defaults omitted minimumOnMs to zero for legacy rules', () => {
+    const legacyRule: ThermostatRule = {
+      ...DEFAULT_HEATING_RULE,
+      consecutiveHits: 1,
+      minimumOnMs: undefined
+    };
+    const decision = evaluateThresholdDecision({
+      rule: legacyRule,
+      state: {
+        relayOn: true,
+        onHits: 0,
+        offHits: 0,
+        lastChangeMs: nowMs - 1,
+        onStartedMs: nowMs - 1
+      },
+      measurement: hotMeasurement,
+      nowMs
+    });
+
+    expect(decision).toMatchObject({
+      requestedRelayOn: false,
+      shouldCallRelay: true,
+      reason: 'above-threshold'
+    });
+  });
+
   it('does not let minimum ON delay fail-safe stale OFF', () => {
     const stale = evaluateThresholdDecision({
       rule,
