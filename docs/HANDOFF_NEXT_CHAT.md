@@ -36,13 +36,13 @@ Do not begin those items automatically. The next chat must first re-audit and st
 
 ## Critical runtime constraint
 
-The accepted maximum four-sensor runtime with minimum ON + debounce is **9413 B / 9500 B**, leaving only **87 B** source headroom. Treat this as a hard architectural constraint.
+The fresh 2026-09-30 re-audit measures the current canonical four-sensor runtime with minimum ON + debounce at **9431 B / 9500 B**, leaving **69 B** with its normal fixture names. Treat this as a hard architectural constraint.
 
 Before adding more generated-runtime code, re-measure current byte budgets and decide whether the next behavior can be represented by config/data, reuse existing code, or needs another deliberate compaction/refactor. Do not simply raise the limit.
 
 The existing `minChangeMs`/minimum-OFF behavior already covers the classic cooldown concept. Do not introduce a duplicate cooldown owner.
 
-One discarded work branch explored another relevant budget guard: limiting the **escaped** Climate sensor display name to 32 runtime bytes. That branch is intentionally removed during this cleanup rather than carried forward. Re-audit the issue from current `main`: `climateSensorSchema.displayName` is currently only `.min(1)`, so determine whether an explicit runtime-byte/name bound is still needed and, if so, implement it cleanly with current generator/config constraints.
+The display-name budget re-audit also showed that the discarded 32-byte proposal is unsafe. A full matrix across both sensor profiles, all four rule modes and VPD on/off, with four sensors plus minimum ON + debounce, requires a cap of **26 escaped UTF-8 JSON-content bytes** per sensor display name. The worst accepted matrix case is **9496 B / 9500 B** with VPD enabled, leaving only 4 B; 27 bytes per name reaches 9501 B with VPD and is unsafe. Keep this cap coupled to the maximum-feature matrix test and re-measure it before any runtime expansion.
 
 ## Real-device baseline
 

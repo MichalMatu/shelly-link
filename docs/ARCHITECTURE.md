@@ -134,6 +134,8 @@ A Climate automation supports 1–4 thermometers with `avg`, `min`, `max` or `fi
 
 Normalized physical BLE `runtimeAddress` is the logical thermometer identity at the mobile/runtime boundary. Phone discovery, Plug discovery, installed config and recovery converge on that identity.
 
+Sensor display names are presentation metadata, but the compact runtime config embeds them in generated script source. Climate config therefore caps each display name at 26 escaped UTF-8 JSON-content bytes; the 9500 B generated-script guard remains the final source-size authority.
+
 Freshness is evaluated independently per sensor. Stale/unusable members do not contribute; if no configured member remains usable, AUTO records an automation fault and safe OFF wins. Incomplete advertisements must not make old temperature/humidity values fresh. MANUAL does not use thermometer data to authorize explicit relay ON/OFF; hard safety remains independent and higher priority.
 
 Runtime diagnostics expose one compact record per configured thermometer. Phone BLE and Plug BLE are live-reading sources; recovered identity provenance is tracked separately from live readings.

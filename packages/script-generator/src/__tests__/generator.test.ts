@@ -347,28 +347,26 @@ describe('generateShellyThermostatScript', () => {
     expect(() => new Function(script)).not.toThrow();
   });
 
-  it('rejects a four-sensor runtime whose names would exceed the Shelly script limit', () => {
-    const baseConfig = createDefaultShellyThermostatConfig(
-      'tp357_custom_v1',
-      'humidifying'
-    );
-    const sensor = (index: number) => ({
-      ...baseConfig.sensor,
-      sensorId: `sensor-${index}`,
-      runtimeAddress: `02:00:00:00:00:0${index}`,
-      displayName: `Sensor ${index} `.padEnd(192, 'X')
-    });
-
-    expect(() =>
-      generateShellyThermostatScript({
-        ...baseConfig,
-        sensor: sensor(1),
-        sensorSet: {
-          aggregation: 'avg',
-          additionalSensors: [sensor(2), sensor(3), sensor(4)]
+  it('rejects generated source beyond the fixed Shelly script limit', () => {
+    const nativeEncode = TextEncoder.prototype.encode;
+    const encodeSpy = vi
+      .spyOn(TextEncoder.prototype, 'encode')
+      .mockImplementation(function (this: TextEncoder, value) {
+        if (value?.startsWith('// LCL\n')) {
+          return new Uint8Array(SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES + 1);
         }
-      })
-    ).toThrow(new RegExp(`maximum is ${SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES}`));
+        return nativeEncode.call(this, value);
+      });
+
+    try {
+      expect(() =>
+        generateShellyThermostatScript(createDefaultShellyThermostatConfig())
+      ).toThrow(
+        `Generated Shelly thermostat script is ${SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES + 1} bytes; maximum is ${SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES}.`
+      );
+    } finally {
+      encodeSpy.mockRestore();
+    }
   });
 
   it('returns null for unsupported or malformed thermostat scripts', () => {

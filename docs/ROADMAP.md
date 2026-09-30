@@ -52,7 +52,7 @@ Still pending before this slice is complete:
 - AND/OR condition execution in the Climate runtime;
 - configuration/editor surface for whichever of those capabilities are accepted for v1.
 
-**Constraint:** the accepted maximum four-sensor runtime with minimum ON + debounce is 9413 B / 9500 B. Before adding more runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
+**Constraint:** the fresh stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Before adding more runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
 
 The immediate next work session is a stabilization/re-audit pass, not automatic implementation of the next pending primitive. See `docs/HANDOFF_NEXT_CHAT.md`.
 
