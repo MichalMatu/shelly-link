@@ -1347,7 +1347,7 @@ test('rule page switches humidity modes, enables VPD assist, and copies the gene
     '"x":10800000'
   );
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).toContainText(
-    'Shelly.getUptimeMs'
+    'getUptimeMs()'
   );
   await expect(scriptDialog.getByLabel('Wygenerowany skrypt')).not.toContainText(
     'Date.now'
