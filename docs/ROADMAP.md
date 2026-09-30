@@ -52,7 +52,7 @@ The closeout passed the full repository gate, responsive Playwright and canonica
 
 Develop these slices in order rather than in parallel.
 
-### 1. History / Datalogger
+### 1. History / Datalogger — completed 2026-09-30
 
 Start with a preimplementation audit from fresh `main`. Treat `work/kvs-datalogger` as source material, not a mechanical merge or rebase. Reconcile its ideas with current exclusive Climate script ownership, runtime arbitration, identity gates and current feature boundaries before choosing what to reuse.
 
@@ -60,11 +60,13 @@ History should explain **why** output changed. Record useful operational context
 
 The History v2 foundation now uses a compact Plug-owned KVS ring inside the existing Climate runtime, a typed read-only mobile adapter, and a Climate Detail History surface. Runtime writes and read failures stay isolated from relay arbitration; the UI reads only when History is opened and reports empty/partial/error states without inventing data.
 
-### 2. Runtime safety supervisor
+### 2. Runtime safety supervisor — completed 2026-09-30
 
-Expand the explicit hard-safety layer above AUTO/MANUAL behavior: maximum power/current/device temperature, maximum continuous ON, startup guard where useful, latched lockout and deliberate acknowledge/reset. Hard safety always wins and forces OFF.
+Hard safety now has one explicit supervisor above AUTO/MANUAL. Maximum continuous ON and relay-control failure latch safe OFF; native Shelly switch protection errors are captured immediately through the status handler and rechecked at boot plus the periodic safety pass. The first hard fault remains authoritative until deliberate reset, and reset remains safe OFF.
 
-### 3. Rule/action expansion
+For Plug S Gen3, v1 delegates maximum power/current/device-temperature protection to the device firmware instead of inventing parallel app thresholds. Real firmware 1.7.5 hardware evidence confirmed configured `power_limit=2500 W`, `current_limit=12 A` and `voltage_limit=280 V`; device-temperature cutoff remains firmware-owned and native `overtemp`/electrical protection errors feed the same latched supervisor. Real-device smoke also verified physical max-ON shutoff, deliberate recovery, first-fault-wins and byte-identical restoration of the installed runtime.
+
+### 3. Rule/action expansion — next
 
 Extend the stable runtime with reusable actions and timing: Set ON/OFF, Pulse ON/OFF, minimum ON/OFF, cooldown, debounce, time windows, scheduled conditions and small explicit AND/OR composition. Every requested action passes through the same final relay arbiter.
 
