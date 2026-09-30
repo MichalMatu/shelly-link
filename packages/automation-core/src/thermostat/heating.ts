@@ -1,3 +1,4 @@
+import { evaluateRelayDebounce } from '../actions/relayDebounce.js';
 import { evaluateRelayTiming } from '../actions/relayTiming.js';
 import type {
   AutomationDecision,
@@ -13,6 +14,11 @@ import type {
 const VPD_ASSIST_TEMPERATURE_MARGIN_C = 0.25;
 const VPD_ASSIST_HUMIDITY_MARGIN_PCT = 2;
 
+const clearRelayDebounceState = (state: AutomationState): AutomationState =>
+  state.relayDebounceState === undefined
+    ? state
+    : { ...state, relayDebounceState: { status: 'idle' } };
+
 const offDecision = (
   state: AutomationState,
   reason: RelayDecisionReason,
@@ -22,7 +28,7 @@ const offDecision = (
   shouldCallRelay: state.relayOn,
   reason,
   nextState: {
-    ...state,
+    ...clearRelayDebounceState(state),
     relayOn: false,
     lastChangeMs: state.relayOn ? nowMs : state.lastChangeMs,
     onStartedMs: undefined,
@@ -199,13 +205,47 @@ const applyRelayTarget = (
   stateWithHits: AutomationState
 ): AutomationDecision => {
   const { rule, state, nowMs } = input;
+  const debouncePolicy = rule.relayDebounce;
+  const debounceEnabled =
+    debouncePolicy !== undefined &&
+    (debouncePolicy.turnOnMs > 0 || debouncePolicy.turnOffMs > 0);
+  let nextDebounceState = state.relayDebounceState;
+
+  if (debounceEnabled) {
+    const debounceDecision = evaluateRelayDebounce({
+      action: {
+        type: 'set',
+        relayOn: requestedRelayOn
+      },
+      policy: debouncePolicy,
+      state: state.relayDebounceState ?? { status: 'idle' },
+      currentRelayOn: state.relayOn,
+      nowMs
+    });
+    nextDebounceState = debounceDecision.nextState;
+
+    if (debounceDecision.blockedBy) {
+      return {
+        requestedRelayOn: state.relayOn,
+        shouldCallRelay: false,
+        reason: 'debounce-blocked',
+        nextState: {
+          ...stateWithHits,
+          relayOn: state.relayOn,
+          relayDebounceState: nextDebounceState
+        }
+      };
+    }
+  }
 
   if (requestedRelayOn === state.relayOn) {
     return {
       requestedRelayOn,
       shouldCallRelay: false,
       reason,
-      nextState: stateWithHits
+      nextState: debounceEnabled
+        ? { ...stateWithHits, relayDebounceState: { status: 'idle' } }
+        : stateWithHits
     };
   }
 
@@ -231,7 +271,8 @@ const applyRelayTarget = (
       reason: 'min-change-blocked',
       nextState: {
         ...stateWithHits,
-        relayOn: state.relayOn
+        relayOn: state.relayOn,
+        ...(debounceEnabled ? { relayDebounceState: nextDebounceState } : {})
       }
     };
   }
@@ -244,7 +285,8 @@ const applyRelayTarget = (
       ...stateWithHits,
       relayOn: requestedRelayOn,
       lastChangeMs: nowMs,
-      onStartedMs: requestedRelayOn ? nowMs : undefined
+      onStartedMs: requestedRelayOn ? nowMs : undefined,
+      ...(debounceEnabled ? { relayDebounceState: { status: 'idle' } } : {})
     }
   };
 };
@@ -328,7 +370,7 @@ export const evaluateThresholdDecision = (input: AutomationInput): AutomationDec
     shouldCallRelay: false,
     reason: 'inside-band',
     nextState: {
-      ...lastSeenState,
+      ...clearRelayDebounceState(lastSeenState),
       onHits: 0,
       offHits: 0
     }
