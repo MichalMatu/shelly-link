@@ -9,6 +9,7 @@ const policy = {
   turnOffMs: 2_000
 };
 
+const idle: RelayDebounceState = { status: 'idle' };
 const setOn = { type: 'set' as const, relayOn: true };
 const setOff = { type: 'set' as const, relayOn: false };
 
@@ -18,14 +19,14 @@ describe('evaluateRelayDebounce', () => {
       evaluateRelayDebounce({
         action: setOff,
         policy,
-        state: { pendingRelayOn: true, pendingSinceMs: 100 },
+        state: { status: 'pending', relayOn: true, sinceMs: 100 },
         currentRelayOn: false,
         nowMs: 500
       })
     ).toEqual({
       requestedAction: setOff,
       debouncedAction: setOff,
-      nextState: {},
+      nextState: idle,
       blockedBy: null
     });
   });
@@ -35,14 +36,14 @@ describe('evaluateRelayDebounce', () => {
       evaluateRelayDebounce({
         action: setOn,
         policy: { turnOnMs: 0, turnOffMs: 0 },
-        state: {},
+        state: idle,
         currentRelayOn: false,
         nowMs: 1_000
       })
     ).toEqual({
       requestedAction: setOn,
       debouncedAction: setOn,
-      nextState: {},
+      nextState: idle,
       blockedBy: null
     });
   });
@@ -51,14 +52,14 @@ describe('evaluateRelayDebounce', () => {
     const started = evaluateRelayDebounce({
       action: setOn,
       policy,
-      state: {},
+      state: idle,
       currentRelayOn: false,
       nowMs: 10_000
     });
     expect(started).toEqual({
       requestedAction: setOn,
       debouncedAction: null,
-      nextState: { pendingRelayOn: true, pendingSinceMs: 10_000 },
+      nextState: { status: 'pending', relayOn: true, sinceMs: 10_000 },
       blockedBy: 'debounce-on'
     });
 
@@ -82,7 +83,7 @@ describe('evaluateRelayDebounce', () => {
     expect(ready).toEqual({
       requestedAction: setOn,
       debouncedAction: setOn,
-      nextState: { pendingRelayOn: true, pendingSinceMs: 10_000 },
+      nextState: { status: 'pending', relayOn: true, sinceMs: 10_000 },
       blockedBy: null
     });
   });
@@ -91,7 +92,7 @@ describe('evaluateRelayDebounce', () => {
     const started = evaluateRelayDebounce({
       action: setOff,
       policy,
-      state: {},
+      state: idle,
       currentRelayOn: true,
       nowMs: 20_000
     });
@@ -107,11 +108,11 @@ describe('evaluateRelayDebounce', () => {
     ).toEqual(setOff);
   });
 
-  it('restarts debounce when the requested target changes', () => {
+  it('cancels pending debounce when the request returns to the current relay state', () => {
     const onPending = evaluateRelayDebounce({
       action: setOn,
       policy,
-      state: {},
+      state: idle,
       currentRelayOn: false,
       nowMs: 1_000
     });
@@ -123,7 +124,7 @@ describe('evaluateRelayDebounce', () => {
       currentRelayOn: false,
       nowMs: 4_000
     });
-    expect(cancelled.nextState).toEqual({});
+    expect(cancelled.nextState).toEqual(idle);
     expect(cancelled.debouncedAction).toEqual(setOff);
 
     const restarted = evaluateRelayDebounce({
@@ -133,12 +134,16 @@ describe('evaluateRelayDebounce', () => {
       currentRelayOn: false,
       nowMs: 4_100
     });
-    expect(restarted.nextState).toEqual({ pendingRelayOn: true, pendingSinceMs: 4_100 });
+    expect(restarted.nextState).toEqual({
+      status: 'pending',
+      relayOn: true,
+      sinceMs: 4_100
+    });
     expect(restarted.debouncedAction).toBeNull();
   });
 
   it('keeps a mature target ready while the timing gate still blocks application', () => {
-    let state: RelayDebounceState = {};
+    let state: RelayDebounceState = idle;
     state = evaluateRelayDebounce({
       action: setOn,
       policy,
@@ -174,13 +179,18 @@ describe('evaluateRelayDebounce', () => {
     });
     expect(stillReady.debouncedAction).toEqual(setOn);
     expect(stillReady.nextState).toEqual({
-      pendingRelayOn: true,
-      pendingSinceMs: 10_000
+      status: 'pending',
+      relayOn: true,
+      sinceMs: 10_000
     });
   });
 
   it('clears pending state after downstream application reaches the requested target', () => {
-    const pending = { pendingRelayOn: true, pendingSinceMs: 1_000 };
+    const pending: RelayDebounceState = {
+      status: 'pending',
+      relayOn: true,
+      sinceMs: 1_000
+    };
 
     expect(
       evaluateRelayDebounce({
@@ -190,7 +200,7 @@ describe('evaluateRelayDebounce', () => {
         currentRelayOn: true,
         nowMs: 10_000
       }).nextState
-    ).toEqual({});
+    ).toEqual(idle);
   });
 
   it('rejects invalid debounce durations', () => {
@@ -198,7 +208,7 @@ describe('evaluateRelayDebounce', () => {
       evaluateRelayDebounce({
         action: setOn,
         policy: { turnOnMs: -1, turnOffMs: 0 },
-        state: {},
+        state: idle,
         currentRelayOn: false,
         nowMs: 0
       })
@@ -208,7 +218,7 @@ describe('evaluateRelayDebounce', () => {
       evaluateRelayDebounce({
         action: setOff,
         policy: { turnOnMs: 0, turnOffMs: Number.NaN },
-        state: {},
+        state: idle,
         currentRelayOn: true,
         nowMs: 0
       })
