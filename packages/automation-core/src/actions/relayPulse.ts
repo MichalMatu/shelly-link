@@ -1,12 +1,4 @@
-import type { RelaySetAction } from './relayTiming.js';
-
-export interface RelayPulseAction {
-  type: 'pulse';
-  relayOn: boolean;
-  durationMs: number;
-}
-
-export type RelayAction = RelaySetAction | RelayPulseAction;
+import type { RelayPulseAction, RelaySetAction } from './relayAction.js';
 
 export interface RelayPulseState {
   relayOn: boolean;
