@@ -1,57 +1,135 @@
-# Handoff — paused clean baseline
+# Handoff — pre-charts closeout
 
-Status: **2026-09-30 — feature and performance work is paused until the MacBook M1 Pro / 32 GB host is available.** Resume from fresh `main`; do not continue from an old worktree or benchmark branch.
+Status: **2026-09-30 — product audit is complete. The next chat must close the repository/documentation/code-quality baseline before starting the real History charts page.**
 
 Repository: `MichalMatu/shelly-link`
 
-## Resume contract
+## Start here
 
-1. Fetch fresh `main` and `agent-control`, read the current daemon status/binding, and confirm there is no active task or PR.
+1. Fetch fresh `main` and `agent-control`.
 2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md` and `docs/UX_VISUAL_CONTRACT.md`.
-3. Treat current code + canonical docs as source of truth; historical task ids and old local worktrees are not state.
-4. Do not start a new feature immediately. Re-establish the host/product baseline first.
-5. Run only one heavy benchmark/build/test workload at a time.
+3. Read fresh `agent-control:.agent/status/daemon.json`; do not reuse an old conversation binding.
+4. Confirm there is no active Local Agent task and no open PR before starting work.
+5. Do **not** start the chart UI or another Rule/action feature yet.
 
-## Repository state to preserve
+## Product state already verified
 
-- product model remains `physical Plug -> optional installed automation`;
-- phone configures/manages/diagnoses; Shelly executes locally;
-- one managed automation owner per Plug relay;
-- passive reconciliation must not rewrite a valid remote runtime;
-- destructive/runtime mutation verifies physical identity first;
-- relay/safety tests finish with an explicitly verified final state;
-- generated runtime remains constrained by the 9500 B guard;
-- `golden/climate-ui-20260928` is intentionally retained as the accepted Climate visual reference until the UX contract is deliberately changed.
+The 2026-09-30 product audit is complete:
 
-## Reconciliation hash audit resolved
+- real S22+ UX was inspected against the connected Shelly Plug S Gen3;
+- ownership, reconciliation, config/decode/recovery and error/retry paths were audited;
+- `lcl-af2c3ccf` vs `lcl-e5ff62f5` was resolved as two different hash domains, not runtime divergence;
+- saved `installation.script.hash` is the full generated script-source hash;
+- runtime header `// h:` is the normalized runtime-config hash;
+- passive reconciliation did not rewrite the valid runtime;
+- runtime diagnostic reason drift was fixed and verified on the real S22+ (`mn` now presents as Manual control rather than Unknown);
+- the preserving-data Android install kept the stored app state intact;
+- the final accepted hardware state was explicitly verified relay **OFF / 0 W**;
+- the canonical repository gate and responsive E2E passed for the merged diagnostic fix.
 
-The preserved Android data and installed Shelly expose two intentionally different hash domains:
+Do not reopen those findings unless fresh evidence contradicts them.
 
-- saved local `installation.script.hash`: `lcl-af2c3ccf` — FNV hash of the **full generated script source**;
-- installed runtime header `// h: lcl-e5ff62f5` — hash of the normalized **runtime configuration**.
+## Closeout goal
 
-The 2026-09-30 live audit read the remote source without mutating it and recomputed its full code hash as exactly `lcl-af2c3ccf`. The runtime/config therefore matched the saved installation; there was no local-vs-remote code divergence. Do not compare the header config hash to `installation.script.hash`, and do not passively rewrite a valid runtime.
+Finish with one boring, trustworthy `main` that is the only development source of truth before History visualization work begins.
 
-## Last real-device safety state
+This closeout is **cleanup and quality work, not a feature slice**.
 
-The most recent accepted hardware audit ended with the managed Shelly relay explicitly **OFF**. Future hardware work must re-check identity and current state instead of assuming the old session is still representative.
+## Phase 1 — repository and documentation hygiene
 
-## Performance handoff
+Audit the active documentation set against current code and remove stale/superseded statements rather than adding more historical documents.
 
-`docs/PERFORMANCE_HANDOFF.md` contains the exact final MacBook Air M1 / 8 GB baseline and the comparison procedure for the M1 Pro / 32 GB machine.
+At minimum check:
 
-For the cleanest computer comparison, first rerun the old benchmark at exact source `6836cc1c49fcd92bac2f8391e3092ef40a552f61` on the new Mac, then establish a fresh baseline on current `main` before changing concurrency/cache settings.
+- `README.md`;
+- `docs/HANDOFF_NEXT_CHAT.md`;
+- `docs/ROADMAP.md`;
+- `docs/ARCHITECTURE.md`;
+- `docs/UX_VISUAL_CONTRACT.md` / `docs/UX_VISUAL_GALLERY.md`;
+- `docs/PERFORMANCE_HANDOFF.md`;
+- `docs/testing/*`.
 
-## First work after the pause
+Keep the active docs small. Historical plans belong in Git history.
 
-After the new Mac is ready:
+Repository branch target after cleanup:
 
-1. establish the cross-host performance baseline;
-2. establish a fresh current-`main` baseline;
-3. inspect the real S22+ UX and the saved-vs-remote runtime mismatch;
-4. audit ownership, config/decode/recovery symmetry, error/retry behavior and remaining test gaps;
-5. rank findings before implementing anything;
-6. make only small cohesive fixes with focused tests;
-7. finish with the canonical gate and real-device verification when the change requires it.
+- `main` — development source of truth;
+- `agent-control` — Local Agent control plane, keep;
+- `golden/climate-ui-20260928` — intentional frozen visual recovery/reference branch, keep until the visual contract no longer depends on it;
+- no other merged/stale working branches.
 
-No feature, benchmark tuning, runtime rewrite, or branch expansion is intentionally left in progress by this handoff.
+Before deleting a branch, verify its useful tree/content is already represented on `main` or intentionally obsolete. Do not delete `agent-control` or the golden branch.
+
+Any cleanup change should go through a small PR, be merged to `main`, then its temporary branch should be deleted.
+
+## Phase 2 — code-quality closeout
+
+Do a fresh quality audit from current `main` before changing code. Rank findings first; only fix clear, low-risk problems in small cohesive changes.
+
+Explicitly inspect:
+
+- ownership/layering against `AGENTS.md` and nearest directory contracts;
+- screens/components for transport, persistence or domain leakage;
+- dead/unreferenced production paths and exports, including the currently suspicious `runtimeConfigUpdate` public path with no known production call-site;
+- whether reconciliation outcomes such as `changed`, `unavailable` and `conflict` are surfaced/consumed intentionally rather than silently discarded;
+- config encode/decode/recovery symmetry and malformed-state behavior;
+- retry semantics: do not automatically replay ambiguous mutating operations;
+- TODO/FIXME/HACK markers and stale compatibility code;
+- large files by responsibility, not line count alone;
+- duplicate logic, catch-all helpers and unnecessary abstractions;
+- strict typing / `any` escapes / unchecked external data;
+- test gaps around meaningful failure states;
+- recurring React test warnings/flaky timing if they indicate real test hygiene problems.
+
+Do not turn the closeout into a broad refactor. If a finding is architectural or product-level rather than an obvious cleanup, record it for later instead of expanding scope.
+
+## Performance rule
+
+The MacBook Air M1 / 8 GB remains the current Local Agent host. `docs/PERFORMANCE_HANDOFF.md` intentionally pauses a fresh performance/concurrency/cache campaign until the M1 Pro / 32 GB host is available.
+
+Do not block ordinary quality cleanup on that pause, but do not tune worker counts/caches or claim a fresh performance baseline from the M1 / 8 GB host.
+
+Run only one heavy build/test workload at a time.
+
+## Phase 3 — final qualification
+
+After all retained cleanup fixes are merged:
+
+1. fetch fresh `main` again and confirm the worktree is clean;
+2. confirm no open PR remains;
+3. confirm no temporary working branch remains;
+4. run exactly one final canonical `pnpm check` for the final source state;
+5. use `pnpm check:full` instead if the closeout intentionally changes responsive/visual UI behavior;
+6. if native/mobile behavior changed, verify the relevant flow on the connected S22+ without destroying preserved app state;
+7. if touching the real Shelly, always identity-first and finish with an explicitly verified relay OFF;
+8. update this handoff/roadmap so the next chat no longer contains cleanup work that is already finished.
+
+## Only after closeout — real History charts page
+
+The existing History/Datalogger runtime, KVS format, typed mobile read path and `HistoryRecord[]` model already exist. The current History UI is intentionally simple and list-based.
+
+The next user-facing slice after closeout is a **real History visualization page with charts**, built on the existing history data path first. Do not redesign the Shelly runtime/storage format merely to draw charts unless a concrete data limitation is demonstrated.
+
+Before implementation, do a normal architecture/design gate and decide explicitly:
+
+- which series belong on the first screen (temperature, humidity, VPD, relay state, power/current);
+- time axis/range and behavior when Shelly timestamps are unavailable and only uptime exists;
+- how AUTO/MANUAL, reason/fault/safety transitions appear without making the graph unreadable;
+- whether the existing chronological record list remains below the charts as the detailed/fallback view;
+- mobile interaction/accessibility and empty/partial/corrupt-history states;
+- whether a chart library is actually needed. A new production dependency requires explicit user approval.
+
+That chart work is a new product/UX slice and must receive its own visual contract update and real-device review. Do not start it as part of repository cleanup.
+
+## Definition of this closeout being done
+
+The pre-charts baseline is closed only when:
+
+- current docs describe current behavior and next work accurately;
+- merged/stale working branches are gone;
+- `main`, `agent-control` and the intentional golden branch are the only expected branches;
+- no open PR remains;
+- ranked code-quality findings have either been safely fixed or explicitly parked with rationale;
+- one final canonical gate is green;
+- hardware/native verification required by the retained changes is complete;
+- the next task can begin directly with the History charts architecture/design gate, without another archaeology/cleanup session.
