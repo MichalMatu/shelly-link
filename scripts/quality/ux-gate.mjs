@@ -16,9 +16,7 @@ const frozenClimateVisuals = Object.freeze({
   'apps/mobile/e2e/responsive.spec.ts-snapshots/06-climate-script-darwin.png':
     '161b2c1dba0d419d3181c764d4192c441cbd36c7',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/07-climate-info-darwin.png':
-    'ce783c8a6a5fdac4724671e85d655aa6c1e1233d',
-  'apps/mobile/e2e/responsive.spec.ts-snapshots/23-climate-history-darwin.png':
-    '4aa80c7c5b86b1b340b8c4bb266b48bceaa394ab'
+    'ce783c8a6a5fdac4724671e85d655aa6c1e1233d'
 });
 const cssPaths = [
   'apps/mobile/src/theme/theme.css',
@@ -28,6 +26,7 @@ const cssPaths = [
   'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
   'apps/mobile/src/features/automations/components/ClimateHistorySection.css',
+  'apps/mobile/src/features/automations/components/ClimateHistoryChart.css',
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
   'apps/mobile/src/features/plugs/components/PlugAddSpeedDial.css',
   'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',

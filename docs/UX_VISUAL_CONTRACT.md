@@ -22,6 +22,8 @@ Do not refresh Climate snapshots as part of unrelated work. Changing the frozen 
 
 History/Datalogger is the explicit product-design exception approved for the current v1 slice: Climate Detail intentionally expands the shared tab chrome from five to six items by adding **History**. The existing Automation, BLE, Device, Script and Info composition remains frozen; only the tab chrome delta and the new History surface receive refreshed/reviewed baselines.
 
+The History surface is chart-first and data-dense: one large full-width plot owns the page, a compact metric grid doubles as the series selector, and the old permanent record-card list does not remain below the chart. Temperature, humidity, VPD, relay output, power and current keep separate units/scales instead of being normalized onto a misleading shared axis. Use real Shelly timestamps when complete, monotonic uptime when timestamps are unavailable, and record order only as the final fallback. Tooltips carry the selected value plus AUTO/MANUAL and relay state without adding permanent explanatory chrome. `@nivo/line` is the approved production chart dependency for this surface.
+
 ## Shared UI ownership
 
 1. `@lcl/design-tokens` owns raw visual values.

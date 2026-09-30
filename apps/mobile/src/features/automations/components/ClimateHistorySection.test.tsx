@@ -1,8 +1,14 @@
 import type { HistoryRecord } from '@lcl/automation-core';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { ClimateHistorySection } from './ClimateHistorySection.js';
+
+vi.mock('@nivo/line', () => ({
+  ResponsiveLine: ({ ariaLabel }: { ariaLabel?: string }) => (
+    <div role="img" aria-label={ariaLabel} data-testid="history-chart" />
+  )
+}));
 
 const record = (uptimeSec: number, finalRelayOn: boolean): HistoryRecord => ({
   timestampUnixSec: 1_790_000_000 + uptimeSec,
@@ -53,18 +59,37 @@ describe('ClimateHistorySection', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders newest records first and reports skipped damaged records', () => {
+  it('renders a chart-first metric selector and reports skipped damaged records', () => {
     renderSection({
       records: [record(10, false), record(20, true)],
       invalidRecordCount: 1
     });
 
-    const items = screen.getAllByRole('listitem');
-    expect(within(items[0]!).getByText('ON')).toBeInTheDocument();
-    expect(within(items[1]!).getByText('OFF')).toBeInTheDocument();
+    expect(screen.queryAllByRole('listitem')).toHaveLength(0);
+    expect(screen.getByRole('img', { name: 'History: Temperature' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Temperature, 22.5 °C' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
     expect(
       screen.getByText('Some stored records are damaged and were skipped.')
     ).toBeInTheDocument();
+
+    const power = screen.getByRole('button', { name: 'Power, 12.3 W' });
+    fireEvent.click(power);
+    expect(power).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('img', { name: 'History: Power' })).toBeInTheDocument();
+  });
+
+  it('falls back to the first available series when temperature is unavailable', () => {
+    const humidityOnly = { ...record(10, false), temperatureC: null };
+    renderSection({ records: [humidityOnly] });
+
+    expect(screen.getByRole('img', { name: 'History: Humidity' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Humidity, 58 %' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
   });
 
   it('renders a retry action on read failure', () => {
