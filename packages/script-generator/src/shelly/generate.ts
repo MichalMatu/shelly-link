@@ -22,9 +22,7 @@ const MINIMUM_ON_GENERATOR_VERSION = '0.6.2';
 export const SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES = 9_500;
 
 const renderPersistentConfigLoader = (minimumOnEnabled = false): string => {
-  const minimumOnValidator = minimumOnEnabled
-    ? '&&(c.u===void 0||N(c.u)&&c.u>=0)'
-    : '';
+  const minimumOnValidator = minimumOnEnabled ? '&&(c.u===void 0||N(c.u)&&c.u>=0)' : '';
   return `var E=0;
 function N(x){return x-0===x}
 function S(x){return x+""===x}
@@ -67,7 +65,9 @@ export const generateShellyThermostatScript = (input: unknown): string => {
   const config = normalizeConfig(input);
   const mode: ShellyScriptGeneratorMode = 'climate-engine-v1';
   const minimumOnEnabled = (config.rule.minimumOnMs ?? 0) > 0;
-  const generatorVersion = minimumOnEnabled ? MINIMUM_ON_GENERATOR_VERSION : GENERATOR_VERSION;
+  const generatorVersion = minimumOnEnabled
+    ? MINIMUM_ON_GENERATOR_VERSION
+    : GENERATOR_VERSION;
   const hash = configHash(config);
   const cfgJson = stableStringify(createShellyRuntimeConfig(config, hash));
   const body = `${minimumOnEnabled ? 'var U=1;\n' : ''}var C=${cfgJson};
