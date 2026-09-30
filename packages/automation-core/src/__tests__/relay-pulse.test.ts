@@ -100,7 +100,9 @@ describe('relay pulse actions', () => {
     });
 
     expect(blocked.blockedBy).toBe('minimum-off');
-    expect(confirmRelayPulseActionApplied(pending, blocked.appliedAction, 30_000)).toEqual({
+    expect(
+      confirmRelayPulseActionApplied(pending, blocked.appliedAction, 30_000)
+    ).toEqual({
       requestedAction: null,
       nextState: pending,
       phase: 'pending-start'
