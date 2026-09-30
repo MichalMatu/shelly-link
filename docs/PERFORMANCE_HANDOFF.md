@@ -1,73 +1,66 @@
 # Performance handoff
 
-Status: 2026-09-30. The first build/test acceleration pass is complete. Start any new performance work from fresh `main` and measure on an otherwise idle host.
+Status: **2026-09-30 — performance work is paused until the MacBook M1 Pro / 32 GB host is available.** Do not change concurrency or cache configuration before a fresh cross-host baseline.
 
-## Completed optimization pass
+## Stable optimizations already merged
 
-The product/runtime behavior was not changed by this pass.
+The completed tooling pass did not change product/runtime behavior:
 
-- PR #39 enabled Gradle build cache and stopped forcing `--no-daemon` in the local Android phone-alpha path.
-  - baseline clean Gradle build with `--no-daemon`: ~31.5 s
-  - baseline warm no-op with `--no-daemon`: ~11.6 s
-  - warm daemon no-op during calibration: ~1.7 s
-  - verified branch results: first clean build after daemon stop ~18.6 s, cache-backed clean rebuild ~5.1 s, warm no-op ~1.8 s
-- PR #40 removed wall-clock waiting from the BLE polling recovery test while leaving production polling unchanged.
-  - focused test: ~9.7 s -> ~1.9 s
-  - mobile suite: ~53 s -> ~39-42 s in repeated optimized runs
-- PR #41 removed real mutation sleeps from tests that do not validate throttling, while preserving dedicated throttle assertions and production delays.
-  - `@lcl/shelly-client`: 8.862 s -> 1.952 s
-  - optimized full `pnpm test`: 43.491 s
-  - optimized canonical `pnpm check`: 77.983 s
-- Removing duplicate plain test passes for the two coverage-core packages was measured and intentionally rejected: the observed saving was only about 1.7 s and did not justify extra gate complexity.
+- Gradle build cache is enabled and local Android builds no longer force `--no-daemon`;
+- BLE polling tests no longer wait on wall-clock recovery where timing is not under test;
+- non-throttling Shelly-client tests no longer contain unnecessary real sleeps;
+- a proposed duplicate-test gate reduction was measured and rejected because the saving was too small.
 
-## Host constraint discovered
+Keep the current configuration until new measurements justify a change.
 
-MacBook Air M1 / 8 GB is memory-constrained during the full repository gate. During the baseline pass the `pnpm check` process tree reached roughly 2.1 GB RSS while the host was already using substantial swap. Do not increase worker counts merely because the CPU has eight cores.
+## Last MacBook Air M1 / 8 GB baseline
 
-## Next performance phase: CPU first, GPU only when eligible
+The final baseline before the pause used source `6836cc1c49fcd92bac2f8391e3092ef40a552f61`. `main` advanced afterwards, so these figures are a machine/reference baseline, not a current-main qualification.
 
-### Measurement rules
+### Repository gate
 
-1. Run only one heavy repository workload at a time. Do not benchmark while another compile, test suite, E2E run, package install, ML job, or Local Agent task is consuming the host.
-2. Pin the exact repository revision and record whether a run is cold, warm, or incremental.
-3. Prefer three comparable runs and report the median; discard a run only when an external disturbance is documented.
-4. Record wall time, CPU utilization, peak RSS and swap pressure. On macOS use `/usr/bin/time -lp` where practical.
-5. Do not clear global dependency caches during ordinary iteration. Clear only the project output/cache required for an explicitly labelled cold test.
-6. Change one variable at a time. Re-run the canonical gate after any configuration change that would be kept.
+Three comparable runs gave:
 
-### CPU track
+- `pnpm check` project-cold median: **81.34 s**;
+- `pnpm check` warm median: **83.76 s**;
+- representative mobile incremental build median: **6.92 s**.
 
-Profile the actual expensive workflows rather than synthetic loops:
+The warm full gate was not faster than the cold-labelled runs, which indicates that this gate is dominated by more than a single reusable build cache. Do not infer cache policy from that observation alone.
 
-- full `pnpm check` and its heaviest package/test groups;
-- Android `assembleDebug` cold/cache-hit/warm paths;
-- representative incremental TypeScript/Vite and Android edits.
+### Android
 
-The goal is to identify CPU saturation versus memory/swap stalls before changing concurrency again.
+- clean `assembleDebug --no-build-cache` median after the first startup outlier: **8.29 s**;
+- first startup/toolchain run: **27.17 s**;
+- clean cache-hit median: **2.16 s**;
+- warm no-op median: **0.91 s**.
 
-### GPU track
+### Memory pressure
 
-Do an eligibility audit before benchmarking GPU. TypeScript, ESLint, Gradle/Kotlin compilation, Vite bundling and ordinary Vitest workloads are not expected to benefit from Apple MPS/GPU acceleration. Do not add GPU dependencies or GPU-specific code unless a real compute workload is found that can use it.
+The M1 / 8 GB host was already under substantial swap pressure:
 
-For Shelly Link, the default expectation is therefore **CPU/RAM profiling only**. A GPU benchmark is justified only if a future workload introduces substantial image, matrix, ML or similarly parallel compute.
+- full-task peak RSS reached about **2.64 GB**;
+- swap was roughly **3.9–4.45 GB** during the campaign.
 
-## Deferred build ideas
+The per-command `/usr/bin/time` RSS values are wrapper/process measurements; Local Agent task-tree telemetry is the more useful whole-workload memory signal.
 
-These are intentionally not active work items:
+This machine should therefore be treated as a memory-constrained reference host. Do not raise worker counts based on CPU core count alone.
 
-- further `pnpm check` task-graph restructuring;
-- more aggressive Gradle/Vitest worker counts;
-- affected-package fast gates.
+## Resume on the M1 Pro / 32 GB host
 
-Re-open them only after new measurements show that the current optimized workflow is again a material development bottleneck.
+For a fair computer-to-computer comparison, first rerun the same benchmark commands at exact source `6836cc1c49fcd92bac2f8391e3092ef40a552f61` on the new Mac. Then benchmark fresh `main` as the new development baseline.
 
-## New-chat bootstrap
+For each baseline:
 
-Read, in order:
+1. run only one heavy workload at a time and confirm the host is idle;
+2. separate cold, warm and representative incremental paths;
+3. use at least three comparable runs and report medians;
+4. record wall time, CPU, process-tree peak RSS and swap/memory pressure;
+5. keep versions and commands identical for the cross-host comparison;
+6. only after the fixed baseline test any higher Gradle/Vitest/build concurrency, one variable at a time;
+7. run the canonical gate before merging a retained configuration change.
 
-1. `AGENTS.md`
-2. `docs/HANDOFF_NEXT_CHAT.md`
-3. this file
-4. the fresh Local Agent daemon state from `agent-control`
+TypeScript, Vite, Vitest, Gradle/Kotlin and ordinary Android build work are CPU/RAM/cache/I/O workloads. Do not add GPU-specific tooling unless a future workload is actually GPU-eligible.
 
-Then verify the host is idle before taking any performance baseline. Do not reconstruct timings from old branches; the numbers above are historical reference points and fresh measurements must use current `main`.
+## Bootstrap after the pause
+
+Read `AGENTS.md`, `docs/HANDOFF_NEXT_CHAT.md`, this file, then fetch fresh `main` and the Local Agent daemon state. Historical timings are reference values only; future product work starts from fresh `main`.
