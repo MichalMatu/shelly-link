@@ -159,7 +159,7 @@ describe('generated runtime control arbitration', () => {
     const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
     expect(script).not.toContain('input:0');
     expect(script).not.toContain('Shelly.addEventHandler');
-    expect(script).toContain('Shelly.addStatusHandler(safe)');
+    expect(script).toContain('L.addStatusHandler(safe)');
   });
 
   it('MANUAL starts safe OFF and explicit manual request controls the relay', () => {

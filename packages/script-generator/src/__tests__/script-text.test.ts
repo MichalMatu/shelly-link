@@ -12,7 +12,9 @@ describe('aliasGeneratedClimateRuntimeTokens', () => {
 
   it('preserves escaped quote content while continuing to alias later tokens', () => {
     expect(
-      aliasGeneratedClimateRuntimeTokens('var a="Shelly \\" null";Shelly.call("X",{on:false});')
+      aliasGeneratedClimateRuntimeTokens(
+        'var a="Shelly \\" null";Shelly.call("X",{on:false});'
+      )
     ).toBe(
       'var Q=null,F=false,G=true,M=Math,J=JSON,L=Shelly;var a="Shelly \\" null";L.call("X",{on:F});'
     );
