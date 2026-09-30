@@ -54,7 +54,7 @@ Still pending before this slice is complete:
 
 **Constraint:** the fresh stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Before adding more runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
 
-The immediate next work session is a stabilization/re-audit pass, not automatic implementation of the next pending primitive. See `docs/HANDOFF_NEXT_CHAT.md`.
+The immediate next work session is a cross-cutting product-quality audit: real-device UX, reconciliation/state logic, error/retry behavior and fresh CPU/RAM/cache/I/O baselines. Do not automatically implement the next Rule/action primitive or redesign the frozen Climate UI before findings are ranked. See `docs/HANDOFF_NEXT_CHAT.md`.
 
 ### 4. Dashboard status polish
 
