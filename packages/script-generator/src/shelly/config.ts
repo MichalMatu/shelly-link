@@ -147,7 +147,6 @@ export const createDefaultShellyThermostatConfig = (
       },
       staleTimeoutSec: defaultRule.staleTimeoutSec,
       minChangeMs: defaultRule.minChangeMs,
-      minimumOnMs: defaultRule.minimumOnMs ?? 0,
       maxOnMs: defaultRule.maxOnMs,
       rssiMin: defaultRule.rssiMin,
       consecutiveHits: defaultRule.consecutiveHits,
