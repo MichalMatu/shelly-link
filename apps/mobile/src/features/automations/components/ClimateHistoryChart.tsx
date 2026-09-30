@@ -1,5 +1,5 @@
 import type { HistoryRecord } from '@lcl/automation-core';
-import { ResponsiveLine, type LineCustomSvgLayerProps } from '@nivo/line';
+import { ResponsiveLine } from '@nivo/line';
 import { useMemo, useState } from 'react';
 import {
   formatHistoryUptime,
@@ -7,6 +7,17 @@ import {
   historyXValueFor,
   resolveHistoryAxisMode
 } from './climateHistoryChartAxis.js';
+import { ClimateHistoryChartLegend } from './ClimateHistoryChartLegend.js';
+import {
+  CONTINUOUS_HISTORY_METRICS,
+  HISTORY_METRICS,
+  historyMetricValues,
+  latestHistoryMetricValue,
+  type HistoryChartSeries,
+  type HistoryMetricDefinition,
+  type HistoryMetricId
+} from './climateHistoryChartMetrics.js';
+import { createClimateHistoryOutputTrack } from './ClimateHistoryOutputTrack.js';
 import {
   historyMetricDomain,
   normalizeHistoryMetricValue,
@@ -29,72 +40,6 @@ export type ClimateHistoryChartLabels = {
   on: string;
   off: string;
 };
-
-type MetricId = HistoryContinuousMetricId | 'output';
-
-type MetricDefinition = {
-  id: MetricId;
-  unit: string;
-  color: string;
-  read(record: HistoryRecord): number | null;
-};
-
-type ContinuousMetricDefinition = MetricDefinition & {
-  id: HistoryContinuousMetricId;
-};
-
-type ChartDatum = {
-  x: number;
-  y: number | null;
-  recordIndex: number;
-};
-
-type ChartSeries = {
-  id: MetricId;
-  data: readonly ChartDatum[];
-};
-
-const CONTINUOUS_METRICS: readonly ContinuousMetricDefinition[] = [
-  {
-    id: 'temperature',
-    unit: '°C',
-    color: 'var(--history-color-temperature)',
-    read: (record) => record.temperatureC
-  },
-  {
-    id: 'humidity',
-    unit: '%',
-    color: 'var(--history-color-humidity)',
-    read: (record) => record.humidityPct
-  },
-  {
-    id: 'vpd',
-    unit: 'kPa',
-    color: 'var(--history-color-vpd)',
-    read: (record) => record.vpdKpa
-  },
-  {
-    id: 'power',
-    unit: 'W',
-    color: 'var(--history-color-power)',
-    read: (record) => record.powerW
-  },
-  {
-    id: 'current',
-    unit: 'A',
-    color: 'var(--history-color-current)',
-    read: (record) => record.currentA
-  }
-] as const;
-
-const OUTPUT_METRIC: MetricDefinition = {
-  id: 'output',
-  unit: '',
-  color: 'var(--history-color-output)',
-  read: (record) => (record.finalRelayOn ? 1 : 0)
-};
-
-const METRICS: readonly MetricDefinition[] = [...CONTINUOUS_METRICS, OUTPUT_METRIC];
 
 const CHART_MARGIN = { top: 8, right: 8, bottom: 36, left: 8 } as const;
 const OUTPUT_INTERACTION_Y = 0.08;
@@ -136,26 +81,6 @@ const CHART_THEME = {
   }
 } as const;
 
-const latestMetricValue = (
-  records: readonly HistoryRecord[],
-  metric: MetricDefinition
-): number | null => {
-  for (let index = records.length - 1; index >= 0; index -= 1) {
-    const value = metric.read(records[index]!);
-    if (value !== null) return value;
-  }
-  return null;
-};
-
-const metricValues = (
-  records: readonly HistoryRecord[],
-  metric: ContinuousMetricDefinition
-): readonly number[] =>
-  records.flatMap((record) => {
-    const value = metric.read(record);
-    return value === null ? [] : [value];
-  });
-
 type ClimateHistoryChartProps = {
   records: readonly HistoryRecord[];
   locale: string;
@@ -167,7 +92,7 @@ export const ClimateHistoryChart = ({
   locale,
   labels
 }: ClimateHistoryChartProps) => {
-  const [hiddenMetricIds, setHiddenMetricIds] = useState<ReadonlySet<MetricId>>(
+  const [hiddenMetricIds, setHiddenMetricIds] = useState<ReadonlySet<HistoryMetricId>>(
     () => new Set()
   );
   const number = useMemo(
@@ -187,10 +112,10 @@ export const ClimateHistoryChart = ({
     [locale]
   );
 
-  const availableMetrics = METRICS.filter((metric) =>
+  const availableMetrics = HISTORY_METRICS.filter((metric) =>
     records.some((record) => metric.read(record) !== null)
   );
-  const availableContinuousMetrics = CONTINUOUS_METRICS.filter((metric) =>
+  const availableContinuousMetrics = CONTINUOUS_HISTORY_METRICS.filter((metric) =>
     availableMetrics.some((available) => available.id === metric.id)
   );
   const visibleMetrics = availableMetrics.filter(
@@ -215,12 +140,15 @@ export const ClimateHistoryChart = ({
   const domains = useMemo(() => {
     const next = new Map<HistoryContinuousMetricId, HistoryMetricDomain>();
     for (const metric of availableContinuousMetrics) {
-      next.set(metric.id, historyMetricDomain(metric.id, metricValues(records, metric)));
+      next.set(
+        metric.id,
+        historyMetricDomain(metric.id, historyMetricValues(records, metric))
+      );
     }
     return next;
   }, [availableContinuousMetrics, records]);
 
-  const formatMetric = (metric: MetricDefinition, value: number): string => {
+  const formatMetric = (metric: HistoryMetricDefinition, value: number): string => {
     if (metric.id === 'output') return value >= 0.5 ? labels.on : labels.off;
     return `${number.format(value)} ${metric.unit}`;
   };
@@ -245,7 +173,7 @@ export const ClimateHistoryChart = ({
     return formatHistoryUptime(record.uptimeSec);
   };
 
-  const chartData: readonly ChartSeries[] = [
+  const chartData: readonly HistoryChartSeries[] = [
     ...visibleContinuousMetrics.map((metric) => {
       const domain = domains.get(metric.id)!;
       return {
@@ -274,7 +202,7 @@ export const ClimateHistoryChart = ({
     'transparent'
   ];
 
-  const toggleMetric = (metricId: MetricId) => {
+  const toggleMetric = (metricId: HistoryMetricId) => {
     setHiddenMetricIds((current) => {
       const next = new Set(current);
       if (next.has(metricId)) next.delete(metricId);
@@ -283,80 +211,31 @@ export const ClimateHistoryChart = ({
     });
   };
 
-  const outputTrackLayer = ({
-    xScale,
-    innerHeight,
-    innerWidth
-  }: LineCustomSvgLayerProps<ChartSeries>) => {
-    if (!outputVisible || records.length === 0) return null;
-
-    const offY = innerHeight - 5;
-    const onY = innerHeight - 14;
-    const yFor = (record: HistoryRecord) => (record.finalRelayOn ? onY : offY);
-    const firstX = xScale(xValues[0]!);
-    let path = `M ${firstX} ${yFor(records[0]!)}`;
-
-    for (let index = 1; index < records.length; index += 1) {
-      const x = xScale(xValues[index]!);
-      path += ` H ${x} V ${yFor(records[index]!)}`;
-    }
-
-    return (
-      <g aria-hidden="true">
-        <line
-          className="climate-history-chart__output-baseline"
-          x1={0}
-          x2={innerWidth}
-          y1={offY}
-          y2={offY}
-        />
-        {records.length === 1 ? (
-          <circle
-            className="climate-history-chart__output-track"
-            cx={firstX}
-            cy={yFor(records[0]!)}
-            r={2.5}
-          />
-        ) : (
-          <path className="climate-history-chart__output-track" d={path} />
-        )}
-      </g>
-    );
-  };
+  const legendItems = availableMetrics.map((metric) => {
+    const latest = latestHistoryMetricValue(records, metric)!;
+    return {
+      id: metric.id,
+      label: labels[metric.id],
+      value: formatMetric(metric, latest),
+      visible: !hiddenMetricIds.has(metric.id)
+    };
+  });
+  const outputTrackLayer = createClimateHistoryOutputTrack(
+    records,
+    xValues,
+    outputVisible
+  );
 
   return (
     <div className="climate-history-chart">
-      <div
-        className="climate-history-chart__metrics"
-        role="group"
-        aria-label={labels.title}
-      >
-        {availableMetrics.map((metric) => {
-          const latest = latestMetricValue(records, metric)!;
-          const value = formatMetric(metric, latest);
-          const visible = !hiddenMetricIds.has(metric.id);
-          return (
-            <button
-              className="climate-history-chart__metric"
-              data-metric={metric.id}
-              type="button"
-              aria-label={`${labels[metric.id]}, ${value}`}
-              aria-pressed={visible}
-              key={metric.id}
-              onClick={() => toggleMetric(metric.id)}
-            >
-              <span className="climate-history-chart__metric-dot" aria-hidden="true" />
-              <span className="climate-history-chart__metric-label">
-                {labels[metric.id]}
-              </span>
-              <strong>{value}</strong>
-            </button>
-          );
-        })}
-      </div>
+      <ClimateHistoryChartLegend
+        title={labels.title}
+        items={legendItems}
+        onToggle={toggleMetric}
+      />
 
       <div className="climate-history-chart__plot">
-        <ResponsiveLine<ChartSeries>
+        <ResponsiveLine<HistoryChartSeries>
           data={chartData}
           margin={CHART_MARGIN}
           xScale={{ type: 'linear', min: 'auto', max: 'auto' }}
