@@ -50,6 +50,34 @@ const createRuntime = () => {
   let scanner:
     | ((event: string, packet: { addr: string; advData: number[]; rssi: number }) => void)
     | undefined;
+  const timers: Array<{
+    dueMs: number;
+    durationMs: number;
+    repeat: boolean;
+    callback: () => void;
+  }> = [];
+
+  const runDueTimers = () => {
+    let iterations = 0;
+    while (true) {
+      let nextIndex = -1;
+      let nextDueMs = Number.POSITIVE_INFINITY;
+      timers.forEach((entry, index) => {
+        if (entry.dueMs <= nowMs && entry.dueMs < nextDueMs) {
+          nextIndex = index;
+          nextDueMs = entry.dueMs;
+        }
+      });
+      if (nextIndex < 0) return;
+      const entry = timers.splice(nextIndex, 1)[0]!;
+      entry.callback();
+      if (entry.repeat) {
+        timers.push({ ...entry, dueMs: entry.dueMs + entry.durationMs });
+      }
+      iterations += 1;
+      if (iterations > 1_000) throw new Error('Generated runtime timer loop did not settle.');
+    }
+  };
 
   const shelly = {
     call: (
@@ -81,7 +109,17 @@ const createRuntime = () => {
       start: () => true
     }
   };
-  const timer = { set: () => undefined };
+  const timer = {
+    set: (durationMs: number, repeat: boolean, callback: () => void) => {
+      timers.push({
+        dueMs: nowMs + durationMs,
+        durationMs,
+        repeat,
+        callback
+      });
+      return timers.length;
+    }
+  };
   const enterManual = climateRuntimeSetControlModeEvalCode('manual');
   const runtime = new Function(
     'Shelly',
@@ -102,6 +140,7 @@ const createRuntime = () => {
     physicalRelayOn: () => physicalRelayOn,
     advance: (milliseconds: number) => {
       nowMs += milliseconds;
+      runDueTimers();
     },
     scan: (temperatureC: number) =>
       scanner?.('scan-result', {
@@ -178,7 +217,7 @@ describe('generated relay debounce runtime', () => {
     });
   });
 
-  it('requires a stable AUTO ON request before changing the physical relay', () => {
+  it('matures a stable AUTO ON request from its one-shot timer without another scan', () => {
     const runtime = createRuntime();
 
     runtime.scan(18);
@@ -186,16 +225,14 @@ describe('generated relay debounce runtime', () => {
     expect(runtime.runtime.state()).toMatchObject({ db: true, rs: 'db' });
 
     runtime.advance(4_999);
-    runtime.scan(18);
     expect(runtime.physicalRelayOn()).toBe(false);
 
     runtime.advance(1);
-    runtime.scan(18);
     expect(runtime.physicalRelayOn()).toBe(true);
     expect(runtime.runtime.state().db).toBeNull();
   });
 
-  it('cancels and restarts pending debounce when the requested target returns to actual state', () => {
+  it('cancels and restarts the timer when the requested target returns to actual state', () => {
     const runtime = createRuntime();
 
     runtime.scan(18);
@@ -203,26 +240,24 @@ describe('generated relay debounce runtime', () => {
     runtime.scan(19.5);
     expect(runtime.runtime.state().db).toBeNull();
 
-    runtime.advance(1_000);
-    runtime.scan(18);
+    runtime.advance(4_000);
     expect(runtime.physicalRelayOn()).toBe(false);
-    expect(runtime.runtime.state()).toMatchObject({ db: true, di: 102_000 });
+
+    runtime.scan(18);
+    expect(runtime.runtime.state()).toMatchObject({ db: true, di: 105_000 });
 
     runtime.advance(4_999);
-    runtime.scan(18);
     expect(runtime.physicalRelayOn()).toBe(false);
 
     runtime.advance(1);
-    runtime.scan(18);
     expect(runtime.physicalRelayOn()).toBe(true);
   });
 
-  it('lets MANUAL forced OFF bypass and clear a pending OFF debounce', () => {
+  it('lets MANUAL forced OFF bypass and invalidate a pending OFF timer', () => {
     const runtime = createRuntime();
 
     runtime.scan(18);
     runtime.advance(5_000);
-    runtime.scan(18);
     expect(runtime.physicalRelayOn()).toBe(true);
 
     runtime.advance(1_000);
@@ -231,6 +266,10 @@ describe('generated relay debounce runtime', () => {
     expect(runtime.runtime.state()).toMatchObject({ db: false, rs: 'db' });
 
     expect(runtime.runtime.enterManual()).toBe(1);
+    expect(runtime.physicalRelayOn()).toBe(false);
+    expect(runtime.runtime.state().db).toBeNull();
+
+    runtime.advance(60_000);
     expect(runtime.physicalRelayOn()).toBe(false);
     expect(runtime.runtime.state().db).toBeNull();
   });
