@@ -1,44 +1,39 @@
 import {
   advanceRelayPulse,
   cancelRelayPulse,
+  confirmRelayPulseActionApplied,
   startRelayPulse
 } from '../actions/relayPulse.js';
 
 describe('relay pulse actions', () => {
-  it('starts Pulse ON by requesting ON and restoring the prior OFF state at expiry', () => {
-    expect(
-      startRelayPulse(
-        { type: 'pulse', relayOn: true, durationMs: 5_000 },
-        false,
-        10_000
-      )
-    ).toEqual({
-      requestedAction: { type: 'set', relayOn: true },
-      nextState: {
-        relayOn: true,
-        restoreRelayOn: false,
-        expiresAtMs: 15_000
-      },
-      phase: 'started'
-    });
+  it('requests Pulse ON and preserves the prior OFF state without starting the timer yet', () => {
+    expect(startRelayPulse({ type: 'pulse', relayOn: true, durationMs: 5_000 }, false)).toEqual(
+      {
+        requestedAction: { type: 'set', relayOn: true },
+        nextState: {
+          status: 'pending-start',
+          targetRelayOn: true,
+          restoreRelayOn: false,
+          durationMs: 5_000
+        },
+        phase: 'pending-start'
+      }
+    );
   });
 
-  it('starts Pulse OFF by requesting OFF and restoring the prior ON state at expiry', () => {
-    expect(
-      startRelayPulse(
-        { type: 'pulse', relayOn: false, durationMs: 5_000 },
-        true,
-        10_000
-      )
-    ).toEqual({
-      requestedAction: { type: 'set', relayOn: false },
-      nextState: {
-        relayOn: false,
-        restoreRelayOn: true,
-        expiresAtMs: 15_000
-      },
-      phase: 'started'
-    });
+  it('requests Pulse OFF and preserves the prior ON state without starting the timer yet', () => {
+    expect(startRelayPulse({ type: 'pulse', relayOn: false, durationMs: 5_000 }, true)).toEqual(
+      {
+        requestedAction: { type: 'set', relayOn: false },
+        nextState: {
+          status: 'pending-start',
+          targetRelayOn: false,
+          restoreRelayOn: true,
+          durationMs: 5_000
+        },
+        phase: 'pending-start'
+      }
+    );
   });
 
   it.each([
@@ -49,22 +44,48 @@ describe('relay pulse actions', () => {
     ({ relayOn, currentRelayOn }) => {
       const started = startRelayPulse(
         { type: 'pulse', relayOn, durationMs: 5_000 },
-        currentRelayOn,
-        10_000
+        currentRelayOn
       );
 
-      expect(started.nextState?.restoreRelayOn).toBe(currentRelayOn);
-      expect(advanceRelayPulse(started.nextState!, 15_000)).toEqual({
-        requestedAction: { type: 'set', relayOn: currentRelayOn },
-        nextState: null,
-        phase: 'expired'
-      });
+      expect(started.nextState).toMatchObject({ restoreRelayOn: currentRelayOn });
     }
   );
 
+  it('keeps a blocked start pending without consuming pulse duration', () => {
+    const pending = startRelayPulse(
+      { type: 'pulse', relayOn: true, durationMs: 5_000 },
+      false
+    ).nextState!;
+
+    expect(advanceRelayPulse(pending, 60_000)).toEqual({
+      requestedAction: { type: 'set', relayOn: true },
+      nextState: pending,
+      phase: 'pending-start'
+    });
+  });
+
+  it('starts the timer only after the target Set action is confirmed applied', () => {
+    const pending = startRelayPulse(
+      { type: 'pulse', relayOn: true, durationMs: 5_000 },
+      false
+    ).nextState!;
+
+    expect(confirmRelayPulseActionApplied(pending, 20_000)).toEqual({
+      requestedAction: null,
+      nextState: {
+        status: 'active',
+        targetRelayOn: true,
+        restoreRelayOn: false,
+        expiresAtMs: 25_000
+      },
+      phase: 'started'
+    });
+  });
+
   it('keeps requesting the pulse target before expiry', () => {
     const state = {
-      relayOn: true,
+      status: 'active' as const,
+      targetRelayOn: true,
       restoreRelayOn: false,
       expiresAtMs: 15_000
     };
@@ -76,16 +97,71 @@ describe('relay pulse actions', () => {
     });
   });
 
-  it('requests the restore target exactly at expiry and clears pulse state', () => {
+  it('requests restore at expiry but keeps it pending until the Set action is applied', () => {
     expect(
       advanceRelayPulse(
-        { relayOn: true, restoreRelayOn: false, expiresAtMs: 15_000 },
+        {
+          status: 'active',
+          targetRelayOn: true,
+          restoreRelayOn: false,
+          expiresAtMs: 15_000
+        },
         15_000
       )
     ).toEqual({
       requestedAction: { type: 'set', relayOn: false },
+      nextState: {
+        status: 'pending-restore',
+        targetRelayOn: true,
+        restoreRelayOn: false
+      },
+      phase: 'pending-restore'
+    });
+  });
+
+  it('retries a blocked restore instead of losing pulse state', () => {
+    const state = {
+      status: 'pending-restore' as const,
+      targetRelayOn: true,
+      restoreRelayOn: false
+    };
+
+    expect(advanceRelayPulse(state, 60_000)).toEqual({
+      requestedAction: { type: 'set', relayOn: false },
+      nextState: state,
+      phase: 'pending-restore'
+    });
+  });
+
+  it('clears pulse state only after the restore Set action is confirmed applied', () => {
+    expect(
+      confirmRelayPulseActionApplied(
+        {
+          status: 'pending-restore',
+          targetRelayOn: true,
+          restoreRelayOn: false
+        },
+        20_000
+      )
+    ).toEqual({
+      requestedAction: null,
       nextState: null,
-      phase: 'expired'
+      phase: 'completed'
+    });
+  });
+
+  it('does not restart an already active pulse when an applied action is acknowledged again', () => {
+    const state = {
+      status: 'active' as const,
+      targetRelayOn: true,
+      restoreRelayOn: false,
+      expiresAtMs: 15_000
+    };
+
+    expect(confirmRelayPulseActionApplied(state, 12_000)).toEqual({
+      requestedAction: null,
+      nextState: state,
+      phase: 'active'
     });
   });
 
@@ -101,7 +177,7 @@ describe('relay pulse actions', () => {
     'rejects invalid duration %s',
     (durationMs) => {
       expect(() =>
-        startRelayPulse({ type: 'pulse', relayOn: true, durationMs }, false, 0)
+        startRelayPulse({ type: 'pulse', relayOn: true, durationMs }, false)
       ).toThrow('Relay pulse duration must be a positive finite number.');
     }
   );
