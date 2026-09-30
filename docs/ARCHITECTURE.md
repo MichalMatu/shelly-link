@@ -90,6 +90,23 @@ The mobile app changes managed runtime state through `Script.Eval`; it does not 
 
 While a Climate automation owns a Plug S Gen3, the app converges `PLUGS_UI.controls.switch:0.in_mode` to `detached` and restores the previous mode on uninstall. Real-device acceptance on Plug S Gen3 firmware 1.7.5 confirmed that this model exposes no physical `Input`/`Button` component for its built-in button while detached. Therefore physical-button takeover is not part of the Plug S Gen3 runtime contract; manual takeover is app-driven. Future device profiles may enable physical takeover only when a real local input/button event capability is verified.
 
+### Rule/action timing pipeline
+
+Normal automation requests do not control the relay directly. The currently integrated Climate path is:
+
+```text
+rule decision
+-> requested Set ON/OFF
+-> optional relay debounce
+-> minimum ON/OFF timing gate
+-> final AUTO/MANUAL + fault + hard-safety arbiter
+-> physical relay
+```
+
+Hard safety and other forced-OFF paths remain authoritative and are never delayed by debounce or minimum-ON timing. The legacy `minChangeMs` behavior is the minimum-OFF/cooldown owner; adding another cooldown owner would duplicate semantics.
+
+Pure domain primitives also exist for Pulse actions, daily time windows and flat AND/OR condition composition. Until those are integrated into the generated Climate runtime, they are foundations rather than installed runtime capabilities and must not be presented as if Shelly executes them.
+
 ## Climate engine and persistent config
 
 The stable direction is:
@@ -99,7 +116,7 @@ mobile configuration
   -> typed automation model
     -> Shelly RPC transport
       -> stable Climate runtime
-        -> compact persistent config/diagnostics
+        -> compact persistent config/diagnostics/history
           -> sensors + clock
             -> rules/operators
               -> relay
@@ -109,7 +126,7 @@ The current Climate runtime is `climate-engine-v1`. Supported thermometer profil
 
 Explicit Climate edits currently replace the managed runtime using the current generator instead of preserving development-era script instances. Recovery may read persisted config while retaining the current generated-runtime decoding fallback.
 
-If future history/config data requires larger storage, Shelly KVS may be evaluated as a namespaced/versioned persistence mechanism. It must not create a second automation ownership model.
+History v2 uses a namespaced/versioned `shellylink.history.*` KVS ring owned by the same managed Climate runtime. History writes are observational and best-effort: KVS failure must not affect relay arbitration or safety. Runtime configuration and History remain separate persistence concerns and do not create another automation owner.
 
 ## Climate sensors
 
@@ -170,12 +187,13 @@ Persistent BLE pairing/bonding and offline OTA remain separate research/feature 
 Plug Detail is one physical-device surface with capability-driven local sections. The shared capability vocabulary is:
 
 ```text
-Automation | BLE | Device | Script | Info
+Automation | History | BLE | Device | Script | Info
 ```
 
-A Plug shows only the sections supported by its ownership model. Climate exposes all five. Native Time Schedule omits `Script`. A plain saved Plug keeps the physical-device surfaces and an Automation empty state rather than inventing another detail shell. These sections are presentation boundaries, not new domain owners:
+A Plug shows only the sections supported by its ownership model. Climate exposes all six. Native Time Schedule omits `History` and `Script`. A plain saved Plug keeps the physical-device surfaces and an Automation empty state rather than inventing another detail shell. These sections are presentation boundaries, not new domain owners:
 
 - **Automation** — installed automation state/configuration and deletion;
+- **History** — read-only Climate operational history from the managed KVS ring;
 - **BLE** — BLE state, configured sensors, readings and diagnostics;
 - **Device** — Shelly-owned settings such as LED, button mode and Cloud plus explicit management actions approved for that transport/state;
 - **Script** — managed runtime source/preview;
