@@ -32,14 +32,18 @@ This keeps the architecture reusable without turning the app into a general-purp
 - configures temperature, humidity and VPD rules;
 - installs and manages a local Shelly Script runtime;
 - exposes Plug, BLE, automation, script and device diagnostics without moving runtime ownership to the phone;
+- records Climate History/Datalogger data locally on Shelly and reads it through a typed mobile path;
+- provides AUTO/MANUAL control, runtime fault/safety diagnostics and safe recovery behavior;
 - supports BLE bootstrap provisioning to Wi-Fi, verified transport promotion to HTTP, firmware status/update and capability-aware device-time synchronization;
 - keeps user-triggered device mutations identity-verified and avoids automatic replay after ambiguous transport failures.
 
 ## Current status
 
-The project is pre-release/beta. Core local automation, multi-sensor Climate, Plug lifecycle/recovery, BLE management, BLE-to-Wi-Fi provisioning and the verified OTA/time-sync path have real-device evidence on Samsung S22+ / Android 16 and Shelly Plug S Gen3.
+The project is pre-release/beta. Core local automation, multi-sensor Climate, canonical Plug ownership/recovery, History/Datalogger, Runtime Safety Supervisor, BLE management, BLE-to-Wi-Fi provisioning and the verified OTA/time-sync path have real-device evidence on Samsung S22+ / Android 16 and Shelly Plug S Gen3.
 
-The current closeout intentionally stops before adding another onboarding abstraction. The next architecture cleanup is to converge the remaining separate Wi-Fi-origin and BLE-origin saved-Plug registries around one canonical physical Plug model. After that, the next user-facing milestone should be chosen explicitly between richer climate rules and History/Datalogger rather than developing both in parallel.
+The current phase is a **pre-charts closeout**: clean stale documentation and working branches, do one final code-quality pass, merge only small safe cleanup fixes and finish with a clean canonical `main`. Do not start another runtime feature during that closeout.
+
+After the closeout, the next intended user-facing slice is a proper **History visualization page with charts** built on the existing `HistoryRecord[]` data path. The current History surface is deliberately simple/list-based; the chart slice should improve presentation first rather than redesigning the Shelly history storage/runtime without evidence that the existing data model is insufficient.
 
 See [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), [Current handoff](docs/HANDOFF_NEXT_CHAT.md) and the [Hardware test matrix](docs/testing/hardware-matrix.md).
 
@@ -64,6 +68,7 @@ The active documentation set is intentionally small:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Current handoff](docs/HANDOFF_NEXT_CHAT.md)
+- [Performance handoff](docs/PERFORMANCE_HANDOFF.md)
 - [Hardware test matrix](docs/testing/hardware-matrix.md)
 - [UX visual contract](docs/UX_VISUAL_CONTRACT.md)
 - [UX visual gallery](docs/UX_VISUAL_GALLERY.md)

@@ -27,11 +27,13 @@ See `docs/ARCHITECTURE.md` for durable ownership/safety contracts and `docs/test
 
 History records enough operational context to explain output changes: climate/VPD, requested/final relay, mode/manual request, reason, automation fault, hard safety and power/current where available. History failures are isolated from relay arbitration.
 
+The current UI intentionally presents this data as a simple chronological record list. Rich chart visualization is a separate product/UI slice described below; it should reuse the existing data path first.
+
 ### 2. Runtime Safety Supervisor — completed 2026-09-30
 
 Maximum continuous ON, relay-control failures and native Shelly protection errors converge on one first-fault-wins hard-safety latch. Reset remains safe OFF. Plug-owned firmware limits remain the authority for device electrical/thermal ceilings.
 
-### 3. Rule/action expansion — in progress
+### 3. Rule/action expansion — foundations merged, advanced scope parked
 
 Merged foundations/runtime work:
 
@@ -45,26 +47,56 @@ Merged foundations/runtime work:
 - Climate runtime relay-debounce integration with one-shot maturity and forced-OFF precedence;
 - runtime source compaction without raising the 9500 B guard.
 
-Still pending before this slice is complete:
+Advanced candidates that are **not the immediate next slice**:
 
 - Pulse integration in the Shelly Climate runtime;
 - time-window/scheduled-condition execution in the Climate runtime;
 - AND/OR condition execution in the Climate runtime;
-- configuration/editor surface for whichever of those capabilities are accepted for v1.
+- configuration/editor surfaces for whichever of those capabilities are later accepted for v1.
 
-**Constraint:** the fresh stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Before adding more runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
+**Constraint:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Before adding more runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
 
-The immediate next work session is a cross-cutting product-quality audit: real-device UX, reconciliation/state logic, error/retry behavior and fresh CPU/RAM/cache/I/O baselines. Do not automatically implement the next Rule/action primitive or redesign the frozen Climate UI before findings are ranked. See `docs/HANDOFF_NEXT_CHAT.md`.
+Do not resume this advanced Rule/action work during the pre-charts closeout unless the user explicitly reprioritizes it.
 
-### 4. Dashboard status polish
+### 4. Pre-charts closeout — next
 
-After the rule/action baseline is stable, improve the operational status layer without changing shared card geometry: requested output, final output, reason, automation-fault state and hard-safety state should be understandable at a glance.
+Before another product feature, make the repository baseline intentionally boring:
 
-### 5. UX redesign round 2
+- remove stale/superseded documentation and keep the active doc set small;
+- remove merged/stale working branches while preserving `agent-control` and the intentional `golden/climate-ui-20260928` reference branch;
+- perform a fresh ownership/layering/dead-code/error-retry/test-gap audit from current `main`;
+- fix only small, clear quality findings rather than starting a broad refactor;
+- merge retained cleanup through small PRs;
+- finish with no open PRs, no temporary work branches and one final canonical gate.
+
+The exact closeout procedure and known audit targets are in `docs/HANDOFF_NEXT_CHAT.md`.
+
+### 5. History visualization / charts — next user-facing slice after closeout
+
+Build a real History visualization page on top of the existing Shelly History/Datalogger and typed `HistoryRecord[]` mobile data path.
+
+Initial design/architecture should decide:
+
+- which chart series are first-class: temperature, humidity, VPD, relay state, power/current;
+- timestamp vs uptime-only records and the time-axis contract;
+- readable representation of AUTO/MANUAL, reason/fault/safety transitions;
+- whether the detailed chronological list remains as a lower/fallback section;
+- mobile interaction, accessibility, partial/corrupt-history and empty states;
+- whether a production chart dependency is justified. New production dependencies require explicit approval.
+
+Prefer presentation work first. Do not redesign runtime persistence solely to support charts unless the existing data format proves insufficient.
+
+This is an intentional visual-contract change and requires reviewed responsive/real-device evidence.
+
+### 6. Dashboard status polish
+
+After the closeout/chart slice is stable, improve the operational status layer without casually changing shared card geometry: requested output, final output, reason, automation-fault state and hard-safety state should be understandable at a glance.
+
+### 7. UX redesign round 2
 
 After History/safety/rules stabilize, make the dashboard more status-first while keeping transport/script/firmware diagnostics deeper under Device / Info / Advanced.
 
-### 6. Watchdog, stabilization and v1 feature freeze
+### 8. Watchdog, stabilization and v1 feature freeze
 
 Verify heartbeat/watchdog, reboot/power-cycle recovery, Wi-Fi/BLE loss, AUTO/MANUAL interaction matrix, automation-fault and hard-safety recovery, long soak, script-memory headroom, final hardware matrix and final UX acceptance. Then declare v1 feature freeze.
 
@@ -81,6 +113,8 @@ Feature-complete v1 requires:
 - accepted pulse/timing/rule-composition scope;
 - clear dashboard control/status presentation;
 - watchdog/recovery/soak stabilization.
+
+History charts are a high-priority usability slice but should reuse the completed History runtime/data foundation rather than becoming a second history subsystem.
 
 ## Post-freeze
 
