@@ -118,6 +118,109 @@ describe('thermostat relay debounce integration', () => {
     });
   });
 
+  it('clears pending debounce when the requested target already matches the relay', () => {
+    const decision = evaluateThresholdDecision({
+      rule: ruleWithDebounce(),
+      state: {
+        relayOn: true,
+        onHits: 0,
+        offHits: 0,
+        lastChangeMs: startMs - 10_000,
+        onStartedMs: startMs - 10_000,
+        relayDebounceState: {
+          status: 'pending',
+          relayOn: false,
+          sinceMs: startMs - 500
+        }
+      },
+      measurement: measurement(18, startMs),
+      nowMs: startMs
+    });
+
+    expect(decision).toMatchObject({
+      requestedRelayOn: true,
+      shouldCallRelay: false,
+      reason: 'below-threshold',
+      nextState: {
+        relayOn: true,
+        relayDebounceState: { status: 'idle' }
+      }
+    });
+  });
+
+  it('supports an OFF-only debounce policy', () => {
+    const rule = ruleWithDebounce({
+      relayDebounce: {
+        turnOnMs: 0,
+        turnOffMs: 1_000
+      }
+    });
+    const state: AutomationState = {
+      relayOn: true,
+      onHits: 0,
+      offHits: 0,
+      lastChangeMs: startMs - 10_000,
+      onStartedMs: startMs - 10_000
+    };
+
+    const pending = evaluateThresholdDecision({
+      rule,
+      state,
+      measurement: measurement(21, startMs),
+      nowMs: startMs
+    });
+    expect(pending).toMatchObject({
+      requestedRelayOn: true,
+      shouldCallRelay: false,
+      reason: 'debounce-blocked',
+      nextState: {
+        relayDebounceState: {
+          status: 'pending',
+          relayOn: false,
+          sinceMs: startMs
+        }
+      }
+    });
+
+    const applied = evaluateThresholdDecision({
+      rule,
+      state: pending.nextState,
+      measurement: measurement(21, startMs + 1_000),
+      nowMs: startMs + 1_000
+    });
+    expect(applied).toMatchObject({
+      requestedRelayOn: false,
+      shouldCallRelay: true,
+      reason: 'above-threshold'
+    });
+  });
+
+  it('treats an explicit zero debounce policy as disabled in the domain layer', () => {
+    const rule = ruleWithDebounce({
+      minimumOnMs: undefined,
+      relayDebounce: {
+        turnOnMs: 0,
+        turnOffMs: 0
+      }
+    });
+    const decision = evaluateThresholdDecision({
+      rule,
+      state: offState(),
+      measurement: measurement(18, startMs),
+      nowMs: startMs
+    });
+
+    expect(decision).toMatchObject({
+      requestedRelayOn: true,
+      shouldCallRelay: true,
+      reason: 'below-threshold',
+      nextState: {
+        relayOn: true
+      }
+    });
+    expect(decision.nextState.relayDebounceState).toBeUndefined();
+  });
+
   it('keeps a mature debounce request ready while minimum OFF timing still blocks it', () => {
     const rule = ruleWithDebounce({
       minChangeMs: 5_000,
