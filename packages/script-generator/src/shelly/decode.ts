@@ -45,6 +45,7 @@ export interface DecodedShellyThermostatSettings {
   };
   staleTimeoutSec: number;
   minChangeMs: number;
+  minimumOnMs: number;
   maxOnMs: number;
   rssiMin: number;
   consecutiveHits: number;
@@ -194,6 +195,7 @@ export const decodeShellyThermostatScript = (
       },
       staleTimeoutSec: Math.trunc(runtimeConfig.s / 1000),
       minChangeMs: runtimeConfig.c,
+      minimumOnMs: runtimeConfig.u ?? 0,
       maxOnMs: runtimeConfig.x,
       rssiMin: runtimeConfig.r,
       consecutiveHits: runtimeConfig.h,
