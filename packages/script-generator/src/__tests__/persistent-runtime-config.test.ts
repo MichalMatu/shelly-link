@@ -261,6 +261,45 @@ describe('persistent Shelly runtime config', () => {
     });
   });
 
+  it('rejects minimum ON config updates on legacy runtime bodies', () => {
+    const base = createDefaultShellyThermostatConfig();
+    const config = {
+      ...base,
+      rule: { ...base.rule, minimumOnMs: 45_000 }
+    };
+    const code = generateShellyRuntimeConfigUpdateEval(config);
+    const runtime = { on: false, ds: 'old' };
+    const evaluate = new Function(
+      'C',
+      'R',
+      'vc',
+      'Script',
+      'nw',
+      's',
+      `return ${code};`
+    ) as (
+      currentConfig: Record<string, unknown>,
+      runtimeState: Record<string, unknown>,
+      validate: (value: unknown) => boolean,
+      scriptApi: { storage: { setItem: (key: string, value: string) => void } },
+      now: () => number,
+      setRelay: (on: boolean) => void
+    ) => string;
+
+    expect(code).toContain('if(typeof U==="undefined")return"iv";');
+    expect(
+      evaluate(
+        {},
+        runtime,
+        () => true,
+        { storage: { setItem: () => undefined } },
+        () => 0,
+        () => undefined
+      )
+    ).toBe('iv');
+    expect(runtime).toEqual({ on: false, ds: 'old' });
+  });
+
   it('refuses an invalid config or missing Script.storage before mutating state', () => {
     const config = createDefaultShellyThermostatConfig();
     const code = generateShellyRuntimeConfigUpdateEval(config);
