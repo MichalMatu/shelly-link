@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   dailyScheduleTimespec,
   expectedRelayOnForClockTime,
+  isClockTimeInDailyWindow,
   parseClockMinutes
 } from '../time/schedule.js';
 
@@ -31,9 +32,47 @@ describe('daily time automation domain', () => {
     ).toBe(false);
   });
 
+  it('evaluates a reusable same-day window as start-inclusive and end-exclusive', () => {
+    const window = { startTime: '08:00', endTime: '20:00' };
+
+    expect(isClockTimeInDailyWindow(window, '07:59')).toBe(false);
+    expect(isClockTimeInDailyWindow(window, '08:00')).toBe(true);
+    expect(isClockTimeInDailyWindow(window, '19:59')).toBe(true);
+    expect(isClockTimeInDailyWindow(window, '20:00')).toBe(false);
+  });
+
+  it('evaluates a reusable overnight window across midnight', () => {
+    const window = { startTime: '20:00', endTime: '08:00' };
+
+    expect(isClockTimeInDailyWindow(window, '19:59')).toBe(false);
+    expect(isClockTimeInDailyWindow(window, '20:00')).toBe(true);
+    expect(isClockTimeInDailyWindow(window, '23:59')).toBe(true);
+    expect(isClockTimeInDailyWindow(window, '00:00')).toBe(true);
+    expect(isClockTimeInDailyWindow(window, '07:59')).toBe(true);
+    expect(isClockTimeInDailyWindow(window, '08:00')).toBe(false);
+  });
+
   it('rejects malformed clock text at the pure domain boundary', () => {
     expect(parseClockMinutes('24:00')).toBeNull();
     expect(() => dailyScheduleTimespec('bad')).toThrow('Invalid clock time');
+  });
+
+  it('rejects invalid or ambiguous reusable windows', () => {
+    expect(() =>
+      isClockTimeInDailyWindow({ startTime: 'bad', endTime: '20:00' }, '12:00')
+    ).toThrow('Cannot evaluate the daily time window.');
+    expect(() =>
+      isClockTimeInDailyWindow({ startTime: '08:00', endTime: 'bad' }, '12:00')
+    ).toThrow('Cannot evaluate the daily time window.');
+    expect(() =>
+      isClockTimeInDailyWindow({ startTime: '08:00', endTime: '20:00' }, 'bad')
+    ).toThrow('Cannot evaluate the daily time window.');
+    expect(() =>
+      isClockTimeInDailyWindow({ startTime: '08:00', endTime: '20:00' }, '12:00:00')
+    ).toThrow('Cannot evaluate the daily time window.');
+    expect(() =>
+      isClockTimeInDailyWindow({ startTime: '08:00', endTime: '08:00' }, '12:00')
+    ).toThrow('Cannot evaluate the daily time window.');
   });
 
   it('rejects invalid or ambiguous clocks when evaluating relay state', () => {

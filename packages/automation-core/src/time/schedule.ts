@@ -7,6 +7,11 @@ export type DailyTimeAutomationConfig = {
   offTime: string;
 };
 
+export interface DailyTimeWindow {
+  startTime: string;
+  endTime: string;
+}
+
 export const parseClockMinutes = (time: string): number | null => {
   const match = clockTimePattern.exec(time);
   if (!match) {
@@ -25,16 +30,35 @@ export const dailyScheduleTimespec = (time: string): string => {
   return `0 ${minute} ${hour} * * ${DAILY_TIMESPEC_DAYS}`;
 };
 
+const evaluateDailyTimeWindow = (
+  window: DailyTimeWindow,
+  clockTime: string,
+  errorMessage: string
+): boolean => {
+  const current = parseClockMinutes(clockTime);
+  const start = parseClockMinutes(window.startTime);
+  const end = parseClockMinutes(window.endTime);
+  if (current === null || start === null || end === null || start === end) {
+    throw new Error(errorMessage);
+  }
+
+  return start < end
+    ? current >= start && current < end
+    : current >= start || current < end;
+};
+
+export const isClockTimeInDailyWindow = (
+  window: DailyTimeWindow,
+  clockTime: string
+): boolean =>
+  evaluateDailyTimeWindow(window, clockTime, 'Cannot evaluate the daily time window.');
+
 export const expectedRelayOnForClockTime = (
   config: DailyTimeAutomationConfig,
   localTime: string
-): boolean => {
-  const current = parseClockMinutes(localTime.slice(0, 5));
-  const on = parseClockMinutes(config.onTime);
-  const off = parseClockMinutes(config.offTime);
-  if (current === null || on === null || off === null || on === off) {
-    throw new Error('Cannot evaluate the daily schedule clock state.');
-  }
-
-  return on < off ? current >= on && current < off : current >= on || current < off;
-};
+): boolean =>
+  evaluateDailyTimeWindow(
+    { startTime: config.onTime, endTime: config.offTime },
+    localTime.slice(0, 5),
+    'Cannot evaluate the daily schedule clock state.'
+  );
