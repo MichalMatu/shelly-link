@@ -1,12 +1,18 @@
 import type { HistoryRecord } from '@lcl/automation-core';
-import { ResponsiveLine } from '@nivo/line';
+import { ResponsiveLine, type LineCustomSvgLayerProps } from '@nivo/line';
 import { useMemo, useState } from 'react';
 import {
   formatHistoryUptime,
-  historyTickIndexes,
+  historyDomainTicks,
   historyXValueFor,
   resolveHistoryAxisMode
 } from './climateHistoryChartAxis.js';
+import {
+  historyMetricDomain,
+  normalizeHistoryMetricValue,
+  type HistoryContinuousMetricId,
+  type HistoryMetricDomain
+} from './climateHistoryChartScale.js';
 import './ClimateHistoryChart.css';
 
 export type ClimateHistoryChartLabels = {
@@ -24,7 +30,7 @@ export type ClimateHistoryChartLabels = {
   off: string;
 };
 
-type MetricId = 'temperature' | 'humidity' | 'vpd' | 'output' | 'power' | 'current';
+type MetricId = HistoryContinuousMetricId | 'output';
 
 type MetricDefinition = {
   id: MetricId;
@@ -33,7 +39,22 @@ type MetricDefinition = {
   read(record: HistoryRecord): number | null;
 };
 
-const METRICS: readonly MetricDefinition[] = [
+type ContinuousMetricDefinition = MetricDefinition & {
+  id: HistoryContinuousMetricId;
+};
+
+type ChartDatum = {
+  x: number;
+  y: number | null;
+  recordIndex: number;
+};
+
+type ChartSeries = {
+  id: MetricId;
+  data: readonly ChartDatum[];
+};
+
+const CONTINUOUS_METRICS: readonly ContinuousMetricDefinition[] = [
   {
     id: 'temperature',
     unit: '°C',
@@ -53,12 +74,6 @@ const METRICS: readonly MetricDefinition[] = [
     read: (record) => record.vpdKpa
   },
   {
-    id: 'output',
-    unit: '',
-    color: 'var(--history-color-output)',
-    read: (record) => (record.finalRelayOn ? 1 : 0)
-  },
-  {
     id: 'power',
     unit: 'W',
     color: 'var(--history-color-power)',
@@ -72,7 +87,18 @@ const METRICS: readonly MetricDefinition[] = [
   }
 ] as const;
 
-const CHART_MARGIN = { top: 12, right: 12, bottom: 40, left: 42 } as const;
+const OUTPUT_METRIC: MetricDefinition = {
+  id: 'output',
+  unit: '',
+  color: 'var(--history-color-output)',
+  read: (record) => (record.finalRelayOn ? 1 : 0)
+};
+
+const METRICS: readonly MetricDefinition[] = [...CONTINUOUS_METRICS, OUTPUT_METRIC];
+
+const CHART_MARGIN = { top: 8, right: 8, bottom: 36, left: 8 } as const;
+const OUTPUT_INTERACTION_Y = 0.08;
+const TIMESTAMP_CLOCK_THRESHOLD_SEC = 36 * 60 * 60;
 
 const CHART_THEME = {
   background: 'transparent',
@@ -121,6 +147,15 @@ const latestMetricValue = (
   return null;
 };
 
+const metricValues = (
+  records: readonly HistoryRecord[],
+  metric: ContinuousMetricDefinition
+): readonly number[] =>
+  records.flatMap((record) => {
+    const value = metric.read(record);
+    return value === null ? [] : [value];
+  });
+
 type ClimateHistoryChartProps = {
   records: readonly HistoryRecord[];
   locale: string;
@@ -132,7 +167,9 @@ export const ClimateHistoryChart = ({
   locale,
   labels
 }: ClimateHistoryChartProps) => {
-  const [requestedMetricId, setRequestedMetricId] = useState<MetricId>('temperature');
+  const [hiddenMetricIds, setHiddenMetricIds] = useState<ReadonlySet<MetricId>>(
+    () => new Set()
+  );
   const number = useMemo(
     () => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }),
     [locale]
@@ -153,21 +190,30 @@ export const ClimateHistoryChart = ({
   const availableMetrics = METRICS.filter((metric) =>
     records.some((record) => metric.read(record) !== null)
   );
-  const activeMetric =
-    availableMetrics.find((metric) => metric.id === requestedMetricId) ??
-    availableMetrics[0]!;
+  const availableContinuousMetrics = CONTINUOUS_METRICS.filter((metric) =>
+    availableMetrics.some((available) => available.id === metric.id)
+  );
+  const visibleMetrics = availableMetrics.filter((metric) => !hiddenMetricIds.has(metric.id));
+  const visibleContinuousMetrics = availableContinuousMetrics.filter(
+    (metric) => !hiddenMetricIds.has(metric.id)
+  );
+  const outputVisible =
+    availableMetrics.some((metric) => metric.id === 'output') && !hiddenMetricIds.has('output');
+
   const axisMode = resolveHistoryAxisMode(records);
-  const xValues = records.map((record, index) =>
-    historyXValueFor(record, index, axisMode)
-  );
-  const ticks = Array.from(
-    new Set(historyTickIndexes(records.length).map((index) => xValues[index]!))
-  );
-  const timestampDays = records
-    .filter((record) => record.timestampUnixSec !== null)
-    .map((record) => new Date(record.timestampUnixSec! * 1000).toDateString());
-  const timestampsShareDay =
-    timestampDays.length > 0 && new Set(timestampDays).size === 1;
+  const xValues = records.map((record, index) => historyXValueFor(record, index, axisMode));
+  const ticks = historyDomainTicks(xValues, axisMode);
+  const xStart = xValues.length > 0 ? Math.min(...xValues) : 0;
+  const xEnd = xValues.length > 0 ? Math.max(...xValues) : xStart;
+  const xSpan = xEnd - xStart;
+
+  const domains = useMemo(() => {
+    const next = new Map<HistoryContinuousMetricId, HistoryMetricDomain>();
+    for (const metric of availableContinuousMetrics) {
+      next.set(metric.id, historyMetricDomain(metric.id, metricValues(records, metric)));
+    }
+    return next;
+  }, [availableContinuousMetrics, records]);
 
   const formatMetric = (metric: MetricDefinition, value: number): string => {
     if (metric.id === 'output') return value >= 0.5 ? labels.on : labels.off;
@@ -177,32 +223,102 @@ export const ClimateHistoryChart = ({
   const formatAxisX = (value: number): string => {
     if (axisMode === 'timestamp') {
       const date = new Date(value * 1000);
-      return timestampsShareDay ? clock.format(date) : day.format(date);
+      return xSpan <= TIMESTAMP_CLOCK_THRESHOLD_SEC ? clock.format(date) : day.format(date);
     }
-    if (axisMode === 'uptime') return formatHistoryUptime(value);
+    if (axisMode === 'uptime') {
+      const elapsed = Math.max(0, value - xStart);
+      return elapsed === 0 ? '0s' : `+${formatHistoryUptime(elapsed)}`;
+    }
 
     const record = records[Math.round(value)];
     if (!record) return '';
     if (record.timestampUnixSec !== null) {
-      const date = new Date(record.timestampUnixSec * 1000);
-      return timestampsShareDay ? clock.format(date) : day.format(date);
+      return clock.format(new Date(record.timestampUnixSec * 1000));
     }
     return formatHistoryUptime(record.uptimeSec);
   };
 
-  const chartData = [
+  const chartData: readonly ChartSeries[] = [
+    ...visibleContinuousMetrics.map((metric) => {
+      const domain = domains.get(metric.id)!;
+      return {
+        id: metric.id,
+        data: records.map((record, index) => {
+          const value = metric.read(record);
+          return {
+            x: xValues[index]!,
+            y: value === null ? null : normalizeHistoryMetricValue(value, domain),
+            recordIndex: index
+          };
+        })
+      };
+    }),
     {
-      id: labels[activeMetric.id],
-      data: records.map((record, index) => ({
+      id: 'output',
+      data: records.map((_, index) => ({
         x: xValues[index]!,
-        y: activeMetric.read(record),
+        y: OUTPUT_INTERACTION_Y,
         recordIndex: index
       }))
     }
   ];
+  const chartColors = [
+    ...visibleContinuousMetrics.map((metric) => metric.color),
+    'transparent'
+  ];
+
+  const toggleMetric = (metricId: MetricId) => {
+    setHiddenMetricIds((current) => {
+      const next = new Set(current);
+      if (next.has(metricId)) next.delete(metricId);
+      else next.add(metricId);
+      return next;
+    });
+  };
+
+  const outputTrackLayer = ({
+    xScale,
+    innerHeight,
+    innerWidth
+  }: LineCustomSvgLayerProps<ChartSeries>) => {
+    if (!outputVisible || records.length === 0) return null;
+
+    const offY = innerHeight - 5;
+    const onY = innerHeight - 14;
+    const yFor = (record: HistoryRecord) => (record.finalRelayOn ? onY : offY);
+    const firstX = xScale(xValues[0]!);
+    let path = `M ${firstX} ${yFor(records[0]!)}`;
+
+    for (let index = 1; index < records.length; index += 1) {
+      const x = xScale(xValues[index]!);
+      path += ` H ${x} V ${yFor(records[index]!)}`;
+    }
+
+    return (
+      <g aria-hidden="true">
+        <line
+          className="climate-history-chart__output-baseline"
+          x1={0}
+          x2={innerWidth}
+          y1={offY}
+          y2={offY}
+        />
+        {records.length === 1 ? (
+          <circle
+            className="climate-history-chart__output-track"
+            cx={firstX}
+            cy={yFor(records[0]!)}
+            r={2.5}
+          />
+        ) : (
+          <path className="climate-history-chart__output-track" d={path} />
+        )}
+      </g>
+    );
+  };
 
   return (
-    <div className="climate-history-chart" data-active-metric={activeMetric.id}>
+    <div className="climate-history-chart">
       <div
         className="climate-history-chart__metrics"
         role="group"
@@ -211,15 +327,16 @@ export const ClimateHistoryChart = ({
         {availableMetrics.map((metric) => {
           const latest = latestMetricValue(records, metric)!;
           const value = formatMetric(metric, latest);
+          const visible = !hiddenMetricIds.has(metric.id);
           return (
             <button
               className="climate-history-chart__metric"
               data-metric={metric.id}
               type="button"
               aria-label={`${labels[metric.id]}, ${value}`}
-              aria-pressed={metric.id === activeMetric.id}
+              aria-pressed={visible}
               key={metric.id}
-              onClick={() => setRequestedMetricId(metric.id)}
+              onClick={() => toggleMetric(metric.id)}
             >
               <span className="climate-history-chart__metric-dot" aria-hidden="true" />
               <span className="climate-history-chart__metric-label">
@@ -232,20 +349,12 @@ export const ClimateHistoryChart = ({
       </div>
 
       <div className="climate-history-chart__plot">
-        <ResponsiveLine
+        <ResponsiveLine<ChartSeries>
           data={chartData}
           margin={CHART_MARGIN}
           xScale={{ type: 'linear', min: 'auto', max: 'auto' }}
-          yScale={{
-            type: 'linear',
-            min: activeMetric.id === 'output' ? 0 : 'auto',
-            max: activeMetric.id === 'output' ? 1 : 'auto',
-            stacked: false,
-            reverse: false,
-            nice: true
-          }}
+          yScale={{ type: 'linear', min: 0, max: 1, stacked: false, reverse: false }}
           xFormat={(value) => formatAxisX(Number(value))}
-          yFormat={(value) => formatMetric(activeMetric, Number(value))}
           axisTop={null}
           axisRight={null}
           axisBottom={{
@@ -254,26 +363,17 @@ export const ClimateHistoryChart = ({
             tickSize: 0,
             tickPadding: 10
           }}
-          axisLeft={{
-            tickValues: activeMetric.id === 'output' ? [0, 1] : 4,
-            format: (value) =>
-              activeMetric.id === 'output'
-                ? Number(value) >= 0.5
-                  ? labels.on
-                  : labels.off
-                : number.format(Number(value)),
-            tickSize: 0,
-            tickPadding: 8
-          }}
-          colors={[activeMetric.color]}
-          curve={activeMetric.id === 'output' ? 'stepAfter' : 'linear'}
-          lineWidth={2.5}
-          enablePoints={records.length <= 12 || activeMetric.id === 'output'}
-          pointSize={6}
+          axisLeft={null}
+          colors={chartColors}
+          curve="linear"
+          lineWidth={2.25}
+          enablePoints={records.length <= 2}
+          pointSize={5}
           pointColor={{ from: 'series.color' }}
           pointBorderWidth={0}
           enableGridX={false}
           enableGridY
+          gridYValues={[0.35, 0.6, 0.85]}
           enableArea={false}
           enableSlices="x"
           enableCrosshair
@@ -282,33 +382,51 @@ export const ClimateHistoryChart = ({
           useMesh={false}
           animate={false}
           theme={CHART_THEME}
+          layers={[
+            'grid',
+            'markers',
+            'axes',
+            outputTrackLayer,
+            'lines',
+            'points',
+            'crosshair',
+            'slices'
+          ]}
           role="img"
-          ariaLabel={`${labels.title}: ${labels[activeMetric.id]}`}
+          ariaLabel={labels.title}
           sliceTooltip={({ slice }) => {
             const point = slice.points[0];
             if (!point) return null;
-            const datum = point.data as typeof point.data & { recordIndex: number };
-            const record = records[datum.recordIndex];
+            const record = records[point.data.recordIndex];
             if (!record) return null;
 
             const time =
               record.timestampUnixSec === null
                 ? `${labels.uptime} ${formatHistoryUptime(record.uptimeSec)}`
                 : fullDateTime.format(new Date(record.timestampUnixSec * 1000));
-            const metricValue = activeMetric.read(record);
-            if (metricValue === null) return null;
 
             return (
               <div className="climate-history-chart__tooltip">
                 <span className="climate-history-chart__tooltip-time">{time}</span>
-                <div className="climate-history-chart__tooltip-value">
-                  <span
-                    className="climate-history-chart__metric-dot"
-                    aria-hidden="true"
-                  />
-                  <span>{labels[activeMetric.id]}</span>
-                  <strong>{formatMetric(activeMetric, metricValue)}</strong>
-                </div>
+                {visibleMetrics.map((metric) => {
+                  const metricValue = metric.read(record);
+                  return (
+                    <div
+                      className="climate-history-chart__tooltip-value"
+                      data-metric={metric.id}
+                      key={metric.id}
+                    >
+                      <span
+                        className="climate-history-chart__metric-dot"
+                        aria-hidden="true"
+                      />
+                      <span>{labels[metric.id]}</span>
+                      <strong>
+                        {metricValue === null ? '—' : formatMetric(metric, metricValue)}
+                      </strong>
+                    </div>
+                  );
+                })}
                 <span className="climate-history-chart__tooltip-state">
                   {record.controlMode === 'manual' ? labels.manual : labels.automatic} ·{' '}
                   {record.finalRelayOn ? labels.on : labels.off}
