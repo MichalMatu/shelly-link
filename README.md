@@ -41,9 +41,9 @@ This keeps the architecture reusable without turning the app into a general-purp
 
 The project is pre-release/beta. Core local automation, multi-sensor Climate, canonical Plug ownership/recovery, History/Datalogger, Runtime Safety Supervisor, BLE management, BLE-to-Wi-Fi provisioning and the verified OTA/time-sync path have real-device evidence on Samsung S22+ / Android 16 and Shelly Plug S Gen3.
 
-The current phase is a **pre-charts closeout**: clean stale documentation and working branches, do one final code-quality pass, merge only small safe cleanup fixes and finish with a clean canonical `main`. Do not start another runtime feature during that closeout.
+The **pre-charts repository closeout is complete**: active documentation has been reduced to the current contracts, historical working refs are being retired from the Local Agent checkout, and the current ownership/dead-code/error-retry audit has no blocking cleanup finding for the next product slice.
 
-After the closeout, the next intended user-facing slice is a proper **History visualization page with charts** built on the existing `HistoryRecord[]` data path. The current History surface is deliberately simple/list-based; the chart slice should improve presentation first rather than redesigning the Shelly history storage/runtime without evidence that the existing data model is insufficient.
+The next intended user-facing slice is a proper **History visualization page with charts** built on the existing `HistoryRecord[]` data path. The current History surface is deliberately simple/list-based; the chart slice should improve presentation first rather than redesigning the Shelly history storage/runtime without evidence that the existing data model is insufficient.
 
 See [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), [Current handoff](docs/HANDOFF_NEXT_CHAT.md) and the [Hardware test matrix](docs/testing/hardware-matrix.md).
 
