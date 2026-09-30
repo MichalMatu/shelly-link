@@ -1,4 +1,7 @@
-import { evaluateRelayDebounce, type RelayDebounceState } from '../actions/relayDebounce.js';
+import {
+  evaluateRelayDebounce,
+  type RelayDebounceState
+} from '../actions/relayDebounce.js';
 import { evaluateRelayTiming } from '../actions/relayTiming.js';
 
 const policy = {
@@ -170,7 +173,10 @@ describe('evaluateRelayDebounce', () => {
       nowMs: 16_000
     });
     expect(stillReady.debouncedAction).toEqual(setOn);
-    expect(stillReady.nextState).toEqual({ pendingRelayOn: true, pendingSinceMs: 10_000 });
+    expect(stillReady.nextState).toEqual({
+      pendingRelayOn: true,
+      pendingSinceMs: 10_000
+    });
   });
 
   it('clears pending state after downstream application reaches the requested target', () => {

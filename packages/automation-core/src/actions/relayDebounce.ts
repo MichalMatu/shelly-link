@@ -33,7 +33,9 @@ const validateDuration = (value: number, label: string): void => {
   }
 };
 
-export const evaluateRelayDebounce = (input: RelayDebounceInput): RelayDebounceDecision => {
+export const evaluateRelayDebounce = (
+  input: RelayDebounceInput
+): RelayDebounceDecision => {
   const { action, policy, state, currentRelayOn, nowMs } = input;
 
   validateDuration(policy.turnOnMs, 'Relay ON debounce');
