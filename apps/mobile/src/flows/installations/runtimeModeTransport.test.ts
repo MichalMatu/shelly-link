@@ -1,4 +1,5 @@
 import {
+  climateRuntimeResetSafetyLockoutEvalCode,
   climateRuntimeSetControlModeEvalCode,
   climateRuntimeSetManualRelayEvalCode,
   createDefaultShellyThermostatConfig
@@ -13,6 +14,7 @@ vi.mock('../../platform/shellyHttpTransport.js', () => ({
 
 import {
   readInstalledAutomationRuntimeMode,
+  resetInstalledAutomationSafetyLockout,
   setInstalledAutomationManualRelayRequest,
   setInstalledAutomationRuntimeMode
 } from './runtimeModeTransport.js';
@@ -81,6 +83,22 @@ describe('runtime control Script.Eval transport', () => {
         id: 7,
         code: climateRuntimeSetManualRelayEvalCode(true)
       }
+    });
+  });
+
+  it('resets a lockout through the centralized protocol helper', async () => {
+    mocks.call.mockResolvedValue({ ok: true, value: { result: '[1,0,null,0,null]' } });
+
+    await expect(resetInstalledAutomationSafetyLockout(installation)).resolves.toEqual({
+      mode: 'manual',
+      manualRequestOn: false,
+      automationFault: null,
+      safetyLockout: false,
+      safetyReason: null
+    });
+    expect(mocks.call).toHaveBeenCalledWith({
+      method: 'Script.Eval',
+      params: { id: 7, code: climateRuntimeResetSafetyLockoutEvalCode }
     });
   });
 

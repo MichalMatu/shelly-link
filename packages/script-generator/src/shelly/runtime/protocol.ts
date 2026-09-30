@@ -62,6 +62,8 @@ export const climateRuntimeSetControlModeEvalCode = (
   return '(function(){if(R.lk)return-2;if(R.m)R.mt=nw();R.m=0;R.nh=R.fh=0;R.mn=false;R.a=false;R.ls=null;R.af="st";R.rs="ar";sw(false,"ar",1);return 0})()';
 };
 
+export const climateRuntimeResetSafetyLockoutEvalCode = `(function(){if(!R.lk)return ${encodedRuntimeState};R.lk=false;R.mn=false;R.a=false;R.nh=R.fh=0;R.ls=null;if(!R.m)R.af="st";R.rs=R.m?"mn":"ar";sw(false,R.rs,1);return ${encodedRuntimeState}})()`;
+
 export const climateRuntimeSetManualRelayEvalCode = (on: boolean): string => {
   const returnValue = on ? 1 : 0;
   const booleanValue = on ? 'true' : 'false';

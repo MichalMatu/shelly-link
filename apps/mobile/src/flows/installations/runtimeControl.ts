@@ -6,6 +6,7 @@ import { readShellySetupStatus } from '../hardware-setup/shellyRequests.js';
 import type { ClimateInstalledAutomation } from './model.js';
 import { forceRelayOffAndConfirm } from './relaySafety.js';
 import {
+  resetInstalledAutomationSafetyLockout,
   setInstalledAutomationManualRelayRequest,
   setInstalledAutomationRuntimeMode
 } from './runtimeModeTransport.js';
@@ -13,10 +14,7 @@ import {
   readInstalledAutomationControlStatus,
   type InstalledAutomationControlStatus
 } from './runtimeStatus.js';
-import {
-  ensureInstalledAutomationRuntimeCurrent,
-  recoverInstalledAutomationRuntime
-} from './runtimeUpgrade.js';
+import { ensureInstalledAutomationRuntimeCurrent } from './runtimeUpgrade.js';
 
 export { readInstalledAutomationControlStatus } from './runtimeStatus.js';
 
@@ -131,8 +129,17 @@ export const enterInstalledAutomationAutoMode = async (
 export const recoverInstalledAutomation = async (
   installation: ClimateInstalledAutomation
 ): Promise<InstalledAutomationActionResult> => {
-  const recovered = await recoverInstalledAutomationRuntime(installation);
-  return { installation: recovered.installation, status: recovered.status };
+  const prepared = await ensureInstalledAutomationRuntimeCurrent(installation);
+  if (!prepared.status.safetyLockout) {
+    return { installation: prepared.installation, status: prepared.status };
+  }
+
+  await resetInstalledAutomationSafetyLockout(prepared.installation);
+  const status = await verifyRuntimeState(prepared.installation);
+  if (status.safetyLockout || status.relayOn || status.manualRequestOn) {
+    throw new Error('Shelly did not confirm a safely reset runtime lockout.');
+  }
+  return { installation: prepared.installation, status };
 };
 
 export const setInstalledAutomationRelayState = async (

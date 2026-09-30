@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   readStatus: vi.fn(),
   setRuntimeMode: vi.fn(),
   setManualRelay: vi.fn(),
+  resetSafety: vi.fn(),
   ensureCurrent: vi.fn(),
   recoverRuntime: vi.fn()
 }));
@@ -35,7 +36,8 @@ vi.mock('./runtimeModeTransport.js', async (importOriginal) => {
   return {
     ...actual,
     setInstalledAutomationRuntimeMode: mocks.setRuntimeMode,
-    setInstalledAutomationManualRelayRequest: mocks.setManualRelay
+    setInstalledAutomationManualRelayRequest: mocks.setManualRelay,
+    resetInstalledAutomationSafetyLockout: mocks.resetSafety
   };
 });
 vi.mock('./runtimeStatus.js', async (importOriginal) => {
@@ -53,6 +55,7 @@ vi.mock('./runtimeUpgrade.js', async (importOriginal) => {
 
 import {
   installedAutomationScriptMatch,
+  recoverInstalledAutomation,
   enterInstalledAutomationManualMode,
   enterInstalledAutomationAutoMode,
   setInstalledAutomationRelayState
@@ -181,6 +184,49 @@ describe('installed automation runtime control', () => {
       'live MANUAL automation runtime'
     );
     expect(mocks.setManualRelay).not.toHaveBeenCalled();
+  });
+
+  it('resets a live safety lockout without reinstalling the runtime', async () => {
+    const locked = status('manual', false, 7, {
+      manualRequestOn: true,
+      safetyLockout: true,
+      safetyReason: 'mx'
+    });
+    mocks.ensureCurrent.mockResolvedValue({
+      installation,
+      status: locked,
+      upgraded: false
+    });
+    mocks.resetSafety.mockResolvedValue({
+      mode: 'manual',
+      manualRequestOn: false,
+      automationFault: null,
+      safetyLockout: false,
+      safetyReason: null
+    });
+    mocks.readStatus.mockResolvedValue(status('manual'));
+
+    const result = await recoverInstalledAutomation(installation);
+    expect(mocks.resetSafety).toHaveBeenCalledWith(installation);
+    expect(mocks.recoverRuntime).not.toHaveBeenCalled();
+    expect(result.status.safetyLockout).toBe(false);
+    expect(result.status.relayOn).toBe(false);
+    expect(result.status.manualRequestOn).toBe(false);
+  });
+
+  it('returns a converged replacement directly for a stopped runtime', async () => {
+    const replaced = { ...installation, script: { id: 11, hash: 'replacement' } };
+    mocks.ensureCurrent.mockResolvedValue({
+      installation: replaced,
+      status: status('auto', false, 11),
+      upgraded: true
+    });
+
+    const result = await recoverInstalledAutomation(installation);
+    expect(mocks.resetSafety).not.toHaveBeenCalled();
+    expect(mocks.recoverRuntime).not.toHaveBeenCalled();
+    expect(result.installation).toBe(replaced);
+    expect(result.status.automationMode).toBe('auto');
   });
 
   it('hard safety lockout overrides both mode changes and manual relay requests', async () => {

@@ -1,6 +1,7 @@
 import {
   climateRuntimeControlModeFromCode,
   climateRuntimeRestoreControlStateEvalCode,
+  climateRuntimeResetSafetyLockoutEvalCode,
   climateRuntimeSetControlModeEvalCode,
   climateRuntimeSetManualRelayEvalCode,
   decodeClimateRuntimeControlState,
@@ -109,5 +110,14 @@ describe('climate runtime control protocol', () => {
     expect(climateRuntimeRestoreControlStateEvalCode(lockedWithReason)).toContain(
       'R.rs=R.lk?"max"'
     );
+  });
+
+  it('renders a deliberate safety lockout reset that stays safe OFF', () => {
+    expect(climateRuntimeResetSafetyLockoutEvalCode).toContain('R.lk=false');
+    expect(climateRuntimeResetSafetyLockoutEvalCode).toContain('R.mn=false');
+    expect(climateRuntimeResetSafetyLockoutEvalCode).toContain('R.a=false');
+    expect(climateRuntimeResetSafetyLockoutEvalCode).not.toContain('R.mt=');
+    expect(climateRuntimeResetSafetyLockoutEvalCode).toContain('sw(false,R.rs,1)');
+    expect(climateRuntimeResetSafetyLockoutEvalCode).toContain('if(!R.m)R.af="st"');
   });
 });

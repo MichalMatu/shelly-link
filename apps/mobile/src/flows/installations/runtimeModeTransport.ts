@@ -1,6 +1,7 @@
 import {
   climateRuntimeControlStateEvalCode,
   climateRuntimeRestoreControlStateEvalCode,
+  climateRuntimeResetSafetyLockoutEvalCode,
   climateRuntimeSetControlModeEvalCode,
   climateRuntimeSetManualRelayEvalCode,
   decodeClimateRuntimeControlState,
@@ -140,4 +141,16 @@ export const setInstalledAutomationManualRelayRequest = async (
   if (result !== (on ? '1' : '0')) {
     throw new Error(`Shelly did not confirm manual relay ${on ? 'ON' : 'OFF'}.`);
   }
+};
+
+export const resetInstalledAutomationSafetyLockout = async (
+  installation: ClimateInstalledAutomation
+): Promise<ClimateRuntimeControlState> => {
+  const state = decodeClimateRuntimeControlState(
+    await evaluateRuntime(installation, climateRuntimeResetSafetyLockoutEvalCode)
+  );
+  if (!state || state.safetyLockout || state.manualRequestOn) {
+    throw new Error('Shelly did not confirm a safely reset runtime lockout.');
+  }
+  return state;
 };
