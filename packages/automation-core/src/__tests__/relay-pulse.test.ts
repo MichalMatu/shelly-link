@@ -71,7 +71,9 @@ describe('relay pulse actions', () => {
       false
     ).nextState!;
 
-    expect(confirmRelayPulseActionApplied(pending, 20_000)).toEqual({
+    expect(
+      confirmRelayPulseActionApplied(pending, { type: 'set', relayOn: true }, 20_000)
+    ).toEqual({
       requestedAction: null,
       nextState: {
         status: 'active',
@@ -90,26 +92,31 @@ describe('relay pulse actions', () => {
     );
     const pending = started.nextState!;
     const policy = { minimumOnMs: 0, minimumOffMs: 120_000 };
+    const blocked = evaluateRelayTiming({
+      action: started.requestedAction!,
+      policy,
+      state: { relayOn: false, lastChangeMs: 0 },
+      nowMs: 30_000
+    });
 
-    expect(
-      evaluateRelayTiming({
-        action: started.requestedAction!,
-        policy,
-        state: { relayOn: false, lastChangeMs: 0 },
-        nowMs: 30_000
-      }).blockedBy
-    ).toBe('minimum-off');
+    expect(blocked.blockedBy).toBe('minimum-off');
+    expect(confirmRelayPulseActionApplied(pending, blocked.appliedAction, 30_000)).toEqual({
+      requestedAction: null,
+      nextState: pending,
+      phase: 'pending-start'
+    });
     expect(advanceRelayPulse(pending, 119_999).phase).toBe('pending-start');
 
+    const allowed = evaluateRelayTiming({
+      action: advanceRelayPulse(pending, 120_000).requestedAction!,
+      policy,
+      state: { relayOn: false, lastChangeMs: 0 },
+      nowMs: 120_000
+    });
+    expect(allowed.blockedBy).toBeNull();
     expect(
-      evaluateRelayTiming({
-        action: advanceRelayPulse(pending, 120_000).requestedAction!,
-        policy,
-        state: { relayOn: false, lastChangeMs: 0 },
-        nowMs: 120_000
-      }).blockedBy
-    ).toBeNull();
-    expect(confirmRelayPulseActionApplied(pending, 120_000).nextState).toMatchObject({
+      confirmRelayPulseActionApplied(pending, allowed.appliedAction, 120_000).nextState
+    ).toMatchObject({
       status: 'active',
       expiresAtMs: 125_000
     });
@@ -176,27 +183,34 @@ describe('relay pulse actions', () => {
     const expired = advanceRelayPulse(active, 105_000);
     const pendingRestore = expired.nextState!;
     const policy = { minimumOnMs: 30_000, minimumOffMs: 0 };
+    const blocked = evaluateRelayTiming({
+      action: expired.requestedAction!,
+      policy,
+      state: { relayOn: true, lastChangeMs: 100_000 },
+      nowMs: 105_000
+    });
 
+    expect(blocked.blockedBy).toBe('minimum-on');
     expect(
-      evaluateRelayTiming({
-        action: expired.requestedAction!,
-        policy,
-        state: { relayOn: true, lastChangeMs: 100_000 },
-        nowMs: 105_000
-      }).blockedBy
-    ).toBe('minimum-on');
+      confirmRelayPulseActionApplied(pendingRestore, blocked.appliedAction, 105_000)
+    ).toEqual({
+      requestedAction: null,
+      nextState: pendingRestore,
+      phase: 'pending-restore'
+    });
     expect(advanceRelayPulse(pendingRestore, 129_999).phase).toBe('pending-restore');
 
     const restore = advanceRelayPulse(pendingRestore, 130_000);
+    const allowed = evaluateRelayTiming({
+      action: restore.requestedAction!,
+      policy,
+      state: { relayOn: true, lastChangeMs: 100_000 },
+      nowMs: 130_000
+    });
+    expect(allowed.blockedBy).toBeNull();
     expect(
-      evaluateRelayTiming({
-        action: restore.requestedAction!,
-        policy,
-        state: { relayOn: true, lastChangeMs: 100_000 },
-        nowMs: 130_000
-      }).blockedBy
-    ).toBeNull();
-    expect(confirmRelayPulseActionApplied(pendingRestore, 130_000)).toEqual({
+      confirmRelayPulseActionApplied(pendingRestore, allowed.appliedAction, 130_000)
+    ).toEqual({
       requestedAction: null,
       nextState: null,
       phase: 'completed'
@@ -211,6 +225,7 @@ describe('relay pulse actions', () => {
           targetRelayOn: true,
           restoreRelayOn: false
         },
+        { type: 'set', relayOn: false },
         20_000
       )
     ).toEqual({
@@ -228,7 +243,9 @@ describe('relay pulse actions', () => {
       expiresAtMs: 15_000
     };
 
-    expect(confirmRelayPulseActionApplied(state, 12_000)).toEqual({
+    expect(
+      confirmRelayPulseActionApplied(state, { type: 'set', relayOn: true }, 12_000)
+    ).toEqual({
       requestedAction: null,
       nextState: state,
       phase: 'active'
