@@ -744,10 +744,12 @@ for (const viewport of viewports) {
     );
 
     await page.getByRole('button', { name: 'Historia' }).click();
-    await expect(page.locator('.climate-history__record')).toHaveCount(2);
-    await expect(page.locator('.climate-history__record').first()).toContainText(
-      '42,3 W'
-    );
+    await expect(page.getByRole('img', { name: 'Historia: Temperatura' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Temperatura, 21,4 °C' })
+    ).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'Moc, 42,3 W' })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '23-climate-history');
     }

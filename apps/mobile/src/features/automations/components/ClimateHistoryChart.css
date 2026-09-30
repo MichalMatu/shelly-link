@@ -1,0 +1,158 @@
+.climate-history-chart {
+  --history-color-temperature: var(--lcl-color-status-danger-text);
+  --history-color-humidity: var(--lcl-color-accent);
+  --history-color-vpd: var(--lcl-color-spectrum-magenta);
+  --history-color-output: var(--lcl-color-text);
+  --history-color-power: var(--lcl-color-status-warning-text);
+  --history-color-current: var(--lcl-color-status-ok-text);
+  --history-active-color: var(--history-color-temperature);
+
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+  min-width: 0;
+}
+
+.climate-history-chart[data-active-metric='humidity'] {
+  --history-active-color: var(--history-color-humidity);
+}
+
+.climate-history-chart[data-active-metric='vpd'] {
+  --history-active-color: var(--history-color-vpd);
+}
+
+.climate-history-chart[data-active-metric='output'] {
+  --history-active-color: var(--history-color-output);
+}
+
+.climate-history-chart[data-active-metric='power'] {
+  --history-active-color: var(--history-color-power);
+}
+
+.climate-history-chart[data-active-metric='current'] {
+  --history-active-color: var(--history-color-current);
+}
+
+.climate-history-chart__metrics {
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.climate-history-chart__metric {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--lcl-radius-lg);
+  color: var(--lcl-color-text-muted);
+  cursor: pointer;
+  display: grid;
+  gap: 0 var(--lcl-spacing-xs);
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: var(--lcl-size-control-min-height);
+  min-width: 0;
+  padding: var(--lcl-spacing-xs) var(--lcl-spacing-sm);
+  text-align: left;
+}
+
+.climate-history-chart__metric[data-metric='temperature'] {
+  --history-metric-color: var(--history-color-temperature);
+}
+
+.climate-history-chart__metric[data-metric='humidity'] {
+  --history-metric-color: var(--history-color-humidity);
+}
+
+.climate-history-chart__metric[data-metric='vpd'] {
+  --history-metric-color: var(--history-color-vpd);
+}
+
+.climate-history-chart__metric[data-metric='output'] {
+  --history-metric-color: var(--history-color-output);
+}
+
+.climate-history-chart__metric[data-metric='power'] {
+  --history-metric-color: var(--history-color-power);
+}
+
+.climate-history-chart__metric[data-metric='current'] {
+  --history-metric-color: var(--history-color-current);
+}
+
+.climate-history-chart__metric[aria-pressed='true'] {
+  background: var(--lcl-color-surface-muted);
+  color: var(--lcl-color-text);
+}
+
+.climate-history-chart__metric:focus-visible {
+  outline: var(--lcl-border-width-md) solid var(--lcl-color-accent);
+  outline-offset: var(--lcl-spacing-xs);
+}
+
+.climate-history-chart__metric-dot {
+  background: var(--history-metric-color, var(--history-active-color));
+  border-radius: var(--lcl-radius-round);
+  display: block;
+  height: var(--lcl-spacing-sm);
+  width: var(--lcl-spacing-sm);
+}
+
+.climate-history-chart__metric-label {
+  font-size: var(--lcl-font-size-xs);
+  font-weight: var(--lcl-font-weight-medium);
+  line-height: var(--lcl-line-height-tight);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.climate-history-chart__metric strong {
+  font-size: var(--lcl-font-size-md);
+  font-variant-numeric: tabular-nums;
+  grid-column: 2;
+  line-height: var(--lcl-line-height-tight);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.climate-history-chart__plot {
+  height: clamp(18rem, 58dvh, 34rem);
+  min-width: 0;
+  width: 100%;
+}
+
+.climate-history-chart__tooltip {
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  box-shadow: var(--lcl-shadow-md);
+  color: var(--lcl-color-text);
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  min-width: 10rem;
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
+}
+
+.climate-history-chart__tooltip-time,
+.climate-history-chart__tooltip-state {
+  color: var(--lcl-color-text-muted);
+  font-size: var(--lcl-font-size-xs);
+}
+
+.climate-history-chart__tooltip-value {
+  align-items: center;
+  display: grid;
+  gap: var(--lcl-spacing-xs);
+  grid-template-columns: auto 1fr auto;
+}
+
+.climate-history-chart__tooltip-value strong {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-height: 44rem) {
+  .climate-history-chart__plot {
+    height: 18rem;
+  }
+}

@@ -72,6 +72,8 @@ pnpm android:phone-alpha
 
 Note: `android:phone-alpha` performs a clean uninstall. For presentation acceptance where app data must be preserved, build/sync the same APK and use `adb install -r` instead.
 
+| 2026-10-01 | Chart-first History UI real-device acceptance | PASS | Samsung SM-S906B / Android 16 installed exact candidate `1f9eca28b784756175709bcc4ddc01413d6d555f` with `adb install -r`, preserving app data. History rendered inside the 1080 px viewport at `[42,549][1039,1845]`. Real selector taps exercised Temperature, Humidity, Output, Power and Current; VPD was absent from the current stored records and was therefore omitted from the available-series grid, while the unused sixth cell left the selection unchanged. After `logcat -c` and the interaction smoke, no `FATAL EXCEPTION`, `AndroidRuntime`, `Uncaught`, `TypeError`, `ReferenceError` or Capacitor/JavaScript error matched. Presentation-only acceptance: no Shelly/runtime/schedule/relay mutation was performed. |
+
 Install/observe a generated Shelly climate runtime:
 
 ```bash

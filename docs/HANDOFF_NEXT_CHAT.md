@@ -1,6 +1,6 @@
 # Handoff — History charts
 
-Status: **2026-09-30 — the pre-charts source closeout is complete. The next product slice is the History visualization/design gate.**
+Status: **2026-10-01 — the chart-first History visualization slice is implemented, canonical-visual verified and accepted on Samsung S22+ / Android 16.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -10,7 +10,7 @@ Repository: `MichalMatu/shelly-link`
 2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md` and `docs/UX_VISUAL_CONTRACT.md`.
 3. Read fresh `agent-control:.agent/status/daemon.json`; do not reuse an old conversation binding.
 4. Confirm there is no active Local Agent task and no open PR before starting work.
-5. Start with the History charts architecture/design gate; do not reopen pre-charts archaeology without new evidence.
+5. Start from the qualified chart-first History baseline; do not reopen storage/runtime or the completed design gate without new evidence.
 
 ## Accepted baseline
 
@@ -20,7 +20,7 @@ The existing History/Datalogger foundation is already complete:
 - records live in the namespaced/versioned `shellylink.history.*` KVS ring;
 - History writes are observational and failure-isolated from relay/safety arbitration;
 - the mobile side has a typed read path and `HistoryRecord[]` model;
-- Climate Detail already has a deliberately simple chronological History list with loading, retry, empty and partial-corruption handling;
+- Climate Detail now has a chart-first History surface with loading, retry, empty and partial-corruption handling;
 - ownership, runtime recovery, config/decode symmetry and mutation retry semantics were re-audited during closeout.
 
 The durable remote branches are intentionally only:
@@ -52,17 +52,18 @@ The MacBook Air M1 / 8 GB remains the current Local Agent host. `docs/PERFORMANC
 
 Do not tune worker counts/caches or claim a fresh performance baseline from the M1 / 8 GB host. Run only one heavy build/test workload at a time.
 
-## Next slice — History visualization / charts
+## Current slice — History visualization / charts
 
-Do a normal architecture/design gate before implementation and decide explicitly:
+Accepted implementation contract:
 
-- which series belong on the first screen: temperature, humidity, VPD, relay state, power/current;
-- time axis/range and behavior when Shelly timestamps are unavailable and only uptime exists;
-- how AUTO/MANUAL, reason/fault/safety transitions appear without making the graph unreadable;
-- whether the existing chronological record list remains below the charts as the detailed/fallback view;
-- mobile interaction/accessibility and empty/partial/corrupt-history states;
-- whether a chart library is actually needed. A new production dependency requires explicit user approval.
+- `@nivo/line` is the approved production dependency;
+- the History page is chart-first, with one large plot and a compact metric-selector grid rather than stacked record cards;
+- temperature, humidity, VPD, relay output, power and current are selectable first-class series and keep their own units/scales;
+- x-axis spacing uses complete Shelly timestamps first, monotonic uptime second and record order only when neither timeline is safe;
+- the tooltip carries selected value plus AUTO/MANUAL and relay state; no permanent explanatory copy is added around the chart;
+- loading, retry, empty and partial-corruption states remain explicit and compact;
+- runtime/KVS ownership and the `HistoryRecord[]` read path are unchanged.
 
-Prefer presentation work first. Do not redesign the Shelly runtime/storage format merely to draw charts unless a concrete limitation in the existing `HistoryRecord[]` path is demonstrated.
+Canonical `23-climate-history` evidence was refreshed and re-verified 4/4 on macOS. Real-device acceptance on Samsung SM-S906B / Android 16 used `adb install -r` with preserved app data: the History chart stayed inside the 1080 px viewport at `[42,549][1039,1845]`, and selector taps exercised Temperature, Humidity, Output, Power and Current. VPD was absent from the current stored records and therefore correctly omitted from the available-series grid; the unused sixth grid cell left the active series unchanged. After a clean `logcat -c`, the interaction smoke produced no matched `FATAL EXCEPTION`, `AndroidRuntime`, `Uncaught`, `TypeError`, `ReferenceError` or Capacitor/JavaScript error. No Shelly/runtime/schedule/relay mutation was performed.
 
-The chart work is an intentional visual-contract change and requires reviewed responsive evidence plus real-device review. If native/mobile behavior changes, preserve app state during device verification. If the real Shelly is touched, use identity-first access and finish with an explicitly verified relay OFF.
+Keep later chart refinements presentation-only unless a concrete data-model limitation is demonstrated. If the real Shelly is touched, use identity-first access and finish with an explicitly verified relay OFF.
