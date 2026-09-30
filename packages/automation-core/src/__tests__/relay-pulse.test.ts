@@ -4,6 +4,7 @@ import {
   confirmRelayPulseActionApplied,
   startRelayPulse
 } from '../actions/relayPulse.js';
+import { evaluateRelayTiming } from '../actions/relayTiming.js';
 
 describe('relay pulse actions', () => {
   it('requests Pulse ON and preserves the prior OFF state without starting the timer yet', () => {
@@ -82,6 +83,38 @@ describe('relay pulse actions', () => {
     });
   });
 
+  it('arms duration from the actual transition time after minimum-OFF releases', () => {
+    const started = startRelayPulse(
+      { type: 'pulse', relayOn: true, durationMs: 5_000 },
+      false
+    );
+    const pending = started.nextState!;
+    const policy = { minimumOnMs: 0, minimumOffMs: 120_000 };
+
+    expect(
+      evaluateRelayTiming({
+        action: started.requestedAction!,
+        policy,
+        state: { relayOn: false, lastChangeMs: 0 },
+        nowMs: 30_000
+      }).blockedBy
+    ).toBe('minimum-off');
+    expect(advanceRelayPulse(pending, 119_999).phase).toBe('pending-start');
+
+    expect(
+      evaluateRelayTiming({
+        action: advanceRelayPulse(pending, 120_000).requestedAction!,
+        policy,
+        state: { relayOn: false, lastChangeMs: 0 },
+        nowMs: 120_000
+      }).blockedBy
+    ).toBeNull();
+    expect(confirmRelayPulseActionApplied(pending, 120_000).nextState).toMatchObject({
+      status: 'active',
+      expiresAtMs: 125_000
+    });
+  });
+
   it('keeps requesting the pulse target before expiry', () => {
     const state = {
       status: 'active' as const,
@@ -130,6 +163,43 @@ describe('relay pulse actions', () => {
       requestedAction: { type: 'set', relayOn: false },
       nextState: state,
       phase: 'pending-restore'
+    });
+  });
+
+  it('keeps restore pending until minimum-ON releases and the restore is applied', () => {
+    const active = {
+      status: 'active' as const,
+      targetRelayOn: true,
+      restoreRelayOn: false,
+      expiresAtMs: 105_000
+    };
+    const expired = advanceRelayPulse(active, 105_000);
+    const pendingRestore = expired.nextState!;
+    const policy = { minimumOnMs: 30_000, minimumOffMs: 0 };
+
+    expect(
+      evaluateRelayTiming({
+        action: expired.requestedAction!,
+        policy,
+        state: { relayOn: true, lastChangeMs: 100_000 },
+        nowMs: 105_000
+      }).blockedBy
+    ).toBe('minimum-on');
+    expect(advanceRelayPulse(pendingRestore, 129_999).phase).toBe('pending-restore');
+
+    const restore = advanceRelayPulse(pendingRestore, 130_000);
+    expect(
+      evaluateRelayTiming({
+        action: restore.requestedAction!,
+        policy,
+        state: { relayOn: true, lastChangeMs: 100_000 },
+        nowMs: 130_000
+      }).blockedBy
+    ).toBeNull();
+    expect(confirmRelayPulseActionApplied(pendingRestore, 130_000)).toEqual({
+      requestedAction: null,
+      nextState: null,
+      phase: 'completed'
     });
   });
 
