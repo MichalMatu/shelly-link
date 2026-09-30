@@ -75,7 +75,8 @@ const createRuntime = () => {
         timers.push({ ...entry, dueMs: entry.dueMs + entry.durationMs });
       }
       iterations += 1;
-      if (iterations > 1_000) throw new Error('Generated runtime timer loop did not settle.');
+      if (iterations > 1_000)
+        throw new Error('Generated runtime timer loop did not settle.');
     }
   };
 
