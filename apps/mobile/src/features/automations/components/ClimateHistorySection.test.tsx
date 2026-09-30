@@ -59,15 +59,23 @@ describe('ClimateHistorySection', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a chart-first metric selector and reports skipped damaged records', () => {
+  it('shows all available metrics by default and toggles them independently', () => {
     renderSection({
       records: [record(10, false), record(20, true)],
       invalidRecordCount: 1
     });
 
     expect(screen.queryAllByRole('listitem')).toHaveLength(0);
-    expect(screen.getByRole('img', { name: 'History: Temperature' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'History' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Temperature, 22.5 °C' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Humidity, 58 %' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Output, ON' })).toHaveAttribute(
       'aria-pressed',
       'true'
     );
@@ -77,16 +85,34 @@ describe('ClimateHistorySection', () => {
 
     const power = screen.getByRole('button', { name: 'Power, 12.3 W' });
     fireEvent.click(power);
+    expect(power).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Temperature, 22.5 °C' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByRole('img', { name: 'History' })).toBeInTheDocument();
+
+    fireEvent.click(power);
     expect(power).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('img', { name: 'History: Power' })).toBeInTheDocument();
   });
 
-  it('falls back to the first available series when temperature is unavailable', () => {
-    const humidityOnly = { ...record(10, false), temperatureC: null };
+  it('omits unavailable metrics without changing the shared chart', () => {
+    const humidityOnly = {
+      ...record(10, false),
+      temperatureC: null,
+      vpdKpa: null,
+      powerW: null,
+      currentA: null
+    };
     renderSection({ records: [humidityOnly] });
 
-    expect(screen.getByRole('img', { name: 'History: Humidity' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'History' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Temperature/ })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Humidity, 58 %' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Output, OFF' })).toHaveAttribute(
       'aria-pressed',
       'true'
     );
