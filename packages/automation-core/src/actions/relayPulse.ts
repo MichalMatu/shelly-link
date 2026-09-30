@@ -61,8 +61,20 @@ export const startRelayPulse = (
 
 export const confirmRelayPulseActionApplied = (
   state: RelayPulseState,
+  appliedAction: RelaySetAction,
   nowMs: number
 ): RelayPulseDecision => {
+  const expectedRelayOn =
+    state.status === 'pending-restore' ? state.restoreRelayOn : state.targetRelayOn;
+
+  if (appliedAction.relayOn !== expectedRelayOn) {
+    return {
+      requestedAction: null,
+      nextState: state,
+      phase: state.status
+    };
+  }
+
   if (state.status === 'pending-start') {
     return {
       requestedAction: null,
