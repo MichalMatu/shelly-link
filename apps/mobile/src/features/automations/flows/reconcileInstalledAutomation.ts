@@ -184,6 +184,9 @@ const recoveredClimateConfig = (
       staleTimeoutSec: settings.staleTimeoutSec,
       minChangeMs: settings.minChangeMs,
       minimumOnMs: settings.minimumOnMs,
+      ...(settings.relayDebounce
+        ? { relayDebounce: { ...settings.relayDebounce } }
+        : {}),
       maxOnMs: settings.maxOnMs,
       rssiMin: settings.rssiMin,
       consecutiveHits: settings.consecutiveHits,
