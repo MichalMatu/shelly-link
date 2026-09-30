@@ -163,6 +163,7 @@ export const es = {
     disabled: 'desactivado',
     enabled: 'activado',
     firmware: 'Firmware',
+    history: 'Historial',
     info: 'Información',
     missing: 'sin dato',
     missingData: 'sin datos',

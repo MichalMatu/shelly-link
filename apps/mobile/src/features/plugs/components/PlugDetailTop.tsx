@@ -9,13 +9,15 @@ type PlugDetailTopProps = {
   availableTabs?: readonly PlugDetailTab[] | undefined;
   disabledTabs?: readonly PlugDetailTab[] | undefined;
   automationIcon?: PlugDetailAutomationIcon | undefined;
+  showHistory?: boolean | undefined;
 };
 
 export const PlugDetailTop = ({
   tabs,
   availableTabs,
   disabledTabs,
-  automationIcon
+  automationIcon,
+  showHistory
 }: PlugDetailTopProps) => {
   const [activeTab, onChange] = tabs;
 
@@ -26,6 +28,7 @@ export const PlugDetailTop = ({
       {...(availableTabs ? { availableTabs } : {})}
       {...(disabledTabs ? { disabledTabs } : {})}
       {...(automationIcon ? { automationIcon } : {})}
+      {...(showHistory ? { showHistory } : {})}
     />
   );
 };

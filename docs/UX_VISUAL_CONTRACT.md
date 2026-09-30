@@ -20,6 +20,8 @@ Protected states include the Plugs dashboard Climate card and Climate Automation
 
 Do not refresh Climate snapshots as part of unrelated work. Changing the frozen design requires an explicit product-design decision.
 
+History/Datalogger is the explicit product-design exception approved for the current v1 slice: Climate Detail intentionally expands the shared tab chrome from five to six items by adding **History**. The existing Automation, BLE, Device, Script and Info composition remains frozen; only the tab chrome delta and the new History surface receive refreshed/reviewed baselines.
+
 ## Shared UI ownership
 
 1. `@lcl/design-tokens` owns raw visual values.

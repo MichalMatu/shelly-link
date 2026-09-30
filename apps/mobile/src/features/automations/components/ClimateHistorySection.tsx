@@ -57,9 +57,7 @@ export const ClimateHistorySection = ({
 
   return (
     <section className="climate-history" aria-label={copy.title}>
-      {invalidRecordCount > 0 && (
-        <FeedbackPanel tone="warning" title={copy.partial} />
-      )}
+      {invalidRecordCount > 0 && <FeedbackPanel tone="warning" title={copy.partial} />}
       {newestFirst.length === 0 ? (
         <p className="climate-history__empty">{copy.empty}</p>
       ) : (
@@ -69,8 +67,7 @@ export const ClimateHistorySection = ({
               record.timestampUnixSec === null
                 ? `${copy.uptime} ${formatUptime(record.uptimeSec)}`
                 : dateTime.format(new Date(record.timestampUnixSec * 1000));
-            const mode =
-              record.controlMode === 'manual' ? copy.manual : copy.automatic;
+            const mode = record.controlMode === 'manual' ? copy.manual : copy.automatic;
             const output = record.finalRelayOn ? t('common.on') : t('common.off');
 
             return (

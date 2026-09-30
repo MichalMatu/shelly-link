@@ -9,10 +9,12 @@ import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   ClimateAutomationDetailSection,
+  ClimateHistorySection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
   ClimateScriptDetailSection,
-  ClimateScriptDiagnosticsSection
+  ClimateScriptDiagnosticsSection,
+  useClimateHistory
 } from '../features/automations/index.js';
 import {
   PlugDeleteConfirmModal,
@@ -140,6 +142,9 @@ const ClimateInstallationDetail = ({
   >(null);
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
   const controlQuery = useInstalledAutomationControl(installation);
+  const historyQuery = useClimateHistory(installation, {
+    enabled: activeTab === 'history'
+  });
   const automationAction = useInstalledAutomationActions(installation);
   const resourcesQuery = useInstalledAutomationResourceDiagnostics(installation, {
     enabled: activeTab === 'info',
@@ -249,7 +254,7 @@ const ClimateInstallationDetail = ({
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <PlugDetailTop tabs={[activeTab, setActiveTab]} />
+      <PlugDetailTop tabs={[activeTab, setActiveTab]} showHistory />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
         {activeTab === 'automation' && (
@@ -320,6 +325,16 @@ const ClimateInstallationDetail = ({
               </button>
             </div>
           </>
+        )}
+
+        {activeTab === 'history' && (
+          <ClimateHistorySection
+            records={historyQuery.data?.records ?? []}
+            invalidRecordCount={historyQuery.data?.invalidKeys.length ?? 0}
+            loading={historyQuery.isLoading}
+            error={historyQuery.isError}
+            onRetry={() => void historyQuery.refetch()}
+          />
         )}
 
         {activeTab === 'ble' && (

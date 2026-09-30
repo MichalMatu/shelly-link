@@ -165,6 +165,7 @@ export const it = {
     disabled: 'disattivato',
     enabled: 'attivato',
     firmware: 'Firmware',
+    history: 'Cronologia',
     info: 'Informazioni',
     missing: 'mancante',
     missingData: 'nessun dato',
