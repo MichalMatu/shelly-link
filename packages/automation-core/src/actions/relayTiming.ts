@@ -1,7 +1,4 @@
-export interface RelaySetAction {
-  type: 'set';
-  relayOn: boolean;
-}
+import type { RelaySetAction } from './relayAction.js';
 
 export interface RelayTimingPolicy {
   minimumOnMs: number;
