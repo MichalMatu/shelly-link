@@ -7,10 +7,17 @@ export interface RelayDebouncePolicy {
 
 export type RelayDebounceBlockReason = 'debounce-on' | 'debounce-off';
 
-export interface RelayDebounceState {
-  pendingRelayOn?: boolean | undefined;
-  pendingSinceMs?: number | undefined;
+export interface RelayDebounceIdleState {
+  status: 'idle';
 }
+
+export interface RelayDebouncePendingState {
+  status: 'pending';
+  relayOn: boolean;
+  sinceMs: number;
+}
+
+export type RelayDebounceState = RelayDebounceIdleState | RelayDebouncePendingState;
 
 export interface RelayDebounceInput {
   action: RelaySetAction;
@@ -26,6 +33,8 @@ export interface RelayDebounceDecision {
   nextState: RelayDebounceState;
   blockedBy: RelayDebounceBlockReason | null;
 }
+
+const idleState = (): RelayDebounceIdleState => ({ status: 'idle' });
 
 const validateDuration = (value: number, label: string): void => {
   if (!Number.isFinite(value) || value < 0) {
@@ -45,7 +54,7 @@ export const evaluateRelayDebounce = (
     return {
       requestedAction: action,
       debouncedAction: action,
-      nextState: {},
+      nextState: idleState(),
       blockedBy: null
     };
   }
@@ -55,18 +64,17 @@ export const evaluateRelayDebounce = (
     return {
       requestedAction: action,
       debouncedAction: action,
-      nextState: {},
+      nextState: idleState(),
       blockedBy: null
     };
   }
 
   const pendingSinceMs =
-    state.pendingRelayOn === action.relayOn && state.pendingSinceMs !== undefined
-      ? state.pendingSinceMs
-      : nowMs;
-  const nextState: RelayDebounceState = {
-    pendingRelayOn: action.relayOn,
-    pendingSinceMs
+    state.status === 'pending' && state.relayOn === action.relayOn ? state.sinceMs : nowMs;
+  const nextState: RelayDebouncePendingState = {
+    status: 'pending',
+    relayOn: action.relayOn,
+    sinceMs: pendingSinceMs
   };
   const elapsedMs = nowMs - pendingSinceMs;
 
