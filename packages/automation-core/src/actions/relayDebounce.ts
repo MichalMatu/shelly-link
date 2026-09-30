@@ -70,7 +70,9 @@ export const evaluateRelayDebounce = (
   }
 
   const pendingSinceMs =
-    state.status === 'pending' && state.relayOn === action.relayOn ? state.sinceMs : nowMs;
+    state.status === 'pending' && state.relayOn === action.relayOn
+      ? state.sinceMs
+      : nowMs;
   const nextState: RelayDebouncePendingState = {
     status: 'pending',
     relayOn: action.relayOn,
