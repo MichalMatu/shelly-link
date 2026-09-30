@@ -23,14 +23,14 @@ Repository: `MichalMatu/shelly-link`
 - generated runtime remains constrained by the 9500 B guard;
 - `golden/climate-ui-20260928` is intentionally retained as the accepted Climate visual reference until the UX contract is deliberately changed.
 
-## Known investigation target
+## Reconciliation hash audit resolved
 
-The preserved Android data and installed Shelly provide a concrete reconciliation case:
+The preserved Android data and installed Shelly expose two intentionally different hash domains:
 
-- saved local script hash: `lcl-af2c3ccf`;
-- installed runtime header: `lcl-e5ff62f5`.
+- saved local `installation.script.hash`: `lcl-af2c3ccf` — FNV hash of the **full generated script source**;
+- installed runtime header `// h: lcl-e5ff62f5` — hash of the normalized **runtime configuration**.
 
-The live runtime/config previously matched the intended `GrowBox` TP357 automation despite the hash divergence. On resume, determine whether this is stale local metadata, a presentation/recovery-state issue, or a logic defect. **Do not passively rewrite the remote runtime merely because the hashes differ.**
+The 2026-09-30 live audit read the remote source without mutating it and recomputed its full code hash as exactly `lcl-af2c3ccf`. The runtime/config therefore matched the saved installation; there was no local-vs-remote code divergence. Do not compare the header config hash to `installation.script.hash`, and do not passively rewrite a valid runtime.
 
 ## Last real-device safety state
 

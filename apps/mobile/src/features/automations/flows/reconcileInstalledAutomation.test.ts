@@ -233,6 +233,47 @@ describe('reconcileInstalledAutomationsForShelly', () => {
     expect(stored?.updatedAtMs).toBe(1000);
   });
 
+  it('does not confuse the runtime config header hash with the full script code hash', async () => {
+    const config = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const code = generateShellyThermostatScript(config);
+    const installation = createInstalledAutomation({
+      shelly: { id: 'SHELLY-ABC', model: 'Old model', gen: 3 },
+      shellyName: 'Old name',
+      baseUrl: 'http://192.168.0.10/',
+      scriptId: 7,
+      scriptHash: hashScriptCode(code),
+      config,
+      nowMs: 1000
+    });
+    const configHeaderHash = /^\/\/ h: (lcl-[0-9a-f]{8})$/m.exec(code)?.[1];
+
+    expect(configHeaderHash).toBeDefined();
+    expect(configHeaderHash).not.toBe(installation.script.hash);
+    useInstalledAutomationStore.getState().upsertInstallation(installation);
+
+    const result = await reconcileInstalledAutomationsForShelly(
+      target,
+      services({
+        readClimateRuntime: vi.fn(async () => ({
+          scriptId: 7,
+          running: true,
+          code,
+          persistedRuntimeConfigJson: null
+        }))
+      })
+    );
+    const stored = useInstalledAutomationStore.getState().installations[0];
+
+    expect(result.status).toBe('verified');
+    expect(stored?.kind).toBe('climate');
+    if (!stored || stored.kind !== 'climate')
+      throw new Error('Expected climate installation.');
+    expect(stored.script.hash).toBe(hashScriptCode(code));
+  });
+
   it('reports changed when remote code differs from the current stored code hash', async () => {
     useInstalledAutomationStore.getState().upsertInstallation(climateInstallation());
     const result = await reconcileInstalledAutomationsForShelly(
