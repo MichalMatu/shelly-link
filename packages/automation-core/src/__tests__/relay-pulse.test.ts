@@ -8,33 +8,33 @@ import { evaluateRelayTiming } from '../actions/relayTiming.js';
 
 describe('relay pulse actions', () => {
   it('requests Pulse ON and preserves the prior OFF state without starting the timer yet', () => {
-    expect(startRelayPulse({ type: 'pulse', relayOn: true, durationMs: 5_000 }, false)).toEqual(
-      {
-        requestedAction: { type: 'set', relayOn: true },
-        nextState: {
-          status: 'pending-start',
-          targetRelayOn: true,
-          restoreRelayOn: false,
-          durationMs: 5_000
-        },
-        phase: 'pending-start'
-      }
-    );
+    expect(
+      startRelayPulse({ type: 'pulse', relayOn: true, durationMs: 5_000 }, false)
+    ).toEqual({
+      requestedAction: { type: 'set', relayOn: true },
+      nextState: {
+        status: 'pending-start',
+        targetRelayOn: true,
+        restoreRelayOn: false,
+        durationMs: 5_000
+      },
+      phase: 'pending-start'
+    });
   });
 
   it('requests Pulse OFF and preserves the prior ON state without starting the timer yet', () => {
-    expect(startRelayPulse({ type: 'pulse', relayOn: false, durationMs: 5_000 }, true)).toEqual(
-      {
-        requestedAction: { type: 'set', relayOn: false },
-        nextState: {
-          status: 'pending-start',
-          targetRelayOn: false,
-          restoreRelayOn: true,
-          durationMs: 5_000
-        },
-        phase: 'pending-start'
-      }
-    );
+    expect(
+      startRelayPulse({ type: 'pulse', relayOn: false, durationMs: 5_000 }, true)
+    ).toEqual({
+      requestedAction: { type: 'set', relayOn: false },
+      nextState: {
+        status: 'pending-start',
+        targetRelayOn: false,
+        restoreRelayOn: true,
+        durationMs: 5_000
+      },
+      phase: 'pending-start'
+    });
   });
 
   it.each([

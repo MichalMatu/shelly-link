@@ -21,17 +21,10 @@ export interface RelayPulsePendingRestoreState {
 }
 
 export type RelayPulseState =
-  | RelayPulsePendingStartState
-  | RelayPulseActiveState
-  | RelayPulsePendingRestoreState;
+  RelayPulsePendingStartState | RelayPulseActiveState | RelayPulsePendingRestoreState;
 
 export type RelayPulsePhase =
-  | 'pending-start'
-  | 'started'
-  | 'active'
-  | 'pending-restore'
-  | 'completed'
-  | 'cancelled';
+  'pending-start' | 'started' | 'active' | 'pending-restore' | 'completed' | 'cancelled';
 
 export interface RelayPulseDecision {
   requestedAction: RelaySetAction | null;
