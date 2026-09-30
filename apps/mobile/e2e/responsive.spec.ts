@@ -744,11 +744,18 @@ for (const viewport of viewports) {
     );
 
     await page.getByRole('button', { name: 'Historia' }).click();
-    await expect(page.getByRole('img', { name: 'Historia: Temperatura' })).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Temperatura, 21,4 °C' })
-    ).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByRole('button', { name: 'Moc, 42,3 W' })).toBeVisible();
+    await expect(page.getByRole('img', { name: 'Historia' })).toBeVisible();
+    const temperatureHistoryMetric = page.getByRole('button', {
+      name: 'Temperatura, 21,4 °C'
+    });
+    const powerHistoryMetric = page.getByRole('button', { name: 'Moc, 42,3 W' });
+    await expect(temperatureHistoryMetric).toHaveAttribute('aria-pressed', 'true');
+    await expect(powerHistoryMetric).toHaveAttribute('aria-pressed', 'true');
+    await powerHistoryMetric.click();
+    await expect(powerHistoryMetric).toHaveAttribute('aria-pressed', 'false');
+    await expect(temperatureHistoryMetric).toHaveAttribute('aria-pressed', 'true');
+    await powerHistoryMetric.click();
+    await expect(powerHistoryMetric).toHaveAttribute('aria-pressed', 'true');
     await expectNoHorizontalOverflow(page);
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '23-climate-history');

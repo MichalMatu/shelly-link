@@ -193,15 +193,20 @@ export const ClimateHistoryChart = ({
   const availableContinuousMetrics = CONTINUOUS_METRICS.filter((metric) =>
     availableMetrics.some((available) => available.id === metric.id)
   );
-  const visibleMetrics = availableMetrics.filter((metric) => !hiddenMetricIds.has(metric.id));
+  const visibleMetrics = availableMetrics.filter(
+    (metric) => !hiddenMetricIds.has(metric.id)
+  );
   const visibleContinuousMetrics = availableContinuousMetrics.filter(
     (metric) => !hiddenMetricIds.has(metric.id)
   );
   const outputVisible =
-    availableMetrics.some((metric) => metric.id === 'output') && !hiddenMetricIds.has('output');
+    availableMetrics.some((metric) => metric.id === 'output') &&
+    !hiddenMetricIds.has('output');
 
   const axisMode = resolveHistoryAxisMode(records);
-  const xValues = records.map((record, index) => historyXValueFor(record, index, axisMode));
+  const xValues = records.map((record, index) =>
+    historyXValueFor(record, index, axisMode)
+  );
   const ticks = historyDomainTicks(xValues, axisMode);
   const xStart = xValues.length > 0 ? Math.min(...xValues) : 0;
   const xEnd = xValues.length > 0 ? Math.max(...xValues) : xStart;
@@ -223,7 +228,9 @@ export const ClimateHistoryChart = ({
   const formatAxisX = (value: number): string => {
     if (axisMode === 'timestamp') {
       const date = new Date(value * 1000);
-      return xSpan <= TIMESTAMP_CLOCK_THRESHOLD_SEC ? clock.format(date) : day.format(date);
+      return xSpan <= TIMESTAMP_CLOCK_THRESHOLD_SEC
+        ? clock.format(date)
+        : day.format(date);
     }
     if (axisMode === 'uptime') {
       const elapsed = Math.max(0, value - xStart);

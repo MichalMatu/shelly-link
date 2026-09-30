@@ -1,9 +1,5 @@
 export type HistoryContinuousMetricId =
-  | 'temperature'
-  | 'humidity'
-  | 'vpd'
-  | 'power'
-  | 'current';
+  'temperature' | 'humidity' | 'vpd' | 'power' | 'current';
 
 export type HistoryMetricDomain = readonly [min: number, max: number];
 

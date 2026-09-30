@@ -5,25 +5,8 @@ export type HistoryAxisMode = 'timestamp' | 'uptime' | 'sequence';
 type HistoryAxisRecord = Pick<HistoryRecord, 'timestampUnixSec' | 'uptimeSec'>;
 
 const TIME_STEPS_SEC = [
-  1,
-  5,
-  10,
-  15,
-  30,
-  60,
-  120,
-  300,
-  600,
-  900,
-  1_800,
-  3_600,
-  7_200,
-  10_800,
-  21_600,
-  43_200,
-  86_400,
-  172_800,
-  604_800
+  1, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1_800, 3_600, 7_200, 10_800, 21_600, 43_200,
+  86_400, 172_800, 604_800
 ] as const;
 
 export const resolveHistoryAxisMode = (
