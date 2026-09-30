@@ -58,6 +58,7 @@ export const shellyThermostatConfigSchema = z
       }),
       staleTimeoutSec: z.number().int().positive(),
       minChangeMs: z.number().int().positive(),
+      minimumOnMs: z.number().int().nonnegative().optional(),
       maxOnMs: z.number().int().positive(),
       rssiMin: z.number().int().min(-100).max(-20),
       consecutiveHits: z.number().int().min(1).max(10).default(2),

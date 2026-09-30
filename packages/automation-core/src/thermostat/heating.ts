@@ -1,7 +1,4 @@
-import {
-  evaluateRelayTiming,
-  relayTimingPolicyFromLegacyMinChange
-} from '../actions/relayTiming.js';
+import { evaluateRelayTiming } from '../actions/relayTiming.js';
 import type {
   AutomationDecision,
   AutomationInput,
@@ -217,7 +214,10 @@ const applyRelayTarget = (
       type: 'set',
       relayOn: requestedRelayOn
     },
-    policy: relayTimingPolicyFromLegacyMinChange(rule.minChangeMs),
+    policy: {
+      minimumOnMs: rule.minimumOnMs ?? 0,
+      minimumOffMs: rule.minChangeMs
+    },
     state: {
       relayOn: state.relayOn,
       lastChangeMs: state.lastChangeMs

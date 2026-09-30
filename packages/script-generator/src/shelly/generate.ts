@@ -18,15 +18,19 @@ import {
 export type ShellyScriptGeneratorMode = 'climate-engine-v1' | 'discovery-debug';
 
 const COMPOSITE_MEASUREMENT_WINDOW_MS = 90_000;
+const MINIMUM_ON_GENERATOR_VERSION = '0.6.2';
 export const SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES = 9_500;
 
-const renderPersistentConfigLoader = (): string => `var E=0;
+const renderPersistentConfigLoader = (minimumOnEnabled = false): string => {
+  const minimumOnValidator = minimumOnEnabled ? '&&(c.u===void 0||N(c.u)&&c.u>=0)' : '';
+  return `var E=0;
 function N(x){return x-0===x}
 function S(x){return x+""===x}
 function vs(c){var a=c.ss;if(a===void 0)return c.ag===void 0;if(!Array.isArray(a)||a.length<2||a.length>4||!N(c.ag)||c.ag<0||c.ag>3)return false;for(var i=0,s;i<a.length;i++){s=a[i];if(!Array.isArray(s)||s.length!==3||!S(s[0])||!S(s[1])||(s[2]!==0&&s[2]!==1))return false;}return true;}
-function vc(c){return c&&c.v===1&&(c.p===0||c.p===1)&&S(c.a)&&S(c.fa)&&S(c.n)&&S(c.k)&&N(c.i)&&c.i>=0&&N(c.r)&&c.r>=-100&&c.r<=-20&&N(c.on)&&N(c.off)&&(c.d===0||c.d===1)&&(c.m===0||c.m===1)&&N(c.h)&&c.h>=1&&c.h<=10&&N(c.c)&&c.c>0&&N(c.s)&&c.s>0&&N(c.x)&&c.x>0&&N(c.vp)&&c.vp>=0&&c.vp<=5&&(c.d?c.on>c.off:c.on<c.off)&&vs(c);}
+function vc(c){return c&&c.v===1&&(c.p===0||c.p===1)&&S(c.a)&&S(c.fa)&&S(c.n)&&S(c.k)&&N(c.i)&&c.i>=0&&N(c.r)&&c.r>=-100&&c.r<=-20&&N(c.on)&&N(c.off)&&(c.d===0||c.d===1)&&(c.m===0||c.m===1)&&N(c.h)&&c.h>=1&&c.h<=10&&N(c.c)&&c.c>0${minimumOnValidator}&&N(c.s)&&c.s>0&&N(c.x)&&c.x>0&&N(c.vp)&&c.vp>=0&&c.vp<=5&&(c.d?c.on>c.off:c.on<c.off)&&vs(c);}
 function lc(d){if(typeof Script=="undefined"||!Script.storage||!Script.storage.getItem)return d;try{var x=Script.storage.getItem(${JSON.stringify(SHELLY_RUNTIME_CONFIG_STORAGE_KEY)});if(!x)return d;var c=JSON.parse(x);if(vc(c))return c;}catch(e){}E=1;return d;}
 C=lc(C);`;
+};
 
 const renderThresholdHelper =
   (): string => `function cl(v,a,b){return Math.min(Math.max(v,a),b);}
@@ -60,12 +64,16 @@ function meas(t,h,b,r,j){var n=nw(),u=R.u[j],p=t!=null||h!=null;R.r=r;if(b!=null
 export const generateShellyThermostatScript = (input: unknown): string => {
   const config = normalizeConfig(input);
   const mode: ShellyScriptGeneratorMode = 'climate-engine-v1';
+  const minimumOnEnabled = (config.rule.minimumOnMs ?? 0) > 0;
+  const generatorVersion = minimumOnEnabled
+    ? MINIMUM_ON_GENERATOR_VERSION
+    : GENERATOR_VERSION;
   const hash = configHash(config);
   const cfgJson = stableStringify(createShellyRuntimeConfig(config, hash));
-  const body = `var C=${cfgJson};
-${renderPersistentConfigLoader()}
+  const body = `${minimumOnEnabled ? 'var U=1;\n' : ''}var C=${cfgJson};
+${renderPersistentConfigLoader(minimumOnEnabled)}
 ${renderRuntimeState()}
-${renderRelayArbiter()}
+${renderRelayArbiter(minimumOnEnabled)}
 ${renderSafetySupervisor()}
 ${renderSensorHealth()}
 function na(a){var s=a==null?"":String(a).toUpperCase(),o="",i,c;for(i=0;i<s.length;i++)if((c=s[i])!=":"&&c!="-")o+=c;return o}
@@ -87,7 +95,7 @@ if(E){R.ds="cf";ft("cf")}else{Shelly.addStatusHandler(safe);sw(false,"b",true);s
   );
 
   const script = `// LCL
-// g: ${GENERATOR_VERSION}
+// g: ${generatorVersion}
 // m: ${mode}
 // h: ${hash}
 ${compactBody}
