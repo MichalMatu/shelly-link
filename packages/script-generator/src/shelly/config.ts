@@ -4,12 +4,28 @@ import { z } from 'zod';
 
 export const GENERATOR_VERSION = '0.6.1';
 export const MAX_CLIMATE_SENSORS = 4;
+export const MAX_CLIMATE_SENSOR_DISPLAY_NAME_RUNTIME_BYTES = 26;
 
 const shellyRuntimeAddressSchema = z
   .string()
   .trim()
   .regex(/^([0-9a-f]{2}:){5}[0-9a-f]{2}$/i, 'Invalid Shelly runtime address.')
   .transform((value) => value.toUpperCase());
+
+const escapedRuntimeStringByteLength = (value: string): number =>
+  new TextEncoder().encode(JSON.stringify(value)).length - 2;
+
+const climateSensorDisplayNameSchema = z
+  .string()
+  .min(1)
+  .refine(
+    (value) =>
+      escapedRuntimeStringByteLength(value) <=
+      MAX_CLIMATE_SENSOR_DISPLAY_NAME_RUNTIME_BYTES,
+    {
+      message: `Climate sensor display name must use at most ${MAX_CLIMATE_SENSOR_DISPLAY_NAME_RUNTIME_BYTES} runtime bytes.`
+    }
+  );
 
 const ruleControlMetricSchema = z.enum(['temperature', 'humidity']);
 const thresholdDirectionSchema = z.enum(['below', 'above']);
@@ -26,7 +42,7 @@ export const climateSensorSchema = z.object({
   profileId: sensorProfileIdSchema,
   sensorId: z.string().min(1),
   runtimeAddress: shellyRuntimeAddressSchema,
-  displayName: z.string().min(1),
+  displayName: climateSensorDisplayNameSchema,
   parserValidated: z.boolean().default(false)
 });
 

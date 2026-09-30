@@ -3,6 +3,7 @@ import {
   climateSensorAggregationForConfig,
   climateSensorsForConfig,
   MAX_CLIMATE_SENSORS,
+  type ClimateSensor,
   type ClimateSensorAggregation,
   type ShellyThermostatConfig
 } from './config.js';
@@ -69,6 +70,12 @@ const sensorProfileFlag = (
   profileId: ShellyThermostatConfig['sensor']['profileId']
 ): 0 | 1 => (profileId === 'tp357_custom_v1' ? 1 : 0);
 
+const runtimeSensorForConfig = (sensor: ClimateSensor): ShellyRuntimeSensor => [
+  compactAddress(sensor.runtimeAddress),
+  sensor.displayName,
+  sensorProfileFlag(sensor.profileId)
+];
+
 const aggregationFlag = (
   aggregation: ClimateSensorAggregation
 ): ShellyRuntimeAggregation => {
@@ -104,26 +111,20 @@ export const createShellyRuntimeConfig = (
   hash: string
 ): ShellyRuntimeConfig => {
   const sensors = climateSensorsForConfig(config);
+  const primaryRuntimeSensor = runtimeSensorForConfig(config.sensor);
   const multiSensorRuntime =
     sensors.length > 1
       ? {
-          ss: sensors.map(
-            (sensor) =>
-              [
-                compactAddress(sensor.runtimeAddress),
-                sensor.displayName,
-                sensorProfileFlag(sensor.profileId)
-              ] as ShellyRuntimeSensor
-          ),
+          ss: sensors.map(runtimeSensorForConfig),
           ag: aggregationFlag(climateSensorAggregationForConfig(config))
         }
       : {};
   const debounce = config.rule.relayDebounce;
 
   return {
-    a: compactAddress(config.sensor.runtimeAddress),
+    a: primaryRuntimeSensor[0],
     fa: config.sensor.runtimeAddress,
-    n: config.sensor.displayName,
+    n: primaryRuntimeSensor[1],
     k: hash,
     i: config.output.relayId,
     r: config.rule.rssiMin,
@@ -140,7 +141,7 @@ export const createShellyRuntimeConfig = (
     x: config.rule.maxOnMs,
     v: config.version,
     vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0,
-    p: sensorProfileFlag(config.sensor.profileId),
+    p: primaryRuntimeSensor[2],
     ...multiSensorRuntime
   };
 };
