@@ -1,5 +1,6 @@
 import {
   climateRuntimeControlStateEvalCode,
+  climateRuntimeResetSafetyLockoutEvalCode,
   climateRuntimeSetControlModeEvalCode,
   climateRuntimeSetManualRelayEvalCode,
   createDefaultShellyThermostatConfig,
@@ -70,6 +71,7 @@ const createRuntime = (script: string) => {
   const enterAutoCode = climateRuntimeSetControlModeEvalCode('auto');
   const manualOnCode = climateRuntimeSetManualRelayEvalCode(true);
   const manualOffCode = climateRuntimeSetManualRelayEvalCode(false);
+  const resetSafetyCode = climateRuntimeResetSafetyLockoutEvalCode;
   const runtime = new Function(
     'Shelly',
     'BLE',
@@ -82,7 +84,9 @@ return {
   enterAuto:function(){return ${enterAutoCode};},
   manualOn:function(){return ${manualOnCode};},
   manualOff:function(){return ${manualOffCode};},
+  resetSafety:function(){return ${resetSafetyCode};},
   hardLock:function(){ft("mx");},
+  safe:safe,
   stale:stale
 };`
   )(shelly, ble, timer) as {
@@ -92,7 +96,9 @@ return {
     enterAuto: () => number;
     manualOn: () => number;
     manualOff: () => number;
+    resetSafety: () => string;
     hardLock: () => void;
+    safe: () => void;
     stale: () => void;
   };
 
@@ -272,6 +278,51 @@ describe('generated runtime control arbitration', () => {
     runtime.scan(23.5, 50);
     expect(runtime.physicalRelayOn()).toBe(false);
     expect(runtime.controlState().safetyLockout).toBe(true);
+
+    expect(decodeClimateRuntimeControlState(runtime.runtime.resetSafety())).toMatchObject(
+      {
+        mode: 'manual',
+        manualRequestOn: false,
+        safetyLockout: false,
+        safetyReason: null
+      }
+    );
+    expect(runtime.physicalRelayOn()).toBe(false);
+    expect(runtime.runtime.manualOn()).toBe(1);
+    expect(runtime.physicalRelayOn()).toBe(true);
+  });
+
+  it('hard safety runs before stale handling and preserves the lockout reason', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const base = createDefaultShellyThermostatConfig(
+        'xiaomi_lywsd03mmc_bthome_v2',
+        'heating'
+      );
+      const runtime = createRuntime(
+        generateShellyThermostatScript({
+          ...base,
+          sensor: { ...base.sensor, runtimeAddress: 'AA:BB:CC:DD:EE:FF' },
+          rule: { ...base.rule, consecutiveHits: 1, minChangeMs: 1, maxOnMs: 1_000 }
+        })
+      );
+      runtime.scan(18, 50);
+      expect(runtime.physicalRelayOn()).toBe(true);
+
+      nowMs += 700_000;
+      runtime.runtime.safe();
+      runtime.runtime.stale();
+      expect(runtime.controlState()).toMatchObject({
+        mode: 'auto',
+        automationFault: 'st',
+        safetyLockout: true,
+        safetyReason: 'mx'
+      });
+      expect(runtime.physicalRelayOn()).toBe(false);
+    } finally {
+      nowSpy.mockRestore();
+    }
   });
 
   it('exposes independent mode, request, fault and safety axes in diagnostics', () => {

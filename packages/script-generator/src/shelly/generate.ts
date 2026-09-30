@@ -7,6 +7,7 @@ import {
 import { renderRuntimeDiagnostics } from './runtime/diagnostics.js';
 import { renderHistoryWriter } from './runtime/historyWriter.js';
 import { renderRelayArbiter } from './runtime/relayArbiter.js';
+import { renderSafetySupervisor } from './runtime/safetySupervisor.js';
 import { renderSensorHealth } from './runtime/sensorHealth.js';
 import { renderRuntimeState } from './runtime/state.js';
 import { compactGeneratedShellyScript } from './scriptText.js';
@@ -62,6 +63,7 @@ export const generateShellyThermostatScript = (input: unknown): string => {
 ${renderPersistentConfigLoader()}
 ${renderRuntimeState()}
 ${renderRelayArbiter()}
+${renderSafetySupervisor()}
 ${renderSensorHealth()}
 function na(a){var s=a==null?"":String(a).toUpperCase(),o="",i,c;for(i=0;i<s.length;i++)if((c=s[i])!=":"&&c!="-")o+=c;return o}
 ${renderThresholdHelper()}
@@ -76,7 +78,7 @@ function ev(e,x){if(e!=BLE.Scanner.SCAN_RESULT||!x)return;var j=ix(x.addr);if(j<
 var bt=BLE.Scanner.stop||BLE.Scanner.Stop;
 function bs(){if(bt)bt.call(BLE.Scanner);R.sa=nw();var f=BLE.Scanner.start||BLE.Scanner.Start;if(!f||f.call(BLE.Scanner,{duration_ms:-1,active:false,interval_ms:241,window_ms:61,rssi_thr:0})==null)sf("bf")}
 function bw(){if(R.sa&&nw()-(R.l||R.sa)>9e4)bs();}
-if(E){R.ds="cf";ft("cf")}else{sw(false,"b",true);BLE.Scanner.subscribe(function(e,x){ev(e,x)});Timer.set(1000,false,bs);Timer.set(30000,true,function(){stale();bw()});Timer.set(1500,false,hi)}`;
+if(E){R.ds="cf";ft("cf")}else{sw(false,"b",true);BLE.Scanner.subscribe(function(e,x){ev(e,x)});Timer.set(1000,false,bs);Timer.set(30000,true,function(){safe();stale();bw()});Timer.set(1500,false,hi)}`;
   const compactBody = compactGeneratedShellyScript(body);
 
   const script = `// LCL
