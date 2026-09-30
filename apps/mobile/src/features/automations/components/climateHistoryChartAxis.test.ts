@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatHistoryUptime,
-  historyTickIndexes,
+  historyDomainTicks,
   historyXValueFor,
   resolveHistoryAxisMode
 } from './climateHistoryChartAxis.js';
@@ -30,8 +30,13 @@ describe('climateHistoryChartAxis', () => {
     expect(historyXValueFor(records[1]!, 1, 'sequence')).toBe(1);
   });
 
-  it('keeps ticks sparse and formats uptime compactly', () => {
-    expect(historyTickIndexes(5)).toEqual([0, 1, 3, 4]);
+  it('derives sparse timestamp ticks from the time domain rather than record indexes', () => {
+    expect(historyDomainTicks([100, 101, 400], 'timestamp')).toEqual([100, 300, 400]);
+    expect(historyDomainTicks([0, 1, 1_000], 'uptime')).toEqual([0, 600, 1_000]);
+  });
+
+  it('keeps sequence fallback sparse and formats uptime compactly', () => {
+    expect(historyDomainTicks([0, 1, 2, 3, 4], 'sequence')).toEqual([0, 2, 4]);
     expect(formatHistoryUptime(45)).toBe('45s');
     expect(formatHistoryUptime(125)).toBe('2m');
     expect(formatHistoryUptime(7_380)).toBe('2h 3m');
