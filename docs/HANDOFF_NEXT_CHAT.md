@@ -10,7 +10,7 @@ Repository: `MichalMatu/shelly-link`
 2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md` and `docs/UX_VISUAL_CONTRACT.md`.
 3. Read fresh `agent-control:.agent/status/daemon.json`; never reuse an old conversation binding.
 4. Confirm there is no active Local Agent task and no open PR before starting work.
-5. The user will attach screenshots of the current History UI at the start of the next chat. Treat those screenshots as the primary visual evidence and compare them against the implementation before changing code.
+5. The user will attach the current Samsung S22+ History screenshots at the start of the next chat. Treat those screenshots as the primary visual evidence and compare them against the implementation before changing code.
 6. Start from the qualified chart-first History baseline. Do not reopen storage/runtime/KVS or rewrite History v2 without new evidence of a data-model limitation.
 
 ## Accepted baseline
@@ -53,6 +53,21 @@ The implementation is intentionally local to the automations feature:
 
 Final handoff audit found no actionable `TODO` / `FIXME` / `HACK`, no explicit `any` escape and no presentation-side fetch/Shelly/KVS/BLE/storage ownership. Focused ESLint, tests and mobile typecheck passed on the merged product baseline.
 
+## Real-phone screenshot findings
+
+The user supplied five Samsung S22+ screenshots of the current History tab, one for each available metric state. They make the next UX problems concrete:
+
+- the 2x3 metric-selector cards consume roughly the upper third of the useful History content area, so the controls visually compete with the chart instead of behaving like a legend;
+- temperature around `24.64–24.70 °C` is stretched across almost the full plot height, making about `0.06 °C` of movement look dramatic;
+- humidity around `37.44–37.48 %` has the same exaggerated-amplitude problem for only about `0.04` percentage point of variation;
+- Output, Power and Current screens leave a large mostly-empty plot when the values are binary or near zero, while the other measurements are hidden behind metric switching;
+- the user explicitly wants those measurements visible together on one time surface so relationships can be read at a glance;
+- the current x-axis/uplink-time labels look too technical and visually irregular for the short captured history; retain truthful elapsed-time positioning but improve tick generation and human-readable rhythm;
+- there is no horizontal-overflow problem in the screenshots, so keep that contract while compressing the legend;
+- bottom navigation and surrounding detail chrome are not the target of this slice; spend the recovered space on the plot, not new explanatory text.
+
+Treat these screenshots as evidence of **known UX debt**, not as a golden visual target. The next implementation should deliberately look different.
+
 ## Product-owner corrections for the next slice
 
 These are explicit requirements and supersede the current one-metric-at-a-time interaction:
@@ -71,7 +86,7 @@ These are explicit requirements and supersede the current one-metric-at-a-time i
    - output: fixed binary 0/1 semantics.
 8. **Fix x-axis visual rhythm.** Data positions must continue to reflect real elapsed time, but tick generation should come from the x-domain/time range rather than record-index sampling when timestamp/uptime mode is available. Irregular event spacing must stay truthful without producing awkward labels.
 9. **Relay output should not visually dominate continuous sensor series.** Prefer a subtle step/state track, band or equivalent presentation inside the same chart surface rather than a competing full-strength continuous line.
-10. Keep legend interaction compact and touch-friendly. Avoid a tall 3x2 control block if screenshots show that it steals useful plot height; explore a compact inline/wrapping legend without horizontal page overflow.
+10. Keep legend interaction compact and touch-friendly. Replace the tall 3x2 control block with a much smaller inline/wrapping legend or equivalent treatment that does not create horizontal page overflow.
 11. At least one meaningful data layer must remain understandable when several series overlap. Use line style/marker treatment sparingly if color alone is insufficient, but do not turn the plot into a dashboard legend wall.
 12. Preserve dark mode, project tokens and the existing no-horizontal-overflow contract.
 
@@ -92,16 +107,15 @@ If this becomes an awkward fight against Nivo internals, stop and evaluate wheth
 
 ## Visual review requirements for the next chat
 
-The user intends to attach screenshots first. Before coding:
+Before coding, use the attached real-phone screenshots to decide and record:
 
-- mark what wastes vertical space;
-- check plot-to-screen ratio;
-- inspect legend density and tap affordance;
-- inspect perceived amplitude of small temperature/humidity/VPD changes;
-- inspect x-axis tick spacing/labels against actual event timestamps;
-- inspect whether power/current/output flatten or visually swamp climate data;
-- decide which series are visible by default;
-- decide how hidden-series state is represented without adding text clutter.
+- exact compact legend geometry and default visible series;
+- plot-to-screen ratio after the selector-card space is reclaimed;
+- per-series minimum spans/padding and zero-baseline behavior;
+- x-axis tick cadence/format for timestamp and uptime modes;
+- how hidden-series state is indicated without extra prose;
+- how relay state is shown without competing with continuous data;
+- whether multiple overlapping continuous lines remain readable in both light and dark modes.
 
 Validate at least the canonical mobile viewports `360x800`, `390x844`, `412x915`, plus the real Samsung SM-S906B / S22+ before closeout.
 
@@ -109,7 +123,9 @@ Validate at least the canonical mobile viewports `360x800`, `390x844`, `412x915`
 
 Chart v1 canonical `23-climate-history` was refreshed and re-verified 4/4 on macOS. Samsung SM-S906B / Android 16 preserving-data acceptance showed the chart stayed inside the 1080 px viewport and selector taps exercised Temperature, Humidity, Output, Power and Current. VPD was absent from the current stored records and correctly omitted. A clean interaction log had no matched `FATAL EXCEPTION`, `AndroidRuntime`, `Uncaught`, `TypeError`, `ReferenceError` or Capacitor/JavaScript error. No Shelly/runtime/schedule/relay mutation was performed.
 
-That evidence proves the baseline is stable; it does **not** freeze the chart UX. The next task is specifically to improve the chart interaction/scaling based on screenshots.
+At this closeout the exact current application code from `main` was rebuilt, synced to Android and installed on the connected S22+ with `adb install -r`, preserving app data; cold start completed without matched app/JavaScript crash errors. A later handoff-only documentation commit does not change the installed application bytes.
+
+That evidence proves the baseline is stable; it does **not** freeze the chart UX. The next task is specifically to improve the chart interaction/scaling based on the supplied screenshots.
 
 ## Performance rule
 
