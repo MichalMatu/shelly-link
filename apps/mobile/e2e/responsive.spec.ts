@@ -133,7 +133,13 @@ const mockShellyRpc = async (
     const requestBody = JSON.parse(route.request().postData() ?? '{}') as {
       id?: number | string;
       method?: string;
-      params?: { id?: number; on?: boolean; code?: string };
+      params?: {
+        id?: number;
+        on?: boolean;
+        code?: string;
+        match?: string;
+        offset?: number;
+      };
     };
     let result: unknown = {};
     switch (requestBody.method) {
@@ -219,6 +225,25 @@ const mockShellyRpc = async (
         break;
       case 'Cloud.GetStatus':
         result = { connected: false };
+        break;
+      case 'KVS.GetMany':
+        result = {
+          items: [
+            { key: 'shellylink.history.meta', etag: 'meta', value: '[2,24,2,2]' },
+            {
+              key: 'shellylink.history.00',
+              etag: 's0',
+              value: '[2,[[1782819900,3500,214,552,1310,0,"ib",null,null,0,0]]]'
+            },
+            {
+              key: 'shellylink.history.01',
+              etag: 's1',
+              value: '[2,[[1782820000,3600,214,552,1310,3,"bl",null,null,423,200]]]'
+            }
+          ],
+          offset: 0,
+          total: 3
+        };
         break;
       case 'Script.GetCode':
         result = { data: '// Shelly Link deployed script\nprint("ok");' };
@@ -718,6 +743,15 @@ for (const viewport of viewports) {
       0
     );
 
+    await page.getByRole('button', { name: 'Historia' }).click();
+    await expect(page.locator('.climate-history__record')).toHaveCount(2);
+    await expect(page.locator('.climate-history__record').first()).toContainText(
+      '42,3 W'
+    );
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '23-climate-history');
+    }
+
     await page.getByRole('button', { name: 'Bluetooth' }).click();
     await expect(page.getByText('91%')).toBeVisible();
     await expect(page.getByText('-51 dBm')).toBeVisible();
@@ -775,7 +809,7 @@ for (const viewport of viewports) {
     }
 
     if (viewport.name === 'phone-large') {
-      await page.locator('.plug-detail-tabs__item').nth(3).click();
+      await page.getByRole('button', { name: 'Skrypt' }).click();
       await expectVisualScreen(page, '06-climate-script');
     }
     await page.getByRole('button', { name: 'Informacje' }).click();

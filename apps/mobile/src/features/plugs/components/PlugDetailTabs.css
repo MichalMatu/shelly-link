@@ -26,6 +26,10 @@
   --plug-detail-tab-count: 5;
 }
 
+.plug-detail-tabs[data-tab-count='6'] {
+  --plug-detail-tab-count: 6;
+}
+
 .plug-detail-tabs__item {
   padding: 0;
 }

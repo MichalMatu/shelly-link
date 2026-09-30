@@ -27,6 +27,7 @@ describe('PlugDetailTabs', () => {
     expect(screen.getByRole('button', { name: 'Script' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Plug settings' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Info' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'History' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Info' })).toHaveAttribute(
       'aria-current',
       'page'
@@ -34,5 +35,17 @@ describe('PlugDetailTabs', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Plug settings' }));
     expect(onChange).toHaveBeenCalledWith('device');
+  });
+  it('shows History only when the caller opts into that tab', () => {
+    render(
+      <I18nProvider>
+        <PlugDetailTabs activeTab="history" showHistory onChange={vi.fn()} />
+      </I18nProvider>
+    );
+    expect(screen.getByRole('button', { name: 'History' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+    expect(screen.getByRole('navigation')).toHaveAttribute('data-tab-count', '6');
   });
 });

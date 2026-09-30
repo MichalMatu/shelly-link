@@ -58,6 +58,8 @@ Start with a preimplementation audit from fresh `main`. Treat `work/kvs-datalogg
 
 History should explain **why** output changed. Record useful operational context such as timestamp, climate values, VPD, automation-requested and final relay state, control mode, manual request, reason code, automation-fault context, hard-safety context and power/current where available. History failure must not affect Climate safety.
 
+The History v2 foundation now uses a compact Plug-owned KVS ring inside the existing Climate runtime, a typed read-only mobile adapter, and a Climate Detail History surface. Runtime writes and read failures stay isolated from relay arbitration; the UI reads only when History is opened and reports empty/partial/error states without inventing data.
+
 ### 2. Runtime safety supervisor
 
 Expand the explicit hard-safety layer above AUTO/MANUAL behavior: maximum power/current/device temperature, maximum continuous ON, startup guard where useful, latched lockout and deliberate acknowledge/reset. Hard safety always wins and forces OFF.

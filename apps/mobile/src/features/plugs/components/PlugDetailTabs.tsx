@@ -2,13 +2,15 @@ import {
   IconBluetooth,
   IconClock,
   IconCode,
+  IconHistory,
   IconSettings,
   IconTemperature
 } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
 import './PlugDetailTabs.css';
 
-export type PlugDetailTab = 'automation' | 'ble' | 'device' | 'script' | 'info';
+export type PlugDetailTab =
+  'automation' | 'history' | 'ble' | 'device' | 'script' | 'info';
 export type PlugDetailAutomationIcon = 'temperature' | 'clock';
 
 type PlugDetailTabsProps = {
@@ -17,12 +19,14 @@ type PlugDetailTabsProps = {
   availableTabs?: readonly PlugDetailTab[];
   disabledTabs?: readonly PlugDetailTab[];
   automationIcon?: PlugDetailAutomationIcon;
+  showHistory?: boolean;
 };
 
 const tabs: readonly {
   id: PlugDetailTab;
   labelKey:
     | 'detail.automation'
+    | 'common.history'
     | 'common.bluetooth'
     | 'hardware.shelly.settings'
     | 'hardware.rule.script'
@@ -30,6 +34,7 @@ const tabs: readonly {
   icon: typeof IconTemperature | null;
 }[] = [
   { id: 'automation', labelKey: 'detail.automation', icon: IconTemperature },
+  { id: 'history', labelKey: 'common.history', icon: IconHistory },
   { id: 'ble', labelKey: 'common.bluetooth', icon: IconBluetooth },
   { id: 'device', labelKey: 'hardware.shelly.settings', icon: IconSettings },
   { id: 'script', labelKey: 'hardware.rule.script', icon: IconCode },
@@ -41,12 +46,15 @@ export const PlugDetailTabs = ({
   onChange,
   availableTabs,
   disabledTabs = [],
-  automationIcon = 'temperature'
+  automationIcon = 'temperature',
+  showHistory = false
 }: PlugDetailTabsProps) => {
   const { t } = useTranslation();
-  const visibleTabs = availableTabs
-    ? tabs.filter((tab) => availableTabs.includes(tab.id))
-    : tabs;
+  const visibleTabs = tabs.filter(
+    (tab) =>
+      (showHistory || tab.id !== 'history') &&
+      (availableTabs === undefined || availableTabs.includes(tab.id))
+  );
 
   return (
     <nav

@@ -16,6 +16,8 @@ export {
   type ShellyControlStatus
 } from './data/shellyManagedAutomation.js';
 export { readClimateHistory } from './data/climateHistory.js';
+export { ClimateHistorySection } from './components/ClimateHistorySection.js';
+export { climateHistoryQueryKey, useClimateHistory } from './flows/useClimateHistory.js';
 
 export {
   deleteTimeAutomation,

@@ -8,15 +8,17 @@ const frozenClimateVisuals = Object.freeze({
   'apps/mobile/e2e/responsive.spec.ts-snapshots/01-plugs-dashboard-darwin.png':
     '91ecf3b388a6360f60ed0396add6539647988c20',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/02-climate-automation-darwin.png':
-    '8a0080b8f47d8457dd8e134c02c7379dbb93e6c4',
+    '836dcaf7dffa851b168ffd242923027c21183f2a',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/03-climate-ble-darwin.png':
-    '0449d4c2779a2d309c96d085fa1e486d58699f26',
+    '7911cb81e7bde04c0f28bd5c315667da6970b89d',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/05-climate-device-darwin.png':
-    '680848e54cc180f58fbfa183ca1b55ed637bff21',
+    'fd97d72020f6f3ebef335f85675f1f8c7a7f5ce2',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/06-climate-script-darwin.png':
-    'da898ad737411dab276508fe92e7f502152b5569',
+    '161b2c1dba0d419d3181c764d4192c441cbd36c7',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/07-climate-info-darwin.png':
-    '05f2aaa22c0349c97616883e97b8f0f6f53684cd'
+    'ce783c8a6a5fdac4724671e85d655aa6c1e1233d',
+  'apps/mobile/e2e/responsive.spec.ts-snapshots/23-climate-history-darwin.png':
+    '4aa80c7c5b86b1b340b8c4bb266b48bceaa394ab'
 });
 const cssPaths = [
   'apps/mobile/src/theme/theme.css',
@@ -25,6 +27,7 @@ const cssPaths = [
   'apps/mobile/src/screens/AutomationDashboardScreen.css',
   'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
+  'apps/mobile/src/features/automations/components/ClimateHistorySection.css',
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
   'apps/mobile/src/features/plugs/components/PlugAddSpeedDial.css',
   'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',
