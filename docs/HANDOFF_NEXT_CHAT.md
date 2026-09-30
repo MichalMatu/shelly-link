@@ -1,114 +1,136 @@
-# Handoff — context reset after Rule/action runtime work
+# Handoff — clean baseline for UX, logic and optimization audit
 
-Status: **2026-09-30 — stop feature work here and start the next chat with a fresh audit/stabilization pass from `main`.**
+Status: **2026-09-30 — feature work is paused. Start the next chat from fresh `main` with a new cross-cutting audit before changing behavior.**
 
 Repository: `MichalMatu/shelly-link`
 
 ## Bootstrap
 
-1. Verify remote `main`, Local Agent binding/status and that there is no active task or open PR.
-2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md` and the relevant testing docs before changing behavior.
-3. Inspect the real current branch list; do not recreate or reuse completed feature branches.
-4. Create a fresh work branch only after the audit identifies a concrete change.
+1. Fetch fresh `main` and `agent-control`, read the current Local Agent binding/status, and verify that no task or PR is already active.
+2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md`, `docs/UX_VISUAL_CONTRACT.md` and the relevant hardware evidence before changing code.
+3. Inspect the real remote branch list. `golden/climate-ui-20260928` is an intentional frozen UX reference, not a work branch.
+4. Do not start the next Rule/action primitive automatically. First inspect the current app and runtime as a product: UX, state/logic, ownership, errors, recovery and performance.
+5. Create a work branch only after the audit identifies a concrete fix.
 
-Current code and canonical docs are the source of truth. Session-specific Local Agent ids/state do not belong in product documentation.
+Current code + canonical docs are the source of truth. Session-specific Local Agent ids do not belong in repository documentation.
 
-## Current baseline
+## Audited code baseline
 
-The last product merge before this handoff is PR #59, `Integrate relay debounce into Climate runtime`, at `75f83b7e8c8ff44f9c603943db6e802333c73aff`. Verify `main` because the handoff/docs cleanup merge will move it again.
+The product tree audited here is PR #61, `Stabilize climate runtime byte budget`, commit `aff0bc3c1e9506b9e563d8baec679e6c41923d7f`. This final handoff cleanup is documentation-only and will advance `main`; always verify fresh `main` in the next chat.
 
-Completed v1 foundations:
+Fresh 2026-09-30 re-audit results on that tree:
 
-- History/Datalogger: compact namespaced KVS ring in the existing Climate runtime, typed read path and Climate History UI;
-- Runtime Safety Supervisor: max-ON, relay-control failure, native Shelly protection errors, first-fault-wins and deliberate safe-OFF reset;
-- Rule/action domain: Set, timing/minimum OFF, Pulse semantics, debounce, daily time windows and flat AND/OR condition composition;
-- Rule/action runtime: explicit minimum ON and relay debounce are integrated into Climate runtime;
-- runtime source was compacted without raising the 9500 B generator guard.
+- `@lcl/script-generator`: **17/17 files, 172/172 tests PASS**;
+- script-generator TypeScript check PASS;
+- repository branding, script-lifecycle, repository-boundary, feature-boundary and gate-selftest checks PASS;
+- the same product tree already passed the full canonical `pnpm check` with 100% core coverage during PR #61 stabilization;
+- no `TODO` / `FIXME` / `HACK` / `XXX` markers were found under active app/package/docs/scripts paths;
+- screens/components do not own Shelly RPC/BLE transport clients; current repo/feature gates still enforce the intended dependency direction;
+- largest production screens are currently `AutomationDashboardScreen.tsx` (~483 lines) and `InstallationDetailScreen.tsx` (~453 lines). Treat them as ownership/UX audit targets, not automatic file-splitting targets.
 
-Still **not** integrated into the Shelly Climate runtime:
+### Known audit targets — intentionally not changed in this cleanup
 
-- Pulse timers/state;
-- time-window/scheduled-condition execution;
-- AND/OR condition execution;
-- any editor/UI for those unfinished primitives.
+1. `generateShellyRuntimeConfigUpdateEval` / `runtimeConfigUpdate.ts` is still exported publicly from `@lcl/script-generator`, but the fresh reference audit found **no production call-site**; only tests exercise it. Decide whether it is a deliberately retained capability or dead development-era API before keeping/removing it.
+2. Config/decode/recovery responsibilities are spread across `reconcileInstalledAutomation`, `updateClimateInstalledAutomation`, `runtimeControl`, `runtimeStatus` and `runtimeUpgrade`. They currently pass tests, but the next audit should check for duplicated matching/decode/recovery decisions and make ownership explicit before extending them.
+3. The saved Android installation and the real Shelly currently provide an excellent reconciliation test case: local storage records Climate script hash `lcl-af2c3ccf`, while the installed runtime source header reports `lcl-e5ff62f5`. The live runtime config/diagnostics still correspond to the saved `GrowBox` TP357 automation and 65/66% thresholds. Determine whether this hash divergence is expected stale metadata, a recovery-state presentation issue or a real logic defect. **Do not use passive inspection as a reason to rewrite the valid remote runtime.**
+4. The next UX pass should inspect the real rendered flows, not infer quality from unit tests: Plugs, Thermometers, Settings, plain Plug Detail, Climate Detail tabs, History empty/error states, runtime mismatch/recovery presentation, button/action affordances and navigation/back behavior.
+5. Error/retry behavior needs a fresh product-level pass: LAN/BLE unreachable states, stale locators, diagnostics/history failure, recovery prompts, background refresh, logcat noise and user-facing copy.
 
-Do not begin those items automatically. The next chat must first re-audit and stabilize the current tree.
+## Generated-runtime byte constraint
 
-## Critical runtime constraint
+The current canonical four-sensor runtime with minimum ON + debounce is **9431 B / 9500 B**, leaving 69 B with its normal fixture names.
 
-The fresh 2026-09-30 re-audit measures the current canonical four-sensor runtime with minimum ON + debounce at **9431 B / 9500 B**, leaving **69 B** with its normal fixture names. Treat this as a hard architectural constraint.
+Sensor display names are capped at **26 escaped UTF-8 JSON-content bytes**. Across both sensor profiles, all four rule modes, VPD on/off, four sensors, minimum ON and debounce, the worst accepted case is **9496 B / 9500 B** — only **4 B headroom**. Four 27-byte names can produce 9501 B and must remain rejected.
 
-Before adding more generated-runtime code, re-measure current byte budgets and decide whether the next behavior can be represented by config/data, reuse existing code, or needs another deliberate compaction/refactor. Do not simply raise the limit.
+Before adding generated-runtime behavior, re-measure the complete matrix and prefer reuse/config/data or deliberate compaction. Never raise the 9500 B guard as a shortcut. Existing `minChangeMs` remains the minimum-OFF/cooldown owner.
 
-The existing `minChangeMs`/minimum-OFF behavior already covers the classic cooldown concept. Do not introduce a duplicate cooldown owner.
+## Current real-device baseline
 
-The display-name budget re-audit also showed that the discarded 32-byte proposal is unsafe. A full matrix across both sensor profiles, all four rule modes and VPD on/off, with four sensors plus minimum ON + debounce, requires a cap of **26 escaped UTF-8 JSON-content bytes** per sensor display name. The worst accepted matrix case is **9496 B / 9500 B** with VPD enabled, leaving only 4 B; 27 bytes per name reaches 9501 B with VPD and is unsafe. Keep this cap coupled to the maximum-feature matrix test and re-measure it before any runtime expansion.
+Configured controller: Shelly Plug S Gen3 `shellyplugsg3-e4b063d7f530`, model `S3PL-00112EU`, firmware 1.7.5.
 
-## Real-device baseline
+Latest identity-first inspection confirmed:
 
-Configured controller: Plug S Gen3 `shellyplugsg3-e4b063d7f530`, firmware 1.7.5.
+- exactly one `Shelly Link Thermostat` script, id 1, enabled and running;
+- installed production source: **7788 B**, generator header `0.6.0`, SHA-256 `37ce58a4c759499d712922e2051cc7167b8fb31a0b2171bcdd6193df5d20889e`;
+- the source was not rewritten during this final audit;
+- live diagnostics identified TP357 `F7:5F:8D:0F:76:20` / `GrowBox`; latest observed sample was 26.3 °C, 60% RH;
+- configured rule remained humidifying ON 65% / OFF 66%;
+- `Schedule.List` was empty;
+- latest History read returned an empty valid store;
+- final control state was deliberately set to **MANUAL + request OFF** and re-verified after 15 s;
+- final physical relay was **OFF, 0 W / 0 A**.
 
-The Rule/action hardware acceptance restored the original production script after each temporary candidate. After PR #59 acceptance/postflight:
+The installed runtime is older than the current generator. Explicit Save/Edit/Recover may be an upgrade boundary, but passive reconciliation must not silently rewrite a valid runtime.
 
-- exactly one production `Shelly Link Thermostat` script remained running;
-- its source was restored byte-identically (SHA-256 `37ce58a4c759499d712922e2051cc7167b8fb31a0b2171bcdd6193df5d20889e`);
-- production control state was MANUAL with request OFF and no safety lockout;
-- schedules were empty;
-- pre-existing History KVS entries were restored;
-- final physical relay was explicitly verified OFF at 0 W / 0 A.
+## Android baseline
 
-The installed production script on the Plug may therefore be older than the generator in current `main`. Treat explicit Save/Edit/Recover as a possible runtime-upgrade boundary; passive inspection/recovery must not rewrite a valid runtime.
+Physical target: Samsung SM-S906B / S22+, Android 16, package `app.shellylink.mobile`.
 
-## Android baseline and install workflow
+Exact product `main` `aff0bc3c1e9506b9e563d8baec679e6c41923d7f` was rebuilt and installed with `adb install -r` after the phone was unlocked:
 
-Current physical Android acceptance target is Samsung SM-S906B / S22+ on Android 16. Package id: `app.shellylink.mobile`.
+- install succeeded;
+- `firstInstallTime` remained `2026-09-28 04:57:23`, confirming app data was preserved;
+- cold start succeeded (`LaunchState: COLD`, about 798 ms in the latest run);
+- `MainActivity` became the resumed activity;
+- targeted logcat inspection found no FATAL/AndroidRuntime/Capacitor crash signature.
 
-For debugging/presentation while **preserving existing app data**, do not use `pnpm android:phone-alpha`, because that script intentionally performs a clean uninstall first.
+Current preserved app data includes one saved Plug named `Humidifer` at the configured controller identity and a Climate automation using TP357 `GrowBox`, humidifying 65/66%.
 
-Preferred preserving-data path:
+For preserving-data debug installs use:
 
 ```bash
 pnpm --filter @lcl/mobile build
 pnpm --filter @lcl/mobile exec cap sync android
 printf 'sdk.dir=%s\n' "${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}" > apps/mobile/android/local.properties
 (cd apps/mobile/android && ./gradlew assembleDebug)
-"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}/platform-tools/adb" devices -l
 "${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}/platform-tools/adb" install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Then cold-start and inspect warnings/errors with ADB/logcat. Use `pnpm android:phone-alpha` only when a clean-install/recovery test is explicitly intended.
+Do not use `pnpm android:phone-alpha` unless a deliberate clean-install/recovery test is required; that path uninstalls first.
 
-## Required first pass in the next chat
+## Performance baseline / rules
 
-Before continuing the roadmap, perform a **behavior-preserving re-audit**:
+`docs/PERFORMANCE_HANDOFF.md` contains the previous build/test optimization pass. Do not treat its timings as a current benchmark.
 
-1. sync to fresh `main` and inspect repo/branch/task cleanliness;
-2. audit architecture boundaries, generated runtime size, config/decode/recovery symmetry and rule/action ownership;
-3. inspect recent Rule/action code for duplication, dead paths, naming/API rough edges, test blind spots and docs drift;
-4. re-evaluate the sensor display-name/runtime-byte budget alongside the overall 9500 B constraint;
-5. run focused tests and the canonical full gate; fix real defects and low-risk code-quality issues in small commits;
-6. debug the mobile app locally and on the physical Android phone, preserving user data unless a clean-install test is deliberately selected;
-7. verify navigation, Climate/History state, runtime diagnostics and logcat on-device;
-8. if Shelly is mutated, identity-check first and finish with an explicitly known relay state (normally OFF);
-9. only after the baseline is clean, decide the next Rule/action runtime slice from measured byte headroom and architecture evidence.
+For the next optimization audit:
 
-Do not redesign the dashboard during this first pass. Dashboard status polish and UX redesign are later roadmap stages.
+- confirm the MacBook M1 / 8 GB host is idle before every measurement;
+- run only one heavy build/test/benchmark at a time;
+- measure cold, warm and incremental separately;
+- prefer at least three comparable runs and median;
+- record wall time, CPU, peak RSS and swap pressure;
+- focus on CPU/RAM/cache/I/O; do not pursue GPU acceleration without a demonstrated GPU-eligible workload.
 
-## Frozen contracts
+## Frozen product/safety contracts
 
+- product model remains `physical Plug -> optional installed automation`;
 - phone configures/manages/diagnoses; Shelly executes installed automation locally;
 - one managed automation owner per Plug relay;
-- Climate user modes remain AUTO/MANUAL only;
+- Climate user modes remain AUTO/MANUAL;
 - MANUAL entry is safe OFF; AUTO entry is safe OFF and waits for fresh usable data;
 - automation faults and hard-safety lockout remain separate axes;
 - hard safety always overrides normal action/timing behavior;
-- all normal requested relay actions must pass through the single final relay arbiter;
+- normal relay actions pass through the single final relay arbiter;
 - destructive/runtime mutation verifies physical identity first;
-- passive reconciliation does not rewrite a valid runtime;
-- hardware tests that mutate a relay end with a verified final state.
+- passive reconciliation does not rewrite valid runtime;
+- hardware tests that mutate a relay finish with an explicitly verified final state;
+- `golden/climate-ui-20260928` remains the frozen accepted Climate visual reference until the UX contract deliberately changes.
 
-## Continuation prompt for a new chat
+## First pass in the next chat
 
-Copy this into the new chat after opening the repository with Local Agent:
+Perform one evidence-driven cross-cutting audit before feature work:
 
-> `https://github.com/MichalMatu/shelly-link` — kontynuuj pracę w trybie local-agent zgodnie z `AGENTS.md` i `docs/HANDOFF_NEXT_CHAT.md`. Zacznij od świeżego `main` i **nie wdrażaj od razu kolejnej funkcji**. Najpierw zrób kompletny re-audit aktualnego kodu i dokumentacji po ostatnich zmianach Rule/action: architektura, ownership, generated-runtime byte budget, config/decode/recovery, sensor display-name/runtime-byte budget, dead/duplicate code, test gaps i niespójności dokumentacji. Następnie zrób małe bezpieczne poprawki jakościowe/refaktory bez zmiany zachowania, uruchom focused testy oraz pełny canonical gate, debuguj aplikację i wgraj aktualny debug APK na podłączony Samsung S22+ **z zachowaniem danych przez `adb install -r`**. Sprawdź cold start, logcat, nawigację, Climate/History i diagnostykę runtime na telefonie. Jeżeli dotykasz realnego Shelly, najpierw zweryfikuj identity, nie przepisuj pasywnie poprawnego runtime i zakończ test ze zweryfikowanym relay OFF. Dopiero po czystym baseline zaproponuj następny najmniejszy slice Rule/action, uwzględniając aktualny limit 9500 B i bardzo mały zapas runtime.
+1. sync fresh `main`, inspect branches/PRs/daemon and confirm a clean tree;
+2. review the app on the real S22+ screen: navigation, Plugs, Thermometers, Settings, Climate Detail, History and mismatch/recovery states;
+3. audit UX consistency against `docs/UX_VISUAL_CONTRACT.md` without assuming the frozen design is automatically optimal — identify deliberate changes before modifying the golden contract;
+4. audit logic/state ownership, especially saved-vs-remote runtime reconciliation, config/decode/recovery symmetry and dead/duplicate paths;
+5. audit errors/retries and inspect logcat during real navigation/network operations;
+6. take fresh CPU/RAM/cache/I/O baselines from current `main` according to `docs/PERFORMANCE_HANDOFF.md`;
+7. rank findings by severity/value and implement only small, cohesive fixes with clear owners and focused tests;
+8. run one final full `pnpm check` (`pnpm check:full` when responsive visual/E2E acceptance changes);
+9. install the resulting APK with `adb install -r`, visually verify the changed flows, and if Shelly is mutated verify identity first and finish relay OFF;
+10. only after this baseline is clean decide whether Rule/action expansion, dashboard polish or another optimization is the next product slice.
+
+## Continuation prompt
+
+> `https://github.com/MichalMatu/shelly-link` — zacznij od świeżego `main` w trybie local-agent i przeczytaj `AGENTS.md` oraz `docs/HANDOFF_NEXT_CHAT.md`. Nie implementuj od razu nowej funkcji. Zrób od zera pełny audit aktualnego produktu: realny UX na podłączonym S22+, logika i ownership, local-vs-remote runtime reconciliation, config/decode/recovery, błędy i retry, test gaps oraz świeży performance baseline CPU/RAM/cache/I/O zgodnie z `docs/PERFORMANCE_HANDOFF.md`. Traktuj zapisany hash `lcl-af2c3ccf` vs remote header `lcl-e5ff62f5` jako konkretny przypadek do zbadania, ale nie przepisuj poprawnego runtime pasywnie. Następnie uszereguj problemy, wprowadzaj małe bezpieczne poprawki, sprawdzaj je na telefonie i testami, a na końcu uruchom canonical gate. Nie uruchamiaj dwóch ciężkich workloadów równolegle. Jeżeli dotykasz realnego Shelly, zawsze identity-first i kończ ze zweryfikowanym relay OFF.
