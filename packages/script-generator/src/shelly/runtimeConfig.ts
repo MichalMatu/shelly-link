@@ -38,6 +38,8 @@ export const shellyRuntimeConfigSchema = z
     h: z.number().int().min(1).max(10),
     c: z.number().int().positive(),
     u: z.number().int().nonnegative().optional(),
+    y: z.number().int().nonnegative().optional(),
+    z: z.number().int().nonnegative().optional(),
     s: z.number().int().positive(),
     x: z.number().int().positive(),
     v: z.number().int().positive(),
@@ -116,6 +118,7 @@ export const createShellyRuntimeConfig = (
           ag: aggregationFlag(climateSensorAggregationForConfig(config))
         }
       : {};
+  const debounce = config.rule.relayDebounce;
 
   return {
     a: compactAddress(config.sensor.runtimeAddress),
@@ -131,6 +134,8 @@ export const createShellyRuntimeConfig = (
     h: config.rule.consecutiveHits,
     c: config.rule.minChangeMs,
     ...(config.rule.minimumOnMs ? { u: config.rule.minimumOnMs } : {}),
+    ...(debounce?.turnOnMs ? { y: debounce.turnOnMs } : {}),
+    ...(debounce?.turnOffMs ? { z: debounce.turnOffMs } : {}),
     s: config.rule.staleTimeoutSec * 1000,
     x: config.rule.maxOnMs,
     v: config.version,
