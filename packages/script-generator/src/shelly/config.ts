@@ -13,6 +13,14 @@ const shellyRuntimeAddressSchema = z
 
 const ruleControlMetricSchema = z.enum(['temperature', 'humidity']);
 const thresholdDirectionSchema = z.enum(['below', 'above']);
+const relayDebounceSchema = z
+  .object({
+    turnOnMs: z.number().int().nonnegative(),
+    turnOffMs: z.number().int().nonnegative()
+  })
+  .refine((value) => value.turnOnMs > 0 || value.turnOffMs > 0, {
+    message: 'Relay debounce must enable at least one direction.'
+  });
 
 export const climateSensorSchema = z.object({
   profileId: sensorProfileIdSchema,
@@ -59,6 +67,7 @@ export const shellyThermostatConfigSchema = z
       staleTimeoutSec: z.number().int().positive(),
       minChangeMs: z.number().int().positive(),
       minimumOnMs: z.number().int().nonnegative().optional(),
+      relayDebounce: relayDebounceSchema.optional(),
       maxOnMs: z.number().int().positive(),
       rssiMin: z.number().int().min(-100).max(-20),
       consecutiveHits: z.number().int().min(1).max(10).default(2),

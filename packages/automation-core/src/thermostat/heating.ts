@@ -1,4 +1,3 @@
-import { evaluateRelayTiming } from '../actions/relayTiming.js';
 import type {
   AutomationDecision,
   AutomationInput,
@@ -9,6 +8,7 @@ import type {
   ThermostatMeasurement,
   ThermostatRule
 } from '../model.js';
+import { applyRelayTarget, clearRelayDebounceState } from './relayTarget.js';
 
 const VPD_ASSIST_TEMPERATURE_MARGIN_C = 0.25;
 const VPD_ASSIST_HUMIDITY_MARGIN_PCT = 2;
@@ -22,7 +22,7 @@ const offDecision = (
   shouldCallRelay: state.relayOn,
   reason,
   nextState: {
-    ...state,
+    ...clearRelayDebounceState(state),
     relayOn: false,
     lastChangeMs: state.relayOn ? nowMs : state.lastChangeMs,
     onStartedMs: undefined,
@@ -192,63 +192,6 @@ export const resolveEffectiveThresholdControl = (
   };
 };
 
-const applyRelayTarget = (
-  input: AutomationInput,
-  requestedRelayOn: boolean,
-  reason: RelayDecisionReason,
-  stateWithHits: AutomationState
-): AutomationDecision => {
-  const { rule, state, nowMs } = input;
-
-  if (requestedRelayOn === state.relayOn) {
-    return {
-      requestedRelayOn,
-      shouldCallRelay: false,
-      reason,
-      nextState: stateWithHits
-    };
-  }
-
-  const timingDecision = evaluateRelayTiming({
-    action: {
-      type: 'set',
-      relayOn: requestedRelayOn
-    },
-    policy: {
-      minimumOnMs: rule.minimumOnMs ?? 0,
-      minimumOffMs: rule.minChangeMs
-    },
-    state: {
-      relayOn: state.relayOn,
-      lastChangeMs: state.lastChangeMs
-    },
-    nowMs
-  });
-  if (timingDecision.blockedBy) {
-    return {
-      requestedRelayOn: state.relayOn,
-      shouldCallRelay: false,
-      reason: 'min-change-blocked',
-      nextState: {
-        ...stateWithHits,
-        relayOn: state.relayOn
-      }
-    };
-  }
-
-  return {
-    requestedRelayOn,
-    shouldCallRelay: true,
-    reason,
-    nextState: {
-      ...stateWithHits,
-      relayOn: requestedRelayOn,
-      lastChangeMs: nowMs,
-      onStartedMs: requestedRelayOn ? nowMs : undefined
-    }
-  };
-};
-
 export const evaluateThresholdDecision = (input: AutomationInput): AutomationDecision => {
   const { rule, state, measurement, nowMs, event } = input;
 
@@ -328,7 +271,7 @@ export const evaluateThresholdDecision = (input: AutomationInput): AutomationDec
     shouldCallRelay: false,
     reason: 'inside-band',
     nextState: {
-      ...lastSeenState,
+      ...clearRelayDebounceState(lastSeenState),
       onHits: 0,
       offHits: 0
     }

@@ -1,5 +1,6 @@
 import type {
   AutomationMode,
+  RelayDebouncePolicy,
   RuleControlMetric,
   ThresholdDirection
 } from '@lcl/automation-core';
@@ -46,6 +47,7 @@ export interface DecodedShellyThermostatSettings {
   staleTimeoutSec: number;
   minChangeMs: number;
   minimumOnMs: number;
+  relayDebounce: RelayDebouncePolicy | null;
   maxOnMs: number;
   rssiMin: number;
   consecutiveHits: number;
@@ -164,6 +166,13 @@ export const decodeShellyThermostatScript = (
   const direction = thresholdDirectionForFlag(runtimeConfig.d);
   const sensors = decodedSensors(runtimeMode, runtimeConfig);
   const primarySensor = sensors[0]!;
+  const relayDebounce =
+    (runtimeConfig.y ?? 0) > 0 || (runtimeConfig.z ?? 0) > 0
+      ? {
+          turnOnMs: runtimeConfig.y ?? 0,
+          turnOffMs: runtimeConfig.z ?? 0
+        }
+      : null;
 
   return {
     generatorVersion: metadataLine(script, 'g'),
@@ -196,6 +205,7 @@ export const decodeShellyThermostatScript = (
       staleTimeoutSec: Math.trunc(runtimeConfig.s / 1000),
       minChangeMs: runtimeConfig.c,
       minimumOnMs: runtimeConfig.u ?? 0,
+      relayDebounce,
       maxOnMs: runtimeConfig.x,
       rssiMin: runtimeConfig.r,
       consecutiveHits: runtimeConfig.h,

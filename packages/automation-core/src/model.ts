@@ -1,3 +1,5 @@
+import type { RelayDebouncePolicy, RelayDebounceState } from './actions/relayDebounce.js';
+
 export type AutomationMode = 'heating' | 'cooling' | 'humidifying' | 'dehumidifying';
 
 export type RuleControlMetric = 'temperature' | 'humidity';
@@ -14,6 +16,7 @@ export type RelayDecisionReason =
   | 'boot-safe-off'
   | 'max-on-time'
   | 'min-change-blocked'
+  | 'debounce-blocked'
   | 'control-value-missing';
 
 export interface ThresholdControl {
@@ -35,6 +38,7 @@ export interface ThermostatRule {
   staleTimeoutSec: number;
   minChangeMs: number;
   minimumOnMs?: number | undefined;
+  relayDebounce?: RelayDebouncePolicy | undefined;
   maxOnMs: number;
   rssiMin: number;
   consecutiveHits: number;
@@ -56,6 +60,7 @@ export interface AutomationState {
   onStartedMs?: number | undefined;
   onHits: number;
   offHits: number;
+  relayDebounceState?: RelayDebounceState | undefined;
 }
 
 export interface AutomationInput {
