@@ -51,16 +51,27 @@ At minimum check:
 
 Keep the active docs small. Historical plans belong in Git history.
 
-Repository branch target after cleanup:
+### Branch cleanup state
+
+Remote cleanup after PR #64 is already complete. The expected remote heads are now only:
 
 - `main` — development source of truth;
 - `agent-control` — Local Agent control plane, keep;
-- `golden/climate-ui-20260928` — intentional frozen visual recovery/reference branch, keep until the visual contract no longer depends on it;
-- no other merged/stale working branches.
+- `golden/climate-ui-20260928` — intentional frozen visual recovery/reference branch, keep until the visual contract no longer depends on it.
 
-Before deleting a branch, verify its useful tree/content is already represented on `main` or intentionally obsolete. Do not delete `agent-control` or the golden branch.
+The Local Agent checkout still contains many historical **local-only** branch refs from earlier work. Some are direct ancestors of current `origin/main`; others show as unmerged because prior work was squash/rebased and must not be judged by `git branch --merged` alone.
 
-Any cleanup change should go through a small PR, be merged to `main`, then its temporary branch should be deleted.
+The next chat should clean those local refs/worktrees deliberately:
+
+1. inventory local branches/worktrees;
+2. for each non-current historical branch, compare its tree/content against current `origin/main` or the relevant merged PR/commit;
+3. delete it only when its useful content is already on `main` or intentionally obsolete;
+4. do not delete `agent-control` or the golden reference;
+5. finish with the active Local Agent worktree based on fresh `main`, not an old historical branch.
+
+Do not bulk-delete the local `--no-merged` list without comparison: squash merges make ancestry alone insufficient.
+
+Any retained cleanup change should go through a small PR, be merged to `main`, then its temporary remote branch should be deleted.
 
 ## Phase 2 — code-quality closeout
 
@@ -97,7 +108,7 @@ After all retained cleanup fixes are merged:
 
 1. fetch fresh `main` again and confirm the worktree is clean;
 2. confirm no open PR remains;
-3. confirm no temporary working branch remains;
+3. confirm no temporary remote or local working branch remains;
 4. run exactly one final canonical `pnpm check` for the final source state;
 5. use `pnpm check:full` instead if the closeout intentionally changes responsive/visual UI behavior;
 6. if native/mobile behavior changed, verify the relevant flow on the connected S22+ without destroying preserved app state;
@@ -126,8 +137,8 @@ That chart work is a new product/UX slice and must receive its own visual contra
 The pre-charts baseline is closed only when:
 
 - current docs describe current behavior and next work accurately;
-- merged/stale working branches are gone;
-- `main`, `agent-control` and the intentional golden branch are the only expected branches;
+- merged/stale local working branches/worktrees are gone;
+- remote heads remain only `main`, `agent-control` and the intentional golden branch;
 - no open PR remains;
 - ranked code-quality findings have either been safely fixed or explicitly parked with rationale;
 - one final canonical gate is green;
