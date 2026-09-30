@@ -34,6 +34,7 @@ export interface ThermostatRule {
   vpdAssist: VpdAssistConfig;
   staleTimeoutSec: number;
   minChangeMs: number;
+  minimumOnMs?: number | undefined;
   maxOnMs: number;
   rssiMin: number;
   consecutiveHits: number;
@@ -82,6 +83,7 @@ export const DEFAULT_HEATING_RULE: ThermostatRule = {
   },
   staleTimeoutSec: 120,
   minChangeMs: 120_000,
+  minimumOnMs: 0,
   maxOnMs: 14_400_000,
   rssiMin: -85,
   consecutiveHits: 2,
@@ -103,6 +105,7 @@ export const DEFAULT_COOLING_RULE: ThermostatRule = {
   },
   staleTimeoutSec: 120,
   minChangeMs: 120_000,
+  minimumOnMs: 0,
   maxOnMs: 14_400_000,
   rssiMin: -85,
   consecutiveHits: 2,
@@ -124,6 +127,7 @@ export const DEFAULT_HUMIDIFYING_RULE: ThermostatRule = {
   },
   staleTimeoutSec: 120,
   minChangeMs: 120_000,
+  minimumOnMs: 0,
   maxOnMs: 14_400_000,
   rssiMin: -85,
   consecutiveHits: 2,
@@ -145,6 +149,7 @@ export const DEFAULT_DEHUMIDIFYING_RULE: ThermostatRule = {
   },
   staleTimeoutSec: 120,
   minChangeMs: 120_000,
+  minimumOnMs: 0,
   maxOnMs: 14_400_000,
   rssiMin: -85,
   consecutiveHits: 2,
