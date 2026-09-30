@@ -356,7 +356,7 @@ describe('generateShellyThermostatScript', () => {
       ...baseConfig.sensor,
       sensorId: `sensor-${index}`,
       runtimeAddress: `02:00:00:00:00:0${index}`,
-      displayName: `Sensor ${index} `.padEnd(96, 'X')
+      displayName: `Sensor ${index} `.padEnd(192, 'X')
     });
 
     expect(() =>
@@ -397,15 +397,15 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('m: climate-engine-v1');
     expect(script).toContain('function ad(d)');
     expect(script).toContain('function r2(d,o,s)');
-    expect(script).toContain('Shelly.call("Switch.Set"');
-    expect(script).toContain('function nw(){return Shelly.getUptimeMs()}');
+    expect(script).toContain('L.call("Switch.Set"');
+    expect(script).toContain('function nw(){return L.getUptimeMs()}');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
     expect(script).toContain('interval_ms:241,window_ms:61,rssi_thr:0');
     expect(script).toContain('nw()-(R.l||R.sa)>9e4');
     expect(script).not.toContain('Date.now()');
     expect(script).toContain('"st"');
     expect(script).toContain('"mx"');
-    expect(script).toContain('sw(false,"b",true)');
+    expect(script).toContain('sw(F,"b",G)');
     expect(script).toContain('R.vp');
     expect(script).toContain('R.eo');
     expect(script).toContain('R.ef');
@@ -890,8 +890,8 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('m: climate-engine-v1');
     expect(script).toContain('function mf(d)');
     expect(script).toContain('"tm"');
-    expect(script).toContain('Shelly.call("Switch.Set"');
-    expect(script).toContain('function nw(){return Shelly.getUptimeMs()}');
+    expect(script).toContain('L.call("Switch.Set"');
+    expect(script).toContain('function nw(){return L.getUptimeMs()}');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
     expect(script).not.toContain('Date.now()');
     expect(script).toContain('R.vp');
@@ -951,7 +951,7 @@ describe('generateShellyThermostatScript', () => {
     expect(disabled).toContain('function sv(t)');
     expect(enabled).toContain('"vp":1.25');
     expect(enabled).toContain('function sv(t)');
-    expect(enabled).toContain('Math.exp');
+    expect(enabled).toContain('M.exp');
   });
 
   it('rejects unreasonable RSSI thresholds and leaves no placeholders', () => {
@@ -1009,7 +1009,7 @@ describe('generateShellyBleDiscoveryScript', () => {
     expect(script).toContain('interval_ms: 241');
     expect(script).toContain('window_ms: 61');
     expect(script).toContain('rssi_thr: 0');
-    expect(script).not.toContain('Shelly.call("Switch.Set"');
+    expect(script).not.toContain('L.call("Switch.Set"');
     expect(script).not.toContain('CFG.rule');
   });
 

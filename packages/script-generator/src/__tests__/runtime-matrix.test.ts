@@ -104,9 +104,9 @@ describe('Shelly runtime generation matrix', () => {
     expect(script).toContain(expectedMetricFlagForMode(matrixCase.mode));
     expect(script).toContain(expectedDirectionFlagForMode(matrixCase.mode));
     expect(script).toContain(expectedProfileFlagForSensor(matrixCase.sensorProfileId));
-    expect(script).toContain('Shelly.call("Switch.Set"');
+    expect(script).toContain('L.call("Switch.Set"');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
-    expect(script).toContain('sw(false,"b",true)');
+    expect(script).toContain('sw(F,"b",G)');
     expect(script).toContain('"st"');
     expect(script).toContain('"mx"');
     expect(script).toContain('"cv"');
@@ -170,7 +170,7 @@ describe('Shelly runtime generation matrix', () => {
       const script = generateShellyThermostatScript(configForCase(matrixCase));
 
       expect(script).toContain('function sv(t)');
-      expect(script).toContain('Math.exp');
+      expect(script).toContain('M.exp');
       expect(script).toContain(matrixCase.vpdAssistEnabled ? '"vp":1.25' : '"vp":0');
     }
   );
