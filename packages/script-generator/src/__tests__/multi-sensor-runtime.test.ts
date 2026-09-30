@@ -37,6 +37,7 @@ const createExecutableRuntime = (script: string) => {
       callback?.({}, 0);
     },
     addEventHandler: () => 1,
+    addStatusHandler: () => 1,
     getComponentStatus: () => ({ output: false }),
     getUptimeMs: () => Date.now()
   };

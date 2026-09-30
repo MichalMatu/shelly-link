@@ -48,6 +48,7 @@ const createRuntime = (kvsFails = false) => {
       }
       callback?.({}, 0);
     },
+    addStatusHandler: () => 1,
     getUptimeMs: () => 123_000,
     getComponentStatus: (component: string) =>
       component === 'sys'
