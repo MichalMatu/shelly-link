@@ -28,12 +28,15 @@ const advertisement = (temperatureC: number, humidityPct: number): number[] => {
   ];
 };
 
-const createRuntime = (script: string) => {
+const createRuntime = (script: string, initialSwitchErrors: string[] = []) => {
   let physicalRelayOn = false;
   let scanner:
     | ((event: string, packet: { addr: string; advData: number[]; rssi: number }) => void)
     | undefined;
   const switchCalls: boolean[] = [];
+  let switchErrors = [...initialSwitchErrors];
+  let statusHandler:
+    ((status: { component: string; delta: Record<string, unknown> }) => void) | undefined;
   const shelly = {
     call: (
       method: string,
@@ -49,11 +52,15 @@ const createRuntime = (script: string) => {
     },
     getComponentStatus: (component: string) =>
       component === 'switch:0'
-        ? { output: physicalRelayOn }
+        ? { output: physicalRelayOn, errors: switchErrors }
         : component === 'sys'
           ? { uptime: 1 }
           : null,
-    getUptimeMs: () => Date.now()
+    getUptimeMs: () => Date.now(),
+    addStatusHandler: (callback: typeof statusHandler) => {
+      statusHandler = callback;
+      return 1;
+    }
   };
   const ble = {
     Scanner: {
@@ -121,6 +128,14 @@ return {
         advData: advertisement(temperatureC, humidityPct),
         rssi: -35
       }),
+    nativeProtection: (error: string) => {
+      physicalRelayOn = false;
+      switchErrors = [error];
+      statusHandler?.({ component: 'switch:0', delta: { errors: [error] } });
+    },
+    setSwitchErrors: (errors: string[]) => {
+      switchErrors = [...errors];
+    },
     physicalRelayOn: () => physicalRelayOn
   };
 };
@@ -144,6 +159,7 @@ describe('generated runtime control arbitration', () => {
     const script = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
     expect(script).not.toContain('input:0');
     expect(script).not.toContain('Shelly.addEventHandler');
+    expect(script).toContain('Shelly.addStatusHandler(safe)');
   });
 
   it('MANUAL starts safe OFF and explicit manual request controls the relay', () => {
@@ -290,6 +306,48 @@ describe('generated runtime control arbitration', () => {
     expect(runtime.physicalRelayOn()).toBe(false);
     expect(runtime.runtime.manualOn()).toBe(1);
     expect(runtime.physicalRelayOn()).toBe(true);
+  });
+
+  it('latches native Shelly protection errors immediately and preserves the first cause', () => {
+    const runtime = createHeatingRuntime();
+    runtime.scan(23.5, 50);
+    runtime.runtime.enterManual();
+    runtime.runtime.manualOn();
+    expect(runtime.physicalRelayOn()).toBe(true);
+
+    runtime.nativeProtection('overtemp');
+    expect(runtime.controlState()).toMatchObject({
+      mode: 'manual',
+      safetyLockout: true,
+      safetyReason: 'overtemp'
+    });
+    expect(runtime.physicalRelayOn()).toBe(false);
+
+    runtime.nativeProtection('overpower');
+    expect(runtime.controlState().safetyReason).toBe('overtemp');
+    expect(runtime.runtime.manualOn()).toBe(-2);
+  });
+
+  it('latches a native protection already present at runtime boot', () => {
+    const runtime = createRuntime(
+      generateShellyThermostatScript(createDefaultShellyThermostatConfig()),
+      ['overcurrent']
+    );
+    expect(runtime.controlState()).toMatchObject({
+      safetyLockout: true,
+      safetyReason: 'overcurrent'
+    });
+    expect(runtime.physicalRelayOn()).toBe(false);
+  });
+
+  it('periodic safety fallback latches a missed native protection status', () => {
+    const runtime = createHeatingRuntime();
+    runtime.setSwitchErrors(['overvoltage']);
+    runtime.runtime.safe();
+    expect(runtime.controlState()).toMatchObject({
+      safetyLockout: true,
+      safetyReason: 'overvoltage'
+    });
   });
 
   it('hard safety runs before stale handling and preserves the lockout reason', () => {

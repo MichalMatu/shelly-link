@@ -28,6 +28,7 @@ const createExecutableTp357Runtime = () => {
       callback?: (_result: unknown, code: number) => void
     ) => callback?.({}, 0),
     addEventHandler: () => 1,
+    addStatusHandler: () => 1,
     getComponentStatus: () => ({ output: false }),
     getUptimeMs: () => Date.now()
   };
