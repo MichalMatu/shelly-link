@@ -56,22 +56,20 @@ Advanced candidates that are **not the immediate next slice**:
 
 **Constraint:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Before adding more runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
 
-Do not resume this advanced Rule/action work during the pre-charts closeout unless the user explicitly reprioritizes it.
+### 4. Pre-charts closeout — completed 2026-09-30
 
-### 4. Pre-charts closeout — next
+The repository baseline was deliberately closed before chart work:
 
-Before another product feature, make the repository baseline intentionally boring:
+- active documentation was reduced to the current architecture, roadmap, handoff, performance, UX and hardware-test contracts;
+- historical Local Agent branches/worktrees were compared against current `main`, merged PRs or accepted successor branches before retirement;
+- ownership/layering, transport placement, persistence/recovery, retry behavior, typing, dead-code candidates and test coverage were re-audited from fresh `main`;
+- no clear production-code cleanup justified a behavior change or broad refactor;
+- `runtimeConfigUpdate` was retained because, despite having no current app call-site, it is a recent capability-gated generator contract with focused tests and is not proven dead;
+- reconciliation states `changed`, `unavailable` and `conflict` remain boundary-tested, but the setup flow currently consumes recovered sensors rather than surfacing those statuses. Turning those outcomes into user-facing behavior is a product/UX decision and is intentionally parked rather than smuggled into cleanup.
 
-- remove stale/superseded documentation and keep the active doc set small;
-- remove merged/stale working branches while preserving `agent-control` and the intentional `golden/climate-ui-20260928` reference branch;
-- perform a fresh ownership/layering/dead-code/error-retry/test-gap audit from current `main`;
-- fix only small, clear quality findings rather than starting a broad refactor;
-- merge retained cleanup through small PRs;
-- finish with no open PRs, no temporary work branches and one final canonical gate.
+Neither retained item blocks the read-only History visualization slice.
 
-The exact closeout procedure and known audit targets are in `docs/HANDOFF_NEXT_CHAT.md`.
-
-### 5. History visualization / charts — next user-facing slice after closeout
+### 5. History visualization / charts — next user-facing slice
 
 Build a real History visualization page on top of the existing Shelly History/Datalogger and typed `HistoryRecord[]` mobile data path.
 
@@ -90,7 +88,7 @@ This is an intentional visual-contract change and requires reviewed responsive/r
 
 ### 6. Dashboard status polish
 
-After the closeout/chart slice is stable, improve the operational status layer without casually changing shared card geometry: requested output, final output, reason, automation-fault state and hard-safety state should be understandable at a glance.
+After the chart slice is stable, improve the operational status layer without casually changing shared card geometry: requested output, final output, reason, automation-fault state and hard-safety state should be understandable at a glance.
 
 ### 7. UX redesign round 2
 
