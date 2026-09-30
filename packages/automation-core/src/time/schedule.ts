@@ -32,10 +32,10 @@ export const dailyScheduleTimespec = (time: string): string => {
 
 const evaluateDailyTimeWindow = (
   window: DailyTimeWindow,
-  localTime: string,
+  clockTime: string,
   errorMessage: string
 ): boolean => {
-  const current = parseClockMinutes(localTime.slice(0, 5));
+  const current = parseClockMinutes(clockTime);
   const start = parseClockMinutes(window.startTime);
   const end = parseClockMinutes(window.endTime);
   if (current === null || start === null || end === null || start === end) {
@@ -49,9 +49,9 @@ const evaluateDailyTimeWindow = (
 
 export const isClockTimeInDailyWindow = (
   window: DailyTimeWindow,
-  localTime: string
+  clockTime: string
 ): boolean =>
-  evaluateDailyTimeWindow(window, localTime, 'Cannot evaluate the daily time window.');
+  evaluateDailyTimeWindow(window, clockTime, 'Cannot evaluate the daily time window.');
 
 export const expectedRelayOnForClockTime = (
   config: DailyTimeAutomationConfig,
@@ -59,6 +59,6 @@ export const expectedRelayOnForClockTime = (
 ): boolean =>
   evaluateDailyTimeWindow(
     { startTime: config.onTime, endTime: config.offTime },
-    localTime,
+    localTime.slice(0, 5),
     'Cannot evaluate the daily schedule clock state.'
   );
