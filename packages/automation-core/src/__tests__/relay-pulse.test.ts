@@ -5,9 +5,13 @@ import {
 } from '../actions/relayPulse.js';
 
 describe('relay pulse actions', () => {
-  it('starts Pulse ON by requesting ON and scheduling OFF at expiry', () => {
+  it('starts Pulse ON by requesting ON and restoring the prior OFF state at expiry', () => {
     expect(
-      startRelayPulse({ type: 'pulse', relayOn: true, durationMs: 5_000 }, 10_000)
+      startRelayPulse(
+        { type: 'pulse', relayOn: true, durationMs: 5_000 },
+        false,
+        10_000
+      )
     ).toEqual({
       requestedAction: { type: 'set', relayOn: true },
       nextState: {
@@ -19,9 +23,13 @@ describe('relay pulse actions', () => {
     });
   });
 
-  it('starts Pulse OFF by requesting OFF and scheduling ON at expiry', () => {
+  it('starts Pulse OFF by requesting OFF and restoring the prior ON state at expiry', () => {
     expect(
-      startRelayPulse({ type: 'pulse', relayOn: false, durationMs: 5_000 }, 10_000)
+      startRelayPulse(
+        { type: 'pulse', relayOn: false, durationMs: 5_000 },
+        true,
+        10_000
+      )
     ).toEqual({
       requestedAction: { type: 'set', relayOn: false },
       nextState: {
@@ -32,6 +40,27 @@ describe('relay pulse actions', () => {
       phase: 'started'
     });
   });
+
+  it.each([
+    { relayOn: true, currentRelayOn: true },
+    { relayOn: false, currentRelayOn: false }
+  ])(
+    'restores the actual prior state when Pulse target was already $relayOn',
+    ({ relayOn, currentRelayOn }) => {
+      const started = startRelayPulse(
+        { type: 'pulse', relayOn, durationMs: 5_000 },
+        currentRelayOn,
+        10_000
+      );
+
+      expect(started.nextState?.restoreRelayOn).toBe(currentRelayOn);
+      expect(advanceRelayPulse(started.nextState!, 15_000)).toEqual({
+        requestedAction: { type: 'set', relayOn: currentRelayOn },
+        nextState: null,
+        phase: 'expired'
+      });
+    }
+  );
 
   it('keeps requesting the pulse target before expiry', () => {
     const state = {
@@ -72,7 +101,7 @@ describe('relay pulse actions', () => {
     'rejects invalid duration %s',
     (durationMs) => {
       expect(() =>
-        startRelayPulse({ type: 'pulse', relayOn: true, durationMs }, 0)
+        startRelayPulse({ type: 'pulse', relayOn: true, durationMs }, false, 0)
       ).toThrow('Relay pulse duration must be a positive finite number.');
     }
   );
