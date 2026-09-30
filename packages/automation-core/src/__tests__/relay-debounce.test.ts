@@ -152,9 +152,10 @@ describe('evaluateRelayDebounce', () => {
       nowMs: 15_000
     });
     expect(ready.debouncedAction).toEqual(setOn);
+    if (!ready.debouncedAction) throw new Error('Expected mature debounce action.');
 
     const timing = evaluateRelayTiming({
-      action: ready.debouncedAction!,
+      action: ready.debouncedAction,
       policy: { minimumOnMs: 0, minimumOffMs: 20_000 },
       state: { relayOn: false, lastChangeMs: 5_000 },
       nowMs: 15_000
