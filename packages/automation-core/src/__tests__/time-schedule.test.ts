@@ -68,6 +68,9 @@ describe('daily time automation domain', () => {
       isClockTimeInDailyWindow({ startTime: '08:00', endTime: '20:00' }, 'bad')
     ).toThrow('Cannot evaluate the daily time window.');
     expect(() =>
+      isClockTimeInDailyWindow({ startTime: '08:00', endTime: '20:00' }, '12:00:00')
+    ).toThrow('Cannot evaluate the daily time window.');
+    expect(() =>
       isClockTimeInDailyWindow({ startTime: '08:00', endTime: '08:00' }, '12:00')
     ).toThrow('Cannot evaluate the daily time window.');
   });
