@@ -27,7 +27,7 @@ See `docs/ARCHITECTURE.md` for durable ownership/safety contracts and `docs/test
 
 History records enough operational context to explain output changes: climate/VPD, requested/final relay, mode/manual request, reason, automation fault, hard safety and power/current where available. History failures are isolated from relay arbitration.
 
-The current UI intentionally presents this data as a simple chronological record list. Rich chart visualization is a separate product/UI slice described below; it should reuse the existing data path first.
+The mobile UI now presents the same typed records through the completed shared-plot History visualization described below; it does not create a second persistence/runtime path.
 
 ### 2. Runtime Safety Supervisor — completed 2026-09-30
 
@@ -69,22 +69,13 @@ The repository baseline was deliberately closed before chart work:
 
 Neither retained item blocks the read-only History visualization slice.
 
-### 5. History visualization / charts — next user-facing slice
+### 5. History visualization / charts — completed 2026-10-01
 
-Build a real History visualization page on top of the existing Shelly History/Datalogger and typed `HistoryRecord[]` mobile data path.
+History is chart-first on the existing typed `HistoryRecord[]` data path. All available Temperature, Humidity, VPD, Output, Power and Current data shares one truthful time surface. The compact legend toggles series independently and all available series start visible. Continuous metrics use independent semantic domains normalized only for rendering, while real units remain in legend/tooltips and no shared numeric Y axis pretends unlike units are physically comparable. Small fluctuations respect meaningful minimum spans; Power/Current keep zero-aware baselines; Output is a subdued state track.
 
-Initial design/architecture should decide:
+Timestamp/uptime x positions preserve real elapsed spacing and domain-driven ticks stay sparse and natural. The shared crosshair tooltip reports every visible series at the same time. Loading/retry/empty/partial-corruption behavior remains presentation-only over the existing History runtime/KVS model.
 
-- which chart series are first-class: temperature, humidity, VPD, relay state, power/current;
-- timestamp vs uptime-only records and the time-axis contract;
-- readable representation of AUTO/MANUAL, reason/fault/safety transitions;
-- whether the detailed chronological list remains as a lower/fallback section;
-- mobile interaction, accessibility, partial/corrupt-history and empty states;
-- whether a production chart dependency is justified. New production dependencies require explicit approval.
-
-Prefer presentation work first. Do not redesign runtime persistence solely to support charts unless the existing data format proves insufficient.
-
-This is an intentional visual-contract change and requires reviewed responsive/real-device evidence.
+Responsive acceptance passed at `360x800`, `390x844` and `412x915`, canonical visual verification passed, and Samsung S22+ / Android 16 preserving-data acceptance confirmed no horizontal overflow, independent legend toggles and the multi-series tooltip. No runtime, KVS or `HistoryRecord[]` redesign was needed.
 
 ### 6. Dashboard status polish
 
@@ -112,7 +103,7 @@ Feature-complete v1 requires:
 - clear dashboard control/status presentation;
 - watchdog/recovery/soak stabilization.
 
-History charts are a high-priority usability slice but should reuse the completed History runtime/data foundation rather than becoming a second history subsystem.
+History charts are complete and reuse the existing History runtime/data foundation rather than becoming a second history subsystem.
 
 ## Post-freeze
 
