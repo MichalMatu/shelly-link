@@ -43,21 +43,27 @@ describe('Pulse execution compact runtime contracts', () => {
   it('validates every compact execution limit family and rejects invalid limits/windows', () => {
     const base = compactBase();
 
-    expect(shellyRuntimeConfigSchema.safeParse({ ...base, e: [1_000, 2_000, 0, 0, 0] }).success).toBe(
-      true
-    );
-    expect(shellyRuntimeConfigSchema.safeParse({ ...base, e: [1_000, 2_000, 0, 0, 3] }).success).toBe(
-      true
-    );
     expect(
-      shellyRuntimeConfigSchema.safeParse({ ...base, e: [1_000, 2_000, 0, 1, -10_000] }).success
+      shellyRuntimeConfigSchema.safeParse({ ...base, e: [1_000, 2_000, 0, 0, 0] }).success
     ).toBe(true);
     expect(
-      shellyRuntimeConfigSchema.safeParse({ ...base, e: [1_000, 2_000, 0, 0, -500] }).success
+      shellyRuntimeConfigSchema.safeParse({ ...base, e: [1_000, 2_000, 0, 0, 3] }).success
+    ).toBe(true);
+    expect(
+      shellyRuntimeConfigSchema.safeParse({ ...base, e: [1_000, 2_000, 0, 1, -10_000] })
+        .success
+    ).toBe(true);
+    expect(
+      shellyRuntimeConfigSchema.safeParse({ ...base, e: [1_000, 2_000, 0, 0, -500] })
+        .success
     ).toBe(false);
 
-    expect(shellyRuntimeConfigSchema.safeParse({ ...base, w: [60, 120] }).success).toBe(true);
-    expect(shellyRuntimeConfigSchema.safeParse({ ...base, w: [60, 60] }).success).toBe(false);
+    expect(shellyRuntimeConfigSchema.safeParse({ ...base, w: [60, 120] }).success).toBe(
+      true
+    );
+    expect(shellyRuntimeConfigSchema.safeParse({ ...base, w: [60, 60] }).success).toBe(
+      false
+    );
   });
 
   it('decodes Continuous, Cycles, Duration and daily-window compact forms', () => {
@@ -120,17 +126,18 @@ describe('Pulse execution compact runtime contracts', () => {
 
   it('encodes all Pulse execution modes and start phases into compact runtime config', () => {
     const base = createDefaultShellyThermostatConfig();
-    const runtimeFor = (pulse: NonNullable<ShellyThermostatConfig['execution']>['pulse']) =>
-      createShellyRuntimeConfig({ ...base, execution: { pulse } }, 'hash');
+    const runtimeFor = (
+      pulse: NonNullable<ShellyThermostatConfig['execution']>['pulse']
+    ) => createShellyRuntimeConfig({ ...base, execution: { pulse } }, 'hash');
 
-    expect(runtimeFor(pulseConfig('continuous', 'on')).e).toEqual([1_000, 2_000, 3_000, 0, 0]);
-    expect(runtimeFor(pulseConfig('cycles', 'off')).e).toEqual([1_000, 2_000, 3_000, 1, 4]);
+    expect(runtimeFor(pulseConfig('continuous', 'on')).e).toEqual([
+      1_000, 2_000, 3_000, 0, 0
+    ]);
+    expect(runtimeFor(pulseConfig('cycles', 'off')).e).toEqual([
+      1_000, 2_000, 3_000, 1, 4
+    ]);
     expect(runtimeFor(pulseConfig('duration', 'on')).e).toEqual([
-      1_000,
-      2_000,
-      3_000,
-      0,
-      -10_000
+      1_000, 2_000, 3_000, 0, -10_000
     ]);
     expect(
       createShellyRuntimeConfig(
@@ -152,7 +159,9 @@ describe('Pulse execution compact runtime contracts', () => {
     const config: ShellyThermostatConfig = { ...base, execution };
 
     const decoded = decodeShellyThermostatScript(generateShellyThermostatScript(config));
-    const steadyDecoded = decodeShellyThermostatScript(generateShellyThermostatScript(base));
+    const steadyDecoded = decodeShellyThermostatScript(
+      generateShellyThermostatScript(base)
+    );
 
     expect(decoded?.settings.execution).toEqual(execution);
     expect(steadyDecoded?.settings).not.toHaveProperty('execution');
