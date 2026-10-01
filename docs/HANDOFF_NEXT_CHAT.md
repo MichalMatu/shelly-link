@@ -1,23 +1,19 @@
-# Handoff — Pulse V1 next slice
+# Handoff — Pulse V1 runtime integration
 
-Status: **2026-10-01 — History stacked panels are accepted and the canonical responsive baseline is healthy. The next product slice is Pulse V1.**
+Status: **2026-10-01 — Pulse V1 generated Climate runtime integration is in progress on `pulse-v1-runtime-integration`; the accepted hard generated-script ceiling is 12000 B, with 9500 B retained only as a preferred optimization target.**
 
 Repository: `MichalMatu/shelly-link`
 
 ## Start here
 
-1. Fetch fresh `main` and `agent-control`.
+1. Fetch fresh `main`, `pulse-v1-runtime-integration` and `agent-control`.
 2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md` and `docs/UX_VISUAL_CONTRACT.md`.
 3. Read fresh `agent-control:.agent/status/daemon.json`; never reuse an old conversation binding.
-4. Confirm there is no active Local Agent task and no open PR before starting work.
-5. Start from the accepted History/runtime/safety baseline. Do not reopen History KVS/`HistoryRecord[]` without concrete evidence of a data-model limitation.
-6. Run the Pulse architecture + runtime-size gate before adding generated runtime behavior. Keep 9500 B as the preferred target; if the final supported Pulse + active-window worst case exceeds it, the user explicitly accepts a one-time guard increase to 10000 B after focused generator and real-Plug validation. Do not remove working safety/recovery behavior merely to stay below 9500 B.
+4. Confirm there is no active Local Agent task and no duplicate/open PR before continuing.
+5. Keep `main` untouched until the working branch is qualified. The accepted pre-integration baseline is `a2297e3040d98916782af5327a635b45375b19e1`.
+6. Keep 9500 B as a preferred generated-runtime target, but enforce **12000 B as the accepted hard ceiling**. Do not remove safety/recovery behavior, narrow supported sensor combinations or perform risky logic/minification refactors solely to save bytes.
 
-Durable remote branches after closeout should remain only:
-
-- `main` — development source of truth;
-- `agent-control` — Local Agent control plane;
-- `golden/climate-ui-20260928` — frozen visual recovery/reference branch.
+The latest focused size matrix on the runtime branch passed with a 12000 B guard. The tested supported worst case — four sensors with mixed BTHome/TP357 parsers, maximum runtime display-name budget, VPD, minimum ON, debounce, large timing values, Pulse and an overnight active window — generated **11332 B**, leaving **668 B** headroom. The same focused Local Agent run passed script-generator typecheck and **179/179 tests**. This is not yet real-Plug acceptance and is not a substitute for the final repository gate.
 
 ## Accepted History baseline
 
@@ -31,35 +27,47 @@ History remains one read-only presentation over the existing Climate History v2 
 
 The accepted chart UX has five compact vertical panels in this order: Temperature, Humidity, Output, Power and Current. Each continuous metric has an independent real-unit Y scale. Output is a square digital step track. All panels share the same truthful time domain. There is no interactive legend, tooltip or crosshair in the accepted phone design. VPD remains in the typed History/scaling layer but is intentionally omitted from the five-panel stack.
 
-The previously stale History responsive contract is now closed: the Current assertion matches the encoded fixture (`currentMilliA=200` -> `0,2 A` in Polish locale), the canonical Darwin `23-climate-history` snapshot was deliberately refreshed, final `pnpm check` passed, and the full responsive suite passed 36/36 on the accepted baseline. Treat that harness debt as resolved rather than reopening the old snapshot workaround.
+The previously stale History responsive contract is closed: the Current assertion matches the encoded fixture (`currentMilliA=200` -> `0,2 A` in Polish locale), the canonical Darwin `23-climate-history` snapshot was deliberately refreshed, final `pnpm check` passed, and the full responsive suite passed 36/36 on the accepted History baseline. Do not reopen that work without concrete evidence.
 
-## Next slice — Pulse V1
+## Pulse V1 product shape
 
-Pulse is no longer merely a parked primitive. The existing pure `RelayPulseAction` / one-shot pulse state machine remains a foundation. A shared bounded Pulse-cycle model now defines ON/OFF phases, initial delay, Continuous/Cycles/Duration execution, start phase and safe-OFF completion. Climate config can carry optional Pulse and daily active-window execution without changing the old config shape when those features are unused. Generated Shelly runtime integration and UI are still the next implementation work.
-
-### Product shape
-
-Automation setup should expose four primary automation types:
+Pulse is a first-class automation capability with one shared Pulse-cycle engine. Automation setup should expose four primary automation types:
 
 1. Temperature;
 2. Humidity;
 3. Time;
 4. Pulse.
 
-Temperature, Humidity and Time also gain an output behavior choice:
+Temperature, Humidity and Time additionally support an output behavior choice:
 
 - **Steady** — existing normal relay behavior;
 - **Pulse** — while the parent automation requests active output, execute the shared Pulse cycle.
 
-Temperature and Humidity additionally gain an optional daily active window, including windows that cross midnight. Outside the window AUTO is inactive/safe OFF. Existing steady Time remains the native Shelly schedule contract; do not overload its current `DailyTimeAutomationConfig` semantics. Time + Pulse should compose the existing daily window with the shared Pulse engine through an explicit runtime model.
+Temperature and Humidity additionally support an optional daily active window, including windows that cross midnight. Existing steady Time remains the native Shelly schedule contract; do not overload `DailyTimeAutomationConfig`. Time + Pulse must compose the existing daily window with the shared Pulse engine through an explicit runtime model. Standalone Pulse uses the same engine without a climate parent condition.
 
-Standalone Pulse uses exactly the same pulse engine/configuration without a climate parent condition.
+Do not build separate temperature-pulse, humidity-pulse and time-pulse runtimes.
 
-Do not build separate temperature-pulse, humidity-pulse and time-pulse runtimes. There must be one shared Pulse state/config model with adapters/composition at the automation layer.
+## Runtime integration already on the working branch
 
-### Pulse V1 configuration
+The working branch currently carries the Climate execution integration, not UI:
 
-V1 scope is deliberately useful but bounded:
+- compact persistent runtime representation for optional Pulse (`e`) and active window (`w`), with decode/recovery/reconciliation round-trip;
+- a generated execution gate between the Climate parent request and the existing relay arbiter;
+- local one-shot Shelly `Timer` ownership for Pulse phase transitions and daily window boundaries rather than phone timers or one-second polling;
+- Continuous, Cycles and Duration Pulse representation, optional initial delay, ON/OFF start phase and safe-OFF completion;
+- active-window evaluation from Shelly `sys.time` / `unixtime`, including overnight windows and fail-safe OFF when local time is not trustworthy;
+- MANUAL, automation-fault, hard-safety and parent-inactive paths cancel Pulse rather than allowing a cycle to finish;
+- the existing relay arbiter remains the single owner of minimum ON/OFF, debounce and final relay mutation;
+- relay maturity waits can complete from one-shot timers rather than depending on a later BLE measurement;
+- diagnostics expose execution state compactly while existing History records continue to explain transitions through requested/final relay plus reason codes;
+- runtime config update cancels stale Pulse/window timers even when the new config removes `execution`;
+- the generated runtime retains both supported BLE parsers. A parser-specialization experiment was deliberately removed after it caused false capability rejection in persistent runtime config tests; with the accepted 12 KB ceiling the complexity/risk was not justified.
+
+The current size guard is `SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES = 12000`.
+
+## Pulse V1 configuration
+
+V1 scope remains bounded:
 
 - ON time in seconds;
 - OFF time in seconds;
@@ -70,11 +78,11 @@ V1 scope is deliberately useful but bounded:
 - selectable start phase (ON/OFF), with ON as the simple default;
 - safe OFF end state after completion/cancellation;
 - one-shot Pulse retained as the simple/degenerate form of the same foundation;
-- validation and explicit bounds for time/count inputs.
+- explicit validation and bounds for time/count inputs.
 
-The Pulse controls should follow the compact optional-control pattern already used by VPD: collapsed while disabled, expanded parameters when enabled. Standalone Pulse gets its own automation setup surface but reuses the same Pulse configuration component/model.
+The Pulse controls should follow the compact optional-control pattern already used by VPD when UI work begins. Standalone Pulse gets a dedicated setup surface but reuses the same Pulse configuration/model.
 
-### Required semantics
+## Required semantics
 
 - Pulse never becomes a second relay owner; one Plug relay still has one managed automation owner.
 - Hard safety and forced-OFF paths cancel Pulse immediately and leave the relay OFF.
@@ -86,9 +94,11 @@ The Pulse controls should follow the compact optional-control pattern already us
 - Existing minimum ON/OFF, debounce and cooldown ownership must compose with Pulse rather than being duplicated.
 - History/status must be able to explain Pulse-driven transitions; React may display phase/progress but must not own timers.
 
-### Acceptance before moving on
+## What remains before runtime slice acceptance
 
-Pulse V1 is not complete until Temperature + Pulse, Humidity + Pulse, Time + Pulse and standalone Pulse are covered across Continuous/Cycles/Duration, safety/fault/MANUAL/reboot interactions are tested, runtime byte headroom is re-audited, the final repository gate is green, responsive/visual UI evidence exists and real Plug acceptance ends with relay explicitly verified OFF.
+Do not treat the current focused green run as full Pulse V1 acceptance. Still complete focused generated-runtime behavior coverage for Pulse phase/boundary/cancellation semantics, active-window entry/exit and overnight boundaries, AUTO/MANUAL, automation fault, hard safety, reboot-safe behavior and minimum ON/OFF/debounce composition. Then run the required final repository `pnpm check` on the exact qualified branch state and perform real Plug S Gen3 acceptance. Any relay-mutating hardware test must finish with the relay explicitly verified OFF.
+
+Time + Pulse and standalone Pulse adapters/runtime composition follow once Climate + Pulse is stable. UI work remains later and must reuse the shared model/runtime rather than fork it.
 
 ## Sequence after Pulse V1
 
@@ -99,7 +109,7 @@ Once Pulse V1 is qualified and stable, resume the existing V1 roadmap rather tha
 3. Watchdog/stabilization — heartbeat/watchdog, reboot/power-cycle recovery, Wi-Fi/BLE loss, AUTO/MANUAL matrix, fault/safety recovery, Pulse cancellation/recovery, soak, memory headroom, final hardware matrix and UX acceptance;
 4. v1 feature freeze.
 
-After V1 stabilization/freeze, return to Pulse as the first growth track. `docs/ROADMAP.md` preserves the Advanced backlog: Burst mode, Adaptive Pulse, active-window convenience, phase reset/resume policy, optional completion behavior beyond safe OFF only if justified, accumulated ON/duty budgets and richer cycle diagnostics. Those ideas must not enlarge Pulse V1 or bypass runtime-size/safety gates.
+After V1 stabilization/freeze, return to Pulse as the first growth track. `docs/ROADMAP.md` preserves the Advanced backlog. Those ideas must not enlarge Pulse V1 or bypass runtime-size/safety gates.
 
 ## Performance rule
 
@@ -107,4 +117,4 @@ After V1 stabilization/freeze, return to Pulse as the first growth track. `docs/
 
 ## Verification rule
 
-Use the normal repository loop: architecture/UX gate -> smallest cohesive implementation -> focused checks -> responsive/visual evidence when geometry changes -> real-device evidence when relevant -> exactly one final full `pnpm check` on the exact merged `main` -> cleanup temporary branches/artifacts. If real Shelly runtime is touched, use identity-first access and finish with explicitly verified relay OFF.
+Use the normal repository loop: architecture/UX gate -> smallest cohesive implementation -> focused checks -> responsive/visual evidence when geometry changes -> real-device evidence when relevant -> exactly one final full `pnpm check` on the exact qualified state -> cleanup temporary branches/artifacts. If real Shelly runtime is touched, use identity-first access and finish with explicitly verified relay OFF.
