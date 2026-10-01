@@ -57,10 +57,7 @@ const runtimePulseSchema = z
   });
 
 const runtimeActiveWindowSchema = z
-  .tuple([
-    z.number().int().min(0).max(1_439),
-    z.number().int().min(0).max(1_439)
-  ])
+  .tuple([z.number().int().min(0).max(1_439), z.number().int().min(0).max(1_439)])
   .refine((window) => window[0] !== window[1], {
     message: 'Runtime active-window endpoints must differ.'
   });
