@@ -55,7 +55,7 @@ Advanced rule candidates that remain parked and do **not** block Pulse V1:
 - general AND/OR condition execution in the Climate runtime;
 - configuration/editor surfaces for those general condition-composition capabilities if they are later accepted.
 
-**Runtime-size policy:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Keep 9500 B as the preferred target while Pulse and active-window execution are integrated, and emit new runtime logic only for configurations that use it. If the final supported Pulse + active-window worst case genuinely exceeds 9500 B, the guard may be raised once to **10000 B** after focused generator coverage and real-Plug validation. Do not remove working safety/recovery capability or perform risky refactors solely to defend the old 9500 B target.
+**Runtime-size policy:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the pre-Pulse four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Keep 9500 B as the preferred optimization target and emit new runtime logic only for configurations that use it, but Pulse + active-window integration now has an explicitly accepted **12000 B hard ceiling**. Do not remove working safety/recovery capability, narrow supported sensor combinations, or perform risky logic/minification refactors solely to defend the old 9500 B target. The 12000 B ceiling still requires focused generator coverage and real-Plug validation before Pulse V1 is accepted on hardware.
 
 ### 4. Pre-charts closeout — completed 2026-09-30
 
@@ -147,7 +147,7 @@ History and operational status must remain explanatory: Pulse-driven relay chang
 
 Before calling Pulse V1 complete:
 
-- re-audit generated-runtime byte budget after Pulse + active-window behavior exists; keep 9500 B when practical, but allow the explicitly accepted 10000 B final guard if the supported worst case requires it;
+- re-audit generated-runtime byte budget after Pulse + active-window behavior exists; keep 9500 B when practical and enforce the explicitly accepted 12000 B hard ceiling across the supported worst-case matrix;
 - add pure domain/state-machine tests for cycle, cancellation, completion and boundary timing;
 - test Temperature + Pulse, Humidity + Pulse, Time + Pulse and standalone Pulse composition;
 - cover Continuous, Cycles and Duration modes;
@@ -202,7 +202,7 @@ Candidate Pulse Advanced features:
 - **maximum accumulated ON time / duty budget** over a larger window as an additional operational guard where useful;
 - richer cycle/burst progress and History diagnostics.
 
-Every Pulse Advanced addition requires another generated-runtime size/headroom audit and must preserve one relay owner, safe-OFF precedence and the shared Pulse engine. The accepted V1 ceiling is 10000 B; post-freeze features must optimize/reuse or be postponed rather than casually raising that ceiling again.
+Every Pulse Advanced addition requires another generated-runtime size/headroom audit and must preserve one relay owner, safe-OFF precedence and the shared Pulse engine. The accepted V1 hard ceiling is 12000 B; post-freeze features must optimize/reuse or be postponed rather than casually raising that ceiling again.
 
 ## Post-freeze
 
