@@ -268,7 +268,7 @@ const ClimateAutomationCard = ({
 };
 
 const AutomationCard = ({ installation, onOpen, onNameChange }: AutomationCardProps) =>
-  installation.kind === 'time' ? (
+  installation.kind === 'pulse' ? null : installation.kind === 'time' ? (
     <TimeAutomationCard
       installation={installation}
       onOpen={onOpen}
