@@ -1,9 +1,13 @@
 import {
   pulseCycleConfigSchema,
   shellyThermostatConfigSchema,
+  standalonePulseAutomationConfigSchema,
   type ShellyThermostatConfig
 } from '@lcl/script-generator';
-import type { PulseCycleConfig } from '@lcl/automation-core';
+import type {
+  PulseCycleConfig,
+  StandalonePulseAutomationConfig
+} from '@lcl/automation-core';
 import type { ShellyDeviceInfo, ShellyPlugsUiButtonInputMode } from '@lcl/shelly-client';
 import { z } from 'zod';
 import {
@@ -60,9 +64,16 @@ export const timeInstalledAutomationSchema = installationBaseSchema.extend({
   pulseRuntime: installedTimePulseRuntimeSchema.optional()
 });
 
+export const standalonePulseInstalledAutomationSchema = installationBaseSchema.extend({
+  kind: z.literal('pulse'),
+  script: installedScriptSchema,
+  config: standalonePulseAutomationConfigSchema
+});
+
 export const installedAutomationSchema = z.discriminatedUnion('kind', [
   climateInstalledAutomationSchema,
-  timeInstalledAutomationSchema
+  timeInstalledAutomationSchema,
+  standalonePulseInstalledAutomationSchema
 ]);
 
 export type ClimateInstalledAutomation = z.infer<typeof climateInstalledAutomationSchema>;
@@ -70,6 +81,9 @@ export type TimeInstalledAutomation = z.infer<typeof timeInstalledAutomationSche
 export type TimePulseInstalledAutomation = TimeInstalledAutomation & {
   pulseRuntime: z.infer<typeof installedTimePulseRuntimeSchema>;
 };
+export type StandalonePulseInstalledAutomation = z.infer<
+  typeof standalonePulseInstalledAutomationSchema
+>;
 export type InstalledAutomation = z.infer<typeof installedAutomationSchema>;
 export type InstalledAutomationKind = InstalledAutomation['kind'];
 
@@ -77,6 +91,10 @@ export const isTimePulseInstalledAutomation = (
   installation: TimeInstalledAutomation
 ): installation is TimePulseInstalledAutomation =>
   installation.pulseRuntime !== undefined;
+
+export const isStandalonePulseInstalledAutomation = (
+  installation: InstalledAutomation
+): installation is StandalonePulseInstalledAutomation => installation.kind === 'pulse';
 
 const normalizedDeviceId = (deviceId: string): string => deviceId.trim().toLowerCase();
 
@@ -89,6 +107,11 @@ export const createTimeInstalledAutomationId = (
   shellyDeviceId: string,
   relayId: number
 ): string => `time:${normalizedDeviceId(shellyDeviceId)}:${relayId}`;
+
+export const createStandalonePulseInstalledAutomationId = (
+  shellyDeviceId: string,
+  relayId: number
+): string => `pulse:${normalizedDeviceId(shellyDeviceId)}:${relayId}`;
 
 const stableShellyIdentity = ({
   shelly,
@@ -222,6 +245,36 @@ export const createTimePulseInstalledAutomation = ({
     installedAtMs: nowMs,
     updatedAtMs: nowMs
   }) as TimePulseInstalledAutomation;
+};
+
+export const createStandalonePulseInstalledAutomation = ({
+  shelly,
+  shellyName,
+  baseUrl,
+  scriptId,
+  scriptHash,
+  config,
+  nowMs = Date.now()
+}: {
+  shelly: ShellyDeviceInfo;
+  shellyName: string;
+  baseUrl: string;
+  scriptId: number;
+  scriptHash: string;
+  config: StandalonePulseAutomationConfig;
+  nowMs?: number;
+}): StandalonePulseInstalledAutomation => {
+  const identity = stableShellyIdentity({ shelly, shellyName, baseUrl });
+  return standalonePulseInstalledAutomationSchema.parse({
+    version: INSTALLED_AUTOMATION_VERSION,
+    id: createStandalonePulseInstalledAutomationId(identity.deviceId, config.relayId),
+    kind: 'pulse',
+    shelly: identity.shelly,
+    script: { id: scriptId, hash: scriptHash },
+    config,
+    installedAtMs: nowMs,
+    updatedAtMs: nowMs
+  });
 };
 
 export const installedAutomationRelayId = (installation: InstalledAutomation): number =>
