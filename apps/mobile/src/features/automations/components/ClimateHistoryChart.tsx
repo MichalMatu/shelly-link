@@ -133,20 +133,9 @@ export const ClimateHistoryChart = ({
       })}
 
       <div className="climate-history-chart__time-axis" aria-hidden="true">
-        {xTicks.map((tick, index) => {
-          const position = xSpan <= 0 ? 50 : ((tick - xStart) / xSpan) * 100;
-          const edge =
-            index === 0 ? 'start' : index === xTicks.length - 1 ? 'end' : 'middle';
-          return (
-            <span
-              key={tick}
-              data-edge={edge}
-              style={{ left: `${Math.min(100, Math.max(0, position))}%` }}
-            >
-              {formatAxisX(tick)}
-            </span>
-          );
-        })}
+        {xTicks.map((tick) => (
+          <span key={tick}>{formatAxisX(tick)}</span>
+        ))}
       </div>
     </div>
   );
