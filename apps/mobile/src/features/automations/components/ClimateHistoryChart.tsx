@@ -229,10 +229,7 @@ export const ClimateHistoryChart = ({
   const selectedXRatio =
     selectedRecordIndex === null || xSpan <= 0
       ? 0.5
-      : Math.min(
-          1,
-          Math.max(0, (xValues[selectedRecordIndex]! - xStart) / xSpan)
-        );
+      : Math.min(1, Math.max(0, (xValues[selectedRecordIndex]! - xStart) / xSpan));
   const selectedCrosshairLayer: LineCustomSvgLayer<HistoryChartSeries> = ({
     xScale,
     innerHeight
