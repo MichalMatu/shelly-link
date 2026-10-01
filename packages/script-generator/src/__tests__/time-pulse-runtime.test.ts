@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   decodeShellyTimePulseScript,
   generateShellyTimePulseScript,
-  timePulseAutomationConfigSchema
+  timePulseAutomationConfigSchema,
+  timePulseScheduleEvalCode
 } from '../index.js';
 import { renderPulseCycleExecution } from '../shelly/runtime/execution.js';
 
@@ -21,14 +22,16 @@ type TimerEntry = { dueMs: number; callback: () => void };
 
 const runGenerated = ({
   localTime = '23:30',
-  unixTime = 1_800_000_000
+  unixTime = 1_800_000_000,
+  switchErrors = [] as string[]
 }: {
   localTime?: string;
   unixTime?: number;
+  switchErrors?: string[];
 } = {}) => {
   let nowMs = 100_000;
   let nextTimerId = 1;
-  let sysStatus: { time?: string; unixtime?: number } = {
+  const sysStatus: { time?: string; unixtime?: number } = {
     time: localTime,
     unixtime: unixTime
   };
@@ -47,7 +50,11 @@ const runGenerated = ({
   };
   const Shelly = {
     getUptimeMs: () => nowMs,
-    getComponentStatus: (component: string) => (component === 'sys' ? sysStatus : null),
+    getComponentStatus: (component: string) => {
+      if (component === 'sys') return sysStatus;
+      if (component === 'switch:0') return { errors: switchErrors };
+      return null;
+    },
     addEventHandler: (handler: (event: unknown) => void) => {
       eventHandler = handler;
     },
@@ -64,7 +71,11 @@ const runGenerated = ({
   };
 
   const script = generateShellyTimePulseScript(config);
-  new Function('Shelly', 'Timer', script)(Shelly, Timer);
+  const api = new Function(
+    'Shelly',
+    'Timer',
+    `${script};return {rq:rq};`
+  )(Shelly, Timer) as { rq: (active: boolean) => number };
 
   const advance = (durationMs: number) => {
     const target = nowMs + durationMs;
@@ -82,13 +93,11 @@ const runGenerated = ({
   };
 
   return {
+    api,
     script,
     timers,
     relayCalls,
     advance,
-    setSysStatus: (status: { time?: string; unixtime?: number }) => {
-      sysStatus = status;
-    },
     emit: (event: unknown) => eventHandler?.(event)
   };
 };
@@ -117,6 +126,11 @@ describe('Time + Pulse generated runtime', () => {
     expect(script).toContain(compactSharedEngine);
   });
 
+  it('exposes minimal native-schedule start and cancel eval commands', () => {
+    expect(timePulseScheduleEvalCode(true)).toBe('rq(true)');
+    expect(timePulseScheduleEvalCode(false)).toBe('rq(false)');
+  });
+
   it('boots safe OFF, starts a fresh Pulse inside the overnight window, and alternates', () => {
     const runtime = runGenerated();
     expect(runtime.relayCalls).toEqual([false, true]);
@@ -128,16 +142,31 @@ describe('Time + Pulse generated runtime', () => {
     expect(runtime.relayCalls).toEqual([false, true, false, true]);
   });
 
-  it('stays OFF while the daily window is closed', () => {
+  it('stays OFF while the daily window is closed without owning a boundary timer', () => {
     const runtime = runGenerated({ localTime: '12:00' });
     expect(runtime.relayCalls).toEqual([false]);
-    expect(runtime.timers.size).toBe(1);
+    expect(runtime.timers.size).toBe(0);
+
+    runtime.api.rq(true);
+    expect(runtime.relayCalls.at(-1)).toBe(true);
   });
 
   it('fails safe OFF when the Shelly clock is not trustworthy', () => {
     const runtime = runGenerated({ localTime: '23:30', unixTime: 0 });
     expect(runtime.relayCalls).toEqual([false]);
-    expect(runtime.timers.size).toBe(1);
+    expect(runtime.timers.size).toBe(0);
+    expect(runtime.api.rq(true)).toBe(-1);
+  });
+
+  it('native OFF schedule cancels an in-flight Pulse immediately', () => {
+    const runtime = runGenerated();
+    expect(runtime.relayCalls.at(-1)).toBe(true);
+
+    runtime.api.rq(false);
+    expect(runtime.relayCalls.at(-1)).toBe(false);
+
+    runtime.advance(5_000);
+    expect(runtime.relayCalls.at(-1)).toBe(false);
   });
 
   it('cancels Pulse and forces OFF when native Shelly protection reports an error', () => {
@@ -147,6 +176,13 @@ describe('Time + Pulse generated runtime', () => {
     runtime.emit({ component: 'switch:0', delta: { errors: ['overtemp'] } });
     expect(runtime.relayCalls.at(-1)).toBe(false);
 
+    runtime.advance(5_000);
+    expect(runtime.relayCalls.at(-1)).toBe(false);
+  });
+
+  it('does not start Pulse on boot when a native protection error is already present', () => {
+    const runtime = runGenerated({ switchErrors: ['overtemp'] });
+    expect(runtime.relayCalls).toEqual([false, false]);
     runtime.advance(5_000);
     expect(runtime.relayCalls.at(-1)).toBe(false);
   });
