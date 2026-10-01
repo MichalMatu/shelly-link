@@ -1,6 +1,17 @@
 import type { LineCustomSvgLayer } from '@nivo/line';
 import type { HistoryChartSeries } from './climateHistoryChartMetrics.js';
 
+type HistoryInteractionSlice = {
+  points: readonly { data: { recordIndex: number } }[];
+};
+
+export const historyRecordIndexFromInteraction = (datum: unknown): number | null => {
+  if (typeof datum !== 'object' || datum === null || !('points' in datum)) return null;
+  const points = (datum as Partial<HistoryInteractionSlice>).points;
+  const recordIndex = points?.[0]?.data.recordIndex;
+  return typeof recordIndex === 'number' ? recordIndex : null;
+};
+
 export const historySelectionSide = (
   xValues: readonly number[],
   selectedRecordIndex: number | null,
