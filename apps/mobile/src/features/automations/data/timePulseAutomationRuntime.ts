@@ -209,10 +209,13 @@ export const pauseTimePulseAutomation = async (
   await requireStoredIdentity(installation, clients);
   await forceOff(clients, installation.pulseRuntime.script.id);
   await updatePairEnabled(installation, clients, false);
-  unwrapShellyResult(
-    await clients.device.stopScript(installation.pulseRuntime.script.id)
-  );
-  unwrapShellyResult(await clients.device.setRelayOff());
+  try {
+    unwrapShellyResult(
+      await clients.device.stopScript(installation.pulseRuntime.script.id)
+    );
+  } finally {
+    unwrapShellyResult(await clients.device.setRelayOff());
+  }
 };
 
 export const resumeTimePulseAutomation = async (
@@ -223,9 +226,19 @@ export const resumeTimePulseAutomation = async (
   await requireSyncedClock(clients);
   unwrapShellyResult(await clients.device.setRelayOff());
   await updatePairEnabled(installation, clients, true);
-  unwrapShellyResult(
-    await clients.device.startScript(installation.pulseRuntime.script.id)
-  );
+  try {
+    unwrapShellyResult(
+      await clients.device.startScript(installation.pulseRuntime.script.id)
+    );
+  } catch (error) {
+    await forceOff(clients, installation.pulseRuntime.script.id).catch(() => undefined);
+    await updatePairEnabled(installation, clients, false).catch(() => undefined);
+    await clients.device
+      .stopScript(installation.pulseRuntime.script.id)
+      .catch(() => undefined);
+    await clients.device.setRelayOff().catch(() => undefined);
+    throw error;
+  }
 };
 
 export const deleteTimePulseAutomation = async (
@@ -234,14 +247,17 @@ export const deleteTimePulseAutomation = async (
 ): Promise<void> => {
   await requireStoredIdentity(installation, clients);
   await forceOff(clients, installation.pulseRuntime.script.id);
-  await updatePairEnabled(installation, clients, false).catch(() => undefined);
-  await deleteScheduleIfPresent(clients, installation.schedule.onJobId);
-  await deleteScheduleIfPresent(clients, installation.schedule.offJobId);
-  await clients.device
-    .stopScript(installation.pulseRuntime.script.id)
-    .catch(() => undefined);
-  unwrapShellyResult(
-    await clients.device.deleteScript(installation.pulseRuntime.script.id)
-  );
-  unwrapShellyResult(await clients.device.setRelayOff());
+  try {
+    await updatePairEnabled(installation, clients, false).catch(() => undefined);
+    await deleteScheduleIfPresent(clients, installation.schedule.onJobId);
+    await deleteScheduleIfPresent(clients, installation.schedule.offJobId);
+    await clients.device
+      .stopScript(installation.pulseRuntime.script.id)
+      .catch(() => undefined);
+    unwrapShellyResult(
+      await clients.device.deleteScript(installation.pulseRuntime.script.id)
+    );
+  } finally {
+    unwrapShellyResult(await clients.device.setRelayOff());
+  }
 };
