@@ -102,6 +102,8 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
   const setMaxOnHoursInput = useHardwareSetupDraftStore(
     (state) => state.setMaxOnHoursInput
   );
+  const pulseCycleDraft = useHardwareSetupDraftStore((state) => state.pulseCycleDraft);
+  const setPulseCycleDraft = useHardwareSetupDraftStore((state) => state.setPulseCycleDraft);
   const { upsertSensorDevice, ...sensorSetupFlow } = useSensorSetupFlow();
   const { sensorDevices } = sensorSetupFlow;
 
@@ -165,38 +167,45 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     [shellyNameInput, shellyUrlInput]
   );
 
-  const { advancedSettingsValidation, configState, isThresholdValid, isVpdAssistValid } =
-    useMemo(
-      () =>
-        deriveClimateRuleState({
-          selectedSensor,
-          additionalSensors,
-          sensorAggregation,
-          rulePreset,
-          onThresholdInput,
-          offThresholdInput,
-          vpdAssistEnabled,
-          vpdTargetInput,
-          rssiMinInput,
-          staleTimeoutMinInput,
-          minChangeMinInput,
-          maxOnHoursInput
-        }),
-      [
-        additionalSensors,
-        maxOnHoursInput,
-        minChangeMinInput,
-        offThresholdInput,
-        onThresholdInput,
-        rssiMinInput,
-        rulePreset,
+  const {
+    advancedSettingsValidation,
+    pulseCycleValidation,
+    configState,
+    isThresholdValid,
+    isVpdAssistValid
+  } = useMemo(
+    () =>
+      deriveClimateRuleState({
         selectedSensor,
+        additionalSensors,
         sensorAggregation,
-        staleTimeoutMinInput,
+        rulePreset,
+        onThresholdInput,
+        offThresholdInput,
+        pulseCycleDraft,
         vpdAssistEnabled,
-        vpdTargetInput
-      ]
-    );
+        vpdTargetInput,
+        rssiMinInput,
+        staleTimeoutMinInput,
+        minChangeMinInput,
+        maxOnHoursInput
+      }),
+    [
+      additionalSensors,
+      maxOnHoursInput,
+      minChangeMinInput,
+      offThresholdInput,
+      onThresholdInput,
+      pulseCycleDraft,
+      rssiMinInput,
+      rulePreset,
+      selectedSensor,
+      sensorAggregation,
+      staleTimeoutMinInput,
+      vpdAssistEnabled,
+      vpdTargetInput
+    ]
+  );
 
   const {
     canRunSafeRelayTest,
@@ -304,6 +313,9 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     setMinChangeMinInput,
     maxOnHoursInput,
     setMaxOnHoursInput,
+    pulseCycleDraft,
+    setPulseCycleDraft,
+    pulseCycleValidation,
     isAdvancedSettingsValid: advancedSettingsValidation.isValid,
     shellyBaseUrl: selectedShelly?.baseUrl ?? null,
     configState,
