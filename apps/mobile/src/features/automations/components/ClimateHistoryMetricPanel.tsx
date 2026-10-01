@@ -1,6 +1,9 @@
 import type { HistoryRecord } from '@lcl/automation-core';
 import { ResponsiveLine } from '@nivo/line';
-import type { HistoryChartSeries, HistoryMetricDefinition } from './climateHistoryChartMetrics.js';
+import type {
+  HistoryChartSeries,
+  HistoryMetricDefinition
+} from './climateHistoryChartMetrics.js';
 import { createClimateHistoryOutputTrack } from './ClimateHistoryOutputTrack.js';
 import type { HistoryMetricDomain } from './climateHistoryChartScale.js';
 
@@ -33,10 +36,11 @@ const PANEL_THEME = {
 
 type ClimateHistoryMetricPanelProps = {
   metric: HistoryMetricDefinition;
+  metricLabel: string;
   records: readonly HistoryRecord[];
   xValues: readonly number[];
   xTicks: readonly number[];
-  domain: HistoryMetricDomain | null;
+  domain: HistoryMetricDomain;
   currentValue: string;
   rangeValue: string;
   formatX(value: number): string;
@@ -48,6 +52,7 @@ type ClimateHistoryMetricPanelProps = {
 
 export const ClimateHistoryMetricPanel = ({
   metric,
+  metricLabel,
   records,
   xValues,
   xTicks,
@@ -61,7 +66,7 @@ export const ClimateHistoryMetricPanel = ({
   offLabel
 }: ClimateHistoryMetricPanelProps) => {
   const output = metric.id === 'output';
-  const yDomain: HistoryMetricDomain = output ? [0, 1] : (domain ?? [0, 1]);
+  const yDomain: HistoryMetricDomain = output ? [0, 1] : domain;
   const data: readonly HistoryChartSeries[] = [
     {
       id: metric.id,
@@ -81,12 +86,12 @@ export const ClimateHistoryMetricPanel = ({
     <section
       className="climate-history-chart__panel"
       data-metric={metric.id}
-      aria-label={`${metric.id}: ${currentValue}`}
+      aria-label={`${metricLabel}: ${currentValue}`}
     >
       <header className="climate-history-chart__panel-header">
         <div className="climate-history-chart__panel-heading">
           <span className="climate-history-chart__metric-dot" aria-hidden="true" />
-          <span className="climate-history-chart__panel-label">{metric.id}</span>
+          <span className="climate-history-chart__panel-label">{metricLabel}</span>
           <strong>{currentValue}</strong>
         </div>
         <span className="climate-history-chart__range">{rangeValue}</span>
@@ -119,7 +124,11 @@ export const ClimateHistoryMetricPanel = ({
           axisLeft={{
             tickValues: yTicks,
             format: (value) =>
-              output ? (Number(value) >= 0.5 ? onLabel : offLabel) : formatY(Number(value)),
+              output
+                ? Number(value) >= 0.5
+                  ? onLabel
+                  : offLabel
+                : formatY(Number(value)),
             tickSize: 0,
             tickPadding: 8
           }}
@@ -146,7 +155,7 @@ export const ClimateHistoryMetricPanel = ({
               : ['grid', 'axes', 'areas', 'lines']
           }
           role="img"
-          ariaLabel={`${metric.id} history`}
+          ariaLabel={`${metricLabel} history`}
         />
       </div>
     </section>
