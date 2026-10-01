@@ -98,7 +98,8 @@ const cleanupFailedInstall = async (
   onJobId: number | null,
   offJobId: number | null
 ): Promise<void> => {
-  if (onJobId !== null) await deleteScheduleIfPresent(clients, onJobId).catch(() => undefined);
+  if (onJobId !== null)
+    await deleteScheduleIfPresent(clients, onJobId).catch(() => undefined);
   if (offJobId !== null)
     await deleteScheduleIfPresent(clients, offJobId).catch(() => undefined);
   if (scriptId !== null) {
@@ -135,10 +136,7 @@ export const installTimePulseAutomation = async ({
   try {
     const installedScript = unwrapShellyResult(
       await clients.device.installScript(
-        createInstallPlan(
-          generateShellyTimePulseScript(config),
-          config.schedule.relayId
-        )
+        createInstallPlan(generateShellyTimePulseScript(config), config.schedule.relayId)
       )
     );
     scriptId = installedScript.scriptId;
