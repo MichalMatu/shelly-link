@@ -26,27 +26,14 @@ export {
   resumeTimeAutomation,
   updateDailyTimeAutomation
 } from './data/timeAutomationRuntime.js';
-export {
-  createTimePulseAutomationClients,
-  deleteTimePulseAutomation,
-  installTimePulseAutomation,
-  pauseTimePulseAutomation,
-  resumeTimePulseAutomation,
-  type InstalledTimePulseRuntime,
-  type OwnedTimePulseRuntimeInstallation,
-  type TimePulseAutomationClients
-} from './data/timePulseAutomationRuntime.js';
+export { timePulseAutomationRuntime } from './data/timePulseAutomationPublic.js';
 export { setTimeAutomationManualRelay } from './data/timeAutomationRelayControl.js';
 export { TimeAutomationRuntimeError } from './data/timeAutomationRuntimeError.js';
 export {
   readTimeAutomationRuntime,
   type TimeAutomationRuntimeSnapshot
 } from './data/timeAutomationRuntimeState.js';
-export {
-  createTimePulseScheduleJob,
-  findScheduleRelayConflict,
-  timePulseSchedulePairState
-} from './data/timeAutomationSchedule.js';
+export { findScheduleRelayConflict } from './data/timeAutomationSchedule.js';
 export {
   DEFAULT_RULE_ADVANCED_SETTINGS,
   RULE_ADVANCED_LIMITS,
@@ -98,18 +85,15 @@ export {
   createInstalledAutomationId,
   createTimeInstalledAutomation,
   createTimeInstalledAutomationId,
-  createTimePulseInstalledAutomation,
   findInstalledRelayOwner,
   findRelayOwnerConflict,
   installedAutomationRelayId,
   installedAutomationSchema,
-  isTimePulseInstalledAutomation,
   timeInstalledAutomationSchema,
   type ClimateInstalledAutomation,
   type InstalledAutomation,
   type InstalledAutomationKind,
-  type TimeInstalledAutomation,
-  type TimePulseInstalledAutomation
+  type TimeInstalledAutomation
 } from './data/installedAutomation.js';
 export {
   INSTALLED_AUTOMATIONS_STORAGE_KEY,
