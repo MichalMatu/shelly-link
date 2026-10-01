@@ -66,7 +66,8 @@ export const pulseCycleCopy: Record<Locale, PulseCycleCopy> = {
   en,
   de: {
     ...en,
-    description: 'Schaltet das Relais mit einem gemeinsamen Pulse-Zyklus zwischen ON und OFF.',
+    description:
+      'Schaltet das Relais mit einem gemeinsamen Pulse-Zyklus zwischen ON und OFF.',
     outputBehavior: 'Ausgangsverhalten',
     steady: 'Konstant',
     onSeconds: 'ON-Zeit (s)',
