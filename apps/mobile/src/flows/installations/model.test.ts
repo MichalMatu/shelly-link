@@ -3,10 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   createInstalledAutomation,
   createTimeInstalledAutomation,
-  createTimePulseInstalledAutomation,
   findRelayOwnerConflict,
   installedAutomationRelayId,
-  isTimePulseInstalledAutomation,
   timeInstalledAutomationSchema
 } from './model.js';
 
@@ -45,17 +43,16 @@ const pulse = {
   execution: { mode: 'continuous' as const }
 };
 
-const timePulse = createTimePulseInstalledAutomation({
-  shelly,
-  shellyName: 'Grow plug',
-  baseUrl: 'http://192.168.0.20',
-  onJobId: 9,
-  offJobId: 10,
-  scriptId: 2,
-  scriptHash: 'pulse-hash',
+const timePulse = timeInstalledAutomationSchema.parse({
+  ...time,
+  schedule: { onJobId: 9, offJobId: 10 },
   config: { relayId: 0, onTime: '22:00', offTime: '06:00' },
-  pulse,
-  nowMs: 3
+  pulseRuntime: {
+    script: { id: 2, hash: 'pulse-hash' },
+    pulse
+  },
+  installedAtMs: 3,
+  updatedAtMs: 3
 });
 
 describe('installed automation ownership', () => {
@@ -69,13 +66,11 @@ describe('installed automation ownership', () => {
 
   it('keeps Steady Time unchanged and persists Pulse runtime beside its daily config', () => {
     expect(time.pulseRuntime).toBeUndefined();
-    expect(isTimePulseInstalledAutomation(time)).toBe(false);
     expect(timePulse.config).toEqual({ relayId: 0, onTime: '22:00', offTime: '06:00' });
     expect(timePulse.pulseRuntime).toEqual({
       script: { id: 2, hash: 'pulse-hash' },
       pulse
     });
-    expect(isTimePulseInstalledAutomation(timePulse)).toBe(true);
   });
 
   it('validates persisted Pulse settings without weakening the old Time schema', () => {
