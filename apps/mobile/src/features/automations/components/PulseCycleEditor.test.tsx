@@ -63,8 +63,9 @@ describe('PulseCycleEditor', () => {
 
   it('always shows the same parameters for standalone Pulse', () => {
     renderEditor({ optional: false });
-    expect(screen.getByText('Przełączaj przekaźnik ON/OFF jednym wspólnym cyklem Pulse.'))
-      .toBeInTheDocument();
+    expect(
+      screen.getByText('Przełączaj przekaźnik ON/OFF jednym wspólnym cyklem Pulse.')
+    ).toBeInTheDocument();
     expect(screen.getByText('Czas ON (s)')).toBeInTheDocument();
   });
 
