@@ -106,7 +106,7 @@ export const ClimateHistoryChart = ({
 
   return (
     <div className="climate-history-chart" role="group" aria-label={labels.title}>
-      {HISTORY_PANEL_METRICS.map((metric, index) => {
+      {HISTORY_PANEL_METRICS.map((metric) => {
         const values = historyMetricValues(records, metric);
         const domain =
           metric.id === 'output'
@@ -125,14 +125,29 @@ export const ClimateHistoryChart = ({
             domain={domain}
             currentValue={formatMetricValue(metric, latest)}
             rangeValue={formatRange(metric)}
-            formatX={formatAxisX}
             formatY={(value) => number.format(value)}
-            showTimeAxis={index === HISTORY_PANEL_METRICS.length - 1}
             onLabel={labels.on}
             offLabel={labels.off}
           />
         );
       })}
+
+      <div className="climate-history-chart__time-axis" aria-hidden="true">
+        {xTicks.map((tick, index) => {
+          const position = xSpan <= 0 ? 50 : ((tick - xStart) / xSpan) * 100;
+          const edge =
+            index === 0 ? 'start' : index === xTicks.length - 1 ? 'end' : 'middle';
+          return (
+            <span
+              key={tick}
+              data-edge={edge}
+              style={{ left: `${Math.min(100, Math.max(0, position))}%` }}
+            >
+              {formatAxisX(tick)}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 };
