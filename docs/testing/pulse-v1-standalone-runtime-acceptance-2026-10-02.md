@@ -10,8 +10,8 @@ Standalone Pulse has no Climate or Time parent. It is implemented as a thin adap
 
 - branch: `pulse-v1-standalone-adapter`
 - hardware-tested runtime/code candidate: `bcfb01f5c6e76bcf571ed013bc650f4d847861e6`
-- later code-only descendant before documentation: `523b43849d85d7fc0c369ac2d2c23b31182d42f5`
-- the descendant only adds the Standalone Pulse model exports used by app orchestration; it does not change generated Shelly runtime behavior.
+- final code-only qualification candidate before durable closeout: `452b69d957dcc0f4d4efb5c777a5c186bfdbc247`
+- descendants after the hardware-tested runtime only add app ownership/reconciliation integration, repository-boundary cleanup, tests and durable documentation; they do not change the generated Standalone Shelly runtime behavior.
 
 `main` remained untouched.
 
@@ -38,13 +38,15 @@ The existing Climate and Time + Pulse runtime slices were not reopened or minifi
 
 ## Software evidence
 
-Focused package checks passed on the Standalone branch:
+The final code-only candidate passed:
 
 - `@lcl/automation-core` typecheck and tests: **157/157 passed**;
-- `@lcl/script-generator` typecheck and Standalone runtime tests: **15/15 passed** after the final relay-fault case was added;
-- the full script-generator suite at the first package gate: **227/227 passed**;
-- mobile typecheck passed;
-- focused mobile persistence/lifecycle/reconciliation tests: **15/15 passed**, including the existing Time + Pulse reconciliation regression.
+- Standalone generator/runtime focused tests: **16/16 passed**, including relay-control fault safe-OFF and the explicit `>12000 B` hard-size guard;
+- the full `@lcl/script-generator` suite: **229/229 passed with 100% statements / branches / functions / lines**;
+- mobile typecheck;
+- focused mobile persistence/lifecycle/reconciliation tests: **15/15 passed**, including the existing Time + Pulse reconciliation regression;
+- feature-boundary quality gate after narrowing unused public re-exports without changing runtime behavior;
+- full repository `pnpm check` with exit code 0 and a clean worktree on `452b69d957dcc0f4d4efb5c777a5c186bfdbc247`.
 
 The generated runtime tests cover:
 
@@ -59,7 +61,8 @@ The generated runtime tests cover:
 - Duration truncation and safe-OFF completion;
 - lifecycle cancellation;
 - relay-control failure latching and forced OFF;
-- native switch-protection errors and boot-time protection errors.
+- native switch-protection errors and boot-time protection errors;
+- enforcement of the accepted 12000 B hard generated-size ceiling.
 
 Representative generated sizes are far below the accepted 12000 B hard ceiling:
 
