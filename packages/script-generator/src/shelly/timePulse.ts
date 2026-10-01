@@ -49,18 +49,14 @@ const runtimePulse = (pulse: PulseCycleConfig): TimePulseRuntimeConfig['e'] => [
       : -pulse.execution.durationMs
 ];
 
-const runtimeConfig = (config: TimePulseAutomationConfig): TimePulseRuntimeConfig => {
-  const start = parseClockMinutes(config.schedule.onTime);
-  const end = parseClockMinutes(config.schedule.offTime);
-  if (start === null || end === null || start === end) {
-    throw new Error('Cannot generate Time + Pulse from an invalid daily window.');
-  }
-  return {
-    i: config.schedule.relayId,
-    w: [start, end],
-    e: runtimePulse(config.pulse)
-  };
-};
+const runtimeConfig = (config: TimePulseAutomationConfig): TimePulseRuntimeConfig => ({
+  i: config.schedule.relayId,
+  w: [
+    parseClockMinutes(config.schedule.onTime)!,
+    parseClockMinutes(config.schedule.offTime)!
+  ],
+  e: runtimePulse(config.pulse)
+});
 
 const renderTimePulseRelay =
   (): string => `function ff(){if(R.ri)Timer.clear(R.ri);Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.ri=Timer.set(1000,false,ff);return}R.ri=0;R.on=false})}
