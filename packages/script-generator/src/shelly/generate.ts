@@ -29,7 +29,7 @@ const COMPOSITE_MEASUREMENT_WINDOW_MS = 90_000;
 const MINIMUM_ON_GENERATOR_VERSION = '0.6.2';
 const DEBOUNCE_GENERATOR_VERSION = '0.6.3';
 const EXECUTION_GENERATOR_VERSION = '0.7.0';
-export const SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES = 9_500;
+export const SHELLY_THERMOSTAT_SCRIPT_MAX_BYTES = 12_000;
 
 const renderPersistentConfigLoader = (
   minimumOnEnabled = false,
