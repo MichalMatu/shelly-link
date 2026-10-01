@@ -22,6 +22,7 @@ export type TimePulseAutomationClients = {
     | 'getDeviceInfo'
     | 'getStatus'
     | 'installScript'
+    | 'startScript'
     | 'stopScript'
     | 'deleteScript'
     | 'evaluateScript'
