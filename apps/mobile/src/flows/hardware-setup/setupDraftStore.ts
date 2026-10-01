@@ -3,13 +3,16 @@ import type { SensorProfileId } from '@lcl/device-profiles';
 import { create } from 'zustand';
 import {
   createClimateAutomationEditDraftPatch,
+  DEFAULT_PULSE_CYCLE_FORM,
   DEFAULT_RULE_ADVANCED_SETTINGS,
+  pulseCycleFormFromConfig,
   removeSensorSelection,
   selectSensorSelection,
   setAdditionalSensorSelection,
   toggleAdditionalSensorSelection,
   upsertSensorSelection,
   type ClimateInstalledAutomation,
+  type PulseCycleFormDraft,
   type SensorDraftActions
 } from '../../features/automations/index.js';
 import {
@@ -61,6 +64,7 @@ const defaultThresholdInputsForPreset = (
 type HardwareSetupDraftState = HardwareSetupDraft &
   SensorDraftActions<SensorDraftDevice> & {
     sensorMembershipEditStarted: boolean;
+    pulseCycleDraft: PulseCycleFormDraft;
     setShellyNameInput(value: string): void;
     setShellyUrlInput(value: string): void;
     selectShellyDevice(id: string | null): void;
@@ -77,6 +81,7 @@ type HardwareSetupDraftState = HardwareSetupDraft &
     setStaleTimeoutMinInput(value: string): void;
     setMinChangeMinInput(value: string): void;
     setMaxOnHoursInput(value: string): void;
+    setPulseCycleDraft(patch: Partial<PulseCycleFormDraft>): void;
     loadClimateAutomationDraft(installation: ClimateInstalledAutomation): void;
     commitClimateAutomationDraft(installationId: string): void;
   };
@@ -131,6 +136,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
   return {
     ...initialDraft,
     sensorMembershipEditStarted: false,
+    pulseCycleDraft: { ...DEFAULT_PULSE_CYCLE_FORM },
     setShellyNameInput: (shellyNameInput) => set({ shellyNameInput }),
     setShellyUrlInput: (shellyUrlInput) => set({ shellyUrlInput }),
     selectShellyDevice: (id) =>
@@ -204,6 +210,8 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
       updateDraft({ staleTimeoutMinInput }),
     setMinChangeMinInput: (minChangeMinInput) => updateDraft({ minChangeMinInput }),
     setMaxOnHoursInput: (maxOnHoursInput) => updateDraft({ maxOnHoursInput }),
+    setPulseCycleDraft: (patch) =>
+      set((state) => ({ pulseCycleDraft: { ...state.pulseCycleDraft, ...patch } })),
     loadClimateAutomationDraft: (installation) => {
       useSavedPlugStore.getState().saveWifiDevice({
         physicalId: installation.shelly.deviceId,
@@ -218,7 +226,8 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           state,
           createClimateAutomationEditDraftPatch(state, installation)
         ),
-        sensorMembershipEditStarted: false
+        sensorMembershipEditStarted: false,
+        pulseCycleDraft: pulseCycleFormFromConfig(installation.config.execution?.pulse)
       }));
     },
     commitClimateAutomationDraft: (installationId) =>
@@ -238,6 +247,7 @@ export const resetHardwareSetupDraftStore = () => {
   clearStoredHardwareSetupDraft();
   useHardwareSetupDraftStore.setState({
     ...DEFAULT_HARDWARE_SETUP_DRAFT,
-    sensorMembershipEditStarted: false
+    sensorMembershipEditStarted: false,
+    pulseCycleDraft: { ...DEFAULT_PULSE_CYCLE_FORM }
   });
 };
