@@ -1,10 +1,21 @@
-import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
+import {
+  PULSE_MAX_CYCLES,
+  PULSE_MAX_DURATION_MS,
+  PULSE_MAX_INITIAL_DELAY_MS,
+  PULSE_MAX_PHASE_MS,
+  PULSE_MIN_DURATION_MS,
+  PULSE_MIN_PHASE_MS,
+  defaultRuleForPreset,
+  type RulePresetId
+} from '@lcl/automation-core';
 import { outputProfileIdSchema, sensorProfileIdSchema } from '@lcl/device-profiles';
 import { z } from 'zod';
 
 export const GENERATOR_VERSION = '0.6.1';
 export const MAX_CLIMATE_SENSORS = 4;
 export const MAX_CLIMATE_SENSOR_DISPLAY_NAME_RUNTIME_BYTES = 26;
+
+const clockTimePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 const shellyRuntimeAddressSchema = z
   .string()
@@ -38,6 +49,43 @@ const relayDebounceSchema = z
     message: 'Relay debounce must enable at least one direction.'
   });
 
+export const pulseCycleConfigSchema = z.object({
+  onMs: z.number().int().min(PULSE_MIN_PHASE_MS).max(PULSE_MAX_PHASE_MS),
+  offMs: z.number().int().min(PULSE_MIN_PHASE_MS).max(PULSE_MAX_PHASE_MS),
+  initialDelayMs: z.number().int().min(0).max(PULSE_MAX_INITIAL_DELAY_MS).default(0),
+  startPhase: z.enum(['on', 'off']).default('on'),
+  execution: z.discriminatedUnion('mode', [
+    z.object({ mode: z.literal('continuous') }),
+    z.object({
+      mode: z.literal('cycles'),
+      count: z.number().int().min(1).max(PULSE_MAX_CYCLES)
+    }),
+    z.object({
+      mode: z.literal('duration'),
+      durationMs: z.number().int().min(PULSE_MIN_DURATION_MS).max(PULSE_MAX_DURATION_MS)
+    })
+  ])
+});
+
+export const dailyTimeWindowSchema = z
+  .object({
+    startTime: z.string().regex(clockTimePattern),
+    endTime: z.string().regex(clockTimePattern)
+  })
+  .refine((value) => value.startTime !== value.endTime, {
+    message: 'Start and end times must be different.',
+    path: ['endTime']
+  });
+
+export const climateExecutionSchema = z
+  .object({
+    pulse: pulseCycleConfigSchema.optional(),
+    activeWindow: dailyTimeWindowSchema.optional()
+  })
+  .refine((value) => value.pulse !== undefined || value.activeWindow !== undefined, {
+    message: 'Climate execution must enable Pulse or an active time window.'
+  });
+
 export const climateSensorSchema = z.object({
   profileId: sensorProfileIdSchema,
   sensorId: z.string().min(1),
@@ -50,6 +98,7 @@ export const climateSensorAggregationSchema = z.enum(['avg', 'min', 'max', 'firs
 
 export type ClimateSensor = z.infer<typeof climateSensorSchema>;
 export type ClimateSensorAggregation = z.infer<typeof climateSensorAggregationSchema>;
+export type ClimateExecution = z.infer<typeof climateExecutionSchema>;
 
 export const shellyThermostatConfigSchema = z
   .object({
@@ -90,6 +139,7 @@ export const shellyThermostatConfigSchema = z
       failSafe: z.literal('off'),
       bootState: z.literal('off')
     }),
+    execution: climateExecutionSchema.optional(),
     diagnostics: z.object({
       enabled: z.boolean().default(true)
     })
