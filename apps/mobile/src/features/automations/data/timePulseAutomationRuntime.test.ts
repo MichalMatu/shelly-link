@@ -149,9 +149,10 @@ class FakeTimePulseClients {
 const installationFor = (
   installed: Awaited<ReturnType<typeof installTimePulseAutomation>>
 ): OwnedTimePulseRuntimeInstallation => ({
-  ...installed,
   shelly: { baseUrl: 'http://192.168.0.20/', deviceId: 'shelly-time-pulse' },
-  config
+  schedule: installed.schedule,
+  config: config.schedule,
+  pulseRuntime: { script: installed.script, pulse: config.pulse }
 });
 
 describe('Time + Pulse runtime lifecycle', () => {
