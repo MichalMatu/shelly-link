@@ -130,7 +130,6 @@
 }
 
 .climate-history-chart__output-track {
-  fill: var(--history-color-output);
   shape-rendering: crispEdges;
   stroke: var(--history-color-output);
   stroke-linecap: butt;
@@ -138,6 +137,10 @@
   stroke-opacity: 0.72;
   stroke-width: var(--lcl-border-width-md);
   vector-effect: non-scaling-stroke;
+}
+
+circle.climate-history-chart__output-track {
+  fill: var(--history-color-output);
 }
 
 .climate-history-chart__selection-crosshair {
