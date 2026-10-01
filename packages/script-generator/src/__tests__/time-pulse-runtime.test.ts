@@ -71,11 +71,10 @@ const runGenerated = ({
   };
 
   const script = generateShellyTimePulseScript(config);
-  const api = new Function(
-    'Shelly',
-    'Timer',
-    `${script};return {rq:rq};`
-  )(Shelly, Timer) as { rq: (active: boolean) => number };
+  const api = new Function('Shelly', 'Timer', `${script};return {rq:rq};`)(
+    Shelly,
+    Timer
+  ) as { rq: (active: boolean) => number };
 
   const advance = (durationMs: number) => {
     const target = nowMs + durationMs;
