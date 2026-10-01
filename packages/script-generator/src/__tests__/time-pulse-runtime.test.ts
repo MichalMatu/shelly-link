@@ -119,6 +119,34 @@ describe('Time + Pulse generated runtime', () => {
     expect(script).toContain('"w":[1320,360]');
   });
 
+  it('encodes Cycles, Duration and OFF start phase in the compact runtime', () => {
+    const cycles = generateShellyTimePulseScript({
+      ...config,
+      pulse: {
+        ...config.pulse,
+        initialDelayMs: 500,
+        startPhase: 'off',
+        execution: { mode: 'cycles', count: 3 }
+      }
+    });
+    const duration = generateShellyTimePulseScript({
+      ...config,
+      pulse: {
+        ...config.pulse,
+        execution: { mode: 'duration', durationMs: 5_000 }
+      }
+    });
+
+    expect(cycles).toContain('"e":[1000,2000,500,1,3]');
+    expect(duration).toContain('"e":[1000,2000,0,0,-5000]');
+  });
+
+  it('rejects absent, malformed and schema-invalid embedded configs', () => {
+    expect(decodeShellyTimePulseScript('// g: 0.7.1\n')).toBeNull();
+    expect(decodeShellyTimePulseScript('// c: {not-json}\n')).toBeNull();
+    expect(decodeShellyTimePulseScript('// c: {"bad":true}\n')).toBeNull();
+  });
+
   it('reuses the shared Pulse cycle engine rather than a fork', () => {
     const script = generateShellyTimePulseScript(config);
     const compactSharedEngine = renderPulseCycleExecution().replace(/\n\s*/g, '');
