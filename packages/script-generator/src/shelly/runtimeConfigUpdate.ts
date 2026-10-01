@@ -12,8 +12,8 @@ export const generateShellyRuntimeConfigUpdateEval = (input: unknown): string =>
   const capabilityCheck = `${
     (config.rule.minimumOnMs ?? 0) > 0 ? 'if(typeof U==="undefined")return"iv";' : ''
   }${config.rule.relayDebounce ? 'if(typeof D==="undefined")return"iv";' : ''}${
-    config.execution?.pulse ? 'if(typeof P==="undefined")return"iv";' : ''
-  }${config.execution?.activeWindow ? 'if(typeof W==="undefined")return"iv";' : ''}`;
+    config.execution?.pulse ? 'if(typeof px!=="function")return"iv";' : ''
+  }${config.execution?.activeWindow ? 'if(typeof wu!=="function")return"iv";' : ''}`;
   const resetExecution =
     config.execution !== undefined
       ? 'if(typeof cx==="function")cx("cu");if(R.pa!==void 0)R.pa=false;if(R.wg!==void 0){R.wg++;R.wo=-1}'
