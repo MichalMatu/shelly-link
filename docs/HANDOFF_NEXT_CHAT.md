@@ -1,19 +1,21 @@
 # Handoff — Pulse V1 runtime integration
 
-Status: **2026-10-01 — Pulse V1 generated Climate runtime integration is in progress on `pulse-v1-runtime-integration`; the accepted hard generated-script ceiling is 12000 B, with 9500 B retained only as a preferred optimization target.**
+Status: **2026-10-01 — the generated Climate + Pulse + optional active-window runtime slice is qualified on `pulse-v1-runtime-integration`; Time + Pulse, standalone Pulse and Pulse UI remain later Pulse V1 slices. The accepted hard generated-script ceiling is 12000 B, with 9500 B retained only as a preferred optimization target.**
 
 Repository: `MichalMatu/shelly-link`
 
 ## Start here
 
 1. Fetch fresh `main`, `pulse-v1-runtime-integration` and `agent-control`.
-2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md` and `docs/UX_VISUAL_CONTRACT.md`.
+2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md`, `docs/UX_VISUAL_CONTRACT.md` and `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`.
 3. Read fresh `agent-control:.agent/status/daemon.json`; never reuse an old conversation binding.
 4. Confirm there is no active Local Agent task and no duplicate/open PR before continuing.
-5. Keep `main` untouched until the working branch is qualified. The accepted pre-integration baseline is `a2297e3040d98916782af5327a635b45375b19e1`.
+5. Keep `main` untouched until the working branch is reviewed/merged. The accepted pre-integration baseline is `a2297e3040d98916782af5327a635b45375b19e1`.
 6. Keep 9500 B as a preferred generated-runtime target, but enforce **12000 B as the accepted hard ceiling**. Do not remove safety/recovery behavior, narrow supported sensor combinations or perform risky logic/minification refactors solely to save bytes.
 
-The latest focused size matrix on the runtime branch passed with a 12000 B guard. The tested supported worst case — four sensors with mixed BTHome/TP357 parsers, maximum runtime display-name budget, VPD, minimum ON, debounce, large timing values, Pulse and an overnight active window — generated **11332 B**, leaving **668 B** headroom. The same focused Local Agent run passed script-generator typecheck and **179/179 tests**. This is not yet real-Plug acceptance and is not a substitute for the final repository gate.
+The qualified runtime/code candidate is `fe50778d956906749c00f9da9b7237e6e617c970`. The supported worst case — four sensors with mixed BTHome/TP357 parsers, maximum runtime display-name budget, VPD, minimum ON, debounce, large timing values, Pulse and an overnight active window — generated **11332 B**, leaving **668 B** headroom. Script-generator qualification passed **201/201 tests with 100% statements/branches/functions/lines**, and the exact code candidate passed the full repository `pnpm check` with a clean worktree.
+
+Real Plug S Gen3 acceptance also passed on `shellyplugsg3-e4b063d7f530`, model `S3PL-00112EU`, firmware `1.7.5`. The 11332 B worst-case runtime loaded and started cleanly with relay OFF. A real TP357 advertisement then drove the normal generated path through a physical **OFF -> ON -> OFF** Pulse transition. Cleanup deleted the temporary runtime, explicitly verified final relay OFF at 0 W / 0 A, restored the original production runtime as the only running script and preserved its source SHA byte-for-byte. Full details are in `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`.
 
 ## Accepted History baseline
 
@@ -47,16 +49,16 @@ Temperature and Humidity additionally support an optional daily active window, i
 
 Do not build separate temperature-pulse, humidity-pulse and time-pulse runtimes.
 
-## Runtime integration already on the working branch
+## Qualified Climate runtime slice
 
-The working branch currently carries the Climate execution integration, not UI:
+The working branch now carries the qualified Climate execution integration, still without Pulse UI:
 
 - compact persistent runtime representation for optional Pulse (`e`) and active window (`w`), with decode/recovery/reconciliation round-trip;
 - a generated execution gate between the Climate parent request and the existing relay arbiter;
 - local one-shot Shelly `Timer` ownership for Pulse phase transitions and daily window boundaries rather than phone timers or one-second polling;
 - Continuous, Cycles and Duration Pulse representation, optional initial delay, ON/OFF start phase and safe-OFF completion;
 - active-window evaluation from Shelly `sys.time` / `unixtime`, including overnight windows and fail-safe OFF when local time is not trustworthy;
-- MANUAL, automation-fault, hard-safety and parent-inactive paths cancel Pulse rather than allowing a cycle to finish;
+- MANUAL, automation-fault, hard-safety, parent-inactive and active-window-close paths cancel Pulse rather than allowing a cycle to finish;
 - the existing relay arbiter remains the single owner of minimum ON/OFF, debounce and final relay mutation;
 - relay maturity waits can complete from one-shot timers rather than depending on a later BLE measurement;
 - diagnostics expose execution state compactly while existing History records continue to explain transitions through requested/final relay plus reason codes;
@@ -94,11 +96,16 @@ The Pulse controls should follow the compact optional-control pattern already us
 - Existing minimum ON/OFF, debounce and cooldown ownership must compose with Pulse rather than being duplicated.
 - History/status must be able to explain Pulse-driven transitions; React may display phase/progress but must not own timers.
 
-## What remains before runtime slice acceptance
+## What remains after Climate runtime qualification
 
-Do not treat the current focused green run as full Pulse V1 acceptance. Still complete focused generated-runtime behavior coverage for Pulse phase/boundary/cancellation semantics, active-window entry/exit and overnight boundaries, AUTO/MANUAL, automation fault, hard safety, reboot-safe behavior and minimum ON/OFF/debounce composition. Then run the required final repository `pnpm check` on the exact qualified branch state and perform real Plug S Gen3 acceptance. Any relay-mutating hardware test must finish with the relay explicitly verified OFF.
+Do **not** call all of Pulse V1 complete yet. The Climate + Pulse runtime slice above is qualified; the next implementation slices are:
 
-Time + Pulse and standalone Pulse adapters/runtime composition follow once Climate + Pulse is stable. UI work remains later and must reuse the shared model/runtime rather than fork it.
+1. Time + Pulse composition using the existing Time daily window without changing `DailyTimeAutomationConfig` or replacing native steady schedules;
+2. standalone Pulse runtime/adapter reusing the same shared Pulse-cycle engine;
+3. Pulse setup/editor UI and responsive/visual acceptance;
+4. dashboard/detail Pulse status presentation where accepted by the product UX.
+
+Keep those slices explicit. Do not reopen the qualified Climate runtime or continue minifying it unless a concrete failing test, hardware issue or size regression justifies a change.
 
 ## Sequence after Pulse V1
 
@@ -117,4 +124,4 @@ After V1 stabilization/freeze, return to Pulse as the first growth track. `docs/
 
 ## Verification rule
 
-Use the normal repository loop: architecture/UX gate -> smallest cohesive implementation -> focused checks -> responsive/visual evidence when geometry changes -> real-device evidence when relevant -> exactly one final full `pnpm check` on the exact qualified state -> cleanup temporary branches/artifacts. If real Shelly runtime is touched, use identity-first access and finish with explicitly verified relay OFF.
+Use the normal repository loop: architecture/UX gate -> smallest cohesive implementation -> focused checks -> responsive/visual evidence when geometry changes -> real-device evidence when relevant -> final full repository gate on the exact qualified state -> cleanup temporary branches/artifacts. If real Shelly runtime is touched, use identity-first access and finish with explicitly verified relay OFF.
