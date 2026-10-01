@@ -11,7 +11,7 @@ Repository: `MichalMatu/shelly-link`
 3. Read fresh `agent-control:.agent/status/daemon.json`; never reuse an old conversation binding.
 4. Confirm there is no active Local Agent task and no open PR before starting work.
 5. Start from the accepted History/runtime/safety baseline. Do not reopen History KVS/`HistoryRecord[]` without concrete evidence of a data-model limitation.
-6. Run the Pulse preimplementation architecture + runtime-size gate before adding generated runtime behavior. The 9500 B generator guard must not be raised as a shortcut.
+6. Run the Pulse architecture + runtime-size gate before adding generated runtime behavior. Keep 9500 B as the preferred target; if the final supported Pulse + active-window worst case exceeds it, the user explicitly accepts a one-time guard increase to 10000 B after focused generator and real-Plug validation. Do not remove working safety/recovery behavior merely to stay below 9500 B.
 
 Durable remote branches after closeout should remain only:
 
@@ -35,7 +35,7 @@ The previously stale History responsive contract is now closed: the Current asse
 
 ## Next slice — Pulse V1
 
-Pulse is no longer merely a parked primitive. The existing pure `RelayPulseAction` / one-shot pulse state machine is the foundation for a user-facing Pulse V1.
+Pulse is no longer merely a parked primitive. The existing pure `RelayPulseAction` / one-shot pulse state machine remains a foundation. A shared bounded Pulse-cycle model now defines ON/OFF phases, initial delay, Continuous/Cycles/Duration execution, start phase and safe-OFF completion. Climate config can carry optional Pulse and daily active-window execution without changing the old config shape when those features are unused. Generated Shelly runtime integration and UI are still the next implementation work.
 
 ### Product shape
 
@@ -50,6 +50,8 @@ Temperature, Humidity and Time also gain an output behavior choice:
 
 - **Steady** — existing normal relay behavior;
 - **Pulse** — while the parent automation requests active output, execute the shared Pulse cycle.
+
+Temperature and Humidity additionally gain an optional daily active window, including windows that cross midnight. Outside the window AUTO is inactive/safe OFF. Existing steady Time remains the native Shelly schedule contract; do not overload its current `DailyTimeAutomationConfig` semantics. Time + Pulse should compose the existing daily window with the shared Pulse engine through an explicit runtime model.
 
 Standalone Pulse uses exactly the same pulse engine/configuration without a climate parent condition.
 

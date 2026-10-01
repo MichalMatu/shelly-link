@@ -54,7 +54,10 @@ describe('Pulse execution config', () => {
       }
     });
 
-    expect(parsed.execution?.activeWindow).toEqual({ startTime: '22:00', endTime: '06:00' });
+    expect(parsed.execution?.activeWindow).toEqual({
+      startTime: '22:00',
+      endTime: '06:00'
+    });
     expect(parsed.execution?.pulse?.execution).toEqual({ mode: 'cycles', count: 12 });
   });
 

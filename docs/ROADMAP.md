@@ -47,7 +47,7 @@ Merged foundations/runtime work:
 - Climate runtime relay-debounce integration with one-shot maturity and forced-OFF precedence;
 - runtime source compaction without raising the 9500 B guard.
 
-The pure `RelayPulseAction` / pulse state machine is a tested foundation, not the final user-facing Pulse feature. Pulse V1 is now an explicit V1 slice and is defined in section 6.
+The pure `RelayPulseAction` / one-shot state machine remains supported. Pulse V1 additionally has a bounded shared cycle model for ON/OFF phases, initial delay, Continuous/Cycles/Duration execution and safe-OFF completion. Climate configuration can carry optional `execution.pulse` and/or `execution.activeWindow`; when `execution` is absent, the existing steady Climate config shape remains unchanged. These are configuration/domain foundations until generated-runtime integration is completed. Pulse V1 is defined in section 6.
 
 Advanced rule candidates that remain parked and do **not** block Pulse V1:
 
@@ -55,7 +55,7 @@ Advanced rule candidates that remain parked and do **not** block Pulse V1:
 - general AND/OR condition execution in the Climate runtime;
 - configuration/editor surfaces for those general condition-composition capabilities if they are later accepted.
 
-**Constraint:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Before adding Pulse runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
+**Runtime-size policy:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Keep 9500 B as the preferred target while Pulse and active-window execution are integrated, and emit new runtime logic only for configurations that use it. If the final supported Pulse + active-window worst case genuinely exceeds 9500 B, the guard may be raised once to **10000 B** after focused generator coverage and real-Plug validation. Do not remove working safety/recovery capability or perform risky refactors solely to defend the old 9500 B target.
 
 ### 4. Pre-charts closeout — completed 2026-09-30
 
@@ -97,6 +97,8 @@ Temperature, Humidity and Time additionally support an output behavior selector:
 
 - **Steady** — current normal ON/OFF behavior;
 - **Pulse** — when the parent automation requests active output, execute the shared Pulse cycle instead of holding the relay continuously ON.
+
+Temperature and Humidity also support an optional daily **active window**. Outside that window AUTO requests safe OFF; inside it the existing climate condition decides whether output is active. Active windows may cross midnight. Time automation already owns an explicit daily ON/OFF window; Time + Pulse reuses that window rather than introducing another scheduler.
 
 Standalone Pulse is the same engine without a climate condition. It is useful for pumps, fans, irrigation, mixers, dosing and other periodic loads.
 
@@ -145,7 +147,7 @@ History and operational status must remain explanatory: Pulse-driven relay chang
 
 Before calling Pulse V1 complete:
 
-- re-audit generated-runtime byte budget before adding behavior; do not raise the 9500 B guard to make it fit;
+- re-audit generated-runtime byte budget after Pulse + active-window behavior exists; keep 9500 B when practical, but allow the explicitly accepted 10000 B final guard if the supported worst case requires it;
 - add pure domain/state-machine tests for cycle, cancellation, completion and boundary timing;
 - test Temperature + Pulse, Humidity + Pulse, Time + Pulse and standalone Pulse composition;
 - cover Continuous, Cycles and Duration modes;
@@ -174,6 +176,7 @@ Feature-complete v1 requires:
 - Climate temperature / humidity / VPD automation with 1–4 BLE thermometers;
 - Time automation;
 - Pulse V1 as both the fourth standalone automation type and an optional output mode for Temperature, Humidity and Time;
+- optional daily active-window gating for Temperature/Humidity automation, including overnight windows;
 - canonical Plug persistence and transport promotion;
 - AUTO/MANUAL with separate automation-fault and hard-safety axes;
 - capability-correct manual control;
@@ -199,7 +202,7 @@ Candidate Pulse Advanced features:
 - **maximum accumulated ON time / duty budget** over a larger window as an additional operational guard where useful;
 - richer cycle/burst progress and History diagnostics.
 
-Every Pulse Advanced addition requires another generated-runtime size/headroom audit and must preserve one relay owner, safe-OFF precedence and the shared Pulse engine. If runtime headroom is insufficient, optimize/reuse first or postpone the feature; do not raise the generator limit as a shortcut.
+Every Pulse Advanced addition requires another generated-runtime size/headroom audit and must preserve one relay owner, safe-OFF precedence and the shared Pulse engine. The accepted V1 ceiling is 10000 B; post-freeze features must optimize/reuse or be postponed rather than casually raising that ceiling again.
 
 ## Post-freeze
 

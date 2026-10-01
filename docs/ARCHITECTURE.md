@@ -105,7 +105,7 @@ rule decision
 
 Hard safety and other forced-OFF paths remain authoritative and are never delayed by debounce or minimum-ON timing. The legacy `minChangeMs` behavior is the minimum-OFF/cooldown owner; adding another cooldown owner would duplicate semantics.
 
-Pure domain primitives also exist for Pulse actions, daily time windows and flat AND/OR condition composition. Until those are integrated into the generated Climate runtime, they are foundations rather than installed runtime capabilities and must not be presented as if Shelly executes them.
+Pure domain primitives also exist for Pulse actions, bounded Pulse cycles, daily time windows and flat AND/OR condition composition. The Pulse-cycle model supports ON/OFF phases, initial delay, Continuous/Cycles/Duration execution, selectable start phase and safe-OFF completion. Climate configuration may optionally carry Pulse and/or an active daily window; absence of that optional execution block preserves the existing steady configuration shape. Until generated-runtime integration is completed, these remain foundations rather than installed runtime capabilities and must not be presented as if Shelly executes them. Existing steady Time automation remains a native Shelly schedule and keeps its current schedule semantics.
 
 ## Climate engine and persistent config
 

@@ -69,7 +69,12 @@ const nonnegativeFinite = (value: number, label: string): void => {
 
 export const validatePulseCycleConfig = (config: PulseCycleConfig): void => {
   finiteInRange(config.onMs, PULSE_MIN_PHASE_MS, PULSE_MAX_PHASE_MS, 'Pulse ON duration');
-  finiteInRange(config.offMs, PULSE_MIN_PHASE_MS, PULSE_MAX_PHASE_MS, 'Pulse OFF duration');
+  finiteInRange(
+    config.offMs,
+    PULSE_MIN_PHASE_MS,
+    PULSE_MAX_PHASE_MS,
+    'Pulse OFF duration'
+  );
   finiteInRange(
     config.initialDelayMs,
     0,
@@ -83,7 +88,9 @@ export const validatePulseCycleConfig = (config: PulseCycleConfig): void => {
       config.execution.count < 1 ||
       config.execution.count > PULSE_MAX_CYCLES
     ) {
-      throw new RangeError(`Pulse cycle count must be between 1 and ${PULSE_MAX_CYCLES}.`);
+      throw new RangeError(
+        `Pulse cycle count must be between 1 and ${PULSE_MAX_CYCLES}.`
+      );
     }
   }
 
@@ -97,7 +104,10 @@ export const validatePulseCycleConfig = (config: PulseCycleConfig): void => {
   }
 };
 
-const completedOnPhasesAt = (config: PulseCycleConfig, activeElapsedMs: number): number => {
+const completedOnPhasesAt = (
+  config: PulseCycleConfig,
+  activeElapsedMs: number
+): number => {
   const cycleMs = config.onMs + config.offMs;
   if (config.startPhase === 'on') {
     return Math.floor((activeElapsedMs + config.offMs) / cycleMs);

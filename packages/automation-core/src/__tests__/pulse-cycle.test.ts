@@ -5,9 +5,7 @@ import {
   type PulseCycleConfig
 } from '../actions/pulseCycle.js';
 
-const continuous = (
-  overrides: Partial<PulseCycleConfig> = {}
-): PulseCycleConfig => ({
+const continuous = (overrides: Partial<PulseCycleConfig> = {}): PulseCycleConfig => ({
   onMs: 10_000,
   offMs: 20_000,
   initialDelayMs: 0,
@@ -185,7 +183,9 @@ describe('Pulse cycle', () => {
     ).toThrow(RangeError);
     expect(() =>
       validatePulseCycleConfig(
-        continuous({ execution: { mode: 'duration', durationMs: Number.POSITIVE_INFINITY } })
+        continuous({
+          execution: { mode: 'duration', durationMs: Number.POSITIVE_INFINITY }
+        })
       )
     ).toThrow(RangeError);
     expect(() => evaluatePulseCycle(continuous(), 10, 9)).toThrow(RangeError);
