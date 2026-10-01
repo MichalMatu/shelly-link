@@ -17,16 +17,8 @@
 
   background: linear-gradient(
     180deg,
-    color-mix(
-      in srgb,
-      var(--lcl-color-surface) 55%,
-      var(--lcl-color-background) 45%
-    ),
-    color-mix(
-      in srgb,
-      var(--lcl-color-surface) 35%,
-      var(--lcl-color-background) 65%
-    )
+    color-mix(in srgb, var(--lcl-color-surface) 55%, var(--lcl-color-background) 45%),
+    color-mix(in srgb, var(--lcl-color-surface) 35%, var(--lcl-color-background) 65%)
   );
   border: var(--lcl-border-width-sm) solid
     color-mix(in srgb, var(--lcl-color-border) 90%, var(--history-metric-color) 10%);
@@ -213,8 +205,7 @@ circle.climate-history-chart__output-track {
     height: 4.75rem;
   }
 
-  .climate-history-chart__panel[data-metric='output']
-    .climate-history-chart__panel-plot {
+  .climate-history-chart__panel[data-metric='output'] .climate-history-chart__panel-plot {
     height: 4.25rem;
   }
 
