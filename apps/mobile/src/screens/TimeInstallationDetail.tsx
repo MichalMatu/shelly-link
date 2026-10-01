@@ -5,8 +5,7 @@ import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   deleteTimeAutomation,
-  deleteTimePulseAutomation,
-  isTimePulseInstalledAutomation,
+  timePulseAutomationRuntime,
   useInstalledAutomationStore,
   type TimeInstalledAutomation
 } from '../features/automations/index.js';
@@ -79,8 +78,8 @@ export const TimeInstallationDetail = ({
 
   const deleteMutation = useMutation({
     mutationFn: () =>
-      isTimePulseInstalledAutomation(installation)
-        ? deleteTimePulseAutomation(installation)
+      timePulseAutomationRuntime.isInstalled(installation)
+        ? timePulseAutomationRuntime.delete(installation)
         : deleteTimeAutomation(installation),
     onSuccess: () => {
       queryClient.removeQueries({
