@@ -26,13 +26,27 @@ export {
   resumeTimeAutomation,
   updateDailyTimeAutomation
 } from './data/timeAutomationRuntime.js';
+export {
+  createTimePulseAutomationClients,
+  deleteTimePulseAutomation,
+  installTimePulseAutomation,
+  pauseTimePulseAutomation,
+  resumeTimePulseAutomation,
+  type InstalledTimePulseRuntime,
+  type OwnedTimePulseRuntimeInstallation,
+  type TimePulseAutomationClients
+} from './data/timePulseAutomationRuntime.js';
 export { setTimeAutomationManualRelay } from './data/timeAutomationRelayControl.js';
 export { TimeAutomationRuntimeError } from './data/timeAutomationRuntimeError.js';
 export {
   readTimeAutomationRuntime,
   type TimeAutomationRuntimeSnapshot
 } from './data/timeAutomationRuntimeState.js';
-export { findScheduleRelayConflict } from './data/timeAutomationSchedule.js';
+export {
+  createTimePulseScheduleJob,
+  findScheduleRelayConflict,
+  timePulseSchedulePairState
+} from './data/timeAutomationSchedule.js';
 export {
   DEFAULT_RULE_ADVANCED_SETTINGS,
   RULE_ADVANCED_LIMITS,
