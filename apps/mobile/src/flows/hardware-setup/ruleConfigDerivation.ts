@@ -8,8 +8,10 @@ import {
 } from '@lcl/script-generator';
 import { t } from '../../app/i18n.js';
 import {
+  parsePulseCycleForm,
   parseRuleAdvancedSettings,
-  validateRuleAdvancedSettings
+  validateRuleAdvancedSettings,
+  type PulseCycleFormDraft
 } from '../../features/automations/index.js';
 import type { SensorDraftDevice } from './setupDraftStore.js';
 import {
@@ -47,6 +49,7 @@ type ClimateRuleDerivationInput = AdvancedRuleInputs & {
   rulePreset: RulePresetId;
   onThresholdInput: string;
   offThresholdInput: string;
+  pulseCycleDraft: PulseCycleFormDraft;
 };
 
 const climateSensorFromDraft = (sensor: SensorDraftDevice): ClimateSensor => ({
@@ -132,6 +135,7 @@ export const deriveClimateRuleState = ({
   rulePreset,
   onThresholdInput,
   offThresholdInput,
+  pulseCycleDraft,
   vpdAssistEnabled,
   vpdTargetInput,
   rssiMinInput,
@@ -148,6 +152,7 @@ export const deriveClimateRuleState = ({
     maxOnHoursInput
   };
   const advancedSettingsValidation = validateRuleAdvancedSettings(advancedInputs);
+  const pulseCycleValidation = parsePulseCycleForm(pulseCycleDraft);
 
   let configState: ClimateConfigState;
   try {
@@ -156,6 +161,9 @@ export const deriveClimateRuleState = ({
     }
     if (!advancedSettingsValidation.isValid) {
       throw new Error(t('hardware.flow.advancedOptionsInvalid'));
+    }
+    if (!pulseCycleValidation.ok) {
+      throw new Error(t('hardware.flow.configInvalid'));
     }
 
     const base = createDefaultShellyThermostatConfig(
@@ -173,6 +181,9 @@ export const deriveClimateRuleState = ({
               additionalSensors: additionalSensors.map(climateSensorFromDraft)
             }
           }
+        : {}),
+      ...(pulseCycleValidation.config
+        ? { execution: { pulse: pulseCycleValidation.config } }
         : {}),
       rule: {
         ...base.rule,
@@ -220,6 +231,7 @@ export const deriveClimateRuleState = ({
 
   return {
     advancedSettingsValidation,
+    pulseCycleValidation,
     configState,
     isThresholdValid,
     isVpdAssistValid: advancedSettingsValidation.isVpdTargetValid
