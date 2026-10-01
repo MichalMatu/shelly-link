@@ -174,7 +174,8 @@ circle.climate-history-chart__output-track {
     height: 7.75rem;
   }
 
-  .climate-history-chart__panel[data-metric='current'] .climate-history-chart__panel-plot {
+  .climate-history-chart__panel[data-metric='current']
+    .climate-history-chart__panel-plot {
     height: 9rem;
   }
 }
