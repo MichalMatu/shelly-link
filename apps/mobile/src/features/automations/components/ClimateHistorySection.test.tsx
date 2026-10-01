@@ -7,18 +7,26 @@ import { ClimateHistorySection } from './ClimateHistorySection.js';
 vi.mock('@nivo/line', () => ({
   ResponsiveLine: ({
     ariaLabel,
-    onClick
+    onClick,
+    onTouchEnd
   }: {
     ariaLabel?: string;
     onClick?: (datum: { points: readonly { data: { recordIndex: number } }[] }) => void;
-  }) => (
-    <div
-      role="img"
-      aria-label={ariaLabel}
-      data-testid="history-chart"
-      onClick={() => onClick?.({ points: [{ data: { recordIndex: 1 } }] })}
-    />
-  )
+    onTouchEnd?: (datum: {
+      points: readonly { data: { recordIndex: number } }[];
+    }) => void;
+  }) => {
+    const datum = { points: [{ data: { recordIndex: 1 } }] } as const;
+    return (
+      <div
+        role="img"
+        aria-label={ariaLabel}
+        data-testid="history-chart"
+        onClick={() => onClick?.(datum)}
+        onTouchEnd={() => onTouchEnd?.(datum)}
+      />
+    );
+  }
 }));
 
 const record = (uptimeSec: number, finalRelayOn: boolean): HistoryRecord => ({
@@ -107,18 +115,18 @@ describe('ClimateHistorySection', () => {
     expect(power).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('opens the shared tooltip only after a chart tap and toggles it closed', () => {
+  it('opens the shared tooltip only after a chart touch and toggles it closed', () => {
     renderSection({ records: [record(10, false), record(20, true)] });
 
     const chart = screen.getByRole('img', { name: 'History' });
     expect(screen.queryByText('AUTO · ON')).not.toBeInTheDocument();
 
-    fireEvent.click(chart);
+    fireEvent.touchEnd(chart);
     expect(screen.getByText('AUTO · ON')).toBeInTheDocument();
     expect(screen.getAllByText('12.3 W')).toHaveLength(2);
     expect(screen.getAllByText('0.06 A')).toHaveLength(2);
 
-    fireEvent.click(chart);
+    fireEvent.touchEnd(chart);
     expect(screen.queryByText('AUTO · ON')).not.toBeInTheDocument();
   });
 
