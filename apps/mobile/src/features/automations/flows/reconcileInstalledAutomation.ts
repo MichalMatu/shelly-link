@@ -13,6 +13,7 @@ import {
   isTimePulseInstalledAutomation,
   type ClimateInstalledAutomation,
   type InstalledAutomation,
+  type StandalonePulseInstalledAutomation,
   type TimeInstalledAutomation
 } from '../data/installedAutomation.js';
 import { readShellyAutomationScriptState } from '../data/shellyManagedAutomation.js';
@@ -120,13 +121,31 @@ const timeRuntimeMatches = async (
   );
 };
 
+const standalonePulseRuntimeMatches = async (
+  installation: StandalonePulseInstalledAutomation,
+  services: InstalledAutomationReconciliationServices
+): Promise<boolean> => {
+  const evidence = await services.readClimateRuntime(installation.shelly.baseUrl);
+  return (
+    evidence.scriptId === installation.script.id &&
+    evidence.running &&
+    evidence.code !== null &&
+    hashScriptCode(evidence.code) === installation.script.hash
+  );
+};
+
 const runtimeMatches = async (
   installation: InstalledAutomation,
   services: InstalledAutomationReconciliationServices
-): Promise<boolean> =>
-  installation.kind === 'climate'
-    ? climateRuntimeMatches(installation, services)
-    : timeRuntimeMatches(installation, services);
+): Promise<boolean> => {
+  if (installation.kind === 'climate') {
+    return climateRuntimeMatches(installation, services);
+  }
+  if (installation.kind === 'time') {
+    return timeRuntimeMatches(installation, services);
+  }
+  return standalonePulseRuntimeMatches(installation, services);
+};
 
 const decodeRecoverableClimateRuntime = (
   evidence: ClimateRuntimeEvidence

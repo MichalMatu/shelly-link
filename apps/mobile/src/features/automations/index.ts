@@ -26,6 +26,15 @@ export {
   updateDailyTimeAutomation
 } from './data/timeAutomationRuntime.js';
 export { timePulseAutomationRuntime } from './data/timePulseAutomationPublic.js';
+export {
+  createStandalonePulseAutomationClient,
+  deleteStandalonePulseAutomation,
+  installStandalonePulseAutomation,
+  pauseStandalonePulseAutomation,
+  resumeStandalonePulseAutomation,
+  type InstalledStandalonePulseRuntime,
+  type StandalonePulseAutomationClient
+} from './data/standalonePulseAutomationRuntime.js';
 export { setTimeAutomationManualRelay } from './data/timeAutomationRelayControl.js';
 export { TimeAutomationRuntimeError } from './data/timeAutomationRuntimeError.js';
 export {
@@ -82,16 +91,21 @@ export {
   climateInstalledAutomationSchema,
   createInstalledAutomation,
   createInstalledAutomationId,
+  createStandalonePulseInstalledAutomation,
+  createStandalonePulseInstalledAutomationId,
   createTimeInstalledAutomation,
   createTimeInstalledAutomationId,
   findInstalledRelayOwner,
   findRelayOwnerConflict,
   installedAutomationRelayId,
   installedAutomationSchema,
+  isStandalonePulseInstalledAutomation,
+  standalonePulseInstalledAutomationSchema,
   timeInstalledAutomationSchema,
   type ClimateInstalledAutomation,
   type InstalledAutomation,
   type InstalledAutomationKind,
+  type StandalonePulseInstalledAutomation,
   type TimeInstalledAutomation
 } from './data/installedAutomation.js';
 export {
