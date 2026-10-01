@@ -6,24 +6,42 @@ export type HistoryMetricDomain = readonly [min: number, max: number];
 type MetricScalePolicy = {
   minimumSpan: number;
   paddingRatio: number;
+  tickStep: number;
   baselineZero?: boolean;
   clampMin?: number;
   clampMax?: number;
 };
 
 const SCALE_POLICIES: Record<HistoryContinuousMetricId, MetricScalePolicy> = {
-  temperature: { minimumSpan: 2, paddingRatio: 0.1 },
-  humidity: { minimumSpan: 10, paddingRatio: 0.1, clampMin: 0, clampMax: 100 },
-  vpd: { minimumSpan: 0.5, paddingRatio: 0.1, clampMin: 0 },
-  power: { minimumSpan: 25, paddingRatio: 0.12, baselineZero: true, clampMin: 0 },
-  current: { minimumSpan: 0.25, paddingRatio: 0.12, baselineZero: true, clampMin: 0 }
+  temperature: { minimumSpan: 4, paddingRatio: 0.1, tickStep: 1 },
+  humidity: {
+    minimumSpan: 20,
+    paddingRatio: 0.1,
+    tickStep: 5,
+    clampMin: 0,
+    clampMax: 100
+  },
+  vpd: { minimumSpan: 0.5, paddingRatio: 0.1, tickStep: 0.1, clampMin: 0 },
+  power: {
+    minimumSpan: 50,
+    paddingRatio: 0.04,
+    tickStep: 10,
+    baselineZero: true,
+    clampMin: 0
+  },
+  current: {
+    minimumSpan: 0.6,
+    paddingRatio: 0.04,
+    tickStep: 0.1,
+    baselineZero: true,
+    clampMin: 0
+  }
 };
-
-export const HISTORY_CONTINUOUS_VISUAL_MIN = 0.18;
-export const HISTORY_CONTINUOUS_VISUAL_MAX = 0.94;
 
 const finiteValues = (values: readonly number[]): readonly number[] =>
   values.filter((value) => Number.isFinite(value));
+
+const cleanNumber = (value: number): number => Number(value.toFixed(6));
 
 const clampDomainPreservingSpan = (
   domain: HistoryMetricDomain,
@@ -45,7 +63,7 @@ const clampDomainPreservingSpan = (
   if (clampMin !== undefined) min = Math.max(clampMin, min);
   if (clampMax !== undefined) max = Math.min(clampMax, max);
 
-  return [min, max];
+  return [cleanNumber(min), cleanNumber(max)];
 };
 
 export const historyMetricDomain = (
@@ -69,32 +87,27 @@ export const historyMetricDomain = (
   const rawMax = Math.max(...usableValues);
 
   if (policy.baselineZero) {
-    const paddedMax = Math.max(0, rawMax) * (1 + policy.paddingRatio);
-    return [0, Math.max(policy.minimumSpan, paddedMax)];
+    const targetMax = Math.max(
+      policy.minimumSpan,
+      Math.max(0, rawMax) * (1 + policy.paddingRatio)
+    );
+    const max = Math.ceil(targetMax / policy.tickStep) * policy.tickStep;
+    return clampDomainPreservingSpan([0, max], policy.clampMin, policy.clampMax);
   }
 
   const rawSpan = rawMax - rawMin;
-  const span = Math.max(policy.minimumSpan, rawSpan * (1 + policy.paddingRatio * 2));
-  const center = (rawMin + rawMax) / 2;
+  const targetSpan = Math.max(
+    policy.minimumSpan,
+    rawSpan * (1 + policy.paddingRatio * 2)
+  );
+  const pairStep = policy.tickStep * 2;
+  const span = Math.ceil(targetSpan / pairStep) * pairStep;
+  const rawCenter = (rawMin + rawMax) / 2;
+  const center = Math.round(rawCenter / policy.tickStep) * policy.tickStep;
 
   return clampDomainPreservingSpan(
     [center - span / 2, center + span / 2],
     policy.clampMin,
     policy.clampMax
-  );
-};
-
-export const normalizeHistoryMetricValue = (
-  value: number,
-  domain: HistoryMetricDomain
-): number => {
-  const [min, max] = domain;
-  const span = max - min;
-  if (!Number.isFinite(value) || span <= 0) return HISTORY_CONTINUOUS_VISUAL_MIN;
-
-  const ratio = Math.min(1, Math.max(0, (value - min) / span));
-  return (
-    HISTORY_CONTINUOUS_VISUAL_MIN +
-    ratio * (HISTORY_CONTINUOUS_VISUAL_MAX - HISTORY_CONTINUOUS_VISUAL_MIN)
   );
 };
