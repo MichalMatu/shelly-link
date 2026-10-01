@@ -1,6 +1,5 @@
 import type { HistoryRecord } from '@lcl/automation-core';
 import { render } from '@testing-library/react';
-import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { createClimateHistoryOutputTrack } from './ClimateHistoryOutputTrack.js';
 
@@ -23,7 +22,7 @@ const record = (finalRelayOn: boolean): HistoryRecord => ({
 });
 
 describe('createClimateHistoryOutputTrack', () => {
-  it('renders relay transitions as an unfilled orthogonal step path', () => {
+  it('renders relay transitions as an unfilled orthogonal path across its own panel', () => {
     const layer = createClimateHistoryOutputTrack(
       [record(true), record(false), record(true)],
       [10, 20, 30],
@@ -31,15 +30,15 @@ describe('createClimateHistoryOutputTrack', () => {
     );
     const props = {
       xScale: (value: number) => value,
-      innerHeight: 100,
+      yScale: (value: number) => (value === 1 ? 10 : 90),
       innerWidth: 100
     } as Parameters<typeof layer>[0];
-    const output = layer(props) as ReactNode;
 
-    const { container } = render(<svg>{output}</svg>);
+    const node = layer(props);
+    const { container } = render(<svg>{node as React.ReactNode}</svg>);
     const path = container.querySelector('path.climate-history-chart__output-track');
 
     expect(path).toHaveAttribute('fill', 'none');
-    expect(path).toHaveAttribute('d', 'M 10 44 H 20 V 88 H 30 V 44');
+    expect(path).toHaveAttribute('d', 'M 10 10 H 20 V 90 H 30 V 10');
   });
 });
