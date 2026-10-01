@@ -36,7 +36,7 @@ Keep `main` untouched until the Pulse working line is deliberately reviewed/merg
 - hardware-tested Standalone runtime/code candidate: `bcfb01f5c6e76bcf571ed013bc650f4d847861e6`;
 - later Standalone code-only descendant before documentation: `523b43849d85d7fc0c369ac2d2c23b31182d42f5`.
 
-The Time and Standalone branches contain documentation-only commits after their qualified code candidates. Fetch fresh branch HEADs rather than assuming chat-copied documentation SHAs.
+The Time branch contains documentation-only commits after its qualified code candidate. The Standalone branch contains only non-behavior descendants after the hardware-tested candidate: app-facing model exports, formatting and durable documentation. Fetch fresh branch HEADs rather than assuming chat-copied SHAs.
 
 No Pulse PR/merge has been performed yet. Do not assume any Pulse work is on `main`.
 
