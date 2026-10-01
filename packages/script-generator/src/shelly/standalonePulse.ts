@@ -73,8 +73,12 @@ ${renderPulseCycleExecution()}
 ${renderStandalonePulseControl()}
 ${renderStandalonePulseBoot()}`;
   const script = `// g: 0.7.1\n// m: standalone-pulse-v1\n// c: ${sourceConfig}\n${compactGeneratedShellyScript(body)}\n`;
-  if (new TextEncoder().encode(script).length > SHELLY_STANDALONE_PULSE_SCRIPT_MAX_BYTES) {
-    throw new RangeError('Standalone Pulse generated script exceeds the 12000 B hard limit.');
+  if (
+    new TextEncoder().encode(script).length > SHELLY_STANDALONE_PULSE_SCRIPT_MAX_BYTES
+  ) {
+    throw new RangeError(
+      'Standalone Pulse generated script exceeds the 12000 B hard limit.'
+    );
   }
   return script;
 };
