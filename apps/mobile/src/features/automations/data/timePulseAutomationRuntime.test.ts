@@ -62,6 +62,8 @@ class FakeTimePulseClients {
   scripts = new Set<number>();
   createCount = 0;
   failCreateAt: number | null = null;
+  failStart = false;
+  failDeleteScript = false;
   calls: string[] = [];
   installedPlan: ShellyInstallPlan | null = null;
 
@@ -86,10 +88,11 @@ class FakeTimePulseClients {
     },
     startScript: async (scriptId) => {
       this.calls.push(`script:start:${scriptId}`);
-      return ok(null);
+      return this.failStart ? failure('start failed') : ok(null);
     },
     deleteScript: async (scriptId) => {
       this.calls.push(`script:delete:${scriptId}`);
+      if (this.failDeleteScript) return failure('delete failed');
       this.scripts.delete(scriptId);
       return ok(null);
     },
@@ -250,6 +253,25 @@ describe('Time + Pulse runtime lifecycle', () => {
     expect(fake.calls.at(-1)).toBe('script:start:7');
   });
 
+  it('rolls resume back to disabled and OFF when starting the script fails', async () => {
+    const fake = new FakeTimePulseClients();
+    const installation = installationFor(
+      await installTimePulseAutomation({ clients: fake.bundle(), config })
+    );
+    await pauseTimePulseAutomation(installation, fake.bundle());
+    fake.failStart = true;
+    fake.calls = [];
+
+    await expect(resumeTimePulseAutomation(installation, fake.bundle())).rejects.toThrow(
+      'start failed'
+    );
+
+    expect(fake.jobs.every((job) => !job.enable)).toBe(true);
+    expect(fake.calls).toContain('script:eval:7:rq(false)');
+    expect(fake.calls).toContain('script:stop:7');
+    expect(fake.calls.at(-1)).toBe('relay:off');
+  });
+
   it('delete cancels, removes schedules and script, and finishes with relay OFF', async () => {
     const fake = new FakeTimePulseClients();
     const installation = installationFor(
@@ -263,6 +285,23 @@ describe('Time + Pulse runtime lifecycle', () => {
     expect(fake.scripts.size).toBe(0);
     expect(fake.calls[0]).toBe('script:eval:7:rq(false)');
     expect(fake.calls).toContain('script:delete:7');
+    expect(fake.calls.at(-1)).toBe('relay:off');
+  });
+
+  it('still finishes OFF when script deletion reports an error', async () => {
+    const fake = new FakeTimePulseClients();
+    const installation = installationFor(
+      await installTimePulseAutomation({ clients: fake.bundle(), config })
+    );
+    fake.failDeleteScript = true;
+    fake.calls = [];
+
+    await expect(deleteTimePulseAutomation(installation, fake.bundle())).rejects.toThrow(
+      'delete failed'
+    );
+
+    expect(fake.jobs).toEqual([]);
+    expect(fake.scripts.has(7)).toBe(true);
     expect(fake.calls.at(-1)).toBe('relay:off');
   });
 
