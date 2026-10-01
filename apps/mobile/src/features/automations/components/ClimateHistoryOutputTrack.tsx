@@ -41,7 +41,11 @@ export const createClimateHistoryOutputTrack = (
             r={2.5}
           />
         ) : (
-          <path className="climate-history-chart__output-track" d={path} />
+          <path
+            className="climate-history-chart__output-track"
+            d={path}
+            fill="none"
+          />
         )}
       </g>
     );
