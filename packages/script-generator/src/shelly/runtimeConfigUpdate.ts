@@ -15,9 +15,7 @@ export const generateShellyRuntimeConfigUpdateEval = (input: unknown): string =>
     config.execution?.pulse ? 'if(typeof px!=="function")return"iv";' : ''
   }${config.execution?.activeWindow ? 'if(typeof wu!=="function")return"iv";' : ''}`;
   const resetExecution =
-    config.execution !== undefined
-      ? 'if(typeof cx==="function")cx("cu");if(R.pa!==void 0)R.pa=false;if(R.wi!==void 0){if(R.wi)Timer.clear(R.wi);R.wi=0;R.wo=-1}'
-      : '';
+    'if(typeof cx==="function")cx("cu");if(R.pa!==void 0)R.pa=false;if(R.wi!==void 0){if(R.wi)Timer.clear(R.wi);R.wi=0;R.wo=-1}';
   const restartWindow = config.execution?.activeWindow
     ? 'if(typeof wu==="function")wu();'
     : '';
