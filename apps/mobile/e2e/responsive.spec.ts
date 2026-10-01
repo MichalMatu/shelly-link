@@ -744,18 +744,16 @@ for (const viewport of viewports) {
     );
 
     await page.getByRole('button', { name: 'Historia' }).click();
-    await expect(page.getByRole('img', { name: 'Historia' })).toBeVisible();
-    const temperatureHistoryMetric = page.getByRole('button', {
-      name: 'Temperatura, 21,4 °C'
-    });
-    const powerHistoryMetric = page.getByRole('button', { name: 'Moc, 42,3 W' });
-    await expect(temperatureHistoryMetric).toHaveAttribute('aria-pressed', 'true');
-    await expect(powerHistoryMetric).toHaveAttribute('aria-pressed', 'true');
-    await powerHistoryMetric.click();
-    await expect(powerHistoryMetric).toHaveAttribute('aria-pressed', 'false');
-    await expect(temperatureHistoryMetric).toHaveAttribute('aria-pressed', 'true');
-    await powerHistoryMetric.click();
-    await expect(powerHistoryMetric).toHaveAttribute('aria-pressed', 'true');
+    const historyChart = page.getByRole('group', { name: 'Historia' });
+    await expect(historyChart).toBeVisible();
+    await expect(historyChart.locator('.climate-history-chart__panel')).toHaveCount(5);
+    await expect(page.getByLabel('Temperatura: 21,4 °C')).toBeVisible();
+    await expect(page.getByLabel('Wilgotność: 55,2 %')).toBeVisible();
+    await expect(page.getByLabel('Wyjście: ON')).toBeVisible();
+    await expect(page.getByLabel('Moc: 42,3 W')).toBeVisible();
+    await expect(page.getByLabel('Prąd: 0,18 A')).toBeVisible();
+    await expect(historyChart.locator('.climate-history-chart__tooltip')).toHaveCount(0);
+    await expect(historyChart.locator('.climate-history-chart__metric')).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '23-climate-history');
