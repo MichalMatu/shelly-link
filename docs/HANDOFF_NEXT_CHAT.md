@@ -17,10 +17,9 @@ Read in this order:
 5. `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`;
 6. `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md`;
 7. `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md`;
-8. `docs/PERFORMANCE_HANDOFF.md` only if build/agent performance work is relevant;
-9. `docs/UX_VISUAL_CONTRACT.md` before Pulse UI work.
+8. `docs/UX_VISUAL_CONTRACT.md` before Pulse UI work.
 
-Then fetch fresh `main`, the active Pulse branches and `agent-control:.agent/status/daemon.json`. Verify there is no active duplicate task or open PR before changing anything. Never copy a Local Agent binding from this document or an older chat.
+Then fetch fresh `main`, all active Pulse branches and `agent-control:.agent/status/daemon.json`. Verify there is no active/duplicate task or open PR before changing anything. Never copy a Local Agent binding from this document or an older chat.
 
 ## Branch and qualification state
 
@@ -28,19 +27,19 @@ Keep `main` untouched until the Pulse working line is deliberately reviewed/merg
 
 - accepted pre-Pulse `main`: `a2297e3040d98916782af5327a635b45375b19e1`;
 - Climate + Pulse branch: `pulse-v1-runtime-integration`;
-- qualified Climate runtime/code candidate: `fe50778d956906749c00f9da9b7237e6e617c970`;
-- later accepted Climate parent used by Time work: `c760e79493582140788be76034acea8daf3ed7fb`;
+- qualified Climate runtime/code: `fe50778d956906749c00f9da9b7237e6e617c970`;
+- accepted Climate parent used by Time: `c760e79493582140788be76034acea8daf3ed7fb`;
 - Time + Pulse branch: `pulse-v1-time-adapter`;
-- qualified Time runtime/code candidate: `c62f08d252d3d86d3c23ec8f0ad630f3b611a758`;
+- qualified Time runtime/code: `c62f08d252d3d86d3c23ec8f0ad630f3b611a758`;
 - Standalone Pulse branch: `pulse-v1-standalone-adapter`;
-- hardware-tested Standalone runtime/code candidate: `bcfb01f5c6e76bcf571ed013bc650f4d847861e6`;
-- later Standalone code-only descendant before documentation: `523b43849d85d7fc0c369ac2d2c23b31182d42f5`.
+- hardware-tested Standalone runtime/code: `bcfb01f5c6e76bcf571ed013bc650f4d847861e6`;
+- final Standalone code-only qualification candidate before durable closeout: `452b69d957dcc0f4d4efb5c777a5c186bfdbc247`.
 
-The Time branch contains documentation-only commits after its qualified code candidate. The Standalone branch contains only non-behavior descendants after the hardware-tested candidate: app-facing model exports, formatting and durable documentation. Fetch fresh branch HEADs rather than assuming chat-copied SHAs.
+The Standalone descendants after the hardware candidate add app ownership/reconciliation integration, repository-boundary cleanup, tests and durable docs; they do not change the generated Standalone Shelly runtime. The code-only candidate passed full `pnpm check` with a clean worktree, and `@lcl/script-generator` passed **229/229 tests at 100% statements/branches/functions/lines**.
 
-No Pulse PR/merge has been performed yet. Do not assume any Pulse work is on `main`.
+No Pulse PR/merge has been performed. Fetch fresh branch HEADs instead of assuming a documentation SHA is still current.
 
-Durable remote branches should now be limited to the active control/baseline/reference lines:
+Durable remote branches should be limited to:
 
 - `main`;
 - `agent-control`;
@@ -49,69 +48,36 @@ Durable remote branches should now be limited to the active control/baseline/ref
 - `pulse-v1-time-adapter`;
 - `pulse-v1-standalone-adapter`.
 
-## Qualified product/runtime contract
+## Qualified runtime contract
 
 Pulse is one capability with one shared Pulse-cycle engine. Do not create separate temperature-pulse, humidity-pulse, time-pulse or standalone-pulse engines.
 
-Pulse V1 configuration remains bounded to:
+Pulse V1 remains bounded to ON/OFF time, Continuous/Cycles/Duration, optional initial delay, ON/OFF start phase, safe-OFF completion/cancellation and explicit input bounds.
 
-- ON time;
-- OFF time;
-- Continuous mode;
-- fixed Cycles mode;
-- bounded Duration mode;
-- optional initial delay;
-- ON/OFF start phase;
-- safe OFF completion/cancellation;
-- explicit input bounds.
+The hard generated-script ceiling is **12000 B**. **9500 B is only a preferred optimization target.** Never remove safety/recovery, narrow supported configurations or perform risky minification only to defend 9500 B.
 
-The accepted generated-script hard ceiling is **12000 B**. **9500 B is only a preferred optimization target.** Do not remove safety/recovery behavior, narrow supported sensors or perform risky minification solely to defend 9500 B.
+### Climate + Pulse — closed
 
-### Climate + Pulse — closed runtime slice
+Climate reuses the existing parent condition and relay arbiter, supports optional Pulse/active window including overnight windows, and cancels immediately for parent inactive, window close, MANUAL, automation fault or hard safety. Minimum ON/OFF and debounce remain existing timing owners. Worst qualified mixed-parser size: **11332 B**.
 
-The qualified Climate execution layer:
+### Time + Pulse — closed
 
-- reuses the existing Climate parent condition and relay arbiter;
-- supports optional Pulse and optional daily active window, including overnight windows;
-- uses Shelly one-shot timers for Pulse/window boundaries;
-- cancels immediately for parent inactive, MANUAL, automation fault, hard safety or window close;
-- composes with existing minimum ON/OFF and relay debounce instead of owning the relay directly;
-- persists compact execution config and keeps diagnostics/History explanatory;
-- preserves existing Steady Climate behavior when execution config is absent.
+Steady Time remains two native `Switch.Set` schedules and no script. Time + Pulse keeps `DailyTimeAutomationConfig` unchanged, uses one run-on-boot Pulse script plus native ON/OFF `Script.Eval` schedule boundaries, and reuses the shared engine. Lifecycle/reconciliation/identity/clock behavior is qualified. Representative sizes: **2091 / 2112 / 2130 B** for Continuous/Cycles/Duration.
 
-Qualified supported mixed-parser worst case: **11332 B**. Software and real Plug S Gen3 acceptance are recorded in `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`.
+### Standalone Pulse — closed
 
-### Time + Pulse — closed runtime slice
+Standalone has no Climate or Time parent and reuses the exact same `renderPulseCycleExecution()` engine.
 
-`DailyTimeAutomationConfig` remains unchanged.
+- config: `{ relayId, pulse }`;
+- boot starts with explicit relay OFF and a fresh cycle;
+- transient phase/timer state is never persisted/resumed;
+- `rq(true)` starts and `rq(false)` cancels to OFF;
+- relay-control failure and native switch protection fail safe OFF;
+- durable ownership is existing `InstalledAutomation` with `kind: "pulse"`;
+- existing one-owner-per-relay, identity, lifecycle and script ID/hash reconciliation patterns are reused;
+- install/pause/resume/delete preserve explicit safe-OFF semantics.
 
-- Steady Time remains exactly two native `Switch.Set` schedules and no script;
-- Time + Pulse stores optional Pulse runtime metadata beside the existing Time config;
-- one run-on-boot script owns Pulse phase timers only;
-- native daily ON/OFF schedules remain the Time-window owner and call `Script.Eval` with `rq(true)` / `rq(false)`;
-- boot starts safe OFF and re-evaluates the current daily window once;
-- install/rollback/pause/resume/delete preserve explicit safe-OFF semantics;
-- physical identity and synchronized-clock requirements are enforced where required;
-- reconciliation requires the exact schedule pair plus expected running script ID/hash;
-- the legacy Steady updater rejects Time + Pulse before RPC mutation.
-
-Representative generated sizes: **2091 B Continuous / 2112 B Cycles / 2130 B Duration**. The qualified candidate passed script-generator **213/213 tests at 100% coverage**, full repository `pnpm check`, and real Plug S Gen3 native-schedule acceptance. Full evidence is in `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md`.
-
-### Standalone Pulse — closed runtime slice
-
-Standalone Pulse has no Climate or Time parent and still reuses the exact same `renderPulseCycleExecution()` engine.
-
-- typed config is `{ relayId, pulse }` with the existing bounded Pulse model;
-- boot explicitly forces relay OFF before starting a fresh cycle;
-- transient phase/timer state is never persisted or resumed across restart;
-- `rq(true)` starts a fresh parentless cycle and `rq(false)` cancels immediately to OFF;
-- relay-control failure and native switch protection fault safe OFF and latch start inhibition;
-- durable ownership uses the existing `InstalledAutomation` record with `kind: "pulse"`;
-- one-owner-per-relay checks, physical identity gates and existing script install lifecycle are reused;
-- install/pause/resume/delete all include explicit safe-OFF handling;
-- reconciliation requires the expected running script ID and generated-code hash.
-
-Representative generated sizes: **1783 B Continuous / 1789 B Cycles / 1803 B Duration**. Software tests and real Plug S Gen3 acceptance are recorded in `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md`.
+Representative generated sizes: **1783 / 1789 / 1803 B** for Continuous/Cycles/Duration. Real Plug S Gen3 acceptance verified boot/restart safe OFF, two physical cycles, cancellation, explicit final OFF, temporary-script cleanup and byte-identical production restoration. See the dated Standalone acceptance record for full evidence.
 
 Do not reopen or further minify any qualified runtime slice without a concrete failing test, hardware issue or size regression.
 
@@ -119,10 +85,10 @@ Do not reopen or further minify any qualified runtime slice without a concrete f
 
 Pulse V1 is **not complete**. Continue in this order:
 
-1. **Shared Pulse setup/editor UI** for Climate, Time and standalone Pulse. Reuse one configuration model/component; follow the compact optional-control pattern used by VPD.
+1. **Shared Pulse setup/editor UI** for Climate, Time and standalone Pulse. Reuse one configuration model/component and the compact optional-control pattern used by VPD.
 2. **Responsive/visual acceptance** for the new setup/editor surfaces.
-3. **Dashboard/detail Pulse phase/progress/status** only in the existing requested/final output, reason, automation-fault and hard-safety language.
-4. Final cross-mode regression/hardware checks only where the remaining slices change generated runtime or real-device behavior.
+3. **Dashboard/detail Pulse phase/progress/status** integrated into the existing requested/final output, reason, automation-fault and hard-safety language.
+4. Final cross-mode regression/hardware only where remaining changes actually touch generated runtime or real-device behavior.
 
 After Pulse V1 is stable, resume Dashboard status polish, UX redesign round 2, watchdog/stabilization and v1 feature freeze from `docs/ROADMAP.md`.
 
@@ -132,8 +98,8 @@ After Pulse V1 is stable, resume Dashboard status polish, UX redesign round 2, w
 - Forced OFF, hard safety and OFF-requiring automation faults cancel Pulse immediately.
 - Parent inactive/window close cancels immediately rather than finishing a cycle.
 - MANUAL cancels/suspends Pulse; returning to AUTO starts a fresh configured cycle when the parent is active.
-- Standalone restart begins safe OFF and starts a fresh configured cycle; never resume an unknown in-flight timer.
+- Standalone restart begins safe OFF; never resume an unknown in-flight timer.
 - React may display phase/progress but never owns Pulse timers.
-- Use direct GitHub for repository audit/changes and Local Agent for Mac/local commands, builds, tests, Playwright and hardware.
-- Any real-device relay-mutating test must end with explicit relay OFF and verification.
-- Run focused checks while iterating and one final full `pnpm check` on the exact completion state. Use `pnpm check:full` when responsive E2E is part of acceptance.
+- Use direct GitHub for repo audit/changes and Local Agent for Mac/local commands, builds, tests, Playwright and hardware.
+- Any relay-mutating real-device test must end with explicit relay OFF and verification.
+- Run focused checks while iterating and one final full `pnpm check` on the exact completion HEAD. Use `pnpm check:full` when responsive E2E is part of acceptance.
