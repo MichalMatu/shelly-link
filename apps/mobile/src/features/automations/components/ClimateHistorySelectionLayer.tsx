@@ -1,15 +1,40 @@
 import type { LineCustomSvgLayer } from '@nivo/line';
+import { useRef, type Dispatch, type SetStateAction } from 'react';
 import type { HistoryChartSeries } from './climateHistoryChartMetrics.js';
 
 type HistoryInteractionSlice = {
   points: readonly { data: { recordIndex: number } }[];
 };
 
+const TOUCH_CLICK_DEDUPE_MS = 500;
+
 export const historyRecordIndexFromInteraction = (datum: unknown): number | null => {
   if (typeof datum !== 'object' || datum === null || !('points' in datum)) return null;
   const points = (datum as Partial<HistoryInteractionSlice>).points;
   const recordIndex = points?.[0]?.data.recordIndex;
   return typeof recordIndex === 'number' ? recordIndex : null;
+};
+
+export const useHistorySelectionInteraction = (
+  setSelectedRecordIndex: Dispatch<SetStateAction<number | null>>
+) => {
+  const lastTouchSelectionAtMs = useRef(0);
+  const toggleSelectedDatum = (datum: unknown) => {
+    const recordIndex = historyRecordIndexFromInteraction(datum);
+    if (recordIndex === null) return;
+    setSelectedRecordIndex((current) => (current === recordIndex ? null : recordIndex));
+  };
+
+  return {
+    onTouchEnd: (datum: unknown) => {
+      lastTouchSelectionAtMs.current = Date.now();
+      toggleSelectedDatum(datum);
+    },
+    onClick: (datum: unknown) => {
+      if (Date.now() - lastTouchSelectionAtMs.current < TOUCH_CLICK_DEDUPE_MS) return;
+      toggleSelectedDatum(datum);
+    }
+  };
 };
 
 export const historySelectionSide = (
