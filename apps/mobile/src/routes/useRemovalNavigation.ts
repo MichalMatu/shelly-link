@@ -19,7 +19,7 @@ export const useRemovalNavigation = (navigate: (route: AppRoute) => void) => {
       const installation = installations.find(
         (candidate) => candidate.id === installationId
       );
-      if (!installation) return;
+      if (!installation || installation.kind === 'pulse') return;
       navigate({
         type: 'installation',
         installationId,
