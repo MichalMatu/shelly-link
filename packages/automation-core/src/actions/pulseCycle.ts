@@ -1,3 +1,10 @@
+export const PULSE_MIN_PHASE_MS = 1_000;
+export const PULSE_MAX_PHASE_MS = 86_400_000;
+export const PULSE_MAX_INITIAL_DELAY_MS = 86_400_000;
+export const PULSE_MAX_CYCLES = 100_000;
+export const PULSE_MIN_DURATION_MS = 1_000;
+export const PULSE_MAX_DURATION_MS = 604_800_000;
+
 export type PulseCycleStartPhase = 'on' | 'off';
 
 export type PulseCycleExecution =
@@ -43,9 +50,14 @@ export type PulseCycleEvaluation =
       nextTransitionAtMs: null;
     };
 
-const positiveFinite = (value: number, label: string): void => {
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new RangeError(`${label} must be a positive finite number.`);
+const finiteInRange = (
+  value: number,
+  minimum: number,
+  maximum: number,
+  label: string
+): void => {
+  if (!Number.isFinite(value) || value < minimum || value > maximum) {
+    throw new RangeError(`${label} must be between ${minimum} and ${maximum}.`);
   }
 };
 
@@ -56,18 +68,32 @@ const nonnegativeFinite = (value: number, label: string): void => {
 };
 
 export const validatePulseCycleConfig = (config: PulseCycleConfig): void => {
-  positiveFinite(config.onMs, 'Pulse ON duration');
-  positiveFinite(config.offMs, 'Pulse OFF duration');
-  nonnegativeFinite(config.initialDelayMs, 'Pulse initial delay');
+  finiteInRange(config.onMs, PULSE_MIN_PHASE_MS, PULSE_MAX_PHASE_MS, 'Pulse ON duration');
+  finiteInRange(config.offMs, PULSE_MIN_PHASE_MS, PULSE_MAX_PHASE_MS, 'Pulse OFF duration');
+  finiteInRange(
+    config.initialDelayMs,
+    0,
+    PULSE_MAX_INITIAL_DELAY_MS,
+    'Pulse initial delay'
+  );
 
   if (config.execution.mode === 'cycles') {
-    if (!Number.isInteger(config.execution.count) || config.execution.count <= 0) {
-      throw new RangeError('Pulse cycle count must be a positive integer.');
+    if (
+      !Number.isInteger(config.execution.count) ||
+      config.execution.count < 1 ||
+      config.execution.count > PULSE_MAX_CYCLES
+    ) {
+      throw new RangeError(`Pulse cycle count must be between 1 and ${PULSE_MAX_CYCLES}.`);
     }
   }
 
   if (config.execution.mode === 'duration') {
-    positiveFinite(config.execution.durationMs, 'Pulse total duration');
+    finiteInRange(
+      config.execution.durationMs,
+      PULSE_MIN_DURATION_MS,
+      PULSE_MAX_DURATION_MS,
+      'Pulse total duration'
+    );
   }
 };
 
