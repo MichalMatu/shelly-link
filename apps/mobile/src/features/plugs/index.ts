@@ -91,6 +91,10 @@ export {
   PlugDeleteConfirmModal,
   type PlugDeleteConfirmModalProps
 } from './components/PlugDeleteConfirmModal.js';
+export {
+  PlugRemovalBlockedModal,
+  type PlugRemovalBlockedModalProps
+} from './components/PlugRemovalBlockedModal.js';
 export { PlugDeviceSettingsSurface } from './components/PlugDeviceSettingsSurface.js';
 export { PlugAutomationModeControl } from './components/PlugAutomationModeControl.js';
 export { PlugRelayControls } from './components/PlugRelayControls.js';

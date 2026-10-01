@@ -2,7 +2,7 @@ import type { ShellySetupFlow } from '../pageContracts.js';
 import { InfoLabel } from '@lcl/ui';
 import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
 import type { ShellyDraftDevice } from '../../../flows/hardware-setup/setupDraftStore.js';
@@ -11,6 +11,7 @@ import {
   PlugAddPage,
   isSameShellyDevice,
   PlugDeleteConfirmModal,
+  PlugRemovalBlockedModal,
   type PlugScanResultView,
   usePlugManagementSurface
 } from '../../../features/plugs/index.js';
@@ -112,6 +113,15 @@ export const ShellySetupPage = ({
     t
   });
   resetBleStopErrorRef.current = resetBleStopError;
+
+  const [blockedRemoval, setBlockedRemoval] = useState<
+    [name: string, owner: string] | null
+  >(null);
+  const requestRemove = (device: ShellyDraftDevice) => {
+    const usage = flow.plugRemovalUsage(device.id)[0];
+    if (usage) return setBlockedRemoval([device.name, usage.name]);
+    management.requestRemove(device);
+  };
 
   const addManualShelly = (onSuccess: () => void) => {
     flow.recheckShellyMutation.reset();
@@ -228,6 +238,12 @@ export const ShellySetupPage = ({
         />
       )}
 
+      <PlugRemovalBlockedModal
+        deviceName={blockedRemoval?.[0] ?? null}
+        automationName={blockedRemoval?.[1] ?? null}
+        onClose={() => setBlockedRemoval(null)}
+      />
+
       <PlugDeleteConfirmModal
         deviceName={management.removePendingDevice?.name ?? null}
         onClose={management.cancelRemove}
@@ -281,7 +297,7 @@ export const ShellySetupPage = ({
             device={management.infoDevice}
             enableBleDiscovery={enableBleDiscovery}
             onBleScan={management.openBleScan}
-            onRemove={management.requestRemove}
+            onRemove={requestRemove}
           />
         </div>
       ) : (
@@ -291,7 +307,7 @@ export const ShellySetupPage = ({
           enableBleDiscovery={enableBleDiscovery}
           onClose={management.closeInfo}
           onBleScan={management.openBleScan}
-          onRemove={management.requestRemove}
+          onRemove={requestRemove}
         />
       )}
 
@@ -317,7 +333,7 @@ export const ShellySetupPage = ({
               onNameChange={(savedDevice, value) =>
                 flow.setShellyDeviceName(savedDevice.id, value)
               }
-              onRemove={management.requestRemove}
+              onRemove={requestRemove}
             />
           ))}
         </div>

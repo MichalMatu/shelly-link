@@ -156,6 +156,7 @@ export const pl = {
     close: 'Zamknij',
     compatible: 'zgodne',
     confirmDelete: 'Potwierdź usuń',
+    openAutomation: 'Otwórz automatykę',
     copy: 'Kopiuj',
     default: 'Domyślne',
     delete: 'Usuń',
@@ -354,6 +355,9 @@ export const pl = {
       deleteScannerFailed: 'Nie udało się zatrzymać albo usunąć skryptu skanera BLE.',
       deleteScriptPartial:
         'Przekaźnik OFF potwierdzony, ale nie udało się usunąć skryptu.',
+      deleteBlockedTitle: 'Nie można usunąć gniazdka',
+      deleteBlockedDescription:
+        'Gniazdko jest używane przez automatykę „{automation}”. Najpierw usuń tę automatykę.',
       deleteTitle: 'Usuń gniazdko tylko z aplikacji',
       deviceNameLabel: 'Nazwa gniazdka',
       empty: 'Brak dodanych gniazdek.',
@@ -434,6 +438,9 @@ export const pl = {
       deleteConfirmTitle: 'Usunąć termometr?',
       deleteDescription:
         'Termometr zostanie usunięty z konfiguracji aplikacji. Jeśli reguła była już wysłana do Shelly, wyślij ją ponownie.',
+      deleteBlockedTitle: 'Nie można usunąć termometru',
+      deleteBlockedDescription:
+        'Termometr jest używany przez automatykę „{automation}”. Najpierw usuń go z automatyki.',
       deleteTitle: 'Usuń termometr tylko z aplikacji',
       empty: 'Brak dodanych termometrów.',
       foundBleListLabel: 'Znalezione termometry BLE',

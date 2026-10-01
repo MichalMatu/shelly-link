@@ -158,6 +158,7 @@ export const de = {
     close: 'Schließen',
     compatible: 'kompatibel',
     confirmDelete: 'Löschen bestätigen',
+    openAutomation: 'Automation öffnen',
     copy: 'Kopieren',
     default: 'Standardwerte',
     delete: 'Löschen',
@@ -356,6 +357,9 @@ export const de = {
       deleteScannerFailed: 'Scanner-Skript konnte nicht gestoppt oder gelöscht werden.',
       deleteScriptPartial:
         'Relais OFF bestätigt, aber das Skript konnte nicht gelöscht werden.',
+      deleteBlockedTitle: 'Steckdose kann nicht entfernt werden',
+      deleteBlockedDescription:
+        'Diese Steckdose wird von der Automation „{automation}“ verwendet. Entferne zuerst diese Automation.',
       deleteTitle: 'Steckdose nur aus der App entfernen',
       deviceNameLabel: 'Steckdosenname',
       empty: 'Keine Steckdosen hinzugefügt.',
@@ -436,6 +440,9 @@ export const de = {
       deleteConfirmTitle: 'Thermometer entfernen?',
       deleteDescription:
         'Das Thermometer wird aus der App-Konfiguration entfernt. Wenn die Regel bereits an Shelly gesendet wurde, sende sie erneut.',
+      deleteBlockedTitle: 'Thermometer kann nicht entfernt werden',
+      deleteBlockedDescription:
+        'Dieses Thermometer wird von der Automation „{automation}“ verwendet. Entferne es zuerst aus der Automation.',
       deleteTitle: 'Thermometer nur aus der App entfernen',
       empty: 'Keine Thermometer hinzugefügt.',
       foundBleListLabel: 'Gefundene BLE-Thermometer',

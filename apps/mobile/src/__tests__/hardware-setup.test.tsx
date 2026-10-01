@@ -1341,7 +1341,7 @@ describe('HardwareSetupScreen', () => {
     expect(within(savedPlugList).getByText('1.23 kWh')).toBeInTheDocument();
   });
 
-  it('forgets a saved Shelly plug without deleting durable automation ownership', async () => {
+  it('blocks forgetting a saved Shelly plug while durable automation owns it', async () => {
     const installation = createInstalledAutomation({
       shelly: { id: 'shellyplugsg3-test', model: 'S3PL-00112EU', gen: 3 },
       shellyName: 'Salon',
@@ -1363,23 +1363,66 @@ describe('HardwareSetupScreen', () => {
       screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
     );
 
-    const dialog = await screen.findByRole('dialog', { name: 'Usunąć gniazdko?' });
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Nie można usunąć gniazdka'
+    });
     expect(within(dialog).getByText('Salon')).toBeInTheDocument();
     expect(
       within(dialog).getByText(
-        'Gniazdko zostanie usunięte tylko z aplikacji. Skrypt zapisany w Shelly pozostanie bez zmian.'
+        'Gniazdko jest używane przez automatykę „Salon”. Najpierw usuń tę automatykę.'
       )
     ).toBeInTheDocument();
     expect(screen.queryByText('Brak dodanych gniazdek.')).not.toBeInTheDocument();
-
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Usuń' }));
-
-    expect(
-      screen.queryByRole('dialog', { name: 'Usunąć gniazdko?' })
-    ).not.toBeInTheDocument();
-    expect(screen.getByText('Brak dodanych gniazdek.')).toBeInTheDocument();
-    expect(await screen.findByText('Usunięto gniazdko z aplikacji.')).toBeInTheDocument();
+    expect(useSavedPlugStore.getState().plugs).toHaveLength(1);
     expect(useInstalledAutomationStore.getState().installations).toEqual([installation]);
+  });
+
+  it('blocks removing a thermometer used by an installed Climate automation', async () => {
+    const baseConfig = createDefaultShellyThermostatConfig(
+      'xiaomi_lywsd03mmc_bthome_v2',
+      'heating'
+    );
+    const installation = createInstalledAutomation({
+      shelly: { id: 'shellyplugsg3-sensor-owner', model: 'S3PL-00112EU', gen: 3 },
+      shellyName: 'Growbox',
+      baseUrl: 'http://192.168.0.30/',
+      scriptId: 1,
+      scriptHash: 'sensor-owner',
+      config: {
+        ...baseConfig,
+        sensor: {
+          ...baseConfig.sensor,
+          sensorId: 'sensor-a4c1384f24cd',
+          runtimeAddress: 'A4:C1:38:4F:24:CD',
+          displayName: 'Canopy'
+        }
+      },
+      nowMs: 1000
+    });
+    useInstalledAutomationStore.getState().upsertInstallation(installation);
+    useHardwareSetupDraftStore.getState().upsertSensorDevice({
+      id: 'A4:C1:38:4F:24:CD',
+      name: 'Canopy',
+      runtimeAddress: 'A4:C1:38:4F:24:CD',
+      profileId: 'xiaomi_lywsd03mmc_bthome_v2'
+    });
+
+    renderHardwareSetup();
+    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    const card = getSavedSensorCard('Canopy');
+    fireEvent.click(
+      within(card).getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
+    );
+
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Nie można usunąć termometru'
+    });
+    expect(
+      within(dialog).getByText(
+        'Termometr jest używany przez automatykę „Growbox”. Najpierw usuń go z automatyki.'
+      )
+    ).toBeInTheDocument();
+    expect(useHardwareSetupDraftStore.getState().sensorDevices).toHaveLength(1);
   });
 
   it('re-adds the same physical Shelly at a new endpoint and reconciles its automation', async () => {
@@ -1417,8 +1460,14 @@ describe('HardwareSetupScreen', () => {
   });
 
   it('keeps a saved Shelly plug when the styled removal modal is cancelled', async () => {
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'shellyplugsg3-unowned',
+      name: 'Salon',
+      wifiBaseUrl: 'http://192.168.0.20',
+      scriptIdInput: '1'
+    });
+
     renderHardwareSetup();
-    await addShellyThroughUi('Salon');
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })
@@ -1440,8 +1489,14 @@ describe('HardwareSetupScreen', () => {
       throw new Error('native confirm should not be used');
     });
     vi.stubGlobal('confirm', confirm);
+    useSavedPlugStore.getState().saveWifiDevice({
+      physicalId: 'shellyplugsg3-unowned',
+      name: 'Salon',
+      wifiBaseUrl: 'http://192.168.0.20',
+      scriptIdInput: '1'
+    });
+
     renderHardwareSetup();
-    await addShellyThroughUi('Salon');
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Usuń gniazdko tylko z aplikacji' })

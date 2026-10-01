@@ -8,6 +8,7 @@ import {
 } from '@lcl/ble-core';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
+import { useSensorUsage } from '../../features/automations/index.js';
 import {
   mergeBleDiscoveryCandidate,
   scanPhoneBleSensors,
@@ -303,13 +304,16 @@ export const useSensorSetupFlow = () => {
     [sensorMacInput, sensorNameInput, sensorProfileInput]
   );
   const phoneSensorFlow = usePhoneSensorFlow(sensorDevices);
+  const sensorRemovalUsage = useSensorUsage(sensorDevices);
 
   const addSensorDraft = () => {
     if (sensorInputState.ok) upsertSensorDevice(sensorInputState.device);
   };
-  const removeSensorDevice = (id: string) => {
+  const removeSensorDevice = (id: string): boolean => {
+    if (sensorRemovalUsage(id).length > 0) return false;
     removeSensorDeviceDraft(id);
     clearSensorReadings(id);
+    return true;
   };
 
   return {
@@ -324,6 +328,7 @@ export const useSensorSetupFlow = () => {
     sensorInputState,
     addSensorDraft,
     setSensorDeviceName,
+    sensorRemovalUsage,
     removeSensorDevice,
     upsertSensorDevice,
     ...phoneSensorFlow

@@ -156,6 +156,7 @@ export const es = {
     close: 'Cerrar',
     compatible: 'compatible',
     confirmDelete: 'Confirmar borrado',
+    openAutomation: 'Abrir automatización',
     copy: 'Copiar',
     default: 'Valores predeterminados',
     delete: 'Eliminar',
@@ -353,6 +354,9 @@ export const es = {
         'El enchufe se eliminará solo de la app. El script guardado en Shelly no cambiará.',
       deleteScannerFailed: 'No se pudo detener o eliminar el script del escáner BLE.',
       deleteScriptPartial: 'Relé OFF confirmado, pero no se pudo eliminar el script.',
+      deleteBlockedTitle: 'No se puede eliminar el enchufe',
+      deleteBlockedDescription:
+        'Este enchufe lo usa la automatización «{automation}». Elimina primero esa automatización.',
       deleteTitle: 'Eliminar enchufe solo de la app',
       deviceNameLabel: 'Nombre del enchufe',
       empty: 'No hay enchufes añadidos.',
@@ -433,6 +437,9 @@ export const es = {
       deleteConfirmTitle: '¿Eliminar termómetro?',
       deleteDescription:
         'El termómetro se eliminará de la configuración de la app. Si la regla ya se envió a Shelly, envíala de nuevo.',
+      deleteBlockedTitle: 'No se puede eliminar el termómetro',
+      deleteBlockedDescription:
+        'Este termómetro lo usa la automatización «{automation}». Elimínalo primero de la automatización.',
       deleteTitle: 'Eliminar termómetro solo de la app',
       empty: 'No hay termómetros añadidos.',
       foundBleListLabel: 'Termómetros BLE encontrados',

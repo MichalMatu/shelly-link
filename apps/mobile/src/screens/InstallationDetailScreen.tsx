@@ -17,7 +17,7 @@ import {
   useClimateHistory
 } from '../features/automations/index.js';
 import {
-  PlugDeleteConfirmModal,
+  PlugRemovalBlockedModal,
   PlugDeviceSettingsSurface,
   PlugDetailNotFound,
   PlugDetailTop,
@@ -161,7 +161,6 @@ const ClimateInstallationDetail = ({
   const loadClimateAutomationDraft = useHardwareSetupDraftStore(
     (state) => state.loadClimateAutomationDraft
   );
-  const removePlug = useSavedPlugStore((state) => state.removePlug);
   const savedDevice = savedPlugs.find((device) =>
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
@@ -431,15 +430,10 @@ const ClimateInstallationDetail = ({
         </FeedbackPanel>
       </Modal>
 
-      <PlugDeleteConfirmModal
+      <PlugRemovalBlockedModal
         deviceName={forgetOpen && savedDevice ? savedDevice.name : null}
+        automationName={forgetOpen ? installation.shelly.name : null}
         onClose={() => setForgetOpen(false)}
-        onConfirm={() => {
-          if (!savedDevice) return;
-          removePlug(savedDevice.physicalId);
-          setForgetOpen(false);
-          pushToast('ok', t('hardware.shelly.removed'));
-        }}
       />
 
       <AppToastViewport

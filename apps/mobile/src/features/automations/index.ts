@@ -71,6 +71,12 @@ export {
   validAdditionalSensorIds,
   type SensorDraftActions
 } from './data/climateSensorDraftSelection.js';
+export { useSensorUsage, useShellyUsage } from './flows/useInstalledDeviceUsage.js';
+export {
+  installedAutomationsUsingSensor,
+  installedAutomationsUsingShelly,
+  type InstalledAutomationUsage
+} from './data/installedAutomationUsage.js';
 export {
   INSTALLED_AUTOMATION_VERSION,
   climateInstalledAutomationSchema,

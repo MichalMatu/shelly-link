@@ -5,6 +5,7 @@ import { BlePlugDeviceReadOnlyPanel } from '../components/BlePlugDeviceReadOnlyP
 import { BlePlugTimeSyncCard } from '../components/BlePlugTimeSyncCard.js';
 import { BlePlugWifiProvisioningCard } from '../components/BlePlugWifiProvisioningCard.js';
 import { PlugDeleteConfirmModal } from '../components/PlugDeleteConfirmModal.js';
+import { PlugRemovalBlockedModal } from '../components/PlugRemovalBlockedModal.js';
 import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
 import type { PlugDetailTab } from '../components/PlugDetailTabs.js';
@@ -18,6 +19,8 @@ export type BlePlugDetailScreenProps = {
   physicalId: string;
   onBack(): void;
   onRemove(physicalId: string): void;
+  removalBlock?: { installationId: string; automationName: string };
+  onOpenBlockingAutomation?: (installationId: string) => void;
 };
 
 const disabledBleDetailTabs: readonly PlugDetailTab[] = ['automation', 'ble', 'script'];
@@ -25,11 +28,14 @@ const disabledBleDetailTabs: readonly PlugDetailTab[] = ['automation', 'ble', 's
 export const BlePlugDetailScreen = ({
   physicalId,
   onBack,
-  onRemove
+  onRemove,
+  removalBlock,
+  onOpenBlockingAutomation
 }: BlePlugDetailScreenProps) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('info');
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteBlockedOpen, setDeleteBlockedOpen] = useState(false);
   const plug = useSavedPlugStore((state) =>
     state.plugs
       .filter(hasBleLocator)
@@ -117,7 +123,9 @@ export const BlePlugDetailScreen = ({
                 className="secondary-action secondary-action--danger"
                 type="button"
                 title={t('hardware.shelly.deleteTitle')}
-                onClick={() => setDeleteOpen(true)}
+                onClick={() =>
+                  removalBlock ? setDeleteBlockedOpen(true) : setDeleteOpen(true)
+                }
               >
                 <IconTrash className="icon-action__svg" aria-hidden="true" />
                 <span>{t('hardware.shelly.deleteTitle')}</span>
@@ -126,6 +134,21 @@ export const BlePlugDetailScreen = ({
           </>
         )}
       </section>
+
+      <PlugRemovalBlockedModal
+        deviceName={deleteBlockedOpen ? plug.name : null}
+        automationName={deleteBlockedOpen ? (removalBlock?.automationName ?? null) : null}
+        onClose={() => setDeleteBlockedOpen(false)}
+        {...(removalBlock && onOpenBlockingAutomation
+          ? {
+              onOpenAutomation: () => {
+                const installationId = removalBlock.installationId;
+                setDeleteBlockedOpen(false);
+                onOpenBlockingAutomation(installationId);
+              }
+            }
+          : {})}
+      />
 
       <PlugDeleteConfirmModal
         deviceName={deleteOpen ? plug.name : null}

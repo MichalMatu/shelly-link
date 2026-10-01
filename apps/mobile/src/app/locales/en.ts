@@ -157,6 +157,7 @@ export const en = {
     close: 'Close',
     compatible: 'compatible',
     confirmDelete: 'Confirm delete',
+    openAutomation: 'Open automation',
     copy: 'Copy',
     default: 'Defaults',
     delete: 'Delete',
@@ -349,6 +350,9 @@ export const en = {
         'The plug will be removed only from the app. The script saved in Shelly will stay unchanged.',
       deleteScannerFailed: 'Could not stop or remove the BLE scanner script.',
       deleteScriptPartial: 'Relay OFF confirmed, but the script could not be removed.',
+      deleteBlockedTitle: 'Cannot remove plug',
+      deleteBlockedDescription:
+        'This plug is used by automation “{automation}”. Remove that automation first.',
       deleteTitle: 'Remove plug only from the app',
       deviceNameLabel: 'Plug name',
       empty: 'No plugs added.',
@@ -429,6 +433,9 @@ export const en = {
       deleteConfirmTitle: 'Remove thermometer?',
       deleteDescription:
         'The thermometer will be removed from the app configuration. If the rule was already sent to Shelly, send it again.',
+      deleteBlockedTitle: 'Cannot remove thermometer',
+      deleteBlockedDescription:
+        'This thermometer is used by automation “{automation}”. Remove it from the automation first.',
       deleteTitle: 'Remove thermometer only from the app',
       empty: 'No thermometers added.',
       foundBleListLabel: 'Found BLE thermometers',
