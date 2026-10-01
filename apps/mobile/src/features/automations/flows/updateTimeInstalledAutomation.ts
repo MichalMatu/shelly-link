@@ -3,6 +3,7 @@ import { createShellyTransport } from '../../../platform/shellyHttpTransport.js'
 import { unwrapShellyResult } from '../../../platform/shellyResult.js';
 import {
   findInstalledRelayOwner,
+  isTimePulseInstalledAutomation,
   type InstalledAutomation,
   type TimeInstalledAutomation
 } from '../data/installedAutomation.js';
@@ -50,6 +51,10 @@ export const updateTimeInstalledAutomation = async ({
   installation: TimeInstalledAutomation;
   runtime: TimeAutomationRuntimeSnapshot;
 }> => {
+  if (isTimePulseInstalledAutomation(installation)) {
+    throw new Error('Time + Pulse requires the dedicated Pulse runtime updater.');
+  }
+
   if (config.relayId !== installation.config.relayId) {
     throw new Error('Changing the relay requires reinstalling the automation.');
   }
