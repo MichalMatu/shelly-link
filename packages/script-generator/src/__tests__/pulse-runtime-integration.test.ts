@@ -50,10 +50,7 @@ const createPulseRuntime = ({
   onMs?: number;
   offMs?: number;
 } = {}) => {
-  const base = createDefaultShellyThermostatConfig(
-    'xiaomi_lywsd03mmc_bthome_v2',
-    mode
-  );
+  const base = createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2', mode);
   const config: ShellyThermostatConfig = {
     ...base,
     sensor: { ...base.sensor, runtimeAddress: 'AA:BB:CC:DD:EE:FF' },
@@ -101,7 +98,8 @@ const createPulseRuntime = ({
         timers.set(id, { ...entry, dueMs: entry.dueMs + entry.durationMs });
       }
       iterations += 1;
-      if (iterations > 1_000) throw new Error('Generated runtime timer loop did not settle.');
+      if (iterations > 1_000)
+        throw new Error('Generated runtime timer loop did not settle.');
     }
     nowMs = targetMs;
   };
