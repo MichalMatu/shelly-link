@@ -170,7 +170,10 @@ describe('Time + Pulse runtime lifecycle', () => {
 
   it('installs one run-on-boot script and two native boundary schedules', async () => {
     const fake = new FakeTimePulseClients();
-    const installed = await installTimePulseAutomation({ clients: fake.bundle(), config });
+    const installed = await installTimePulseAutomation({
+      clients: fake.bundle(),
+      config
+    });
 
     expect(installed).toEqual({
       script: { id: 7, hash: 'time-pulse-hash' },
@@ -182,7 +185,11 @@ describe('Time + Pulse runtime lifecycle', () => {
     expect(fake.jobs).toHaveLength(2);
     expect(
       timePulseSchedulePairState(
-        { schedule: installed.schedule, config: config.schedule, scriptId: installed.script.id },
+        {
+          schedule: installed.schedule,
+          config: config.schedule,
+          scriptId: installed.script.id
+        },
         fake.jobs
       ).scheduleState
     ).toBe('running');
