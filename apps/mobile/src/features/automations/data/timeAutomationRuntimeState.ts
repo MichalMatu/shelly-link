@@ -12,10 +12,12 @@ export type TimeAutomationRuntimeInstallation = {
   shelly: { baseUrl: string };
   schedule: { onJobId: number; offJobId: number };
   config: DailyTimeAutomationConfig;
-  pulseRuntime?: {
-    script: { id: number; hash: string };
-    pulse: PulseCycleConfig;
-  };
+  pulseRuntime?:
+    | {
+        script: { id: number; hash: string };
+        pulse: PulseCycleConfig;
+      }
+    | undefined;
 };
 
 export type TimeAutomationRuntimeSnapshot = {
