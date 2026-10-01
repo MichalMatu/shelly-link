@@ -8,6 +8,7 @@ import {
 } from '@lcl/script-generator';
 import { t } from '../../app/i18n.js';
 import {
+  DEFAULT_PULSE_CYCLE_FORM,
   parsePulseCycleForm,
   parseRuleAdvancedSettings,
   validateRuleAdvancedSettings,
@@ -49,7 +50,7 @@ type ClimateRuleDerivationInput = AdvancedRuleInputs & {
   rulePreset: RulePresetId;
   onThresholdInput: string;
   offThresholdInput: string;
-  pulseCycleDraft: PulseCycleFormDraft;
+  pulseCycleDraft?: PulseCycleFormDraft;
 };
 
 const climateSensorFromDraft = (sensor: SensorDraftDevice): ClimateSensor => ({
@@ -135,7 +136,7 @@ export const deriveClimateRuleState = ({
   rulePreset,
   onThresholdInput,
   offThresholdInput,
-  pulseCycleDraft,
+  pulseCycleDraft = DEFAULT_PULSE_CYCLE_FORM,
   vpdAssistEnabled,
   vpdTargetInput,
   rssiMinInput,
