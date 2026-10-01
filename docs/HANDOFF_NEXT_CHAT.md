@@ -53,6 +53,8 @@ Focused qualification passed on the accepted candidate:
 - UX quality gate;
 - final full repository `pnpm check`.
 
+Tooling note: canonical Darwin History snapshot regeneration was retried during closeout but the Playwright process stalled before producing test output. This is tracked as test-harness debt, not product evidence; do not overwrite the snapshot merely to make a later run green. Use the accepted S22+ evidence above until the harness path is healthy, then refresh and review the `23-climate-history` baseline deliberately.
+
 Samsung SM-S906B / Android 16 acceptance used the exact product candidate `a60bfa41388fe3825af20ed2803992756f0e6997`, built and installed with `adb install -r`. The WebView rendered at 411 CSS px wide with `scrollWidth == clientWidth`; the five-panel stack measured about 746 CSS px total, continuous cards about 138 px high and Output about 130 px high. Output remained a square step path with `fill: none`, `butt` caps and `miter` joins. No Shelly runtime, KVS, schedule or relay mutation was performed.
 
 The responsive test assertions were updated on `4161224d21c84fbd156e04701f61e1857d123fa7` to reflect the permanent five-panel/no-tooltip contract.
