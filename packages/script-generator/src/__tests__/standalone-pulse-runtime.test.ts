@@ -1,3 +1,4 @@
+import type { StandalonePulseAutomationConfig } from '@lcl/automation-core';
 import { describe, expect, it } from 'vitest';
 import {
   decodeShellyStandalonePulseScript,
@@ -8,14 +9,14 @@ import {
 } from '../index.js';
 import { renderPulseCycleExecution } from '../shelly/runtime/execution.js';
 
-const config = {
+const config: StandalonePulseAutomationConfig = {
   relayId: 0,
   pulse: {
     onMs: 1_000,
     offMs: 2_000,
     initialDelayMs: 0,
-    startPhase: 'on' as const,
-    execution: { mode: 'continuous' as const }
+    startPhase: 'on',
+    execution: { mode: 'continuous' }
   }
 };
 
@@ -25,7 +26,7 @@ const runGenerated = ({
   input = config,
   switchErrors = [] as string[]
 }: {
-  input?: typeof config;
+  input?: StandalonePulseAutomationConfig;
   switchErrors?: string[];
 } = {}) => {
   let nowMs = 100_000;
