@@ -75,7 +75,8 @@ export type InstalledAutomationKind = InstalledAutomation['kind'];
 
 export const isTimePulseInstalledAutomation = (
   installation: TimeInstalledAutomation
-): installation is TimePulseInstalledAutomation => installation.pulseRuntime !== undefined;
+): installation is TimePulseInstalledAutomation =>
+  installation.pulseRuntime !== undefined;
 
 const normalizedDeviceId = (deviceId: string): string => deviceId.trim().toLowerCase();
 
