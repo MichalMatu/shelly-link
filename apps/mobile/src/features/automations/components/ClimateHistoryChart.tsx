@@ -1,6 +1,6 @@
 import type { HistoryRecord } from '@lcl/automation-core';
 import { ResponsiveLine } from '@nivo/line';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   formatHistoryUptime,
   historyDomainTicks,
@@ -20,6 +20,7 @@ import {
 import { createClimateHistoryOutputTrack } from './ClimateHistoryOutputTrack.js';
 import {
   createClimateHistorySelectionCrosshair,
+  historyRecordIndexFromInteraction,
   historySelectionSide
 } from './ClimateHistorySelectionLayer.js';
 import {
@@ -48,6 +49,7 @@ export type ClimateHistoryChartLabels = {
 const CHART_MARGIN = { top: 8, right: 8, bottom: 36, left: 8 } as const;
 const OUTPUT_INTERACTION_Y = 0.08;
 const TIMESTAMP_CLOCK_THRESHOLD_SEC = 36 * 60 * 60;
+const TOUCH_CLICK_DEDUPE_MS = 500;
 
 const CHART_THEME = {
   background: 'transparent',
@@ -93,6 +95,7 @@ export const ClimateHistoryChart = ({
     () => new Set()
   );
   const [selectedRecordIndex, setSelectedRecordIndex] = useState<number | null>(null);
+  const lastTouchSelectionAtMs = useRef(0);
   const number = useMemo(
     () => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }),
     [locale]
@@ -214,6 +217,14 @@ export const ClimateHistoryChart = ({
     });
   };
 
+  const toggleSelectedDatum = (datum: unknown) => {
+    const recordIndex = historyRecordIndexFromInteraction(datum);
+    if (recordIndex === null) return;
+    setSelectedRecordIndex((current) =>
+      current === recordIndex ? null : recordIndex
+    );
+  };
+
   const legendItems = availableMetrics.map((metric) => {
     const latest = latestHistoryMetricValue(records, metric)!;
     return {
@@ -289,14 +300,13 @@ export const ClimateHistoryChart = ({
           role="img"
           ariaLabel={labels.title}
           sliceTooltip={() => null}
+          onTouchEnd={(datum) => {
+            lastTouchSelectionAtMs.current = Date.now();
+            toggleSelectedDatum(datum);
+          }}
           onClick={(datum) => {
-            if (!('points' in datum)) return;
-            const point = datum.points[0];
-            if (!point) return;
-            const recordIndex = point.data.recordIndex;
-            setSelectedRecordIndex((current) =>
-              current === recordIndex ? null : recordIndex
-            );
+            if (Date.now() - lastTouchSelectionAtMs.current < TOUCH_CLICK_DEDUPE_MS) return;
+            toggleSelectedDatum(datum);
           }}
         />
         {selectedRecord && (
