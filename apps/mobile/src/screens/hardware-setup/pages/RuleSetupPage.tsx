@@ -6,7 +6,8 @@ import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { useTranslation } from '../../../app/i18n.js';
 import {
   ALL_RULE_PRESETS,
-  ClimateRuleEditor
+  ClimateRuleEditor,
+  PulseCycleEditor
 } from '../../../features/automations/index.js';
 import { useRuleSensorReadings } from '../../../flows/hardware-setup/useRuleSensorReadings.js';
 import { useSavedSensorLiveScanLifecycle } from '../../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
@@ -159,6 +160,11 @@ export const RuleSetupPage = ({
         safeRelayTestPending={flow.safeRelayTestMutation.isPending}
         install={() => flow.installMutation.mutate()}
         submitMode={flow.isEditingClimateAutomation ? 'edit' : 'install'}
+      />
+      <PulseCycleEditor
+        draft={flow.pulseCycleDraft}
+        validation={flow.pulseCycleValidation}
+        onChange={flow.setPulseCycleDraft}
       />
 
       <Modal
