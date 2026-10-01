@@ -82,7 +82,13 @@ export const PulseCycleEditor = ({
       {visible && (
         <>
           <div className="field-row">
-            {numberField('onSecondsInput', copy.onSeconds, draft.onSecondsInput, '0.001', '1')}
+            {numberField(
+              'onSecondsInput',
+              copy.onSeconds,
+              draft.onSecondsInput,
+              '0.001',
+              '1'
+            )}
             {numberField(
               'offSecondsInput',
               copy.offSeconds,
