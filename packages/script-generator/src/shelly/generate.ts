@@ -37,9 +37,10 @@ const renderPersistentConfigLoader = (
   const debounceValidator = debounceEnabled
     ? '&&(c.y===void 0||N(c.y)&&c.y>=0)&&(c.z===void 0||N(c.z)&&c.z>=0)'
     : '';
-  const executionRange = pulseEnabled || activeWindowEnabled
-    ? 'function B(x,a,b){return N(x)&&x>=a&&x<=b}\n'
-    : '';
+  const executionRange =
+    pulseEnabled || activeWindowEnabled
+      ? 'function B(x,a,b){return N(x)&&x>=a&&x<=b}\n'
+      : '';
   const pulseValidator = pulseEnabled
     ? 'function ve(e){return e&&e.length==5&&B(e[0],1e3,864e5)&&B(e[1],1e3,864e5)&&B(e[2],0,864e5)&&(e[3]===0||e[3]===1)&&(e[4]===0||B(e[4],1,1e5)||B(e[4],-6048e5,-1e3))}\n'
     : '';
