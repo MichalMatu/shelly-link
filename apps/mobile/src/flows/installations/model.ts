@@ -5,16 +5,13 @@ export {
   createInstalledAutomationId,
   createTimeInstalledAutomation,
   createTimeInstalledAutomationId,
-  createTimePulseInstalledAutomation,
   findInstalledRelayOwner,
   findRelayOwnerConflict,
   installedAutomationRelayId,
   installedAutomationSchema,
-  isTimePulseInstalledAutomation,
   timeInstalledAutomationSchema,
   type ClimateInstalledAutomation,
   type InstalledAutomation,
   type InstalledAutomationKind,
-  type TimeInstalledAutomation,
-  type TimePulseInstalledAutomation
+  type TimeInstalledAutomation
 } from '../../features/automations/index.js';
