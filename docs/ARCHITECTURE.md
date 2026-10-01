@@ -109,7 +109,7 @@ The optional execution layer changes requested AUTO output only; it is not a sec
 
 The shared Pulse-cycle model supports ON/OFF phases, optional initial delay, Continuous/Cycles/Duration execution, selectable start phase and safe-OFF completion. Climate configuration may optionally carry `execution.pulse` and/or `execution.activeWindow`; absence of `execution` preserves the existing steady Climate configuration shape and runtime behavior. Active windows use Shelly local time, may cross midnight and fail safe OFF when local time is not trustworthy. Parent inactive, active-window close, MANUAL takeover, automation fault and hard safety cancel the active Pulse cycle instead of allowing it to finish.
 
-This generated Climate execution path is qualified. Existing steady Time automation remains a native Shelly schedule and keeps its current schedule semantics. Time + Pulse must later compose the existing daily Time window with the same Pulse engine through an explicit model; do not put Pulse directly into `DailyTimeAutomationConfig`. Standalone Pulse likewise reuses the shared engine without a Climate parent condition. Neither Time + Pulse nor standalone Pulse is part of the qualified Climate runtime slice yet.
+This generated Climate execution path is qualified. Existing Steady Time remains two native Shelly `Switch.Set` schedules and no script. Time + Pulse is also qualified as an explicit composition: `DailyTimeAutomationConfig` stays unchanged; native ON/OFF schedules own the daily window and call the run-on-boot Pulse script through `Script.Eval` `rq(true)` / `rq(false)` boundaries; the script owns Pulse phase timing only and reuses the same shared Pulse-cycle engine. Standalone Pulse remains the next runtime slice and must reuse that engine without a Climate/Time parent.
 
 ## Climate engine and persistent config
 
@@ -243,6 +243,6 @@ Refactor only to fix ownership, remove a concrete blocker or enable an agreed fe
 
 Architecture documents contain durable contracts, not chronological test history.
 
-Real-device claims belong in `docs/testing/hardware-matrix.md` or a focused dated acceptance record. The qualified Climate + Pulse runtime evidence is recorded in `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`. UI geometry belongs in the UX contract/gallery. Session-specific implementation state belongs in `docs/HANDOFF_NEXT_CHAT.md`.
+Real-device claims belong in `docs/testing/hardware-matrix.md` or a focused dated acceptance record. Qualified Pulse runtime evidence is recorded in `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md` and `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md`. UI geometry belongs in the UX contract/gallery. Session-specific implementation state belongs in `docs/HANDOFF_NEXT_CHAT.md`.
 
 Hardware-facing behavior requires real-device acceptance. Mutating tests must record the final relay/device state when that state matters for safety.
