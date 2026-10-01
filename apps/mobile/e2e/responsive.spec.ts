@@ -751,7 +751,7 @@ for (const viewport of viewports) {
     await expect(page.getByLabel('Wilgotność: 55,2 %')).toBeVisible();
     await expect(page.getByLabel('Wyjście: ON')).toBeVisible();
     await expect(page.getByLabel('Moc: 42,3 W')).toBeVisible();
-    await expect(page.getByLabel('Prąd: 0,18 A')).toBeVisible();
+    await expect(page.getByLabel('Prąd: 0,2 A')).toBeVisible();
     await expect(historyChart.locator('.climate-history-chart__tooltip')).toHaveCount(0);
     await expect(historyChart.locator('.climate-history-chart__metric')).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
