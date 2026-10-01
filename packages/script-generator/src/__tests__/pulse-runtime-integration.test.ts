@@ -279,7 +279,10 @@ describe('generated Pulse runtime relay composition', () => {
     expect(harness.physicalRelayOn()).toBe(false);
 
     harness.scanActive();
-    expect(harness.runtime.state()).toMatchObject({ af: null, ps: 2 });
+    expect(harness.runtime.state()).toMatchObject({ af: null, ps: 2, rs: 'mc' });
+    expect(harness.physicalRelayOn()).toBe(false);
+
+    harness.advance(1);
     expect(harness.physicalRelayOn()).toBe(true);
   });
 
