@@ -39,21 +39,19 @@ const runtimePulseSchema = z
     z.number().int().min(PULSE_MIN_PHASE_MS).max(PULSE_MAX_PHASE_MS),
     z.number().int().min(0).max(PULSE_MAX_INITIAL_DELAY_MS),
     z.union([z.literal(0), z.literal(1)]),
-    z.union([z.literal(0), z.literal(1), z.literal(2)]),
-    z.number().int().nonnegative()
+    z.number().int().min(-PULSE_MAX_DURATION_MS).max(PULSE_MAX_CYCLES)
   ])
   .superRefine((pulse, context) => {
-    const mode = pulse[4];
-    const value = pulse[5];
+    const limit = pulse[4];
     const valid =
-      (mode === 0 && value === 0) ||
-      (mode === 1 && value >= 1 && value <= PULSE_MAX_CYCLES) ||
-      (mode === 2 && value >= PULSE_MIN_DURATION_MS && value <= PULSE_MAX_DURATION_MS);
+      limit === 0 ||
+      (limit >= 1 && limit <= PULSE_MAX_CYCLES) ||
+      (limit <= -PULSE_MIN_DURATION_MS && limit >= -PULSE_MAX_DURATION_MS);
     if (!valid) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        path: [5],
-        message: 'Pulse runtime execution value is invalid.'
+        path: [4],
+        message: 'Pulse runtime execution limit is invalid.'
       });
     }
   });
@@ -155,21 +153,17 @@ export const runtimeAggregationFromFlag = (
 
 const runtimePulseForExecution = (
   pulse: NonNullable<ClimateExecution['pulse']>
-): ShellyRuntimePulse => {
-  const mode = pulse.execution.mode;
-  return [
-    pulse.onMs,
-    pulse.offMs,
-    pulse.initialDelayMs,
-    pulse.startPhase === 'off' ? 1 : 0,
-    mode === 'continuous' ? 0 : mode === 'cycles' ? 1 : 2,
-    mode === 'continuous'
-      ? 0
-      : mode === 'cycles'
-        ? pulse.execution.count
-        : pulse.execution.durationMs
-  ];
-};
+): ShellyRuntimePulse => [
+  pulse.onMs,
+  pulse.offMs,
+  pulse.initialDelayMs,
+  pulse.startPhase === 'off' ? 1 : 0,
+  pulse.execution.mode === 'continuous'
+    ? 0
+    : pulse.execution.mode === 'cycles'
+      ? pulse.execution.count
+      : -pulse.execution.durationMs
+];
 
 const clockTimeToMinute = (value: string): number => {
   const [hour, minute] = value.split(':').map(Number);
@@ -191,9 +185,9 @@ export const climateExecutionFromRuntimeConfig = (
         execution:
           config.e[4] === 0
             ? ({ mode: 'continuous' } as const)
-            : config.e[4] === 1
-              ? ({ mode: 'cycles', count: config.e[5] } as const)
-              : ({ mode: 'duration', durationMs: config.e[5] } as const)
+            : config.e[4] > 0
+              ? ({ mode: 'cycles', count: config.e[4] } as const)
+              : ({ mode: 'duration', durationMs: -config.e[4] } as const)
       }
     : undefined;
   const activeWindow = config.w
@@ -203,7 +197,9 @@ export const climateExecutionFromRuntimeConfig = (
       }
     : undefined;
 
-  return pulse || activeWindow ? { ...(pulse ? { pulse } : {}), ...(activeWindow ? { activeWindow } : {}) } : undefined;
+  return pulse || activeWindow
+    ? { ...(pulse ? { pulse } : {}), ...(activeWindow ? { activeWindow } : {}) }
+    : undefined;
 };
 
 export const createShellyRuntimeConfig = (
