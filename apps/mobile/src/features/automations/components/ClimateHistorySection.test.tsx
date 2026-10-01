@@ -5,8 +5,19 @@ import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { ClimateHistorySection } from './ClimateHistorySection.js';
 
 vi.mock('@nivo/line', () => ({
-  ResponsiveLine: ({ ariaLabel }: { ariaLabel?: string }) => (
-    <div role="img" aria-label={ariaLabel} data-testid="history-chart" />
+  ResponsiveLine: ({
+    ariaLabel,
+    onClick
+  }: {
+    ariaLabel?: string;
+    onClick?: (datum: { points: readonly { data: { recordIndex: number } }[] }) => void;
+  }) => (
+    <div
+      role="img"
+      aria-label={ariaLabel}
+      data-testid="history-chart"
+      onClick={() => onClick?.({ points: [{ data: { recordIndex: 1 } }] })}
+    />
   )
 }));
 
@@ -94,6 +105,21 @@ describe('ClimateHistorySection', () => {
 
     fireEvent.click(power);
     expect(power).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('opens the shared tooltip only after a chart tap and toggles it closed', () => {
+    renderSection({ records: [record(10, false), record(20, true)] });
+
+    const chart = screen.getByRole('img', { name: 'History' });
+    expect(screen.queryByText('AUTO · ON')).not.toBeInTheDocument();
+
+    fireEvent.click(chart);
+    expect(screen.getByText('AUTO · ON')).toBeInTheDocument();
+    expect(screen.getByText('12.3 W')).toBeInTheDocument();
+    expect(screen.getByText('0.06 A')).toBeInTheDocument();
+
+    fireEvent.click(chart);
+    expect(screen.queryByText('AUTO · ON')).not.toBeInTheDocument();
   });
 
   it('omits unavailable metrics without changing the shared chart', () => {
