@@ -118,24 +118,51 @@
 .climate-history-chart__plot {
   height: clamp(22rem, 64dvh, 38rem);
   min-width: 0;
+  position: relative;
   width: 100%;
 }
 
 .climate-history-chart__output-baseline {
   stroke: var(--history-color-output);
-  stroke-opacity: 0.16;
+  stroke-opacity: 0.12;
   stroke-width: var(--lcl-border-width-sm);
   vector-effect: non-scaling-stroke;
 }
 
 .climate-history-chart__output-track {
   fill: var(--history-color-output);
+  shape-rendering: crispEdges;
   stroke: var(--history-color-output);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-opacity: 0.68;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  stroke-opacity: 0.72;
   stroke-width: var(--lcl-border-width-md);
   vector-effect: non-scaling-stroke;
+}
+
+.climate-history-chart__selection-crosshair {
+  pointer-events: none;
+  stroke: var(--lcl-color-text-muted);
+  stroke-dasharray: 5 6;
+  stroke-opacity: 0.55;
+  stroke-width: var(--lcl-border-width-sm);
+  vector-effect: non-scaling-stroke;
+}
+
+.climate-history-chart__tooltip-overlay {
+  display: flex;
+  inset: var(--lcl-spacing-sm) var(--lcl-spacing-sm) auto;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.climate-history-chart__tooltip-overlay[data-side='left'] {
+  justify-content: flex-start;
+}
+
+.climate-history-chart__tooltip-overlay[data-side='right'] {
+  justify-content: flex-end;
 }
 
 .climate-history-chart__tooltip {
@@ -146,6 +173,7 @@
   color: var(--lcl-color-text);
   display: grid;
   gap: var(--lcl-spacing-xs);
+  max-width: min(18rem, 100%);
   min-width: 12rem;
   padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
 }
