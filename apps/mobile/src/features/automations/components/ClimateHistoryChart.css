@@ -188,28 +188,20 @@ circle.climate-history-chart__output-track {
 }
 
 .climate-history-chart__time-axis {
+  align-items: start;
   color: var(--lcl-color-text-muted);
+  display: flex;
   font-size: var(--lcl-font-size-xs);
   font-variant-numeric: tabular-nums;
   height: var(--lcl-spacing-xl);
+  justify-content: space-between;
   margin-inline: 3.125rem 1.25rem;
-  position: relative;
+  padding-top: var(--lcl-spacing-xs);
 }
 
 .climate-history-chart__time-axis span {
   line-height: var(--lcl-line-height-tight);
-  position: absolute;
-  top: var(--lcl-spacing-xs);
-  transform: translateX(-50%);
   white-space: nowrap;
-}
-
-.climate-history-chart__time-axis span[data-edge='start'] {
-  transform: none;
-}
-
-.climate-history-chart__time-axis span[data-edge='end'] {
-  transform: translateX(-100%);
 }
 
 @media (max-width: 25rem) {
