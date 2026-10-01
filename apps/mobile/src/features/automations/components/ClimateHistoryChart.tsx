@@ -230,12 +230,7 @@ export const ClimateHistoryChart = ({
   );
   const selectedRecord =
     selectedRecordIndex === null ? null : (records[selectedRecordIndex] ?? null);
-  const selectedSide = historySelectionSide(
-    xValues,
-    selectedRecordIndex,
-    xStart,
-    xSpan
-  );
+  const selectedSide = historySelectionSide(xValues, selectedRecordIndex, xStart, xSpan);
   const selectedCrosshairLayer = createClimateHistorySelectionCrosshair(
     xValues,
     selectedRecordIndex
@@ -305,7 +300,10 @@ export const ClimateHistoryChart = ({
           }}
         />
         {selectedRecord && (
-          <div className="climate-history-chart__tooltip-overlay" data-side={selectedSide}>
+          <div
+            className="climate-history-chart__tooltip-overlay"
+            data-side={selectedSide}
+          >
             <div className="climate-history-chart__tooltip">
               <span className="climate-history-chart__tooltip-time">
                 {formatRecordTime(selectedRecord)}
