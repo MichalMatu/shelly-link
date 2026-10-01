@@ -30,8 +30,7 @@ export type InstalledStandalonePulseRuntime = {
 
 export const createStandalonePulseAutomationClient = (
   baseUrl: string
-): StandalonePulseAutomationClient =>
-  new RpcShellyClient(createShellyTransport(baseUrl));
+): StandalonePulseAutomationClient => new RpcShellyClient(createShellyTransport(baseUrl));
 
 const requireStoredIdentity = async (
   installation: StandalonePulseInstalledAutomation,
