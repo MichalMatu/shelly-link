@@ -62,18 +62,22 @@ const runtimeConfig = (config: TimePulseAutomationConfig): TimePulseRuntimeConfi
   };
 };
 
-const renderTimePulseWindow = (): string =>
-  `function wu(){if(R.wi)Timer.clear(R.wi);var y=Shelly.getComponentStatus("sys"),t=y&&y.time,u=y&&y.unixtime,m=t?(t.slice(0,2)-0)*60+(t.slice(3,5)-0):-1,a=C.w[0],b=C.w[1],o,d,h=R.wo;if(!u||u<1600000000||m<0||m>1439||m!==m){R.wo=-1;R.af="tm";cx();sw(false,"tm");d=30000}else{o=a<b?m>=a&&m<b:m>=a||m<b;R.wo=o?1:0;if(R.af==="tm")R.af=null;d=(((o?b:a)-m+1440)%1440||1440)*60000-u%60*1000;if(!o){cx();sw(false,"pw")}else if(h!=1&&!R.af)px()}R.wi=Timer.set(d,false,wu)}`;
-
 const renderTimePulseRelay =
   (): string => `function ff(){if(R.ri)Timer.clear(R.ri);Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.ri=Timer.set(1000,false,ff);return}R.ri=0;R.on=false})}
 function sw(o,q){R.a=o;R.rs=q;if(R.on===o)return;Shelly.call("Switch.Set",{id:C.i,on:o},function(x,e){if(e){R.af="rc";cx();ff();return}R.on=o})}
 function ft(q){R.af=q||"sf";cx();R.a=false;ff()}`;
 
+const renderTimePulseGate = (): string =>
+  `function rq(o){if(!o){var p=R.ps>0&&R.ps<4;cx();R.a=false;sw(false,p?"pp":"pw");return 0}if(R.af)return-1;px();return 1}
+function bw(){var y=Shelly.getComponentStatus("sys"),t=y&&y.time,u=y&&y.unixtime,m=t?(t.slice(0,2)-0)*60+(t.slice(3,5)-0):-1,a=C.w[0],b=C.w[1];if(!u||u<1600000000||m<0||m>1439||m!==m){R.af="tm";rq(false);return}R.af=null;rq(a<b?m>=a&&m<b:m>=a||m<b)}`;
+
 const renderTimePulseBoot =
-  (): string => `function bt(){Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.af="rc";ff();return}R.on=false;wu()})}
+  (): string => `function bt(){Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.af="rc";ff();return}R.on=false;bw()})}
 if(Shelly.addEventHandler)Shelly.addEventHandler(function(e){if(e&&e.component==="switch:"+C.i&&e.delta&&e.delta.errors&&e.delta.errors[0])ft(e.delta.errors[0])});
 bt();`;
+
+export const timePulseScheduleEvalCode = (active: boolean): string =>
+  `rq(${active ? 'true' : 'false'})`;
 
 export const generateShellyTimePulseScript = (input: unknown): string => {
   const config = timePulseAutomationConfigSchema.parse(
@@ -82,11 +86,11 @@ export const generateShellyTimePulseScript = (input: unknown): string => {
   const sourceConfig = stableStringify(config);
   const compactConfig = stableStringify(runtimeConfig(config));
   const body = `var C=${compactConfig};
-var R={on:false,a:false,af:null,rs:"bt",ps:0,pc:0,pt:null,pn:null,pi:0,wo:-1,wi:0,ri:0};
+var R={on:false,a:false,af:null,rs:"bt",ps:0,pc:0,pt:null,pn:null,pi:0,ri:0};
 function nw(){return Shelly.getUptimeMs()}
 ${renderTimePulseRelay()}
 ${renderPulseCycleExecution()}
-${renderTimePulseWindow()}
+${renderTimePulseGate()}
 ${renderTimePulseBoot()}`;
   return `// g: 0.7.1\n// m: time-pulse-v1\n// c: ${sourceConfig}\n${compactGeneratedShellyScript(body)}\n`;
 };
