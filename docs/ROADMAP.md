@@ -33,7 +33,7 @@ The mobile UI presents the same typed records through the completed History visu
 
 Maximum continuous ON, relay-control failures and native Shelly protection errors converge on one first-fault-wins hard-safety latch. Reset remains safe OFF. Plug-owned firmware limits remain the authority for device electrical/thermal ceilings.
 
-### 3. Rule/action expansion — foundations merged; Pulse promoted to V1
+### 3. Rule/action expansion — foundations merged; Climate Pulse runtime qualified
 
 Merged foundations/runtime work:
 
@@ -45,9 +45,13 @@ Merged foundations/runtime work:
 - flat explicit AND/OR condition composition;
 - Climate runtime minimum-ON integration;
 - Climate runtime relay-debounce integration with one-shot maturity and forced-OFF precedence;
-- runtime source compaction without raising the 9500 B guard.
+- bounded shared Pulse cycle model with Continuous/Cycles/Duration, initial delay, start phase and safe-OFF completion;
+- generated Climate execution gate for optional Pulse and/or active daily window;
+- compact persistent execution config with decode/recovery/reconciliation round-trip;
+- one-shot Shelly timers for Pulse phases and active-window boundaries;
+- qualified composition with MANUAL, automation-fault, hard-safety, minimum ON/OFF and relay debounce.
 
-The pure `RelayPulseAction` / one-shot state machine remains supported. Pulse V1 additionally has a bounded shared cycle model for ON/OFF phases, initial delay, Continuous/Cycles/Duration execution and safe-OFF completion. Climate configuration can carry optional `execution.pulse` and/or `execution.activeWindow`; when `execution` is absent, the existing steady Climate config shape remains unchanged. These are configuration/domain foundations until generated-runtime integration is completed. Pulse V1 is defined in section 6.
+The pure `RelayPulseAction` / one-shot state machine remains supported. Climate configuration may carry optional `execution.pulse` and/or `execution.activeWindow`; when `execution` is absent, the existing steady Climate config shape and behavior remain unchanged. The generated Climate + Pulse + optional active-window runtime slice is qualified on candidate `fe50778d956906749c00f9da9b7237e6e617c970`. Time + Pulse, standalone Pulse and Pulse UI remain later Pulse V1 slices and must reuse the same engine rather than fork it. Pulse V1 is defined in section 6.
 
 Advanced rule candidates that remain parked and do **not** block Pulse V1:
 
@@ -55,7 +59,7 @@ Advanced rule candidates that remain parked and do **not** block Pulse V1:
 - general AND/OR condition execution in the Climate runtime;
 - configuration/editor surfaces for those general condition-composition capabilities if they are later accepted.
 
-**Runtime-size policy:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the pre-Pulse four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Keep 9500 B as the preferred optimization target and emit new runtime logic only for configurations that use it, but Pulse + active-window integration now has an explicitly accepted **12000 B hard ceiling**. Do not remove working safety/recovery capability, narrow supported sensor combinations, or perform risky logic/minification refactors solely to defend the old 9500 B target. The 12000 B ceiling still requires focused generator coverage and real-Plug validation before Pulse V1 is accepted on hardware.
+**Runtime-size policy:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the pre-Pulse four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Keep 9500 B as the preferred optimization target and emit new runtime logic only for configurations that use it, but Pulse + active-window integration has an explicitly accepted **12000 B hard ceiling**. Do not remove working safety/recovery capability, narrow supported sensor combinations, or perform risky logic/minification refactors solely to defend the old 9500 B target. The qualified mixed-parser worst case — four sensors, VPD, minimum ON, debounce, large timing values, Pulse and active window — is **11332 B**, leaving 668 B headroom. Script-generator coverage passed 201/201 tests at 100% statements/branches/functions/lines, full `pnpm check` passed on the qualified runtime/code candidate, and real Plug S Gen3 firmware 1.7.5 acceptance loaded the 11332 B runtime cleanly and observed a BLE-driven physical OFF -> ON -> OFF Pulse with explicit final relay OFF. Detailed evidence is in `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`.
 
 ### 4. Pre-charts closeout — completed 2026-09-30
 
@@ -80,7 +84,7 @@ All five panels share the same truthful time domain and one compact time row bel
 
 Focused History tests, mobile typecheck, UX quality gate and the final repository `pnpm check` passed. Samsung S22+ / Android 16 preserving-data acceptance confirmed five stacked panels, no horizontal overflow, compact phone geometry and an Output SVG path with `fill: none` and square `H/V` transitions. The canonical Darwin History snapshot was subsequently refreshed deliberately and the full responsive suite passed 36/36. No runtime, KVS, `HistoryRecord[]`, schedule or relay behavior changed.
 
-### 6. Pulse V1 — immediate next slice
+### 6. Pulse V1 — Climate runtime qualified; adapters and UI next
 
 Pulse becomes a first-class automation capability with **one shared pulse-cycle engine** and two product entry points. Do not implement separate temperature-pulse, humidity-pulse or time-pulse runtimes.
 
@@ -145,15 +149,15 @@ History and operational status must remain explanatory: Pulse-driven relay chang
 
 #### Pulse V1 qualification
 
-Before calling Pulse V1 complete:
+The generated Climate + Pulse + active-window runtime portion is qualified as of 2026-10-01. Its acceptance covers Continuous/Cycles/Duration, initial delay/start phase, cancellation/completion boundaries, overnight window behavior, AUTO/MANUAL, automation fault, hard safety, reboot-safe start, minimum ON/OFF/debounce composition, compact diagnostics/history reasons, the supported 12 KB size matrix, full repository gate, and real Plug S Gen3 evidence with explicit final OFF.
 
-- re-audit generated-runtime byte budget after Pulse + active-window behavior exists; keep 9500 B when practical and enforce the explicitly accepted 12000 B hard ceiling across the supported worst-case matrix;
-- add pure domain/state-machine tests for cycle, cancellation, completion and boundary timing;
-- test Temperature + Pulse, Humidity + Pulse, Time + Pulse and standalone Pulse composition;
-- cover Continuous, Cycles and Duration modes;
-- cover AUTO/MANUAL transitions, automation fault, hard safety, minimum ON/OFF/debounce interaction and reboot-safe behavior;
-- verify History/status explanation for pulse transitions;
-- run focused generator/runtime tests, one final full repository gate, responsive/visual checks for new UI, and real Plug acceptance with explicit final relay OFF.
+Before calling **all of Pulse V1** complete, still:
+
+- implement and test Time + Pulse composition over the existing Time daily window without changing `DailyTimeAutomationConfig` or replacing steady native schedules;
+- implement and test standalone Pulse using the same shared engine;
+- add Pulse setup/editor UI that reuses the shared config model;
+- run responsive/visual acceptance for the new UI and status presentation;
+- repeat size/hardware qualification only if later adapters change generated runtime or hardware behavior.
 
 Once Pulse V1 is qualified and stable, resume the existing V1 product plan below rather than immediately expanding the runtime with every advanced Pulse idea.
 
