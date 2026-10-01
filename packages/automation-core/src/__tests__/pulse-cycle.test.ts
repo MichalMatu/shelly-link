@@ -152,6 +152,23 @@ describe('Pulse cycle', () => {
     });
   });
 
+  it('reports completed ON phases for duration mode that starts with OFF', () => {
+    const config = continuous({
+      startPhase: 'off',
+      execution: { mode: 'duration', durationMs: 25_000 }
+    });
+
+    expect(evaluatePulseCycle(config, 0, 25_000)).toEqual({
+      status: 'completed',
+      relayOn: false,
+      elapsedMs: 25_000,
+      activeElapsedMs: 25_000,
+      cyclesCompleted: 0,
+      completionReason: 'duration',
+      nextTransitionAtMs: null
+    });
+  });
+
   it('treats duration as active Pulse time after initial delay', () => {
     const config = continuous({
       initialDelayMs: 5_000,
@@ -188,6 +205,9 @@ describe('Pulse cycle', () => {
         })
       )
     ).toThrow(RangeError);
+    expect(() => evaluatePulseCycle(continuous(), -1, 0)).toThrow(RangeError);
+    expect(() => evaluatePulseCycle(continuous(), Number.NaN, 0)).toThrow(RangeError);
+    expect(() => evaluatePulseCycle(continuous(), 0, -1)).toThrow(RangeError);
     expect(() => evaluatePulseCycle(continuous(), 10, 9)).toThrow(RangeError);
   });
 });
