@@ -18,5 +18,5 @@ export const renderExecutionThresholdHelper = (
 function sv(t){return 0.6108*Math.exp((17.27*t)/(t+237.3));}
 function vd(t,h){return t===null||h===null?null:sv(t)*(1-h/100);}
 ${metricHelper}
-function th(t,h){var lo=Math.min(C.on,C.off),hi=Math.max(C.on,C.off),g=${effectiveTarget};if(g===null)return{o:C.on,f:C.off};g=cl(g,lo,hi);var z=C.m?2:0.25;return C.d?{o:cl(g+z,lo,hi),f:cl(g-z,lo,hi)}:{o:cl(g-z,lo,hi),f:cl(g+z,lo,hi)};}`;
+function th(t,h){if(!C.vp)return{o:C.on,f:C.off};var lo=Math.min(C.on,C.off),hi=Math.max(C.on,C.off),g=${effectiveTarget};if(g===null)return{o:C.on,f:C.off};g=cl(g,lo,hi);var z=C.m?2:0.25;return C.d?{o:cl(g+z,lo,hi),f:cl(g-z,lo,hi)}:{o:cl(g-z,lo,hi),f:cl(g+z,lo,hi)};}`;
 };
