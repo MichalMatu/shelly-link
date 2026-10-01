@@ -1,5 +1,6 @@
 import type { HistoryRecord } from '@lcl/automation-core';
 import { render } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { createClimateHistoryOutputTrack } from './ClimateHistoryOutputTrack.js';
 
@@ -33,8 +34,9 @@ describe('createClimateHistoryOutputTrack', () => {
       innerHeight: 100,
       innerWidth: 100
     } as Parameters<typeof layer>[0];
+    const output = layer(props) as ReactNode;
 
-    const { container } = render(<svg>{layer(props)}</svg>);
+    const { container } = render(<svg>{output}</svg>);
     const path = container.querySelector('path.climate-history-chart__output-track');
 
     expect(path).toHaveAttribute('fill', 'none');
