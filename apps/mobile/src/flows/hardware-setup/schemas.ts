@@ -47,6 +47,9 @@ export const bleDiscoveryCandidateSchema = bleDiscoveryRawCandidateSchema.transf
   })
 );
 
+export type BleDiscoveryCandidate = z.infer<typeof bleDiscoveryCandidateSchema>;
+export type BleDiscoverySnapshot = z.infer<typeof bleDiscoverySnapshotSchema>;
+
 export const bleDiscoverySnapshotSchema = z
   .object({
     v: z.number(),
@@ -64,9 +67,6 @@ export const bleDiscoverySnapshotSchema = z
     lastReason: snapshot.lr,
     candidates: snapshot.c
   }));
-
-export type BleDiscoveryCandidate = z.infer<typeof bleDiscoveryCandidateSchema>;
-export type BleDiscoverySnapshot = z.infer<typeof bleDiscoverySnapshotSchema>;
 
 const diagnosticRuntimeAddressSchema = z
   .string()
@@ -94,6 +94,25 @@ const perSensorDiagnosticSchema = z
   }));
 
 const runtimeControlModeCodeSchema = z.union([z.literal(0), z.literal(1)]);
+const executionDiagnosticSchema = z.tuple([
+  z.boolean(),
+  z.union([z.literal(-1), z.literal(0), z.literal(1)]).nullable(),
+  z.number().int().min(0).max(4).nullable(),
+  z.number().int().nonnegative().nullable(),
+  z.number().nullable(),
+  z.string().nullable()
+]);
+
+const pulsePhaseFromCode = (
+  code: number | null
+): 'inactive' | 'delay' | 'on' | 'off' | 'completed' | null => {
+  if (code === null) return null;
+  if (code === 1) return 'delay';
+  if (code === 2) return 'on';
+  if (code === 3) return 'off';
+  if (code === 4) return 'completed';
+  return 'inactive';
+};
 
 export const diagnosticSnapshotSchema = z
   .object({
@@ -122,6 +141,7 @@ export const diagnosticSnapshotSchema = z
       ])
       .nullable(),
     d: z.array(perSensorDiagnosticSchema).optional(),
+    e: executionDiagnosticSchema.optional(),
     g: z.union([
       z.tuple([
         z.number().nullable(),
@@ -206,6 +226,28 @@ export const diagnosticSnapshotSchema = z
           currentA: snapshot.p[3],
           energyWh: snapshot.p[4],
           deviceTemperatureC: snapshot.p[5]
+        }
+      : null,
+    execution: snapshot.e
+      ? {
+          parentRequestedActive: snapshot.e[0],
+          activeWindowState:
+            snapshot.e[1] === null
+              ? null
+              : snapshot.e[1] === 1
+                ? 'open'
+                : snapshot.e[1] === 0
+                  ? 'closed'
+                  : 'time-invalid',
+          pulse:
+            snapshot.e[2] === null
+              ? null
+              : {
+                  phase: pulsePhaseFromCode(snapshot.e[2]),
+                  cyclesCompleted: snapshot.e[3] ?? 0,
+                  nextTransitionUptimeMs: snapshot.e[4],
+                  lastReason: snapshot.e[5]
+                }
         }
       : null,
     diagnostics: {
