@@ -1,3 +1,5 @@
+import type { PulseCycleConfig } from '../actions/pulseCycle.js';
+
 const DAILY_TIMESPEC_DAYS = 'SUN,MON,TUE,WED,THU,FRI,SAT';
 const clockTimePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
@@ -5,6 +7,7 @@ export type DailyTimeAutomationConfig = {
   relayId: number;
   onTime: string;
   offTime: string;
+  pulse?: PulseCycleConfig;
 };
 
 export interface DailyTimeWindow {
