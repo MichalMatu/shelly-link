@@ -1,4 +1,5 @@
-export const renderPulseCycleExecution = (): string => `function cx(){if(R.pi)Timer.clear(R.pi);R.pi=R.ps=R.pc=0;R.pt=R.pn=null}
+export const renderPulseCycleExecution =
+  (): string => `function cx(){if(R.pi)Timer.clear(R.pi);R.pi=R.ps=R.pc=0;R.pt=R.pn=null}
 function pj(d){R.pn=nw()+d;R.pi=Timer.set(d,false,pn)}
 function pc(){R.ps=4;R.pn=null;sw(false,"pc",false)}
 function pf(o){var e=C.e,d=o?e[0]:e[1],v=e[4],r=v<0?-v-nw()+R.pt:d;if(r<=0)return pc();R.ps=o?2:3;sw(o,o?"po":"pf",false);pj(Math.min(d,r))}
