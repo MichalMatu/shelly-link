@@ -3,6 +3,7 @@ export * from './actions/relayAction.js';
 export * from './actions/relayTiming.js';
 export * from './actions/relayDebounce.js';
 export * from './actions/relayPulse.js';
+export * from './actions/pulseCycle.js';
 export * from './conditions/conditionGroup.js';
 export * from './thermostat/heating.js';
 export * from './failsafe/index.js';
