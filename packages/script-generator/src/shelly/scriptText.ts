@@ -10,10 +10,20 @@ const runtimeTokenAliases: Readonly<Record<string, string>> = {
   Shelly: 'L'
 };
 
+const executionRuntimeTokenAliases: Readonly<Record<string, string>> = {
+  Timer: 'K',
+  BLE: 'V',
+  HTTPServer: 'H',
+  Script: 'A'
+};
+
 const isIdentifierStart = (character: string): boolean => /[A-Za-z_$]/.test(character);
 const isIdentifierPart = (character: string): boolean => /[A-Za-z0-9_$]/.test(character);
 
-export const aliasGeneratedClimateRuntimeTokens = (script: string): string => {
+const aliasRuntimeTokens = (
+  script: string,
+  aliases: Readonly<Record<string, string>>
+): string => {
   let compacted = '';
   let index = 0;
 
@@ -41,7 +51,7 @@ export const aliasGeneratedClimateRuntimeTokens = (script: string): string => {
       let end = index + 1;
       while (end < script.length && isIdentifierPart(script[end]!)) end += 1;
       const token = script.slice(index, end);
-      compacted += runtimeTokenAliases[token] ?? token;
+      compacted += aliases[token] ?? token;
       index = end;
       continue;
     }
@@ -50,5 +60,17 @@ export const aliasGeneratedClimateRuntimeTokens = (script: string): string => {
     index += 1;
   }
 
-  return `var Q=null,F=false,G=true,M=Math,J=JSON,L=Shelly;${compacted}`;
+  return compacted;
 };
+
+export const aliasGeneratedClimateRuntimeTokens = (script: string): string =>
+  `var Q=null,F=false,G=true,M=Math,J=JSON,L=Shelly;${aliasRuntimeTokens(
+    script,
+    runtimeTokenAliases
+  )}`;
+
+export const aliasGeneratedExecutionRuntimeTokens = (script: string): string =>
+  `var K=Timer,V=BLE,H=HTTPServer,A=Script;${aliasRuntimeTokens(
+    script,
+    executionRuntimeTokenAliases
+  )}`;
