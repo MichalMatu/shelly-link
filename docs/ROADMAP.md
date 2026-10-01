@@ -27,7 +27,7 @@ See `docs/ARCHITECTURE.md` for durable ownership/safety contracts and `docs/test
 
 History records enough operational context to explain output changes: climate/VPD, requested/final relay, mode/manual request, reason, automation fault, hard safety and power/current where available. History failures are isolated from relay arbitration.
 
-The mobile UI now presents the same typed records through the completed shared-plot History visualization described below; it does not create a second persistence/runtime path.
+The mobile UI presents the same typed records through the completed History visualization described below; it does not create a second persistence/runtime path.
 
 ### 2. Runtime Safety Supervisor — completed 2026-09-30
 
@@ -71,11 +71,13 @@ Neither retained item blocks the read-only History visualization slice.
 
 ### 5. History visualization / charts — completed 2026-10-01
 
-History is chart-first on the existing typed `HistoryRecord[]` data path. All available Temperature, Humidity, VPD, Output, Power and Current data shares one truthful time surface. The compact legend toggles series independently and all available series start visible. Continuous metrics use independent semantic domains normalized only for rendering, while real units remain in legend/tooltips and no shared numeric Y axis pretends unlike units are physically comparable. Small fluctuations respect meaningful minimum spans; Power/Current keep zero-aware baselines; Output is a subdued state track.
+History is chart-first on the existing typed `HistoryRecord[]` data path. The accepted phone presentation is a vertical stack of five compact metric panels: Temperature, Humidity, Output, Power and Current. VPD stays in the typed History/runtime data model but is not shown in the accepted five-panel stack.
 
-Timestamp/uptime x positions preserve real elapsed spacing and domain-driven ticks stay sparse and natural. The shared crosshair tooltip reports every visible series at the same time. Loading/retry/empty/partial-corruption behavior remains presentation-only over the existing History runtime/KVS model.
+Each continuous metric owns a real-unit Y domain instead of sharing normalized plot coordinates with unrelated units. Minimum spans deliberately calm small fluctuations: Temperature 4 °C, Humidity 20 percentage points, Power 50 W from zero and Current 0.6 A from zero; the policy still expands when real data exceeds those spans. Continuous series use monotone smoothing with a restrained area tint, subtle glow and a latest-value point. Output remains a strict digital step track with horizontal/vertical transitions only and no filled area.
 
-Responsive acceptance passed at `360x800`, `390x844` and `412x915`, canonical visual verification passed, and Samsung S22+ / Android 16 preserving-data acceptance confirmed no horizontal overflow, independent legend toggles and the multi-series tooltip. No runtime, KVS or `HistoryRecord[]` redesign was needed.
+All five panels share the same truthful time domain and one compact time row below the stack. The previous legend/toggle, tooltip and crosshair interaction are removed because every metric is permanently visible with its current reading and range. Timestamp/uptime x positions preserve real elapsed spacing with record order only as the final fallback. Loading/retry/empty/partial-corruption behavior remains presentation-only over the existing History runtime/KVS model.
+
+Focused History tests, mobile typecheck, UX quality gate and the final repository `pnpm check` passed. Samsung S22+ / Android 16 preserving-data acceptance confirmed five stacked panels, no horizontal overflow, compact phone geometry and an Output SVG path with `fill: none` and square `H/V` transitions. No runtime, KVS, `HistoryRecord[]`, schedule or relay behavior changed.
 
 ### 6. Dashboard status polish
 
