@@ -190,7 +190,8 @@ const recoveredClimateConfig = (
       consecutiveHits: settings.consecutiveHits,
       failSafe: settings.failSafe,
       bootState: settings.bootState
-    }
+    },
+    ...(settings.execution ? { execution: settings.execution } : {})
   };
 };
 
