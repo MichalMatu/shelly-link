@@ -1,6 +1,6 @@
-# Handoff — post-History shared-plot baseline
+# Handoff — post-History stacked-panel baseline
 
-Status: **2026-10-01 — the screenshot-driven History chart UX refinement is implemented, responsively qualified and accepted on Samsung S22+ / Android 16. The next product slice is Dashboard status polish.**
+Status: **2026-10-01 — the screenshot-driven History redesign is implemented, accepted on Samsung S22+ / Android 16 and merged to `main`. The next product slice is Dashboard status polish.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -10,7 +10,7 @@ Repository: `MichalMatu/shelly-link`
 2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md` and `docs/UX_VISUAL_CONTRACT.md`.
 3. Read fresh `agent-control:.agent/status/daemon.json`; never reuse an old conversation binding.
 4. Confirm there is no active Local Agent task and no open PR before starting work.
-5. Start from the qualified shared-plot History baseline. Do not reopen History runtime/KVS/`HistoryRecord[]` without concrete evidence of a data-model limitation.
+5. Start from the accepted stacked-panel History baseline. Do not reopen History runtime/KVS/`HistoryRecord[]` without concrete evidence of a data-model limitation.
 
 Durable remote branches after closeout should remain only:
 
@@ -30,30 +30,32 @@ History remains one read-only presentation over the existing Climate History v2 
 
 The accepted chart UX now has:
 
-- one shared Nivo time plot with every available series visible by default;
-- a compact two-row/wrapping legend that toggles each series independently instead of acting as a radio selector;
-- stable series colors for Temperature, Humidity, VPD, Output, Power and Current;
-- per-series semantic domains normalized only for plot coordinates, with real values and units preserved in legend/tooltips and no misleading numeric shared Y axis;
-- meaningful minimum spans/padding so tiny temperature/RH noise no longer fills the plot; Power and Current use zero-aware baselines;
-- Output rendered as a quiet digital step track with square horizontal/vertical transitions; ON is visibly higher than OFF with a 44 px state separation on the accepted phone plot;
-- truthful elapsed-time x positions with timestamp -> monotonic uptime -> record-sequence fallback; timestamp/uptime ticks are generated from the x-domain rather than sampled record indexes;
-- a shared tooltip/crosshair that is closed by default and appears only after a deliberate tap/click on the plot; touch-down alone does not open it, a second tap on the same record closes it, and the tooltip reports every visible series at that record/time plus AUTO/MANUAL and relay state;
-- dark-mode/design-token styling and no horizontal page overflow.
+- five compact vertical panels in this order: Temperature, Humidity, Output, Power, Current;
+- one independent Y scale per continuous metric rather than one shared normalized plot;
+- deliberately calm minimum spans: Temperature 4 °C, Humidity 20 percentage points, Power 50 W from zero, Current 0.6 A from zero; domains expand when data requires it;
+- continuous lines rendered with `monotoneX` smoothing, restrained area tint, subtle glow and latest-value marker;
+- Output rendered as a strict square digital step track with horizontal/vertical SVG segments only and `fill: none`;
+- one shared truthful time domain with a compact time row below the stack, using timestamp -> monotonic uptime -> record-sequence fallback;
+- current reading and observed range visible directly in each panel;
+- no interactive legend, tooltip or crosshair in the accepted design;
+- VPD retained in the typed History/scaling layer but intentionally omitted from the accepted five-panel phone stack;
+- design-token styling, rounded cards, shadows and no horizontal page overflow.
 
-Implementation remains local to `apps/mobile/src/features/automations/components/`. The chart coordinator stays below the repository growth gate by separating concrete responsibilities into `ClimateHistoryChartLegend.tsx`, `ClimateHistoryOutputTrack.tsx`, `ClimateHistorySelectionLayer.tsx`, `climateHistoryChartMetrics.ts`, `climateHistoryChartScale.ts` and the existing axis module rather than raising a hotspot budget.
+Implementation remains local to `apps/mobile/src/features/automations/components/`. The chart coordinator uses `ClimateHistoryMetricPanel.tsx`, `ClimateHistoryOutputTrack.tsx`, `climateHistoryChartMetrics.ts`, `climateHistoryChartScale.ts` and the existing axis module. Obsolete shared-plot legend/selection interaction is no longer part of the accepted History UI.
 
 ## Qualification evidence
 
-Focused qualification on the final candidate passed:
+Focused qualification passed on the accepted candidate:
 
-- focused ESLint;
-- focused History Vitest: 3 files / 14 tests;
+- Prettier/format checks for changed History files;
 - mobile typecheck;
-- full repository quality gates;
-- canonical visual verification: 4/4;
-- responsive History acceptance at `360x800`, `390x844` and `412x915`: 3/3.
+- focused History Vitest: 3 files / 9 tests;
+- UX quality gate;
+- final full repository `pnpm check`.
 
-Samsung SM-S906B / Android 16 acceptance used exact application candidate `7ccad35bda7ddc35fbcbf801eafbf89fd33fd210`, built and installed with `adb install -r`; `firstInstallTime` remained unchanged, proving app data was preserved. The WebView stayed at 411 CSS px wide with `scrollWidth == clientWidth`. The Output path used explicit horizontal/vertical SVG segments with square `butt`/`miter` corners, and stored transitions demonstrated the intended 44 px ON/OFF separation. A real CDP touch-down left the tooltip closed; touch release opened the shared tooltip and crosshair, and a second real touch closed both. The clean interaction log contained no matched JavaScript/Android crash error. No Shelly runtime, KVS, schedule or relay mutation was performed.
+Samsung SM-S906B / Android 16 acceptance used the exact product candidate `a60bfa41388fe3825af20ed2803992756f0e6997`, built and installed with `adb install -r`. The WebView rendered at 411 CSS px wide with `scrollWidth == clientWidth`; the five-panel stack measured about 746 CSS px total, continuous cards about 138 px high and Output about 130 px high. Output remained a square step path with `fill: none`, `butt` caps and `miter` joins. No Shelly runtime, KVS, schedule or relay mutation was performed.
+
+The responsive test assertions were updated on `4161224d21c84fbd156e04701f61e1857d123fa7` to reflect the permanent five-panel/no-tooltip contract.
 
 ## Next slice — Dashboard status polish
 
@@ -63,7 +65,7 @@ Run the normal architecture/UX gate before implementation. Keep runtime behavior
 
 ## Performance rule
 
-The MacBook Air M1 / 8 GB remains the current Local Agent host. `docs/PERFORMANCE_HANDOFF.md` pauses a fresh performance/concurrency/cache campaign until the M1 Pro / 32 GB host is available. Run only one heavy build/test workload at a time.
+`docs/PERFORMANCE_HANDOFF.md` is the source of truth for Local Agent performance work. Do not infer a host migration from personal hardware ownership; verify the active host before resuming any performance/concurrency/cache campaign. Run only one heavy build/test workload at a time.
 
 ## Verification rule
 
