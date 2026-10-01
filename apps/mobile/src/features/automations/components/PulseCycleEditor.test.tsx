@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '../../../app/i18n.js';
 import {
@@ -30,6 +30,12 @@ const renderEditor = ({
   return onChange;
 };
 
+const selectOption = (label: string, optionLabel: string) => {
+  fireEvent.click(screen.getByRole('button', { name: label }));
+  const listbox = screen.getByRole('listbox', { name: label });
+  fireEvent.click(within(listbox).getByRole('option', { name: optionLabel }));
+};
+
 describe('PulseCycleEditor', () => {
   it('keeps optional Pulse compact while output behavior is Steady', () => {
     renderEditor();
@@ -39,9 +45,7 @@ describe('PulseCycleEditor', () => {
 
   it('switches the shared optional editor to Pulse', () => {
     const onChange = renderEditor();
-    fireEvent.change(screen.getByLabelText('Zachowanie wyjścia'), {
-      target: { value: 'pulse' }
-    });
+    selectOption('Zachowanie wyjścia', 'Pulse');
     expect(onChange).toHaveBeenCalledWith({ enabled: true });
   });
 
@@ -55,9 +59,7 @@ describe('PulseCycleEditor', () => {
     expect(screen.getByText('Czas ON (s)')).toBeInTheDocument();
     expect(screen.getByText('Czas OFF (s)')).toBeInTheDocument();
     expect(screen.getByText('Liczba cykli')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Faza startowa'), {
-      target: { value: 'off' }
-    });
+    selectOption('Faza startowa', 'OFF');
     expect(onChange).toHaveBeenCalledWith({ startPhase: 'off' });
   });
 
@@ -76,7 +78,7 @@ describe('PulseCycleEditor', () => {
       onSecondsInput: '0.5'
     };
     renderEditor({ draft });
-    const input = screen.getByLabelText('Czas ON (s)');
+    const input = screen.getAllByRole('spinbutton')[0];
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByText('Sprawdź dozwolony zakres wartości.')).toBeInTheDocument();
   });
