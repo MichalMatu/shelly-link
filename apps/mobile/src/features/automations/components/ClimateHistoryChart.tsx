@@ -1,5 +1,5 @@
 import type { HistoryRecord } from '@lcl/automation-core';
-import { ResponsiveLine, type LineCustomSvgLayer } from '@nivo/line';
+import { ResponsiveLine } from '@nivo/line';
 import { useMemo, useState } from 'react';
 import {
   formatHistoryUptime,
@@ -18,6 +18,10 @@ import {
   type HistoryMetricId
 } from './climateHistoryChartMetrics.js';
 import { createClimateHistoryOutputTrack } from './ClimateHistoryOutputTrack.js';
+import {
+  createClimateHistorySelectionCrosshair,
+  historySelectionSide
+} from './ClimateHistorySelectionLayer.js';
 import {
   historyMetricDomain,
   normalizeHistoryMetricValue,
@@ -226,30 +230,16 @@ export const ClimateHistoryChart = ({
   );
   const selectedRecord =
     selectedRecordIndex === null ? null : (records[selectedRecordIndex] ?? null);
-  const selectedXRatio =
-    selectedRecordIndex === null || xSpan <= 0
-      ? 0.5
-      : Math.min(1, Math.max(0, (xValues[selectedRecordIndex]! - xStart) / xSpan));
-  const selectedCrosshairLayer: LineCustomSvgLayer<HistoryChartSeries> = ({
-    xScale,
-    innerHeight
-  }) => {
-    if (selectedRecordIndex === null) return null;
-    const selectedX = xValues[selectedRecordIndex];
-    if (selectedX === undefined) return null;
-    const x = xScale(selectedX);
-
-    return (
-      <line
-        className="climate-history-chart__selection-crosshair"
-        x1={x}
-        x2={x}
-        y1={0}
-        y2={innerHeight}
-        aria-hidden="true"
-      />
-    );
-  };
+  const selectedSide = historySelectionSide(
+    xValues,
+    selectedRecordIndex,
+    xStart,
+    xSpan
+  );
+  const selectedCrosshairLayer = createClimateHistorySelectionCrosshair(
+    xValues,
+    selectedRecordIndex
+  );
 
   return (
     <div className="climate-history-chart">
@@ -315,10 +305,7 @@ export const ClimateHistoryChart = ({
           }}
         />
         {selectedRecord && (
-          <div
-            className="climate-history-chart__tooltip-overlay"
-            data-side={selectedXRatio < 0.5 ? 'right' : 'left'}
-          >
+          <div className="climate-history-chart__tooltip-overlay" data-side={selectedSide}>
             <div className="climate-history-chart__tooltip">
               <span className="climate-history-chart__tooltip-time">
                 {formatRecordTime(selectedRecord)}
