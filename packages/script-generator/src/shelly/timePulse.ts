@@ -72,7 +72,7 @@ const renderTimePulseGate = (): string =>
 function bw(){var y=Shelly.getComponentStatus("sys"),t=y&&y.time,u=y&&y.unixtime,m=t?(t.slice(0,2)-0)*60+(t.slice(3,5)-0):-1,a=C.w[0],b=C.w[1];if(!u||u<1600000000||m<0||m>1439||m!==m){R.af="tm";rq(false);return}R.af=null;rq(a<b?m>=a&&m<b:m>=a||m<b)}`;
 
 const renderTimePulseBoot =
-  (): string => `function bt(){Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.af="rc";ff();return}R.on=false;bw()})}
+  (): string => `function bt(){Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.af="rc";ff();return}R.on=false;var s=Shelly.getComponentStatus("switch:"+C.i);if(s&&s.errors&&s.errors[0]){ft(s.errors[0]);return}bw()})}
 if(Shelly.addEventHandler)Shelly.addEventHandler(function(e){if(e&&e.component==="switch:"+C.i&&e.delta&&e.delta.errors&&e.delta.errors[0])ft(e.delta.errors[0])});
 bt();`;
 
