@@ -144,7 +144,7 @@
   pointer-events: none;
   stroke: var(--lcl-color-text-muted);
   stroke-dasharray: 5 6;
-  stroke-opacity: 0.55;
+  stroke-opacity: var(--lcl-opacity-disabled);
   stroke-width: var(--lcl-border-width-sm);
   vector-effect: non-scaling-stroke;
 }
@@ -154,7 +154,7 @@
   inset: var(--lcl-spacing-sm) var(--lcl-spacing-sm) auto;
   pointer-events: none;
   position: absolute;
-  z-index: 1;
+  z-index: var(--lcl-z-index-content);
 }
 
 .climate-history-chart__tooltip-overlay[data-side='left'] {
