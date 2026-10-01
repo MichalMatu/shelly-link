@@ -3,8 +3,11 @@ import { describe, expect, it } from 'vitest';
 import {
   createInstalledAutomation,
   createTimeInstalledAutomation,
+  createTimePulseInstalledAutomation,
   findRelayOwnerConflict,
-  installedAutomationRelayId
+  installedAutomationRelayId,
+  isTimePulseInstalledAutomation,
+  timeInstalledAutomationSchema
 } from './model.js';
 
 const shelly = { id: 'Shelly-ABC', model: 'S3PL-00112EU', gen: 3 };
@@ -34,6 +37,27 @@ const time = createTimeInstalledAutomation({
   nowMs: 2
 });
 
+const pulse = {
+  onMs: 60_000,
+  offMs: 120_000,
+  initialDelayMs: 0,
+  startPhase: 'on' as const,
+  execution: { mode: 'continuous' as const }
+};
+
+const timePulse = createTimePulseInstalledAutomation({
+  shelly,
+  shellyName: 'Grow plug',
+  baseUrl: 'http://192.168.0.20',
+  onJobId: 9,
+  offJobId: 10,
+  scriptId: 2,
+  scriptHash: 'pulse-hash',
+  config: { relayId: 0, onTime: '22:00', offTime: '06:00' },
+  pulse,
+  nowMs: 3
+});
+
 describe('installed automation ownership', () => {
   it('persists climate and time automations as distinct discriminated models', () => {
     expect(climate.kind).toBe('climate');
@@ -41,6 +65,30 @@ describe('installed automation ownership', () => {
     expect(time.id).toBe('time:shelly-abc:0');
     expect(installedAutomationRelayId(climate)).toBe(0);
     expect(installedAutomationRelayId(time)).toBe(0);
+  });
+
+  it('keeps Steady Time unchanged and persists Pulse runtime beside its daily config', () => {
+    expect(time.pulseRuntime).toBeUndefined();
+    expect(isTimePulseInstalledAutomation(time)).toBe(false);
+    expect(timePulse.config).toEqual({ relayId: 0, onTime: '22:00', offTime: '06:00' });
+    expect(timePulse.pulseRuntime).toEqual({
+      script: { id: 2, hash: 'pulse-hash' },
+      pulse
+    });
+    expect(isTimePulseInstalledAutomation(timePulse)).toBe(true);
+  });
+
+  it('validates persisted Pulse settings without weakening the old Time schema', () => {
+    expect(timeInstalledAutomationSchema.safeParse(time).success).toBe(true);
+    expect(
+      timeInstalledAutomationSchema.safeParse({
+        ...timePulse,
+        pulseRuntime: {
+          ...timePulse.pulseRuntime,
+          pulse: { ...pulse, onMs: 0 }
+        }
+      }).success
+    ).toBe(false);
   });
 
   it('detects a different automation family already owning the same relay', () => {
