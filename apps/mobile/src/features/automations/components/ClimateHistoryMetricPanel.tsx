@@ -1,5 +1,5 @@
 import type { HistoryRecord } from '@lcl/automation-core';
-import { ResponsiveLine } from '@nivo/line';
+import { ResponsiveLine, type LineCustomSvgLayer } from '@nivo/line';
 import type {
   HistoryChartSeries,
   HistoryMetricDefinition
@@ -7,8 +7,8 @@ import type {
 import { createClimateHistoryOutputTrack } from './ClimateHistoryOutputTrack.js';
 import type { HistoryMetricDomain } from './climateHistoryChartScale.js';
 
-const PANEL_MARGIN_WITH_TIME = { top: 8, right: 12, bottom: 34, left: 42 } as const;
-const PANEL_MARGIN = { top: 8, right: 12, bottom: 10, left: 42 } as const;
+const PANEL_MARGIN = { top: 8, right: 12, bottom: 8, left: 42 } as const;
+const OUTPUT_VISUAL_DOMAIN: HistoryMetricDomain = [-0.15, 1.15];
 
 const PANEL_THEME = {
   background: 'transparent',
@@ -43,9 +43,7 @@ type ClimateHistoryMetricPanelProps = {
   domain: HistoryMetricDomain;
   currentValue: string;
   rangeValue: string;
-  formatX(value: number): string;
   formatY(value: number): string;
-  showTimeAxis: boolean;
   onLabel: string;
   offLabel: string;
 };
@@ -59,14 +57,12 @@ export const ClimateHistoryMetricPanel = ({
   domain,
   currentValue,
   rangeValue,
-  formatX,
   formatY,
-  showTimeAxis,
   onLabel,
   offLabel
 }: ClimateHistoryMetricPanelProps) => {
   const output = metric.id === 'output';
-  const yDomain: HistoryMetricDomain = output ? [0, 1] : domain;
+  const yDomain = output ? OUTPUT_VISUAL_DOMAIN : domain;
   const data: readonly HistoryChartSeries[] = [
     {
       id: metric.id,
@@ -81,6 +77,42 @@ export const ClimateHistoryMetricPanel = ({
     ? [0, 1]
     : [yDomain[0], (yDomain[0] + yDomain[1]) / 2, yDomain[1]];
   const outputTrackLayer = createClimateHistoryOutputTrack(records, xValues, output);
+  const latestRecordIndex = (() => {
+    for (let index = records.length - 1; index >= 0; index -= 1) {
+      if (metric.read(records[index]!) !== null) return index;
+    }
+    return null;
+  })();
+  const latestLayer: LineCustomSvgLayer<HistoryChartSeries> = ({
+    xScale,
+    yScale,
+    innerHeight
+  }) => {
+    if (latestRecordIndex === null) return null;
+    const value = metric.read(records[latestRecordIndex]!);
+    if (value === null) return null;
+    const x = xScale(xValues[latestRecordIndex]!);
+    const y = yScale(value);
+
+    return (
+      <g aria-hidden="true">
+        <line
+          className="climate-history-chart__now-line"
+          x1={x}
+          x2={x}
+          y1={0}
+          y2={innerHeight}
+        />
+        <circle
+          className="climate-history-chart__latest-point"
+          cx={x}
+          cy={y}
+          r={3.25}
+          fill={metric.color}
+        />
+      </g>
+    );
+  };
 
   return (
     <section
@@ -100,7 +132,7 @@ export const ClimateHistoryMetricPanel = ({
       <div className="climate-history-chart__panel-plot">
         <ResponsiveLine<HistoryChartSeries>
           data={data}
-          margin={showTimeAxis ? PANEL_MARGIN_WITH_TIME : PANEL_MARGIN}
+          margin={PANEL_MARGIN}
           xScale={{ type: 'linear', min: 'auto', max: 'auto' }}
           yScale={{
             type: 'linear',
@@ -111,16 +143,7 @@ export const ClimateHistoryMetricPanel = ({
           }}
           axisTop={null}
           axisRight={null}
-          axisBottom={
-            showTimeAxis
-              ? {
-                  tickValues: xTicks,
-                  format: (value) => formatX(Number(value)),
-                  tickSize: 0,
-                  tickPadding: 10
-                }
-              : null
-          }
+          axisBottom={null}
           axisLeft={{
             tickValues: yTicks,
             format: (value) =>
@@ -142,7 +165,7 @@ export const ClimateHistoryMetricPanel = ({
           gridYValues={yTicks}
           enableArea={!output}
           areaBaselineValue={output ? 0 : yDomain[0]}
-          areaOpacity={0.1}
+          areaOpacity={0.11}
           enableSlices={false}
           enableCrosshair={false}
           useMesh={false}
@@ -151,8 +174,8 @@ export const ClimateHistoryMetricPanel = ({
           theme={PANEL_THEME}
           layers={
             output
-              ? ['grid', 'axes', outputTrackLayer]
-              : ['grid', 'axes', 'areas', 'lines']
+              ? ['grid', 'axes', outputTrackLayer, latestLayer]
+              : ['grid', 'axes', 'areas', 'lines', latestLayer]
           }
           role="img"
           ariaLabel={`${metricLabel} history`}
