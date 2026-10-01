@@ -4,7 +4,7 @@ export const renderRuntimeDiagnostics = (
   activeWindowEnabled = false
 ): string => {
   const executionDiagnostics = executionEnabled
-    ? `,e:[R.pa,${activeWindowEnabled ? 'R.wo' : 'null'},${pulseEnabled ? 'R.ps,R.pc,R.pn,R.pr' : 'null,null,null,null'}]`
+    ? `,e:[R.pa,${activeWindowEnabled ? 'R.wo' : 'null'},${pulseEnabled ? 'R.ps,R.pc,R.pn,R.rs' : 'null,null,null,null'}]`
     : '';
 
   return `function fv(o,k){return o&&o[k]!=null?o[k]:null}
