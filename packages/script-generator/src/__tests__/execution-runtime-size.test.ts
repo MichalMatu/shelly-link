@@ -23,13 +23,10 @@ const activeWindow = {
   endTime: '00:01'
 };
 
-const withFourMixedSensors = (
-  base: ShellyThermostatConfig
-): ShellyThermostatConfig => {
+const withFourMixedSensors = (base: ShellyThermostatConfig): ShellyThermostatConfig => {
   const sensors: ShellyThermostatConfig['sensor'][] = [0, 1, 2, 3].map((index) => ({
     ...base.sensor,
-    profileId:
-      index % 2 === 0 ? 'xiaomi_lywsd03mmc_bthome_v2' : 'tp357_custom_v1',
+    profileId: index % 2 === 0 ? 'xiaomi_lywsd03mmc_bthome_v2' : 'tp357_custom_v1',
     sensorId: `sensor-${index + 1}`,
     runtimeAddress: `AA:BB:CC:DD:EE:${String(10 + index).padStart(2, '0')}`,
     displayName: `S${index + 1}-${'X'.repeat(23)}`
