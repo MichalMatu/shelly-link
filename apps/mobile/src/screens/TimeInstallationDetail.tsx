@@ -133,3 +133,129 @@ export const TimeInstallationDetail = ({
             )}
 
             <section className="installation-automation-live-state plug-detail-section">
+              <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
+                <div>
+                  <dt>{t('dashboard.output')}</dt>
+                  <dd>
+                    {runtimeQuery.data ? (runtimeQuery.data.relayOn ? 'ON' : 'OFF') : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t('time.clock')}</dt>
+                  <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <TimeScheduleSetupPage
+              flow={{
+                selectedShelly: {
+                  id: installation.shelly.deviceId,
+                  name: installation.shelly.name,
+                  baseUrl: installation.shelly.baseUrl,
+                  scriptIdInput: '1',
+                  model: installation.shelly.model,
+                  gen: installation.shelly.gen
+                }
+              }}
+              editInstallationId={installation.id}
+              inline
+              onInstalled={() => {
+                void runtimeQuery.refetch();
+              }}
+              onPendingChange={setTimeEditPending}
+            />
+
+            <div className="installation-detail-delete-action">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={deleteMutation.isPending || timeEditPending}
+                onClick={() => setDeleteOpen(true)}
+              >
+                {t('time.detail.delete')}
+              </button>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'ble' && (
+          <PlugBleDetailSurface
+            information={informationQuery.data}
+            loading={informationQuery.isPending}
+            error={informationQuery.isError}
+            {...(onOpenBleDiscovery
+              ? { onScan: () => onOpenBleDiscovery(installation.shelly.deviceId) }
+              : {})}
+          />
+        )}
+
+        {activeTab === 'device' && (
+          <PlugDeviceSettingsSurface target={installation.shelly} />
+        )}
+
+        {activeTab === 'info' && (
+          <section>
+            <PlugInfoPanel
+              connection={{
+                transport: 'wifi',
+                baseUrl: installation.shelly.baseUrl
+              }}
+              information={informationQuery.data}
+              loading={informationQuery.isPending}
+              error={informationQuery.isError}
+            />
+            {savedDevice && (
+              <div className="installation-detail-delete-action">
+                <button
+                  className="secondary-action secondary-action--danger"
+                  type="button"
+                  onClick={() => setForgetOpen(true)}
+                >
+                  {t('hardware.shelly.deleteTitle')}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+      </section>
+
+      <Modal
+        actions={
+          <button
+            className="secondary-action secondary-action--danger"
+            type="button"
+            disabled={deleteMutation.isPending || timeEditPending}
+            onClick={() => deleteMutation.mutate()}
+          >
+            {deleteMutation.isPending ? t('time.deleting') : t('common.confirmDelete')}
+          </button>
+        }
+        busy={deleteMutation.isPending}
+        closeLabel={t('common.close')}
+        open={deleteOpen}
+        title={t('time.detail.deleteConfirmTitle')}
+        onClose={() => {
+          if (!deleteMutation.isPending) setDeleteOpen(false);
+        }}
+      >
+        <FeedbackPanel tone="warning" title={t('time.detail.delete')}>
+          {t('time.detail.deleteConfirmDetail')}
+        </FeedbackPanel>
+      </Modal>
+
+      <PlugRemovalBlockedModal
+        deviceName={forgetOpen && savedDevice ? savedDevice.name : null}
+        automationName={forgetOpen ? installation.shelly.name : null}
+        onClose={() => setForgetOpen(false)}
+      />
+
+      <AppToastViewport
+        dismissLabel={t('toast.dismiss')}
+        label={t('toast.regionLabel')}
+        toasts={toasts}
+        onDismiss={dismissToast}
+      />
+    </main>
+  );
+};
