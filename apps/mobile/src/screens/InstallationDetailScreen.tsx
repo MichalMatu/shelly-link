@@ -91,6 +91,7 @@ export const InstallationDetailScreen = ({
   }, []);
 
   if (!installation) return <PlugDetailNotFound />;
+  if (installation.kind === 'pulse') return <PlugDetailNotFound />;
 
   if (installation.kind === 'time') {
     return (
