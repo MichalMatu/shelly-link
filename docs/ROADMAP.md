@@ -33,13 +33,13 @@ The mobile UI presents the same typed records through the completed History visu
 
 Maximum continuous ON, relay-control failures and native Shelly protection errors converge on one first-fault-wins hard-safety latch. Reset remains safe OFF. Plug-owned firmware limits remain the authority for device electrical/thermal ceilings.
 
-### 3. Rule/action expansion — foundations merged, advanced scope parked
+### 3. Rule/action expansion — foundations merged; Pulse promoted to V1
 
 Merged foundations/runtime work:
 
 - typed Set action + minimum ON/OFF timing model;
 - existing minimum-OFF path remains the cooldown owner;
-- pure Pulse action semantics;
+- pure one-shot Pulse action semantics;
 - pure relay debounce model;
 - reusable daily time-window condition;
 - flat explicit AND/OR condition composition;
@@ -47,14 +47,15 @@ Merged foundations/runtime work:
 - Climate runtime relay-debounce integration with one-shot maturity and forced-OFF precedence;
 - runtime source compaction without raising the 9500 B guard.
 
-Advanced candidates that are **not the immediate next slice**:
+The pure `RelayPulseAction` / pulse state machine is a tested foundation, not the final user-facing Pulse feature. Pulse V1 is now an explicit V1 slice and is defined in section 6.
 
-- Pulse integration in the Shelly Climate runtime;
-- time-window/scheduled-condition execution in the Climate runtime;
-- AND/OR condition execution in the Climate runtime;
-- configuration/editor surfaces for whichever of those capabilities are later accepted for v1.
+Advanced rule candidates that remain parked and do **not** block Pulse V1:
 
-**Constraint:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Before adding more runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
+- general time-window/scheduled-condition execution inside the Climate rule engine beyond the accepted Time automation + Pulse composition;
+- general AND/OR condition execution in the Climate runtime;
+- configuration/editor surfaces for those general condition-composition capabilities if they are later accepted.
+
+**Constraint:** the stabilization baseline is 9431 B / 9500 B for the canonical four-sensor minimum-ON + debounce fixture. Sensor display names are capped at 26 escaped UTF-8 runtime bytes; the full four-sensor, minimum-ON + debounce + VPD matrix peaks at 9496 B / 9500 B. Before adding Pulse runtime behavior, re-audit code size, ownership and reuse opportunities. Do not raise the generator limit as a shortcut.
 
 ### 4. Pre-charts closeout — completed 2026-09-30
 
@@ -67,7 +68,7 @@ The repository baseline was deliberately closed before chart work:
 - `runtimeConfigUpdate` was retained because, despite having no current app call-site, it is a recent capability-gated generator contract with focused tests and is not proven dead;
 - reconciliation states `changed`, `unavailable` and `conflict` remain boundary-tested, but the setup flow currently consumes recovered sensors rather than surfacing those statuses. Turning those outcomes into user-facing behavior is a product/UX decision and is intentionally parked rather than smuggled into cleanup.
 
-Neither retained item blocks the read-only History visualization slice.
+Neither retained item blocks Pulse V1.
 
 ### 5. History visualization / charts — completed 2026-10-01
 
@@ -77,35 +78,128 @@ Each continuous metric owns a real-unit Y domain instead of sharing normalized p
 
 All five panels share the same truthful time domain and one compact time row below the stack. The previous legend/toggle, tooltip and crosshair interaction are removed because every metric is permanently visible with its current reading and range. Timestamp/uptime x positions preserve real elapsed spacing with record order only as the final fallback. Loading/retry/empty/partial-corruption behavior remains presentation-only over the existing History runtime/KVS model.
 
-Focused History tests, mobile typecheck, UX quality gate and the final repository `pnpm check` passed. Samsung S22+ / Android 16 preserving-data acceptance confirmed five stacked panels, no horizontal overflow, compact phone geometry and an Output SVG path with `fill: none` and square `H/V` transitions. No runtime, KVS, `HistoryRecord[]`, schedule or relay behavior changed.
+Focused History tests, mobile typecheck, UX quality gate and the final repository `pnpm check` passed. Samsung S22+ / Android 16 preserving-data acceptance confirmed five stacked panels, no horizontal overflow, compact phone geometry and an Output SVG path with `fill: none` and square `H/V` transitions. The canonical Darwin History snapshot was subsequently refreshed deliberately and the full responsive suite passed 36/36. No runtime, KVS, `HistoryRecord[]`, schedule or relay behavior changed.
 
-### 6. Dashboard status polish
+### 6. Pulse V1 — immediate next slice
 
-After the chart slice is stable, improve the operational status layer without casually changing shared card geometry: requested output, final output, reason, automation-fault state and hard-safety state should be understandable at a glance.
+Pulse becomes a first-class automation capability with **one shared pulse-cycle engine** and two product entry points. Do not implement separate temperature-pulse, humidity-pulse or time-pulse runtimes.
 
-### 7. UX redesign round 2
+#### Product model
 
-After History/safety/rules stabilize, make the dashboard more status-first while keeping transport/script/firmware diagnostics deeper under Device / Info / Advanced.
+Automation setup exposes four primary automation types:
 
-### 8. Watchdog, stabilization and v1 feature freeze
+1. Temperature;
+2. Humidity;
+3. Time;
+4. Pulse.
 
-Verify heartbeat/watchdog, reboot/power-cycle recovery, Wi-Fi/BLE loss, AUTO/MANUAL interaction matrix, automation-fault and hard-safety recovery, long soak, script-memory headroom, final hardware matrix and final UX acceptance. Then declare v1 feature freeze.
+Temperature, Humidity and Time additionally support an output behavior selector:
+
+- **Steady** — current normal ON/OFF behavior;
+- **Pulse** — when the parent automation requests active output, execute the shared Pulse cycle instead of holding the relay continuously ON.
+
+Standalone Pulse is the same engine without a climate condition. It is useful for pumps, fans, irrigation, mixers, dosing and other periodic loads.
+
+Examples:
+
+- Temperature + Pulse: below the ON threshold, run `ON 10 s -> OFF 20 s -> ...`; crossing the OFF threshold cancels Pulse and leaves the relay OFF.
+- Humidity + Pulse: the same Pulse behavior while the humidity rule requests output.
+- Time + Pulse: inside the configured active time window, run the Pulse cycle; when the time window closes, cancel the cycle immediately and leave the relay OFF.
+- Standalone Pulse: run the configured cycle continuously, for a number of cycles, or for a bounded total duration.
+
+#### Pulse V1 configuration
+
+Pulse V1 should support:
+
+- ON time in seconds;
+- OFF time in seconds;
+- execution mode:
+  - Continuous;
+  - fixed number of cycles;
+  - bounded total duration;
+- optional initial delay before the first phase;
+- start phase selection (ON or OFF), with ON as the simple/default path;
+- safe end state: OFF after completion/cancellation;
+- one-shot Pulse as the degenerate/simple case already covered by the existing pure Pulse foundation;
+- clear validation and sensible lower/upper bounds for all time/count inputs.
+
+The UI should follow the existing optional-advanced-control pattern used by VPD: Pulse is compact while disabled and reveals its parameters only when enabled. Standalone Pulse gets a dedicated automation setup surface but reuses the same Pulse configuration component/model.
+
+#### Runtime and safety semantics
+
+Pulse is an output behavior, never a competing relay owner. The existing one-automation-owner-per-Plug invariant remains unchanged.
+
+Required precedence and lifecycle:
+
+- hard safety and every forced-OFF path remain authoritative and cancel Pulse immediately;
+- automation fault that requires OFF cancels Pulse immediately;
+- when the parent Temperature/Humidity/Time condition stops requesting output, Pulse is cancelled immediately and relay ends OFF rather than finishing the current cycle;
+- MANUAL relay control suspends/cancels the active Pulse cycle; returning to AUTO starts a fresh cycle from the configured start phase if the parent condition is still active;
+- reboot/power-cycle starts safe OFF; do not attempt to resume an unknown in-flight timer. After runtime state is rebuilt, an active parent condition may start a fresh cycle;
+- Pulse must compose with existing minimum ON/OFF, debounce and cooldown ownership without introducing a second timing owner or weakening forced-OFF precedence;
+- Pulse transitions must not bypass physical-device identity gates or Runtime Safety Supervisor behavior.
+
+History and operational status must remain explanatory: Pulse-driven relay changes need distinguishable reason/phase information so a user can understand why output toggled. Dashboard/detail status should be able to show at least Pulse active phase and, where practical, remaining time / cycle progress without moving timer ownership into React.
+
+#### Pulse V1 qualification
+
+Before calling Pulse V1 complete:
+
+- re-audit generated-runtime byte budget before adding behavior; do not raise the 9500 B guard to make it fit;
+- add pure domain/state-machine tests for cycle, cancellation, completion and boundary timing;
+- test Temperature + Pulse, Humidity + Pulse, Time + Pulse and standalone Pulse composition;
+- cover Continuous, Cycles and Duration modes;
+- cover AUTO/MANUAL transitions, automation fault, hard safety, minimum ON/OFF/debounce interaction and reboot-safe behavior;
+- verify History/status explanation for pulse transitions;
+- run focused generator/runtime tests, one final full repository gate, responsive/visual checks for new UI, and real Plug acceptance with explicit final relay OFF.
+
+Once Pulse V1 is qualified and stable, resume the existing V1 product plan below rather than immediately expanding the runtime with every advanced Pulse idea.
+
+### 7. Dashboard status polish
+
+After Pulse V1 is stable, improve the operational status layer without casually changing shared card geometry: requested output, final output, reason, automation-fault state and hard-safety state should be understandable at a glance. Pulse phase/progress should integrate into this same status language rather than becoming a separate diagnostics island.
+
+### 8. UX redesign round 2
+
+After History/safety/Pulse/rules stabilize, make the dashboard more status-first while keeping transport/script/firmware diagnostics deeper under Device / Info / Advanced.
+
+### 9. Watchdog, stabilization and v1 feature freeze
+
+Verify heartbeat/watchdog, reboot/power-cycle recovery, Wi-Fi/BLE loss, AUTO/MANUAL interaction matrix, automation-fault and hard-safety recovery, Pulse recovery/cancellation semantics, long soak, script-memory headroom, final hardware matrix and final UX acceptance. Then declare v1 feature freeze.
 
 ## V1 completion target
 
 Feature-complete v1 requires:
 
 - Climate temperature / humidity / VPD automation with 1–4 BLE thermometers;
+- Time automation;
+- Pulse V1 as both the fourth standalone automation type and an optional output mode for Temperature, Humidity and Time;
 - canonical Plug persistence and transport promotion;
 - AUTO/MANUAL with separate automation-fault and hard-safety axes;
 - capability-correct manual control;
-- History / Datalogger with reason/fault/safety context;
+- History / Datalogger with reason/fault/safety/Pulse context;
 - Runtime Safety Supervisor;
-- accepted pulse/timing/rule-composition scope;
+- accepted timing/rule-composition scope;
 - clear dashboard control/status presentation;
 - watchdog/recovery/soak stabilization.
 
 History charts are complete and reuse the existing History runtime/data foundation rather than becoming a second history subsystem.
+
+## Post-stabilization growth track — Pulse Advanced
+
+After V1 stabilization / feature freeze, Pulse is the first planned growth area. These capabilities are intentionally recorded now so they are not lost, but they must not expand Pulse V1 scope or delay stabilization.
+
+Candidate Pulse Advanced features:
+
+- **Burst mode** — run a short group such as `ON 5 s / OFF 10 s x 4`, then a longer rest before the next burst;
+- **Adaptive Pulse** — vary ON/OFF duty based on distance from a Temperature/Humidity/VPD target, providing simple proportional-like control without introducing a full PID controller;
+- **active-window convenience** for standalone Pulse, while still reusing Time + Pulse rather than creating a second scheduler;
+- **phase reset/resume policy** when an enabling condition disappears and later returns; V1 defaults to a fresh cycle;
+- **configurable completion behavior** only if a real use case justifies anything other than the V1 safe-OFF default;
+- **maximum accumulated ON time / duty budget** over a larger window as an additional operational guard where useful;
+- richer cycle/burst progress and History diagnostics.
+
+Every Pulse Advanced addition requires another generated-runtime size/headroom audit and must preserve one relay owner, safe-OFF precedence and the shared Pulse engine. If runtime headroom is insufficient, optimize/reuse first or postpone the feature; do not raise the generator limit as a shortcut.
 
 ## Post-freeze
 

@@ -1,6 +1,6 @@
-# Handoff — post-History stacked-panel baseline
+# Handoff — Pulse V1 next slice
 
-Status: **2026-10-01 — the screenshot-driven History redesign is implemented, accepted on Samsung S22+ / Android 16 and merged to `main`. The next product slice is Dashboard status polish.**
+Status: **2026-10-01 — History stacked panels are accepted and the canonical responsive baseline is healthy. The next product slice is Pulse V1.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -10,7 +10,8 @@ Repository: `MichalMatu/shelly-link`
 2. Read `AGENTS.md`, this file, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/PERFORMANCE_HANDOFF.md` and `docs/UX_VISUAL_CONTRACT.md`.
 3. Read fresh `agent-control:.agent/status/daemon.json`; never reuse an old conversation binding.
 4. Confirm there is no active Local Agent task and no open PR before starting work.
-5. Start from the accepted stacked-panel History baseline. Do not reopen History runtime/KVS/`HistoryRecord[]` without concrete evidence of a data-model limitation.
+5. Start from the accepted History/runtime/safety baseline. Do not reopen History KVS/`HistoryRecord[]` without concrete evidence of a data-model limitation.
+6. Run the Pulse preimplementation architecture + runtime-size gate before adding generated runtime behavior. The 9500 B generator guard must not be raised as a shortcut.
 
 Durable remote branches after closeout should remain only:
 
@@ -28,42 +29,75 @@ History remains one read-only presentation over the existing Climate History v2 
 - loading, retry, empty and partial-corruption handling remain explicit;
 - no History presentation component owns Shelly transport, BLE, KVS or durable storage side effects.
 
-The accepted chart UX now has:
+The accepted chart UX has five compact vertical panels in this order: Temperature, Humidity, Output, Power and Current. Each continuous metric has an independent real-unit Y scale. Output is a square digital step track. All panels share the same truthful time domain. There is no interactive legend, tooltip or crosshair in the accepted phone design. VPD remains in the typed History/scaling layer but is intentionally omitted from the five-panel stack.
 
-- five compact vertical panels in this order: Temperature, Humidity, Output, Power, Current;
-- one independent Y scale per continuous metric rather than one shared normalized plot;
-- deliberately calm minimum spans: Temperature 4 °C, Humidity 20 percentage points, Power 50 W from zero, Current 0.6 A from zero; domains expand when data requires it;
-- continuous lines rendered with `monotoneX` smoothing, restrained area tint, subtle glow and latest-value marker;
-- Output rendered as a strict square digital step track with horizontal/vertical SVG segments only and `fill: none`;
-- one shared truthful time domain with a compact time row below the stack, using timestamp -> monotonic uptime -> record-sequence fallback;
-- current reading and observed range visible directly in each panel;
-- no interactive legend, tooltip or crosshair in the accepted design;
-- VPD retained in the typed History/scaling layer but intentionally omitted from the accepted five-panel phone stack;
-- design-token styling, rounded cards, shadows and no horizontal page overflow.
+The previously stale History responsive contract is now closed: the Current assertion matches the encoded fixture (`currentMilliA=200` -> `0,2 A` in Polish locale), the canonical Darwin `23-climate-history` snapshot was deliberately refreshed, final `pnpm check` passed, and the full responsive suite passed 36/36 on the accepted baseline. Treat that harness debt as resolved rather than reopening the old snapshot workaround.
 
-Implementation remains local to `apps/mobile/src/features/automations/components/`. The chart coordinator uses `ClimateHistoryMetricPanel.tsx`, `ClimateHistoryOutputTrack.tsx`, `climateHistoryChartMetrics.ts`, `climateHistoryChartScale.ts` and the existing axis module. Obsolete shared-plot legend/selection interaction is no longer part of the accepted History UI.
+## Next slice — Pulse V1
 
-## Qualification evidence
+Pulse is no longer merely a parked primitive. The existing pure `RelayPulseAction` / one-shot pulse state machine is the foundation for a user-facing Pulse V1.
 
-Focused qualification passed on the accepted candidate:
+### Product shape
 
-- Prettier/format checks for changed History files;
-- mobile typecheck;
-- focused History Vitest: 3 files / 9 tests;
-- UX quality gate;
-- final full repository `pnpm check`.
+Automation setup should expose four primary automation types:
 
-Tooling note: canonical Darwin History snapshot regeneration was retried during closeout but the Playwright process stalled before producing test output. This is tracked as test-harness debt, not product evidence; do not overwrite the snapshot merely to make a later run green. Use the accepted S22+ evidence above until the harness path is healthy, then refresh and review the `23-climate-history` baseline deliberately.
+1. Temperature;
+2. Humidity;
+3. Time;
+4. Pulse.
 
-Samsung SM-S906B / Android 16 acceptance used the exact product candidate `a60bfa41388fe3825af20ed2803992756f0e6997`, built and installed with `adb install -r`. The WebView rendered at 411 CSS px wide with `scrollWidth == clientWidth`; the five-panel stack measured about 746 CSS px total, continuous cards about 138 px high and Output about 130 px high. Output remained a square step path with `fill: none`, `butt` caps and `miter` joins. No Shelly runtime, KVS, schedule or relay mutation was performed.
+Temperature, Humidity and Time also gain an output behavior choice:
 
-The responsive test assertions were updated on `4161224d21c84fbd156e04701f61e1857d123fa7` to reflect the permanent five-panel/no-tooltip contract.
+- **Steady** — existing normal relay behavior;
+- **Pulse** — while the parent automation requests active output, execute the shared Pulse cycle.
 
-## Next slice — Dashboard status polish
+Standalone Pulse uses exactly the same pulse engine/configuration without a climate parent condition.
 
-Improve the operational status layer without casually changing the accepted shared card geometry. Requested output, final relay output, reason, automation-fault state and hard-safety state should be understandable at a glance while keeping the product calm and data-first. Technical transport/script/firmware detail stays under Device / Info / Advanced.
+Do not build separate temperature-pulse, humidity-pulse and time-pulse runtimes. There must be one shared Pulse state/config model with adapters/composition at the automation layer.
 
-Run the normal architecture/UX gate before implementation. Keep runtime behavior unchanged unless the status UI exposes a real missing-data limitation.
+### Pulse V1 configuration
+
+V1 scope is deliberately useful but bounded:
+
+- ON time in seconds;
+- OFF time in seconds;
+- Continuous mode;
+- fixed Cycles mode;
+- bounded total Duration mode;
+- optional initial delay;
+- selectable start phase (ON/OFF), with ON as the simple default;
+- safe OFF end state after completion/cancellation;
+- one-shot Pulse retained as the simple/degenerate form of the same foundation;
+- validation and explicit bounds for time/count inputs.
+
+The Pulse controls should follow the compact optional-control pattern already used by VPD: collapsed while disabled, expanded parameters when enabled. Standalone Pulse gets its own automation setup surface but reuses the same Pulse configuration component/model.
+
+### Required semantics
+
+- Pulse never becomes a second relay owner; one Plug relay still has one managed automation owner.
+- Hard safety and forced-OFF paths cancel Pulse immediately and leave the relay OFF.
+- Automation faults that require OFF cancel Pulse immediately.
+- Temperature/Humidity parent condition becoming inactive cancels immediately rather than finishing a cycle.
+- Time + Pulse cycles only inside the active Time window; the window closing cancels immediately and leaves OFF.
+- MANUAL relay control suspends/cancels Pulse; returning to AUTO starts a fresh cycle from the configured start phase if the parent condition is active.
+- Reboot/power-cycle starts safe OFF; never resume an unknown in-flight timer. Re-evaluate the parent condition and start a fresh cycle only after runtime state is rebuilt.
+- Existing minimum ON/OFF, debounce and cooldown ownership must compose with Pulse rather than being duplicated.
+- History/status must be able to explain Pulse-driven transitions; React may display phase/progress but must not own timers.
+
+### Acceptance before moving on
+
+Pulse V1 is not complete until Temperature + Pulse, Humidity + Pulse, Time + Pulse and standalone Pulse are covered across Continuous/Cycles/Duration, safety/fault/MANUAL/reboot interactions are tested, runtime byte headroom is re-audited, the final repository gate is green, responsive/visual UI evidence exists and real Plug acceptance ends with relay explicitly verified OFF.
+
+## Sequence after Pulse V1
+
+Once Pulse V1 is qualified and stable, resume the existing V1 roadmap rather than immediately expanding every Pulse idea:
+
+1. Dashboard status polish — make requested output, final relay output, reason, automation fault, hard safety and Pulse phase understandable at a glance;
+2. UX redesign round 2 — make the product more status-first while keeping transport/script/firmware diagnostics under Device / Info / Advanced;
+3. Watchdog/stabilization — heartbeat/watchdog, reboot/power-cycle recovery, Wi-Fi/BLE loss, AUTO/MANUAL matrix, fault/safety recovery, Pulse cancellation/recovery, soak, memory headroom, final hardware matrix and UX acceptance;
+4. v1 feature freeze.
+
+After V1 stabilization/freeze, return to Pulse as the first growth track. `docs/ROADMAP.md` preserves the Advanced backlog: Burst mode, Adaptive Pulse, active-window convenience, phase reset/resume policy, optional completion behavior beyond safe OFF only if justified, accumulated ON/duty budgets and richer cycle diagnostics. Those ideas must not enlarge Pulse V1 or bypass runtime-size/safety gates.
 
 ## Performance rule
 
