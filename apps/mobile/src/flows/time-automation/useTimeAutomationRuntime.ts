@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  isTimePulseInstalledAutomation,
   pauseTimeAutomation,
+  pauseTimePulseAutomation,
   readTimeAutomationRuntime,
   resumeTimeAutomation,
+  resumeTimePulseAutomation,
   setTimeAutomationManualRelay
 } from '../../features/automations/index.js';
 import type { TimeInstalledAutomation } from '../installations/model.js';
@@ -40,11 +43,19 @@ export const useTimeAutomationActions = (installation: TimeInstalledAutomation) 
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (action: TimeAutomationAction) => {
+    mutationFn: async (action: TimeAutomationAction) => {
       switch (action) {
         case 'auto':
+          if (isTimePulseInstalledAutomation(installation)) {
+            await resumeTimePulseAutomation(installation);
+            return readTimeAutomationRuntime(installation);
+          }
           return resumeTimeAutomation(installation);
         case 'manual':
+          if (isTimePulseInstalledAutomation(installation)) {
+            await pauseTimePulseAutomation(installation);
+            return readTimeAutomationRuntime(installation);
+          }
           return pauseTimeAutomation(installation);
         case 'on':
           return setTimeAutomationManualRelay(installation, true);
