@@ -10,6 +10,7 @@ import { hashScriptCode, normalizeShellyDeviceId } from '@lcl/shelly-client';
 import {
   createInstalledAutomation,
   installedAutomationRelayId,
+  isTimePulseInstalledAutomation,
   type ClimateInstalledAutomation,
   type InstalledAutomation,
   type TimeInstalledAutomation
@@ -103,13 +104,29 @@ const climateRuntimeMatches = async (
   );
 };
 
+const timeRuntimeMatches = async (
+  installation: TimeInstalledAutomation,
+  services: InstalledAutomationReconciliationServices
+): Promise<boolean> => {
+  if ((await services.readTimeScheduleState(installation)) === 'attention') return false;
+  if (!isTimePulseInstalledAutomation(installation)) return true;
+
+  const evidence = await services.readClimateRuntime(installation.shelly.baseUrl);
+  return (
+    evidence.scriptId === installation.pulseRuntime.script.id &&
+    evidence.running &&
+    evidence.code !== null &&
+    hashScriptCode(evidence.code) === installation.pulseRuntime.script.hash
+  );
+};
+
 const runtimeMatches = async (
   installation: InstalledAutomation,
   services: InstalledAutomationReconciliationServices
 ): Promise<boolean> =>
   installation.kind === 'climate'
     ? climateRuntimeMatches(installation, services)
-    : (await services.readTimeScheduleState(installation)) !== 'attention';
+    : timeRuntimeMatches(installation, services);
 
 const decodeRecoverableClimateRuntime = (
   evidence: ClimateRuntimeEvidence
