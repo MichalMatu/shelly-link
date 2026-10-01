@@ -5,28 +5,9 @@ import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { ClimateHistorySection } from './ClimateHistorySection.js';
 
 vi.mock('@nivo/line', () => ({
-  ResponsiveLine: ({
-    ariaLabel,
-    onClick,
-    onTouchEnd
-  }: {
-    ariaLabel?: string;
-    onClick?: (datum: { points: readonly { data: { recordIndex: number } }[] }) => void;
-    onTouchEnd?: (datum: {
-      points: readonly { data: { recordIndex: number } }[];
-    }) => void;
-  }) => {
-    const datum = { points: [{ data: { recordIndex: 1 } }] } as const;
-    return (
-      <div
-        role="img"
-        aria-label={ariaLabel}
-        data-testid="history-chart"
-        onClick={() => onClick?.(datum)}
-        onTouchEnd={() => onTouchEnd?.(datum)}
-      />
-    );
-  }
+  ResponsiveLine: ({ ariaLabel }: { ariaLabel?: string }) => (
+    <div role="img" aria-label={ariaLabel} data-testid="history-chart" />
+  )
 }));
 
 const record = (uptimeSec: number, finalRelayOn: boolean): HistoryRecord => ({
@@ -78,59 +59,28 @@ describe('ClimateHistorySection', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows all available metrics by default and toggles them independently', () => {
+  it('renders five fixed metric panels with current values and no tooltip controls', () => {
     renderSection({
       records: [record(10, false), record(20, true)],
       invalidRecordCount: 1
     });
 
-    expect(screen.queryAllByRole('listitem')).toHaveLength(0);
-    expect(screen.getByRole('img', { name: 'History' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Temperature, 22.5 °C' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-    expect(screen.getByRole('button', { name: 'Humidity, 58 %' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-    expect(screen.getByRole('button', { name: 'Output, ON' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
+    expect(screen.getByRole('group', { name: 'History' })).toBeInTheDocument();
+    expect(screen.getAllByTestId('history-chart')).toHaveLength(5);
+    expect(screen.getByLabelText('Temperature: 22.5 °C')).toBeInTheDocument();
+    expect(screen.getByLabelText('Humidity: 58 %')).toBeInTheDocument();
+    expect(screen.getByLabelText('Output: ON')).toBeInTheDocument();
+    expect(screen.getByLabelText('Power: 12.3 W')).toBeInTheDocument();
+    expect(screen.getByLabelText('Current: 0.06 A')).toBeInTheDocument();
+    expect(screen.queryByText('VPD')).not.toBeInTheDocument();
+    expect(screen.queryByText('AUTO · ON')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Power/ })).not.toBeInTheDocument();
     expect(
       screen.getByText('Some stored records are damaged and were skipped.')
     ).toBeInTheDocument();
-
-    const power = screen.getByRole('button', { name: 'Power, 12.3 W' });
-    fireEvent.click(power);
-    expect(power).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('button', { name: 'Temperature, 22.5 °C' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-    expect(screen.getByRole('img', { name: 'History' })).toBeInTheDocument();
-
-    fireEvent.click(power);
-    expect(power).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('opens the shared tooltip only after a chart touch and toggles it closed', () => {
-    renderSection({ records: [record(10, false), record(20, true)] });
-
-    const chart = screen.getByRole('img', { name: 'History' });
-    expect(screen.queryByText('AUTO · ON')).not.toBeInTheDocument();
-
-    fireEvent.touchEnd(chart);
-    expect(screen.getByText('AUTO · ON')).toBeInTheDocument();
-    expect(screen.getAllByText('12.3 W')).toHaveLength(2);
-    expect(screen.getAllByText('0.06 A')).toHaveLength(2);
-
-    fireEvent.touchEnd(chart);
-    expect(screen.queryByText('AUTO · ON')).not.toBeInTheDocument();
-  });
-
-  it('omits unavailable metrics without changing the shared chart', () => {
+  it('keeps panel geometry stable when electrical metrics are unavailable', () => {
     const humidityOnly = {
       ...record(10, false),
       temperatureC: null,
@@ -140,16 +90,12 @@ describe('ClimateHistorySection', () => {
     };
     renderSection({ records: [humidityOnly] });
 
-    expect(screen.getByRole('img', { name: 'History' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Temperature/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Humidity, 58 %' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-    expect(screen.getByRole('button', { name: 'Output, OFF' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
+    expect(screen.getAllByTestId('history-chart')).toHaveLength(5);
+    expect(screen.getByLabelText('Temperature: —')).toBeInTheDocument();
+    expect(screen.getByLabelText('Humidity: 58 %')).toBeInTheDocument();
+    expect(screen.getByLabelText('Output: OFF')).toBeInTheDocument();
+    expect(screen.getByLabelText('Power: —')).toBeInTheDocument();
+    expect(screen.getByLabelText('Current: —')).toBeInTheDocument();
   });
 
   it('renders a retry action on read failure', () => {
