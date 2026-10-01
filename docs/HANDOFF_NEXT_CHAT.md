@@ -35,25 +35,25 @@ The accepted chart UX now has:
 - stable series colors for Temperature, Humidity, VPD, Output, Power and Current;
 - per-series semantic domains normalized only for plot coordinates, with real values and units preserved in legend/tooltips and no misleading numeric shared Y axis;
 - meaningful minimum spans/padding so tiny temperature/RH noise no longer fills the plot; Power and Current use zero-aware baselines;
-- Output rendered as a subdued step/state track in the same plot rather than a competing continuous line;
+- Output rendered as a quiet digital step track with square horizontal/vertical transitions; ON is visibly higher than OFF with a 44 px state separation on the accepted phone plot;
 - truthful elapsed-time x positions with timestamp -> monotonic uptime -> record-sequence fallback; timestamp/uptime ticks are generated from the x-domain rather than sampled record indexes;
-- a shared crosshair tooltip reporting every currently visible series at the same record/time plus AUTO/MANUAL and relay state;
+- a shared tooltip/crosshair that is closed by default and appears only after a deliberate tap/click on the plot; touch-down alone does not open it, a second tap on the same record closes it, and the tooltip reports every visible series at that record/time plus AUTO/MANUAL and relay state;
 - dark-mode/design-token styling and no horizontal page overflow.
 
-Implementation remains local to `apps/mobile/src/features/automations/components/`. The chart coordinator was kept below the repository growth gate by separating concrete responsibilities into `ClimateHistoryChartLegend.tsx`, `ClimateHistoryOutputTrack.tsx`, `climateHistoryChartMetrics.ts`, `climateHistoryChartScale.ts` and the existing axis module rather than raising a hotspot budget.
+Implementation remains local to `apps/mobile/src/features/automations/components/`. The chart coordinator stays below the repository growth gate by separating concrete responsibilities into `ClimateHistoryChartLegend.tsx`, `ClimateHistoryOutputTrack.tsx`, `ClimateHistorySelectionLayer.tsx`, `climateHistoryChartMetrics.ts`, `climateHistoryChartScale.ts` and the existing axis module rather than raising a hotspot budget.
 
 ## Qualification evidence
 
 Focused qualification on the final candidate passed:
 
 - focused ESLint;
-- focused History Vitest: 3 files / 13 tests;
+- focused History Vitest: 3 files / 14 tests;
 - mobile typecheck;
 - full repository quality gates;
-- canonical visual update + re-verification: 4/4;
+- canonical visual verification: 4/4;
 - responsive History acceptance at `360x800`, `390x844` and `412x915`: 3/3.
 
-Samsung SM-S906B / Android 16 acceptance used exact candidate `5e281c09fc8ee46d8a645aacd30eb5cd5174fd1c`, installed with `adb install -r` while preserving existing app data. The WebView viewport was 411x848 CSS px at DPR 2.625 with `scrollWidth == clientWidth == 411`. The compact legend was 88 px high and the shared plot was about 378.5x543 px. Temperature, Humidity, Output, Power and Current were all visible by default; VPD was absent from the stored records and correctly omitted. Toggling Power hid only Power while Temperature stayed visible, then restored Power. The shared tooltip reported all five visible values for one timestamp, and the Output state track was present. X-axis labels stayed at three or fewer with no overlap. No Shelly runtime, KVS, schedule or relay mutation was performed.
+Samsung SM-S906B / Android 16 acceptance used exact application candidate `7ccad35bda7ddc35fbcbf801eafbf89fd33fd210`, built and installed with `adb install -r`; `firstInstallTime` remained unchanged, proving app data was preserved. The WebView stayed at 411 CSS px wide with `scrollWidth == clientWidth`. The Output path used explicit horizontal/vertical SVG segments with square `butt`/`miter` corners, and stored transitions demonstrated the intended 44 px ON/OFF separation. A real CDP touch-down left the tooltip closed; touch release opened the shared tooltip and crosshair, and a second real touch closed both. The clean interaction log contained no matched JavaScript/Android crash error. No Shelly runtime, KVS, schedule or relay mutation was performed.
 
 ## Next slice — Dashboard status polish
 

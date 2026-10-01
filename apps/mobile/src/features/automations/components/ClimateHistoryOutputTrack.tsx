@@ -2,6 +2,9 @@ import type { HistoryRecord } from '@lcl/automation-core';
 import type { LineCustomSvgLayer } from '@nivo/line';
 import type { HistoryChartSeries } from './climateHistoryChartMetrics.js';
 
+const OUTPUT_TRACK_BOTTOM_OFFSET = 12;
+const OUTPUT_TRACK_STATE_GAP = 44;
+
 export const createClimateHistoryOutputTrack = (
   records: readonly HistoryRecord[],
   xValues: readonly number[],
@@ -10,8 +13,8 @@ export const createClimateHistoryOutputTrack = (
   function ClimateHistoryOutputTrack({ xScale, innerHeight, innerWidth }) {
     if (!visible || records.length === 0) return null;
 
-    const offY = innerHeight - 5;
-    const onY = innerHeight - 14;
+    const offY = innerHeight - OUTPUT_TRACK_BOTTOM_OFFSET;
+    const onY = Math.max(8, offY - OUTPUT_TRACK_STATE_GAP);
     const yFor = (record: HistoryRecord) => (record.finalRelayOn ? onY : offY);
     const firstX = xScale(xValues[0]!);
     let path = `M ${firstX} ${yFor(records[0]!)}`;
