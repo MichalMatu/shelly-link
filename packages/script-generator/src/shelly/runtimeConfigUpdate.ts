@@ -9,18 +9,11 @@ export const generateShellyRuntimeConfigUpdateEval = (input: unknown): string =>
   const configJson = serializeShellyRuntimeConfig(config);
   const storageKey = JSON.stringify(SHELLY_RUNTIME_CONFIG_STORAGE_KEY);
   const storageValue = JSON.stringify(configJson);
-  const profiles = [config.sensor, ...(config.sensorSet?.additionalSensors ?? [])].map(
-    (sensor) => sensor.profileId
-  );
   const capabilityCheck = `${
     (config.rule.minimumOnMs ?? 0) > 0 ? 'if(typeof U==="undefined")return"iv";' : ''
   }${config.rule.relayDebounce ? 'if(typeof D==="undefined")return"iv";' : ''}${
     config.execution?.pulse ? 'if(typeof px!=="function")return"iv";' : ''
-  }${config.execution?.activeWindow ? 'if(typeof wu!=="function")return"iv";' : ''}${
-    profiles.includes('xiaomi_lywsd03mmc_bthome_v2')
-      ? 'if(typeof pb!=="function")return"iv";'
-      : ''
-  }${profiles.includes('tp357_custom_v1') ? 'if(typeof pt!=="function")return"iv";' : ''}`;
+  }${config.execution?.activeWindow ? 'if(typeof wu!=="function")return"iv";' : ''}`;
   const resetExecution =
     config.execution !== undefined
       ? 'if(typeof cx==="function")cx("cu");if(R.pa!==void 0)R.pa=false;if(R.wi!==void 0){if(R.wi)Timer.clear(R.wi);R.wi=0;R.wo=-1}'
