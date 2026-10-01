@@ -1,4 +1,8 @@
-import type { TimePulseAutomationConfig } from '@lcl/automation-core';
+import type {
+  DailyTimeAutomationConfig,
+  PulseCycleConfig,
+  TimePulseAutomationConfig
+} from '@lcl/automation-core';
 import {
   createInstallPlan,
   normalizeShellyDeviceId,
@@ -36,9 +40,14 @@ export type InstalledTimePulseRuntime = {
   schedule: { onJobId: number; offJobId: number };
 };
 
-export type OwnedTimePulseRuntimeInstallation = InstalledTimePulseRuntime & {
+export type OwnedTimePulseRuntimeInstallation = {
   shelly: { baseUrl: string; deviceId: string };
-  config: TimePulseAutomationConfig;
+  schedule: { onJobId: number; offJobId: number };
+  config: DailyTimeAutomationConfig;
+  pulseRuntime: {
+    script: { id: number; hash: string };
+    pulse: PulseCycleConfig;
+  };
 };
 
 export const createTimePulseAutomationClients = (
@@ -198,9 +207,9 @@ export const pauseTimePulseAutomation = async (
   clients = createTimePulseAutomationClients(installation.shelly.baseUrl)
 ): Promise<void> => {
   await requireStoredIdentity(installation, clients);
-  await forceOff(clients, installation.script.id);
+  await forceOff(clients, installation.pulseRuntime.script.id);
   await updatePairEnabled(installation, clients, false);
-  unwrapShellyResult(await clients.device.stopScript(installation.script.id));
+  unwrapShellyResult(await clients.device.stopScript(installation.pulseRuntime.script.id));
   unwrapShellyResult(await clients.device.setRelayOff());
 };
 
@@ -212,7 +221,7 @@ export const resumeTimePulseAutomation = async (
   await requireSyncedClock(clients);
   unwrapShellyResult(await clients.device.setRelayOff());
   await updatePairEnabled(installation, clients, true);
-  unwrapShellyResult(await clients.device.startScript(installation.script.id));
+  unwrapShellyResult(await clients.device.startScript(installation.pulseRuntime.script.id));
 };
 
 export const deleteTimePulseAutomation = async (
@@ -220,11 +229,11 @@ export const deleteTimePulseAutomation = async (
   clients = createTimePulseAutomationClients(installation.shelly.baseUrl)
 ): Promise<void> => {
   await requireStoredIdentity(installation, clients);
-  await forceOff(clients, installation.script.id);
+  await forceOff(clients, installation.pulseRuntime.script.id);
   await updatePairEnabled(installation, clients, false).catch(() => undefined);
   await deleteScheduleIfPresent(clients, installation.schedule.onJobId);
   await deleteScheduleIfPresent(clients, installation.schedule.offJobId);
-  await clients.device.stopScript(installation.script.id).catch(() => undefined);
-  unwrapShellyResult(await clients.device.deleteScript(installation.script.id));
+  await clients.device.stopScript(installation.pulseRuntime.script.id).catch(() => undefined);
+  unwrapShellyResult(await clients.device.deleteScript(installation.pulseRuntime.script.id));
   unwrapShellyResult(await clients.device.setRelayOff());
 };
