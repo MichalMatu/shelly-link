@@ -9,6 +9,10 @@ import {
   renderClimateExecution,
   renderClimateExecutionBoot
 } from './runtime/execution.js';
+import {
+  renderExecutionRuntimeParseCall,
+  renderExecutionRuntimeParser
+} from './runtime/executionParser.js';
 import { renderHistoryWriter } from './runtime/historyWriter.js';
 import { renderRelayArbiter } from './runtime/relayArbiter.js';
 import { renderSafetySupervisor } from './runtime/safetySupervisor.js';
@@ -97,6 +101,22 @@ export const generateShellyThermostatScript = (input: unknown): string => {
   const pulseEnabled = config.execution?.pulse !== undefined;
   const activeWindowEnabled = config.execution?.activeWindow !== undefined;
   const executionEnabled = pulseEnabled || activeWindowEnabled;
+  const configuredSensors = [
+    config.sensor,
+    ...(config.sensorSet?.additionalSensors ?? [])
+  ];
+  const bthomeEnabled =
+    !executionEnabled ||
+    configuredSensors.some((sensor) => sensor.profileId === 'xiaomi_lywsd03mmc_bthome_v2');
+  const tp357Enabled =
+    !executionEnabled ||
+    configuredSensors.some((sensor) => sensor.profileId === 'tp357_custom_v1');
+  const runtimeParser = executionEnabled
+    ? renderExecutionRuntimeParser(bthomeEnabled, tp357Enabled)
+    : renderRuntimeParser();
+  const runtimeParseCall = executionEnabled
+    ? renderExecutionRuntimeParseCall(bthomeEnabled, tp357Enabled)
+    : 'var p=C.ss?C.ss[j][2]:C.p;parse(x,p,j);';
   const generatorVersion = executionEnabled
     ? EXECUTION_GENERATOR_VERSION
     : debounceEnabled
@@ -117,13 +137,13 @@ ${renderSensorHealth(executionEnabled, pulseEnabled)}
 ${executionEnabled ? `${renderClimateExecution(pulseEnabled, activeWindowEnabled)}\n` : ''}function na(a){var s=a==null?"":String(a).toUpperCase(),o="",i,c;for(i=0;i<s.length;i++)if((c=s[i])!=":"&&c!="-")o+=c;return o}
 ${renderThresholdHelper()}
 ${renderMeasurementHelper(executionEnabled)}
-${renderRuntimeParser()}
+${runtimeParser}
 function pd(){var n=nw(),s=C.ss,a=[],i,u,x,l,f;for(i=0;i<(s?s.length:1);i++){x=s?s[i][0]:C.a;u=R.u[i];if(!u||u[6]!=x){a.push([x,null,null,null,null,null,0]);continue;}l=u[2];if(u[3]!=null&&(l==null||u[3]>l))l=u[3];f=C.vp?fr(u[2],n)&&fr(u[3],n):fr(C.m?u[3]:u[2],n);a.push([x,u[0],u[1],u[4],u[5],l,f?1:0]);}return a;}
 ${renderRuntimeDiagnostics(executionEnabled, pulseEnabled, activeWindowEnabled)}
 ${renderHistoryWriter()}
 if(typeof HTTPServer!=="undefined"&&HTTPServer.registerEndpoint){HTTPServer.registerEndpoint("diag",function(q,p){p.code=200;p.headers=[["Content-Type","application/json"]];p.body=diag();p.send();});}
 function ix(a){var z=na(a),s=C.ss;if(!s)return z==C.a?0:-1;for(var i=0;i<s.length;i++)if(z==s[i][0])return i;return-1;}
-function ev(e,x){if(e!=BLE.Scanner.SCAN_RESULT||!x)return;var j=ix(x.addr);if(j<0)return;R.l=nw();if(x.rssi!=null&&x.rssi<C.r){R.r=x.rssi;R.ds="rl";return;}var p=C.ss?C.ss[j][2]:C.p;parse(x,p,j);}
+function ev(e,x){if(e!=BLE.Scanner.SCAN_RESULT||!x)return;var j=ix(x.addr);if(j<0)return;R.l=nw();if(x.rssi!=null&&x.rssi<C.r){R.r=x.rssi;R.ds="rl";return;}${runtimeParseCall}}
 var bt=BLE.Scanner.stop||BLE.Scanner.Stop;
 function bs(){if(bt)bt.call(BLE.Scanner);R.sa=nw();var f=BLE.Scanner.start||BLE.Scanner.Start;if(!f||f.call(BLE.Scanner,{duration_ms:-1,active:false,interval_ms:241,window_ms:61,rssi_thr:0})==null)sf("bf")}
 function bw(){if(R.sa&&nw()-(R.l||R.sa)>9e4)bs();}
