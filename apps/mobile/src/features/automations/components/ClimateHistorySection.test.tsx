@@ -115,8 +115,8 @@ describe('ClimateHistorySection', () => {
 
     fireEvent.click(chart);
     expect(screen.getByText('AUTO · ON')).toBeInTheDocument();
-    expect(screen.getByText('12.3 W')).toBeInTheDocument();
-    expect(screen.getByText('0.06 A')).toBeInTheDocument();
+    expect(screen.getAllByText('12.3 W')).toHaveLength(2);
+    expect(screen.getAllByText('0.06 A')).toHaveLength(2);
 
     fireEvent.click(chart);
     expect(screen.queryByText('AUTO · ON')).not.toBeInTheDocument();
