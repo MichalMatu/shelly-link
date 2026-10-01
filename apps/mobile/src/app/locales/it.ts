@@ -158,6 +158,7 @@ export const it = {
     close: 'Chiudi',
     compatible: 'compatibile',
     confirmDelete: 'Conferma eliminazione',
+    openAutomation: 'Apri automazione',
     copy: 'Copia',
     default: 'Predefiniti',
     delete: 'Elimina',
@@ -354,6 +355,9 @@ export const it = {
         'La presa verrà rimossa solo dall’app. Lo script salvato in Shelly resterà invariato.',
       deleteScannerFailed: 'Impossibile fermare o eliminare lo script scanner BLE.',
       deleteScriptPartial: 'Relè OFF confermato, ma lo script non è stato eliminato.',
+      deleteBlockedTitle: 'Impossibile eliminare la presa',
+      deleteBlockedDescription:
+        'Questa presa è usata dall’automazione “{automation}”. Elimina prima quell’automazione.',
       deleteTitle: 'Rimuovi presa solo dall’app',
       deviceNameLabel: 'Nome presa',
       empty: 'Nessuna presa aggiunta.',
@@ -435,6 +439,9 @@ export const it = {
       deleteConfirmTitle: 'Rimuovere termometro?',
       deleteDescription:
         'Il termometro verrà rimosso dalla configurazione dell’app. Se la regola è già stata inviata a Shelly, inviala di nuovo.',
+      deleteBlockedTitle: 'Impossibile eliminare il termometro',
+      deleteBlockedDescription:
+        'Questo termometro è usato dall’automazione “{automation}”. Rimuovilo prima dall’automazione.',
       deleteTitle: 'Rimuovi termometro solo dall’app',
       empty: 'Nessun termometro aggiunto.',
       foundBleListLabel: 'Termometri BLE trovati',

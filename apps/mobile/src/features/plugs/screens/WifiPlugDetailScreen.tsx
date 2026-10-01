@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { PlugBleDetailSurface } from '../components/PlugBleDetailSurface.js';
 import { PlugDeleteConfirmModal } from '../components/PlugDeleteConfirmModal.js';
+import { PlugRemovalBlockedModal } from '../components/PlugRemovalBlockedModal.js';
 import { PlugDeviceSettingsSurface } from '../components/PlugDeviceSettingsSurface.js';
 import { PlugDetailNotFound } from '../components/PlugDetailNotFound.js';
 import { PlugDetailTop } from '../components/PlugDetailTop.js';
@@ -23,6 +24,8 @@ export type WifiPlugDetailScreenProps = {
   onAddAutomation(): void;
   onOpenBleDiscovery(deviceId: string): void;
   onRemove(deviceId: string): void;
+  removalBlock?: { installationId: string; automationName: string };
+  onOpenBlockingAutomation?: (installationId: string) => void;
   buttonModeLocked?: boolean;
 };
 
@@ -32,6 +35,8 @@ export const WifiPlugDetailScreen = ({
   onAddAutomation,
   onOpenBleDiscovery,
   onRemove,
+  removalBlock,
+  onOpenBlockingAutomation,
   buttonModeLocked = false
 }: WifiPlugDetailScreenProps) => {
   const { t } = useTranslation();
@@ -39,6 +44,7 @@ export const WifiPlugDetailScreen = ({
     buttonModeLocked ? 'device' : 'automation'
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteBlockedOpen, setDeleteBlockedOpen] = useState(false);
   const target = device
     ? { deviceId: device.deviceId, baseUrl: device.baseUrl }
     : { deviceId: '', baseUrl: '' };
@@ -103,7 +109,9 @@ export const WifiPlugDetailScreen = ({
                 className="secondary-action secondary-action--danger"
                 type="button"
                 title={t('hardware.shelly.deleteTitle')}
-                onClick={() => setDeleteOpen(true)}
+                onClick={() =>
+                  removalBlock ? setDeleteBlockedOpen(true) : setDeleteOpen(true)
+                }
               >
                 <IconTrash className="icon-action__svg" aria-hidden="true" />
                 <span>{t('hardware.shelly.deleteTitle')}</span>
@@ -112,6 +120,21 @@ export const WifiPlugDetailScreen = ({
           </section>
         )}
       </section>
+
+      <PlugRemovalBlockedModal
+        deviceName={deleteBlockedOpen ? device.name : null}
+        automationName={deleteBlockedOpen ? (removalBlock?.automationName ?? null) : null}
+        onClose={() => setDeleteBlockedOpen(false)}
+        {...(removalBlock && onOpenBlockingAutomation
+          ? {
+              onOpenAutomation: () => {
+                const installationId = removalBlock.installationId;
+                setDeleteBlockedOpen(false);
+                onOpenBlockingAutomation(installationId);
+              }
+            }
+          : {})}
+      />
 
       <PlugDeleteConfirmModal
         deviceName={deleteOpen ? device.name : null}

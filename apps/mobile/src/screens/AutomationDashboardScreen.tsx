@@ -284,10 +284,10 @@ const AutomationCard = ({ installation, onOpen, onNameChange }: AutomationCardPr
 
 const ThermometerDashboardSection = ({
   onAdd,
-  onOpenSettings
+  onOpenInstallation
 }: {
   onAdd(): void;
-  onOpenSettings(sensorId: string): void;
+  onOpenInstallation(installationId: string): void;
 }) => {
   const flow = useSensorSetupFlow();
   return (
@@ -296,7 +296,7 @@ const ThermometerDashboardSection = ({
       primaryAddAction="phone-scan"
       embedded
       onAddRequest={onAdd}
-      onOpenSensorSettings={onOpenSettings}
+      onOpenInstallation={onOpenInstallation}
     />
   );
 };
@@ -351,7 +351,6 @@ export const AutomationDashboardScreen = ({
   initialKind,
   onAddPlug,
   onAddThermometer,
-  onOpenThermometerSettings = () => undefined,
   onAddAutomation,
   onOpenInstallation,
   onOpenBlePlug,
@@ -433,7 +432,7 @@ export const AutomationDashboardScreen = ({
         {activeKind === 'time' ? (
           <ThermometerDashboardSection
             onAdd={onAddThermometer}
-            onOpenSettings={onOpenThermometerSettings}
+            onOpenInstallation={onOpenInstallation}
           />
         ) : hasPlugEntries ? (
           <>

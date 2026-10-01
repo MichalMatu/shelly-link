@@ -12,7 +12,7 @@ physical Plug -> optional installed automation
 
 A saved Plug is useful without automation. Automation setup starts from a concrete physical Plug. One Plug relay has at most one Shelly Link managed automation owner at a time.
 
-`InstalledAutomation` is the durable automation ownership record. Forgetting a Plug removes the saved device from the app but does not mutate Shelly. Uninstalling an automation is a separate destructive operation.
+`InstalledAutomation` is the durable automation ownership record. A Plug referenced by an installed automation cannot be forgotten from the app until that automation is uninstalled; forgetting an unowned Plug removes only the saved app record and does not mutate Shelly. A saved thermometer referenced by an installed Climate automation likewise cannot be removed until it is removed from or no longer owned by that automation. Uninstalling an automation remains a separate destructive operation.
 
 The project is pre-release. Internal model/API renames are applied cohesively to current code/tests/docs instead of carrying compatibility layers for never-released development states.
 

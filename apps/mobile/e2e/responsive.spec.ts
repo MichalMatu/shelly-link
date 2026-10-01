@@ -1015,10 +1015,15 @@ for (const viewport of viewports) {
       await expectVisualScreen(page, '21-time-info');
     }
     await forgetPlugButton.click();
-    const forgetPlugDialog = page.getByRole('dialog', { name: 'Usunąć gniazdko?' });
+    const forgetPlugDialog = page.getByRole('dialog', {
+      name: 'Nie można usunąć gniazdka'
+    });
     await expect(forgetPlugDialog).toBeVisible();
     await expect(forgetPlugDialog).toContainText('Shelly Plug S Gen3');
-    await forgetPlugDialog.getByRole('button', { name: 'Anuluj' }).click();
+    await expect(forgetPlugDialog).toContainText(
+      'Gniazdko jest używane przez automatykę „Shelly Plug S Gen3”. Najpierw usuń tę automatykę.'
+    );
+    await forgetPlugDialog.getByRole('button', { name: 'Zamknij' }).click();
     await expect(forgetPlugDialog).toHaveCount(0);
 
     await expectNoHorizontalOverflow(page);
@@ -1134,31 +1139,16 @@ for (const viewport of viewports) {
     const thermometerCard = page
       .getByRole('heading', { name: 'Przedpokój' })
       .locator('xpath=ancestor::article[1]');
-    await expect(thermometerCard.getByText('A4:C1:38:4F:24:CD')).toHaveCount(0);
+    await expect(thermometerCard.getByText('A4:C1:38:4F:24:CD')).toBeVisible();
     await expect(
       thermometerCard.getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
-    ).toHaveCount(0);
+    ).toBeVisible();
     await page.getByRole('button', { name: 'Skanuj termometry BLE telefonem' }).click();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '13-add-thermometer');
     }
     await page.getByRole('button', { name: 'Termometry', exact: true }).click();
     await expect(page.getByRole('main', { name: 'Termometry' })).toBeVisible();
-    await thermometerCard
-      .getByRole('button', { name: 'Ustawienia termometru Przedpokój' })
-      .click();
-    await expect(page.getByRole('main', { name: 'Ustawienia termometru' })).toBeVisible();
-    await expect(page.getByText('A4:C1:38:4F:24:CD')).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
-    ).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Termometry', exact: true })
-    ).toHaveAttribute('aria-current', 'page');
-    if (viewport.name === 'phone-large') {
-      await expectVisualScreen(page, '22-thermometer-detail');
-    }
-    await page.getByRole('button', { name: 'Termometry', exact: true }).click();
     await page.getByRole('button', { name: 'Ustawienia', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
     const settingsDiagnostics = page.locator('.app-settings__diagnostics');

@@ -10,7 +10,7 @@ import {
 } from '../features/automations/index.js';
 import {
   PlugBleDetailSurface,
-  PlugDeleteConfirmModal,
+  PlugRemovalBlockedModal,
   PlugDeviceSettingsSurface,
   PlugDetailTop,
   PlugInfoPanel,
@@ -54,7 +54,6 @@ export const TimeInstallationDetail = ({
     (state) => state.removeInstallation
   );
   const savedPlugs = useSavedPlugStore((state) => state.plugs);
-  const removePlug = useSavedPlugStore((state) => state.removePlug);
   const savedDevice = savedPlugs.find((device) =>
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
@@ -240,15 +239,10 @@ export const TimeInstallationDetail = ({
         </FeedbackPanel>
       </Modal>
 
-      <PlugDeleteConfirmModal
+      <PlugRemovalBlockedModal
         deviceName={forgetOpen && savedDevice ? savedDevice.name : null}
+        automationName={forgetOpen ? installation.shelly.name : null}
         onClose={() => setForgetOpen(false)}
-        onConfirm={() => {
-          if (!savedDevice) return;
-          removePlug(savedDevice.physicalId);
-          setForgetOpen(false);
-          pushToast('ok', t('hardware.shelly.removed'));
-        }}
       />
 
       <AppToastViewport

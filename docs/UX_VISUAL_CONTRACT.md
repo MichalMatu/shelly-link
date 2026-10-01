@@ -56,7 +56,7 @@ Time must not reintroduce legacy `Working`, `Daily schedule` badges, a separate 
 
 Physical Plug detail is capability-driven. Reuse the shared tab and surface components. Time and Climate may expose different capabilities, but must not own separate detail chrome.
 
-Saved-Plug forget actions remove the saved device from the app without uninstalling durable automation ownership.
+Saved-Plug forget actions are available only when no installed automation owns that physical Plug. When ownership exists, removal is blocked with an explanation and a direct route to the owning automation. Thermometer cards keep their destructive trash action on the card itself; removal is blocked when an installed Climate automation references that thermometer.
 
 Managed Climate Button Mode is read-only while Climate owns the relay; do not show a disabled editable form.
 

@@ -10,6 +10,7 @@ export type {
   SensorDraftDevice,
   ShellyDraftDevice
 } from './data/setupDraftPersistence.js';
+export { createDeviceRemovalActions } from './flows/deviceRemovalActions.js';
 export {
   useHardwareSetupSelections,
   verifiedWifiPlugInput

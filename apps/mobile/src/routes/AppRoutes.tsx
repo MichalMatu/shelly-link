@@ -29,6 +29,7 @@ import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
 import { PlugBleDiscoveryScreen } from '../screens/PlugBleDiscoveryScreen.js';
 import { SetupIntentScreen } from '../screens/SetupIntentScreen.js';
+import { useRemovalNavigation } from './useRemovalNavigation.js';
 
 const HardwareSetupScreen = lazy(async () => {
   const module = await import('../screens/hardware-setup/HardwareSetupScreen.js');
@@ -79,6 +80,7 @@ export const AppRoutes = () => {
     routeRef.current = nextRoute;
     setRoute(nextRoute);
   }, []);
+  const { removalBlockFor, openInstalledAutomation } = useRemovalNavigation(navigate);
   const openSettings = useCallback(() => {
     const current = routeRef.current;
     if (current.type === 'settings') return;
@@ -194,11 +196,15 @@ export const AppRoutes = () => {
       </Suspense>
     );
   } else if (route.type === 'ble-plug-detail') {
+    const removalBlock = removalBlockFor(route.physicalId);
     content = (
       <BlePlugDetailScreen
         physicalId={route.physicalId}
         onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
         onRemove={removeShellyDevice}
+        {...(removalBlock
+          ? { removalBlock, onOpenBlockingAutomation: openInstalledAutomation }
+          : {})}
       />
     );
   } else if (route.type === 'plug-settings') {
@@ -239,6 +245,14 @@ export const AppRoutes = () => {
           })
         }
         onRemove={removeShellyDevice}
+        {...(wifiDevice
+          ? (() => {
+              const removalBlock = removalBlockFor(wifiDevice.id);
+              return removalBlock
+                ? { removalBlock, onOpenBlockingAutomation: openInstalledAutomation }
+                : {};
+            })()
+          : {})}
       />
     );
   } else if (route.type === 'plug-ble-discovery') {

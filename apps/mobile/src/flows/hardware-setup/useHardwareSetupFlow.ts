@@ -5,7 +5,10 @@ import {
   deriveShellyInputState
 } from './ruleConfigDerivation.js';
 import { useClimateAutomationInstallFlow } from './useClimateAutomationInstallFlow.js';
-import { useClimateAutomationScriptLoadDraftFlow } from '../../features/automations/index.js';
+import {
+  useClimateAutomationScriptLoadDraftFlow,
+  useShellyUsage
+} from '../../features/automations/index.js';
 import {
   savedPlugsToWifiDevices,
   useSavedPlugStore
@@ -15,6 +18,7 @@ import { useShellyBleDiscoveryFlow } from './useShellyBleDiscoveryFlow.js';
 import { useShellySetupScanFlow } from './useShellySetupScanFlow.js';
 import { useShellyControlFlow } from './useShellyControlFlow.js';
 import {
+  createDeviceRemovalActions,
   useHardwareSetupSelections,
   verifiedWifiPlugInput
 } from '../../features/hardware-setup/index.js';
@@ -244,21 +248,18 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     selectShellyDeviceDraft(device.id);
   };
 
-  const removeShellyDevice = (id: string) => {
-    removePlug(id);
-    if (selectedShellyId === id) {
-      const next = shellyDevices.find((device) => device.id !== id);
-      selectShellyDeviceDraft(next?.id ?? null);
-    }
-    removeShellyControlState(id);
-    resetShellySetupStatus();
-    resetInstallState();
-  };
-
-  const removeSensorDevice = (id: string) => {
-    sensorSetupFlow.removeSensorDevice(id);
-    resetInstallState();
-  };
+  const { plugRemovalUsage, removeShellyDevice, removeSensorDevice } =
+    createDeviceRemovalActions({
+      plugRemovalUsage: useShellyUsage(),
+      removePlug,
+      selectedShellyId,
+      shellyDevices,
+      selectShellyDevice: selectShellyDeviceDraft,
+      removeShellyControlState,
+      resetShellySetupStatus,
+      resetInstallState,
+      removeSensorDevice: sensorSetupFlow.removeSensorDevice
+    });
 
   return {
     shellyNameInput,
@@ -272,6 +273,7 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     selectShellyDevice,
     setShellyDeviceName: renamePlug,
     upsertShellyDevice,
+    plugRemovalUsage,
     removeShellyDevice,
     ...sensorSetupFlow,
     selectedSensorId,

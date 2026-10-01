@@ -156,6 +156,7 @@ export const ptBr = {
     close: 'Fechar',
     compatible: 'compatível',
     confirmDelete: 'Confirmar exclusão',
+    openAutomation: 'Abrir automação',
     copy: 'Copiar',
     default: 'Padrões',
     delete: 'Excluir',
@@ -351,6 +352,9 @@ export const ptBr = {
         'A tomada será removida apenas do app. O script salvo no Shelly não será alterado.',
       deleteScannerFailed: 'Não foi possível parar ou excluir o script do scanner BLE.',
       deleteScriptPartial: 'Relé OFF confirmado, mas não foi possível excluir o script.',
+      deleteBlockedTitle: 'Não é possível remover a tomada',
+      deleteBlockedDescription:
+        'Esta tomada é usada pela automação “{automation}”. Remova essa automação primeiro.',
       deleteTitle: 'Remover tomada apenas do app',
       deviceNameLabel: 'Nome da tomada',
       empty: 'Nenhuma tomada adicionada.',
@@ -431,6 +435,9 @@ export const ptBr = {
       deleteConfirmTitle: 'Remover termômetro?',
       deleteDescription:
         'O termômetro será removido da configuração do app. Se a regra já foi enviada ao Shelly, envie de novo.',
+      deleteBlockedTitle: 'Não é possível remover o termômetro',
+      deleteBlockedDescription:
+        'Este termômetro é usado pela automação “{automation}”. Remova-o primeiro da automação.',
       deleteTitle: 'Remover termômetro apenas do app',
       empty: 'Nenhum termômetro adicionado.',
       foundBleListLabel: 'Termômetros BLE encontrados',

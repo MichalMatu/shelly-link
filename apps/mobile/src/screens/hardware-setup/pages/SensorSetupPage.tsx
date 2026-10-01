@@ -1,6 +1,6 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { useToastQueue } from '../useToastQueue.js';
-import { Modal, SegmentedControl } from '@lcl/ui';
+import { SegmentedControl } from '@lcl/ui';
 import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
@@ -11,12 +11,18 @@ import { useSensorSetupFeedback } from './useSensorSetupFeedback.js';
 import {
   formatSensorMetric,
   SavedSensorList,
+  SensorRemovalBlockedModal,
+  SensorRemovalConfirmModal,
   sensorProfileDisplayLabels
 } from '../../../features/thermometers/index.js';
 import { SensorAddForm } from './SensorSetupPresentation.js';
 
 type SensorDraftDevice = SensorSetupFlow['sensorDevices'][number];
-type SensorDialogState = { kind: 'none' } | { kind: 'remove'; device: SensorDraftDevice };
+type SensorRemovalUsage = ReturnType<SensorSetupFlow['sensorRemovalUsage']>[number];
+type SensorDialogState =
+  | { kind: 'none' }
+  | { kind: 'remove'; device: SensorDraftDevice }
+  | { kind: 'blocked'; device: SensorDraftDevice; usage: SensorRemovalUsage };
 type SensorAddMode = 'manual' | 'phone-scan';
 
 type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
@@ -25,6 +31,7 @@ type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
   addOnly?: boolean;
   onAddRequest?: (mode: SensorAddMode) => void;
   onOpenSensorSettings?: (sensorId: string) => void;
+  onOpenInstallation?: (installationId: string) => void;
   hideAddAction?: boolean;
   onSensorRemoved?: () => void;
 };
@@ -36,6 +43,7 @@ export const SensorSetupPage = ({
   addOnly = false,
   onAddRequest,
   onOpenSensorSettings,
+  onOpenInstallation,
   hideAddAction = false,
   onSensorRemoved
 }: SensorSetupPageProps) => {
@@ -52,6 +60,7 @@ export const SensorSetupPage = ({
   const stopPhoneBleScanRef = useRef<() => void>(() => undefined);
   const { dismissToast, pushToast, toasts } = useToastQueue('sensor-toast');
   const sensorPendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
+  const blockedSensorRemoval = dialog.kind === 'blocked' ? dialog : null;
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
   const isSensorGattPending = flow.setPvvxTimeMutation.isPending;
   const shouldShowPhoneBleEmpty =
@@ -131,9 +140,18 @@ export const SensorSetupPage = ({
     pushToast('ok', t('hardware.shelly.thermometerSaved'));
   };
 
+  const requestRemoveSensor = (device: SensorDraftDevice) => {
+    const usage = flow.sensorRemovalUsage(device.id)[0];
+    setDialog(usage ? { kind: 'blocked', device, usage } : { kind: 'remove', device });
+  };
+
   const confirmRemoveSensor = () => {
     if (!sensorPendingRemoval) return;
-    flow.removeSensorDevice(sensorPendingRemoval.id);
+    if (!flow.removeSensorDevice(sensorPendingRemoval.id)) {
+      const usage = flow.sensorRemovalUsage(sensorPendingRemoval.id)[0];
+      if (usage) setDialog({ kind: 'blocked', device: sensorPendingRemoval, usage });
+      return;
+    }
     setDialog({ kind: 'none' });
     pushToast('ok', t('hardware.sensor.removed'));
     onSensorRemoved?.();
@@ -352,25 +370,25 @@ export const SensorSetupPage = ({
         </button>
       )}
 
-      <Modal
-        closeLabel={t('common.cancel')}
-        description={sensorPendingRemoval?.name ?? ''}
-        open={sensorPendingRemoval !== null}
-        title={t('hardware.sensor.deleteConfirmTitle')}
-        actions={
-          <button
-            className="secondary-action secondary-action--danger"
-            type="button"
-            title={t('hardware.sensor.deleteTitle')}
-            onClick={confirmRemoveSensor}
-          >
-            {t('common.delete')}
-          </button>
-        }
+      <SensorRemovalBlockedModal
+        deviceName={blockedSensorRemoval?.device.name ?? null}
+        usage={blockedSensorRemoval?.usage ?? null}
         onClose={() => setDialog({ kind: 'none' })}
-      >
-        <p>{t('hardware.sensor.deleteDescription')}</p>
-      </Modal>
+        {...(onOpenInstallation
+          ? {
+              onOpenAutomation: (installationId: string) => {
+                setDialog({ kind: 'none' });
+                onOpenInstallation(installationId);
+              }
+            }
+          : {})}
+      />
+
+      <SensorRemovalConfirmModal
+        deviceName={sensorPendingRemoval?.name ?? null}
+        onClose={() => setDialog({ kind: 'none' })}
+        onConfirm={confirmRemoveSensor}
+      />
       <AppToastViewport
         dismissLabel={t('toast.dismiss')}
         label={t('toast.regionLabel')}
@@ -388,7 +406,7 @@ export const SensorSetupPage = ({
         onEditEnd={() => setEditingSensorId(null)}
         onNameChange={flow.setSensorDeviceName}
         onPvvxSetTime={(device) => flow.setPvvxTimeMutation.mutate(device)}
-        onRemove={(device) => setDialog({ kind: 'remove', device })}
+        onRemove={requestRemoveSensor}
         {...(onOpenSensorSettings ? { onOpenDetails: onOpenSensorSettings } : {})}
       />
     </section>
