@@ -24,10 +24,12 @@ type TimerEntry = { dueMs: number; callback: () => void };
 
 const runGenerated = ({
   input = config,
-  switchErrors = [] as string[]
+  switchErrors = [] as string[],
+  relayOnError = false
 }: {
   input?: StandalonePulseAutomationConfig;
   switchErrors?: string[];
+  relayOnError?: boolean;
 } = {}) => {
   let nowMs = 100_000;
   let nextTimerId = 1;
@@ -59,6 +61,10 @@ const runGenerated = ({
       expect(method).toBe('Switch.Set');
       expect(params.id).toBe(input.relayId);
       relayCalls.push(params.on);
+      if (params.on && relayOnError && callback) {
+        Timer.set(0, false, () => callback({}, 1));
+        return;
+      }
       callback?.({}, 0);
     }
   };
@@ -227,6 +233,19 @@ describe('Standalone Pulse generated runtime', () => {
     runtime.api.rq(false);
     expect(runtime.relayCalls.at(-1)).toBe(false);
     expect(runtime.timers.size).toBe(0);
+    runtime.advance(5_000);
+    expect(runtime.relayCalls.at(-1)).toBe(false);
+  });
+
+  it('relay-control faults cancel Pulse, latch the fault and force OFF', () => {
+    const runtime = runGenerated({ relayOnError: true });
+    expect(runtime.relayCalls).toEqual([false, true]);
+
+    runtime.advance(0);
+
+    expect(runtime.relayCalls).toEqual([false, true, false]);
+    expect(runtime.timers.size).toBe(0);
+    expect(runtime.api.rq(true)).toBe(-1);
     runtime.advance(5_000);
     expect(runtime.relayCalls.at(-1)).toBe(false);
   });
