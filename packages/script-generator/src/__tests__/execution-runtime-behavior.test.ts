@@ -79,14 +79,7 @@ const createExecutionHarness = ({
     'sw',
     'Shelly',
     `${code};return {rq:rq,px:typeof px==="function"?px:null,wu:typeof wu==="function"?wu:null};`
-  )(
-    config,
-    runtime,
-    timer,
-    () => nowMs,
-    sw,
-    shelly
-  ) as {
+  )(config, runtime, timer, () => nowMs, sw, shelly) as {
     rq: (active: boolean, reason: string) => void;
     px: (() => void) | null;
     wu: (() => void) | null;
