@@ -37,21 +37,21 @@ const renderPersistentConfigLoader = (
   const debounceValidator = debounceEnabled
     ? '&&(c.y===void 0||N(c.y)&&c.y>=0)&&(c.z===void 0||N(c.z)&&c.z>=0)'
     : '';
-  const executionInteger = pulseEnabled || activeWindowEnabled
-    ? 'function I(x){return N(x)&&x%1===0}\n'
+  const executionRange = pulseEnabled || activeWindowEnabled
+    ? 'function B(x,a,b){return N(x)&&x>=a&&x<=b}\n'
     : '';
   const pulseValidator = pulseEnabled
-    ? `function ve(e){return Array.isArray(e)&&e.length===6&&I(e[0])&&e[0]>=1000&&e[0]<=86400000&&I(e[1])&&e[1]>=1000&&e[1]<=86400000&&I(e[2])&&e[2]>=0&&e[2]<=86400000&&(e[3]===0||e[3]===1)&&(e[4]===0&&e[5]===0||e[4]===1&&I(e[5])&&e[5]>=1&&e[5]<=100000||e[4]===2&&I(e[5])&&e[5]>=1000&&e[5]<=604800000)}\n`
+    ? 'function ve(e){return e&&e.length==5&&B(e[0],1e3,864e5)&&B(e[1],1e3,864e5)&&B(e[2],0,864e5)&&(e[3]===0||e[3]===1)&&(e[4]===0||B(e[4],1,1e5)||B(e[4],-6048e5,-1e3))}\n'
     : '';
   const activeWindowValidator = activeWindowEnabled
-    ? 'function vw(w){return Array.isArray(w)&&w.length===2&&I(w[0])&&w[0]>=0&&w[0]<1440&&I(w[1])&&w[1]>=0&&w[1]<1440&&w[0]!==w[1]}\n'
+    ? 'function vw(w){return w&&w.length==2&&B(w[0],0,1439)&&B(w[1],0,1439)&&w[0]!==w[1]}\n'
     : '';
   const executionValidator = `${pulseEnabled ? '&&ve(c.e)' : ''}${activeWindowEnabled ? '&&vw(c.w)' : ''}`;
 
   return `var E=0;
 function N(x){return x-0===x}
 function S(x){return x+""===x}
-${executionInteger}${pulseValidator}${activeWindowValidator}function vs(c){var a=c.ss;if(a===void 0)return c.ag===void 0;if(!Array.isArray(a)||a.length<2||a.length>4||!N(c.ag)||c.ag<0||c.ag>3)return false;for(var i=0,s;i<a.length;i++){s=a[i];if(!Array.isArray(s)||s.length!==3||!S(s[0])||!S(s[1])||(s[2]!==0&&s[2]!==1))return false;}return true;}
+${executionRange}${pulseValidator}${activeWindowValidator}function vs(c){var a=c.ss;if(a===void 0)return c.ag===void 0;if(!Array.isArray(a)||a.length<2||a.length>4||!N(c.ag)||c.ag<0||c.ag>3)return false;for(var i=0,s;i<a.length;i++){s=a[i];if(!Array.isArray(s)||s.length!==3||!S(s[0])||!S(s[1])||(s[2]!==0&&s[2]!==1))return false;}return true;}
 function vc(c){return c&&c.v===1&&(c.p===0||c.p===1)&&S(c.a)&&S(c.fa)&&S(c.n)&&S(c.k)&&N(c.i)&&c.i>=0&&N(c.r)&&c.r>=-100&&c.r<=-20&&N(c.on)&&N(c.off)&&(c.d===0||c.d===1)&&(c.m===0||c.m===1)&&N(c.h)&&c.h>=1&&c.h<=10&&N(c.c)&&c.c>0${minimumOnValidator}${debounceValidator}&&N(c.s)&&c.s>0&&N(c.x)&&c.x>0&&N(c.vp)&&c.vp>=0&&c.vp<=5&&(c.d?c.on>c.off:c.on<c.off)&&vs(c)${executionValidator};}
 function lc(d){if(typeof Script=="undefined"||!Script.storage||!Script.storage.getItem)return d;try{var x=Script.storage.getItem(${JSON.stringify(SHELLY_RUNTIME_CONFIG_STORAGE_KEY)});if(!x)return d;var c=JSON.parse(x);if(vc(c))return c;}catch(e){}E=1;return d;}
 C=lc(C);`;
@@ -78,18 +78,15 @@ function pt(x,j){var d=x.advData;if(!d){R.ds="ta";return;}var p=mf(d);if(p===nul
 function parse(x,p,j){return p==1?pt(x,j):pb(x,j)}`;
 
 const renderMeasurementHelper = (executionEnabled = false): string => {
-  const request = executionEnabled ? 'rq' : 'sw';
-  const heldRequest = executionEnabled ? 'R.pa' : 'R.on';
-  const commonDecision =
-    `R.af=null;R.ds="ok";var T=th(t,h);R.eo=T.o;R.ef=T.f;R.vp=C.vp?vd(t,h):null;var go=C.d?v>T.o:v<T.o,stop=C.d?v<T.f:v>T.f,gr=C.d?"ab":"bl",sr=C.d?"bl":"ab";if(go){R.nh++;R.fh=0;if(R.nh<C.h){${request}(${heldRequest},gr+"h",false);return;}${request}(true,gr,false);return;}if(stop){R.fh++;R.nh=0;${request}(false,sr,false);return;}R.nh=0;R.fh=0;${request}(${heldRequest},"ib",false);`;
-
-  const normalizedDecision = executionEnabled
-    ? commonDecision.replace(/rq\(([^,]+),([^,]+),false\)/g, 'rq($1,$2)')
-    : commonDecision;
+  if (!executionEnabled) {
+    return `function fr(x,n){return x!==null&&n-x<=Math.min(${COMPOSITE_MEASUREMENT_WINDOW_MS},C.s);}
+function av(v,t,n){var z=[],q,u,i;for(i=0;i<R.u.length;i++){u=R.u[i];if(u&&fr(u[t],n)&&u[v]!=null)z.push(u[v]);}R.fc=z.length;if(!z.length)return null;if(C.ag===3||C.ag===undefined)return z[0];q=z[0];if(C.ag===1){for(i=1;i<z.length;i++)q=Math.min(q,z[i]);return q;}if(C.ag===2){for(i=1;i<z.length;i++)q=Math.max(q,z[i]);return q;}q=0;for(i=0;i<z.length;i++)q+=z[i];return q/z.length;}
+function meas(t,h,b,r,j){var n=nw(),u=R.u[j],p=t!=null||h!=null;R.r=r;if(b!=null)R.b=b;if(!p){R.ds="cv";return;}if(!u){u=[null,null,null,null,null,null,null];R.u[j]=u;}u[5]=r;u[6]=C.ss?C.ss[j][0]:C.a;if(b!=null)u[4]=b;if(t!=null){u[0]=t;u[2]=n;}if(h!=null){u[1]=h;u[3]=n;}var tf=av(0,2,n),hf=av(1,3,n),v=C.m?hf:tf;R.t=tf;R.h=hf;R.tt=n;R.ht=n;R.cv=v;if(C.vp){if(v==null||tf==null||hf==null){R.ds="cv";return;}t=tf;h=hf;}else{if(v==null){R.ds="cv";return;}t=tf;h=hf;}R.ls=n;R.af=null;R.ds="ok";var T=th(t,h);R.eo=T.o;R.ef=T.f;R.vp=C.vp?vd(t,h):null;var go=C.d?v>T.o:v<T.o,stop=C.d?v<T.f:v>T.f,gr=C.d?"ab":"bl",sr=C.d?"bl":"ab";if(go){R.nh++;R.fh=0;if(R.nh<C.h){sw(R.on,gr+"h",false);return;}sw(true,gr,false);return;}if(stop){R.fh++;R.nh=0;sw(false,sr,false);return;}R.nh=0;R.fh=0;sw(R.on,"ib",false);}`;
+  }
 
   return `function fr(x,n){return x!==null&&n-x<=Math.min(${COMPOSITE_MEASUREMENT_WINDOW_MS},C.s);}
 function av(v,t,n){var z=[],q,u,i;for(i=0;i<R.u.length;i++){u=R.u[i];if(u&&fr(u[t],n)&&u[v]!=null)z.push(u[v]);}R.fc=z.length;if(!z.length)return null;if(C.ag===3||C.ag===undefined)return z[0];q=z[0];if(C.ag===1){for(i=1;i<z.length;i++)q=Math.min(q,z[i]);return q;}if(C.ag===2){for(i=1;i<z.length;i++)q=Math.max(q,z[i]);return q;}q=0;for(i=0;i<z.length;i++)q+=z[i];return q/z.length;}
-function meas(t,h,b,r,j){var n=nw(),u=R.u[j],p=t!=null||h!=null;R.r=r;if(b!=null)R.b=b;if(!p){R.ds="cv";return;}if(!u){u=[null,null,null,null,null,null,null];R.u[j]=u;}u[5]=r;u[6]=C.ss?C.ss[j][0]:C.a;if(b!=null)u[4]=b;if(t!=null){u[0]=t;u[2]=n;}if(h!=null){u[1]=h;u[3]=n;}var tf=av(0,2,n),hf=av(1,3,n),v=C.m?hf:tf;R.t=tf;R.h=hf;R.tt=n;R.ht=n;R.cv=v;if(C.vp){if(v==null||tf==null||hf==null){R.ds="cv";return;}t=tf;h=hf;}else{if(v==null){R.ds="cv";return;}t=tf;h=hf;}R.ls=n;${normalizedDecision}}`;
+function meas(t,h,b,r,j){var n=nw(),u=R.u[j],p=t!=null||h!=null;R.r=r;if(b!=null)R.b=b;if(!p){R.ds="cv";return;}if(!u){u=[null,null,null,null,null,null,null];R.u[j]=u;}u[5]=r;u[6]=C.ss?C.ss[j][0]:C.a;if(b!=null)u[4]=b;if(t!=null){u[0]=t;u[2]=n;}if(h!=null){u[1]=h;u[3]=n;}var tf=av(0,2,n),hf=av(1,3,n),v=C.m?hf:tf;R.t=tf;R.h=hf;R.tt=n;R.ht=n;R.cv=v;if(C.vp){if(v==null||tf==null||hf==null){R.ds="cv";return;}t=tf;h=hf;}else{if(v==null){R.ds="cv";return;}t=tf;h=hf;}R.ls=n;R.af=null;R.ds="ok";var T=th(t,h);R.eo=T.o;R.ef=T.f;R.vp=C.vp?vd(t,h):null;var go=C.d?v>T.o:v<T.o,stop=C.d?v<T.f:v>T.f,gr=C.d?"ab":"bl",sr=C.d?"bl":"ab";if(go){R.nh++;R.fh=0;if(R.nh<C.h){rq(R.pa,gr+"h");return;}rq(true,gr);return;}if(stop){R.fh++;R.nh=0;rq(false,sr);return;}R.nh=0;R.fh=0;rq(R.pa,"ib");}`;
 };
 
 export const generateShellyThermostatScript = (input: unknown): string => {
@@ -109,7 +106,7 @@ export const generateShellyThermostatScript = (input: unknown): string => {
         : GENERATOR_VERSION;
   const hash = configHash(config);
   const cfgJson = stableStringify(createShellyRuntimeConfig(config, hash));
-  const capabilities = `${minimumOnEnabled ? 'var U=1;' : ''}${debounceEnabled ? 'var D=1;' : ''}${pulseEnabled ? 'var P=1;' : ''}${activeWindowEnabled ? 'var W=1;' : ''}`;
+  const capabilities = `${minimumOnEnabled ? 'var U=1;' : ''}${debounceEnabled ? 'var D=1;' : ''}`;
   const executionBoot = renderClimateExecutionBoot(activeWindowEnabled);
   const body = `${capabilities ? `${capabilities}\n` : ''}var C=${cfgJson};
 ${renderPersistentConfigLoader(minimumOnEnabled, debounceEnabled, pulseEnabled, activeWindowEnabled)}
@@ -122,7 +119,7 @@ ${renderThresholdHelper()}
 ${renderMeasurementHelper(executionEnabled)}
 ${renderRuntimeParser()}
 function pd(){var n=nw(),s=C.ss,a=[],i,u,x,l,f;for(i=0;i<(s?s.length:1);i++){x=s?s[i][0]:C.a;u=R.u[i];if(!u||u[6]!=x){a.push([x,null,null,null,null,null,0]);continue;}l=u[2];if(u[3]!=null&&(l==null||u[3]>l))l=u[3];f=C.vp?fr(u[2],n)&&fr(u[3],n):fr(C.m?u[3]:u[2],n);a.push([x,u[0],u[1],u[4],u[5],l,f?1:0]);}return a;}
-${renderRuntimeDiagnostics()}
+${renderRuntimeDiagnostics(executionEnabled, pulseEnabled, activeWindowEnabled)}
 ${renderHistoryWriter()}
 if(typeof HTTPServer!=="undefined"&&HTTPServer.registerEndpoint){HTTPServer.registerEndpoint("diag",function(q,p){p.code=200;p.headers=[["Content-Type","application/json"]];p.body=diag();p.send();});}
 function ix(a){var z=na(a),s=C.ss;if(!s)return z==C.a?0:-1;for(var i=0;i<s.length;i++)if(z==s[i][0])return i;return-1;}
