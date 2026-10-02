@@ -37,7 +37,7 @@ const STANDALONE_PULSE_DETAIL_TABS = [
 
 type StandalonePulseInstallationDetailProps = {
   installation: StandalonePulseInstalledAutomation;
-  onBack(): void;
+  onBack?: () => void;
   onOpenBleDiscovery?: (deviceId: string) => void;
 };
 
@@ -88,7 +88,7 @@ export const StandalonePulseInstallationDetail = ({
     onSuccess: () => {
       removeInstallation(installation.id);
       setDeleteOpen(false);
-      onBack();
+      onBack?.();
     }
   });
 
