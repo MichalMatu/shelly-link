@@ -1,6 +1,6 @@
-# Handoff — Pulse V1 closed after operational status acceptance
+# Handoff — Dashboard status polish slice accepted after Pulse V1
 
-Status: **2026-10-02 — Climate + Pulse, Time + Pulse and Standalone Pulse runtimes are qualified; shared setup/editor UI and dashboard/detail operational status are accepted; Pulse V1 implementation is closed. The accepted operational-status implementation head is `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`.**
+Status: **2026-10-02 — Pulse V1 is closed and Dashboard status polish slice 1 is accepted. The accepted Dashboard status implementation head is `08a50db96f126e04dd509c246581939aabcde3d6` on `dashboard-status-polish`; frozen Climate golden UI remains unchanged.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -40,6 +40,7 @@ Keep `main` untouched until the Pulse working line is deliberately reviewed/merg
 - accepted shared setup/editor + responsive visual acceptance: `99ae14745215e5d267ed2588806a1bc0d05c6420`;
 - durable shared-UI closeout baseline before the operational-status audit: `cd0a335e65ff1c0f0a58340704e7192bdee458c6`;
 - accepted operational-status implementation + responsive acceptance: `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`.
+- Dashboard status polish branch: `dashboard-status-polish`; accepted slice-1 code/acceptance head: `08a50db96f126e04dd509c246581939aabcde3d6`.
 
 The Standalone descendants after the hardware candidate add app ownership/reconciliation integration, repository-boundary cleanup, tests and durable docs; they do not change the generated Standalone Shelly runtime. The code-only candidate passed full `pnpm check` with a clean worktree, and `@lcl/script-generator` passed **229/229 tests at 100% statements/branches/functions/lines**.
 
@@ -54,6 +55,7 @@ Durable remote branches should be limited to:
 - `pulse-v1-time-adapter`;
 - `pulse-v1-standalone-adapter`;
 - `pulse-v1-shared-ui`.
+- `dashboard-status-polish`.
 
 ## Qualified runtime contract
 
@@ -109,13 +111,23 @@ Acceptance on `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`: focused responsive ope
 
 Samsung S22+ / Android 16 preserving-data installation of the same application code also passed build/install/cold-start/layout smoke. The phone currently contains a non-Pulse Climate installation, so this smoke is explicitly **not** claimed as live Pulse operational-status hardware acceptance. No hardware requalification was required because generated runtime/device behavior did not change.
 
+### Dashboard status polish — slice 1 accepted
+
+Accepted code/acceptance head: `08a50db96f126e04dd509c246581939aabcde3d6` on `dashboard-status-polish`.
+
+The mobile operational-status presentation now has one shared `requested output -> final relay -> reason` language for Pulse and Steady Time. Pulse keeps the already-qualified normalized read model and timing ownership. Steady Time derives requested output only from Shelly local time plus the existing schedule-domain helper while AUTO is running; paused/MANUAL deliberately reports no automation request. Climate detail now prefers the authoritative automation-requested output diagnostic while retaining its existing fallback.
+
+The frozen Climate dashboard/detail visual contract remains unchanged: the Stage 7 work did not casually grow Climate card geometry, and the UX gate rejected accidental Climate golden regeneration. Only the intentional Time dashboard/detail snapshots changed. Full responsive Playwright passed **46/46** and the exact implementation line passed full `pnpm check`. See `docs/testing/dashboard-status-polish-acceptance-2026-10-02.md`.
+
+No generated runtime, RPC path, polling cadence, lifecycle, persistence or hardware behavior changed.
+
 ## Next implementation order
 
 Pulse V1 is closed. Do not reopen the qualified runtime/setup/status slices without a concrete failing test, hardware issue or accepted product change.
 
 Continue the V1 plan in this order:
 
-1. Dashboard status polish for the broader product status language beyond the now-accepted Pulse phase/progress surface.
+1. Continue Dashboard status polish with fault/hard-safety legibility using existing authoritative diagnostics and warning/detail surfaces, without casually changing frozen Climate card geometry.
 2. UX redesign round 2 after the stable History/safety/Pulse foundation.
 3. Watchdog/recovery/soak stabilization and the final hardware matrix.
 4. V1 feature freeze.

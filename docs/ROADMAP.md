@@ -167,9 +167,13 @@ Operational-status acceptance passed focused responsive E2E **5/5**, full `pnpm 
 
 Pulse V1 is complete. Resume Dashboard status polish, UX redesign round 2, watchdog/stabilization and v1 feature freeze rather than expanding Pulse immediately with additional runtime modes.
 
-### 7. Dashboard status polish
+### 7. Dashboard status polish — slice 1 accepted 2026-10-02
 
-After Pulse V1 is stable, improve the operational status layer without casually changing shared card geometry: requested output, final output, reason, automation-fault state and hard-safety state should be understandable at a glance. Pulse phase/progress should integrate into this same status language rather than becoming a separate diagnostics island.
+The first post-Pulse status slice is accepted on `08a50db96f126e04dd509c246581939aabcde3d6`. One mobile presentation primitive now owns the common requested-output, final-relay and reason language used by Pulse and Steady Time. Pulse keeps the already-qualified normalized read model. Steady Time derives requested output only from Shelly local time and the existing schedule-domain helper while AUTO is running; paused/MANUAL deliberately reports no automation request. Climate detail prefers the authoritative automation-requested diagnostic with the previous relay-state fallback for older snapshots.
+
+The frozen Climate dashboard/detail golden UI remains unchanged. The implementation deliberately backed out a steady-Climate dashboard geometry change after the UX gate proved that it violated the accepted golden contract. Only the intentional Time dashboard/detail snapshots were refreshed. Complete responsive Playwright passed **46/46** and the exact completion code passed full `pnpm check`. No runtime, transport, polling, persistence, relay or hardware semantics changed.
+
+Continue Stage 7 with broader automation-fault and hard-safety legibility using existing authoritative diagnostics and existing warning/footer/detail surfaces before introducing any new state or transport owner. Pulse phase/progress remains integrated into the same status vocabulary rather than becoming a diagnostics island.
 
 ### 8. UX redesign round 2
 

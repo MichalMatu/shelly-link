@@ -123,6 +123,12 @@ Climate maps the existing managed-runtime diagnostic path into this model. Time 
 
 Dashboard and detail consume one shared Pulse status presentation. The compact dashboard view omits secondary fault/safety rows; full detail retains automation fault and hard-safety information. This capability does not modify generated script source, timing, persistence, restart semantics, safety precedence or automation lifecycle.
 
+### Shared operational-status presentation
+
+The broader mobile status language is presentation-only and reuses authoritative state owners rather than creating a new runtime model. Pulse and Steady Time share a small presentation primitive for requested output, final physical relay and reason. Time requested output is derived only from Shelly local time plus the existing schedule-domain helper while the native schedule is running; paused/MANUAL mode reports no automation request. Climate continues to consume its managed-runtime diagnostics, including the explicit automation-requested relay state.
+
+Frozen Climate dashboard/detail geometry remains an explicit UX contract. Shared status presentation must not move transport, persistence, polling or runtime ownership into React, and it must not bypass the accepted Climate golden contract merely to make components look structurally identical.
+
 ## Climate engine and persistent config
 
 The stable direction is:
