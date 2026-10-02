@@ -23,6 +23,7 @@ import {
   useStandalonePulseActions,
   useStandalonePulseRuntime
 } from './flows/useStandalonePulseRuntime.js';
+import { useStandalonePulseScriptSource } from './flows/useStandalonePulseScriptSource.js';
 
 export const Pulse = {
   Cycle: {
@@ -40,6 +41,7 @@ export const Pulse = {
     SetupPage: StandalonePulseSetupPage,
     useRuntime: useStandalonePulseRuntime,
     useActions: useStandalonePulseActions,
+    useScriptSource: useStandalonePulseScriptSource,
     pause: pauseStandalonePulseAutomation,
     resume: resumeStandalonePulseAutomation,
     delete: deleteStandalonePulseAutomation
