@@ -13,6 +13,7 @@ import {
 import { useMemo, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import {
+  ClimateSetup,
   createInstalledAutomation,
   findRelayOwnerConflict,
   findScheduleRelayConflict,
@@ -27,9 +28,10 @@ import {
 } from '../../features/plugs/index.js';
 import { forceRelayOffAndConfirm } from '../installations/relaySafety.js';
 import { convergeManagedButtonMode } from '../installations/runtimeUpgrade.js';
-import type { ClimateConfigState } from './ruleConfigDerivation.js';
 import { cleanupStaleShellyBleDiscoveryScripts } from './shellyRequests.js';
 import { useHardwareSetupDraftStore, type ShellyDraftDevice } from './setupDraftStore.js';
+
+type ClimateConfigState = ReturnType<typeof ClimateSetup.deriveRuleState>['configState'];
 
 type HardwareInstallState = {
   shellyId: string;
