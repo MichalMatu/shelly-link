@@ -5,8 +5,11 @@ import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   deleteTimeAutomation,
+  isTimePulseInstalledAutomation,
+  PulseOperationalStatusSummary,
   timePulseAutomationRuntime,
   useInstalledAutomationStore,
+  usePulseOperationalStatus,
   type TimeInstalledAutomation
 } from '../features/automations/index.js';
 import {
@@ -48,6 +51,10 @@ export const TimeInstallationDetail = ({
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const runtimeQuery = useTimeAutomationRuntime(installation);
+  const pulseInstallation = isTimePulseInstalledAutomation(installation)
+    ? installation
+    : null;
+  const pulseQuery = usePulseOperationalStatus(pulseInstallation);
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
   });
@@ -98,6 +105,7 @@ export const TimeInstallationDetail = ({
     : runtimeQuery.isError
       ? 'offline'
       : (runtimeQuery.data?.scheduleState ?? 'attention');
+  const pulseNeedsAttention = pulseInstallation !== null && pulseQuery.isError;
   return (
     <main className="demo-shell installation-detail-shell">
       <PlugDetailTop
@@ -118,7 +126,7 @@ export const TimeInstallationDetail = ({
                 <span>{t('common.refreshing')}</span>
               </div>
             )}
-            {(runtimeState === 'offline' || runtimeState === 'attention') && (
+            {(runtimeState === 'offline' || runtimeState === 'attention' || pulseNeedsAttention) && (
               <FeedbackPanel
                 tone="warning"
                 title={
@@ -144,6 +152,9 @@ export const TimeInstallationDetail = ({
                   <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
                 </div>
               </dl>
+              {pulseInstallation && (
+                <PulseOperationalStatusSummary status={pulseQuery.data} />
+              )}
             </section>
 
             <TimeScheduleSetupPage
@@ -161,6 +172,7 @@ export const TimeInstallationDetail = ({
               inline
               onInstalled={() => {
                 void runtimeQuery.refetch();
+                if (pulseInstallation) void pulseQuery.refetch();
               }}
               onPendingChange={setTimeEditPending}
             />
