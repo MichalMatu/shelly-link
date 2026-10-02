@@ -61,7 +61,9 @@ export const useTimeAutomationSetupFlow = (
     if (!editingInstallation) return;
     setOnTime(editingInstallation.config.onTime);
     setOffTime(editingInstallation.config.offTime);
-    setPulseCycleDraftState(Pulse.Cycle.fromConfig(editingInstallation.pulseRuntime?.pulse));
+    setPulseCycleDraftState(
+      Pulse.Cycle.fromConfig(editingInstallation.pulseRuntime?.pulse)
+    );
   }, [editingInstallation]);
 
   const configState = useMemo(() => {
