@@ -4,12 +4,10 @@ import { calculateVpdKpa } from '@lcl/automation-core';
 import { IconAlertTriangle, IconPlug } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
+import { StandalonePulseAutomationCard } from '../app/StandalonePulseAutomationCard.js';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
-import {
-  normalizePulseOperationalStatus,
-  PulseOperationalStatusSummary
-} from '../features/automations/index.js';
+import { Pulse } from '../features/automations/index.js';
 import {
   BleOnlyPlugDashboardCards,
   hasBleLocator,
@@ -43,7 +41,6 @@ import {
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { usePlainShellyRuntime } from '../flows/hardware-setup/usePlainShellyRuntime.js';
 import { useSensorSetupFlow } from '../flows/hardware-setup/usePhoneSensorFlow.js';
-import { StandalonePulseAutomationCard } from './StandalonePulseAutomationCard.js';
 import { TimeAutomationCard } from './TimeAutomationCard.js';
 import { SensorSetupPage } from './hardware-setup/pages/SensorSetupPage.js';
 import './AutomationDashboardScreen.css';
@@ -139,7 +136,7 @@ const ClimateAutomationCard = ({
     snapshot?.diagnostics.relayState;
   const pulseSnapshot = snapshot?.execution?.pulse;
   const pulseStatus = installation.config.execution?.pulse
-    ? normalizePulseOperationalStatus(
+    ? Pulse.Operational.normalizeStatus(
         pulseSnapshot
           ? {
               phase: pulseSnapshot.phase,
@@ -251,7 +248,7 @@ const ClimateAutomationCard = ({
           }}
         />
       </div>
-      {pulseStatus && <PulseOperationalStatusSummary status={pulseStatus} compact />}
+      {pulseStatus && <Pulse.Operational.StatusSummary status={pulseStatus} compact />}
     </>
   );
 
