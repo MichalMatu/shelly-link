@@ -29,8 +29,12 @@ export const climatePulseOperationalStatus = ({
     lastReason: pulse.lastReason ?? snapshot.diagnostics.lastReason ?? null,
     requestedOutputOn: snapshot.diagnostics.automationRequestedRelayState ?? null,
     finalOutputOn:
-      snapshot.plug?.relayState ?? control?.relayOn ?? snapshot.diagnostics.relayState ?? null,
-    automationFault: control?.automationFault ?? snapshot.diagnostics.automationFault ?? null,
+      snapshot.plug?.relayState ??
+      control?.relayOn ??
+      snapshot.diagnostics.relayState ??
+      null,
+    automationFault:
+      control?.automationFault ?? snapshot.diagnostics.automationFault ?? null,
     hardSafety: control?.safetyLockout ?? snapshot.diagnostics.safetyLockout ?? null,
     hardSafetyReason: control?.safetyReason ?? snapshot.diagnostics.safetyReason ?? null,
     deviceUptimeMs:
