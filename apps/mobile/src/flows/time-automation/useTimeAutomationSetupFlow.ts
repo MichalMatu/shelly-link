@@ -8,24 +8,17 @@ import {
   createTimeInstalledAutomation,
   findInstalledRelayOwner,
   installDailyTimeAutomation,
+  Pulse,
   readShellyControlStatus,
   TimeAutomationRuntimeError,
   updateTimeInstalledAutomation,
   useInstalledAutomationStore,
   type TimeInstalledAutomation
 } from '../../features/automations/index.js';
-import {
-  DEFAULT_PULSE_CYCLE_FORM,
-  parsePulseCycleForm,
-  pulseCycleFormFromConfig,
-  type PulseCycleFormDraft
-} from '../../features/automations/pulseCyclePublic.js';
-import {
-  createTimePulseInstalledAutomation,
-  installTimePulseAutomation
-} from '../../features/automations/timePulseSetupPublic.js';
 import type { ShellyDraftDevice } from '../hardware-setup/setupDraftStore.js';
 import { dailyTimeAutomationConfigSchema } from './config.js';
+
+type PulseCycleFormDraft = ReturnType<typeof Pulse.Cycle.fromConfig>;
 
 const localizedRuntimeError = (error: unknown): Error | unknown => {
   if (!(error instanceof TimeAutomationRuntimeError)) {
@@ -58,7 +51,7 @@ export const useTimeAutomationSetupFlow = (
   const [onTime, setOnTime] = useState(editingInstallation?.config.onTime ?? '08:00');
   const [offTime, setOffTime] = useState(editingInstallation?.config.offTime ?? '20:00');
   const [pulseCycleDraft, setPulseCycleDraftState] = useState<PulseCycleFormDraft>(() =>
-    pulseCycleFormFromConfig(editingInstallation?.pulseRuntime?.pulse)
+    Pulse.Cycle.fromConfig(editingInstallation?.pulseRuntime?.pulse)
   );
   const upsertInstallation = useInstalledAutomationStore(
     (state) => state.upsertInstallation
@@ -68,9 +61,7 @@ export const useTimeAutomationSetupFlow = (
     if (!editingInstallation) return;
     setOnTime(editingInstallation.config.onTime);
     setOffTime(editingInstallation.config.offTime);
-    setPulseCycleDraftState(
-      pulseCycleFormFromConfig(editingInstallation.pulseRuntime?.pulse)
-    );
+    setPulseCycleDraftState(Pulse.Cycle.fromConfig(editingInstallation.pulseRuntime?.pulse));
   }, [editingInstallation]);
 
   const configState = useMemo(() => {
@@ -84,7 +75,7 @@ export const useTimeAutomationSetupFlow = (
       : ({ ok: false, error: t('time.validation.invalidTimes') } as const);
   }, [editingInstallation?.config.relayId, offTime, onTime]);
   const pulseCycleValidation = useMemo(
-    () => parsePulseCycleForm(pulseCycleDraft),
+    () => Pulse.Cycle.parseForm(pulseCycleDraft),
     [pulseCycleDraft]
   );
   const setPulseCycleDraft = (patch: Partial<PulseCycleFormDraft>) =>
@@ -154,14 +145,14 @@ export const useTimeAutomationSetupFlow = (
 
       try {
         if (pulseCycleValidation.config) {
-          const runtime = await installTimePulseAutomation({
+          const runtime = await Pulse.Time.install({
             clients: { device: deviceClient, schedules: scheduleClient },
             config: {
               schedule: configState.config,
               pulse: pulseCycleValidation.config
             }
           });
-          return createTimePulseInstalledAutomation({
+          return Pulse.Time.createInstalledAutomation({
             shelly: deviceInfo,
             shellyName: selectedShelly.name,
             baseUrl: selectedShelly.baseUrl,
