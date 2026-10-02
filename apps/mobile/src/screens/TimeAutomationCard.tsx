@@ -1,10 +1,6 @@
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslation } from '../app/i18n.js';
-import {
-  isTimePulseInstalledAutomation,
-  PulseOperationalStatusSummary,
-  usePulseOperationalStatus
-} from '../features/automations/index.js';
+import { Pulse } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
   PlugDashboardCardShell
@@ -29,10 +25,8 @@ export const TimeAutomationCard = ({
   const { t } = useTranslation();
   const query = useTimeAutomationRuntime(installation);
   const action = useTimeAutomationActions(installation);
-  const pulseInstallation = isTimePulseInstalledAutomation(installation)
-    ? installation
-    : null;
-  const pulseQuery = usePulseOperationalStatus(pulseInstallation);
+  const pulseInstallation = Pulse.Time.isInstalled(installation) ? installation : null;
+  const pulseQuery = Pulse.Operational.useStatus(pulseInstallation);
   const runtimeState = query.isPending
     ? 'loading'
     : query.isError
@@ -78,7 +72,7 @@ export const TimeAutomationCard = ({
         />
       </div>
       {pulseInstallation && (
-        <PulseOperationalStatusSummary status={pulseQuery.data} compact />
+        <Pulse.Operational.StatusSummary status={pulseQuery.data} compact />
       )}
     </>
   );
