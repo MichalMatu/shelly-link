@@ -161,11 +161,13 @@ export const RuleSetupPage = ({
         install={() => flow.installMutation.mutate()}
         submitMode={flow.isEditingClimateAutomation ? 'edit' : 'install'}
       />
-      <Pulse.Cycle.Editor
-        draft={flow.pulseCycleDraft}
-        validation={flow.pulseCycleValidation}
-        onChange={flow.setPulseCycleDraft}
-      />
+      {!inline && (
+        <Pulse.Cycle.Editor
+          draft={flow.pulseCycleDraft}
+          validation={flow.pulseCycleValidation}
+          onChange={flow.setPulseCycleDraft}
+        />
+      )}
 
       <Modal
         actions={

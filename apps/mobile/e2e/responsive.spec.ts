@@ -941,6 +941,18 @@ for (const viewport of viewports) {
     await expect(page.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
+    await page.getByRole('button', { name: 'Zachowanie wyjścia' }).click();
+    await page.getByRole('option', { name: 'Pulse', exact: true }).click();
+    await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
+    await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
+    await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '25-time-pulse-setup');
+    }
+    await page.getByRole('button', { name: 'Zachowanie wyjścia' }).click();
+    await page.getByRole('option', { name: 'Stałe', exact: true }).click();
+
     await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
     const timeCard = page
@@ -1206,6 +1218,17 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '16-climate-setup');
     }
+    await page.getByRole('button', { name: 'Zachowanie wyjścia' }).click();
+    await page.getByRole('option', { name: 'Pulse', exact: true }).click();
+    await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
+    await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
+    await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '24-climate-pulse-setup');
+    }
+    await page.getByRole('button', { name: 'Zachowanie wyjścia' }).click();
+    await page.getByRole('option', { name: 'Stałe', exact: true }).click();
     await ensureRuleAdvancedOpen(page);
     await expect(advancedDisclosure.locator('.lcl-disclosure__body')).toBeVisible();
     if (viewport.name === 'phone-large') {
@@ -1214,6 +1237,47 @@ for (const viewport of viewports) {
     await expect(page.getByRole('button', { name: 'Shelly Script' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectNoLegacyInlineFeedback(page);
+    expect(consoleProblems).toEqual([]);
+  });
+}
+
+for (const viewport of viewports) {
+  test(`standalone Pulse setup is responsive on ${viewport.name}`, async ({ page }) => {
+    const consoleProblems: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error' || message.type() === 'warning') {
+        consoleProblems.push(`${message.type()}: ${message.text()}`);
+      }
+    });
+    page.on('pageerror', (error) => consoleProblems.push(error.message));
+
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await seedDraft(page);
+    await mockShellyRpc(page);
+    await page.goto('/');
+
+    const plugCard = page
+      .getByText('Shelly Plug S Gen3', { exact: true })
+      .locator('xpath=ancestor::article[1]');
+    await plugCard.getByRole('button', { name: 'Dodaj automatykę' }).click();
+    await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    await page.getByRole('button', { name: /Pulse/ }).click();
+
+    await expect(page.getByRole('region', { name: 'Pulse' })).toBeVisible();
+    await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
+    await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
+    await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Faza startowa' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Wykonanie' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
+      0
+    );
+    await expect(page.locator('.app-bottom-nav')).toHaveCount(1);
+    await expectNoHorizontalOverflow(page);
+    await expectNoLegacyInlineFeedback(page);
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '26-standalone-pulse-setup');
+    }
     expect(consoleProblems).toEqual([]);
   });
 }
