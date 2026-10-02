@@ -24,13 +24,13 @@ export const StandalonePulseAutomationCard = ({
 }: StandalonePulseAutomationCardProps) => {
   const { locale, t } = useTranslation();
   const labels = pulseCycleCopy[locale];
-  const pulseQuery = Pulse.Operational.useStatus(installation);
   const runtimeQuery = Pulse.Standalone.useRuntime(installation);
-  const action = Pulse.Standalone.useActions(installation);
   const runtimeMatches = runtimeQuery.data?.automationScriptId === installation.script.id;
   const automationRunning =
     runtimeMatches && runtimeQuery.data?.automationMode === 'auto';
   const manualControl = runtimeMatches && runtimeQuery.data?.automationMode === 'manual';
+  const pulseQuery = Pulse.Operational.useStatus(automationRunning ? installation : null);
+  const action = Pulse.Standalone.useActions(installation);
   const runtimeControllable =
     runtimeMatches &&
     (runtimeQuery.data?.automationMode === 'auto' ||
