@@ -213,7 +213,7 @@ for (const viewport of viewports) {
     await expect(detailSurface).toContainText('30 s');
     await expect(detailSurface).toContainText('60 s');
     await expect(page.getByRole('button', { name: 'Usuń automatykę' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'BLE' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Bluetooth' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Skrypt' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
@@ -240,11 +240,12 @@ test('standalone Pulse can be deleted safely from detail', async ({ page }) => {
   await expect(dialog).toContainText('Usunąć automatykę Pulse?');
   await dialog.getByRole('button', { name: 'Usuń' }).click();
 
+  await expect(dialog).toBeHidden();
+  await expect.poll(() => rpc.calls.includes('Script.Delete')).toBe(true);
+  await expect
+    .poll(() => rpc.calls.filter((method) => method === 'Switch.Set').length)
+    .toBeGreaterThanOrEqual(2);
   await expect(page.getByText('Pompa Pulse', { exact: true })).toHaveCount(0);
   expect(rpc.calls).toContain('Script.Eval');
   expect(rpc.calls).toContain('Script.Stop');
-  expect(rpc.calls).toContain('Script.Delete');
-  expect(
-    rpc.calls.filter((method) => method === 'Switch.Set').length
-  ).toBeGreaterThanOrEqual(2);
 });
