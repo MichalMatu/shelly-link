@@ -9,13 +9,9 @@ import {
 import { t } from '../../app/i18n.js';
 import {
   parseRuleAdvancedSettings,
+  Pulse,
   validateRuleAdvancedSettings
 } from '../../features/automations/index.js';
-import {
-  DEFAULT_PULSE_CYCLE_FORM,
-  parsePulseCycleForm,
-  type PulseCycleFormDraft
-} from '../../features/automations/pulseCyclePublic.js';
 import type { SensorDraftDevice } from './setupDraftStore.js';
 import {
   formatSensorId,
@@ -23,6 +19,8 @@ import {
   normalizeShellyUrl,
   toNumberOrFallback
 } from './validation.js';
+
+type PulseCycleFormDraft = ReturnType<typeof Pulse.Cycle.fromConfig>;
 
 export type ShellyInputState =
   | { ok: true; baseUrl: string; name: string }
@@ -138,7 +136,7 @@ export const deriveClimateRuleState = ({
   rulePreset,
   onThresholdInput,
   offThresholdInput,
-  pulseCycleDraft = DEFAULT_PULSE_CYCLE_FORM,
+  pulseCycleDraft = Pulse.Cycle.defaultForm,
   vpdAssistEnabled,
   vpdTargetInput,
   rssiMinInput,
@@ -155,7 +153,7 @@ export const deriveClimateRuleState = ({
     maxOnHoursInput
   };
   const advancedSettingsValidation = validateRuleAdvancedSettings(advancedInputs);
-  const pulseCycleValidation = parsePulseCycleForm(pulseCycleDraft);
+  const pulseCycleValidation = Pulse.Cycle.parseForm(pulseCycleDraft);
 
   let configState: ClimateConfigState;
   try {
