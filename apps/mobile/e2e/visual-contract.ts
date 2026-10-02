@@ -25,7 +25,10 @@ export const visualScreenNames = [
   '19-climate-advanced-open',
   '20-climate-button-mode-managed',
   '21-time-info',
-  '23-climate-history'
+  '23-climate-history',
+  '24-climate-pulse-setup',
+  '25-time-pulse-setup',
+  '26-standalone-pulse-setup'
 ] as const;
 
 export type VisualScreenName = (typeof visualScreenNames)[number];
