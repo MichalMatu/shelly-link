@@ -39,7 +39,7 @@ export const StandalonePulseSetupPage = ({
   };
 
   return (
-    <section className="demo-panel" aria-label="Pulse">
+    <section className="demo-panel">
       <div className="time-schedule-device">
         <span>{t('time.device')}</span>
         <strong>{selectedShelly?.name ?? t('time.noDevice')}</strong>
