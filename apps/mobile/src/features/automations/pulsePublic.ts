@@ -12,8 +12,17 @@ import {
   isTimePulseInstalledAutomation
 } from './data/installedAutomation.js';
 import { normalizePulseOperationalStatus } from './data/pulseOperationalStatus.js';
+import {
+  deleteStandalonePulseAutomation,
+  pauseStandalonePulseAutomation,
+  resumeStandalonePulseAutomation
+} from './data/standalonePulseAutomationRuntime.js';
 import { installTimePulseAutomation } from './data/timePulseAutomationRuntime.js';
 import { usePulseOperationalStatus } from './flows/usePulseOperationalStatus.js';
+import {
+  useStandalonePulseActions,
+  useStandalonePulseRuntime
+} from './flows/useStandalonePulseRuntime.js';
 
 export const Pulse = {
   Cycle: {
@@ -28,7 +37,12 @@ export const Pulse = {
     isInstalled: isTimePulseInstalledAutomation
   },
   Standalone: {
-    SetupPage: StandalonePulseSetupPage
+    SetupPage: StandalonePulseSetupPage,
+    useRuntime: useStandalonePulseRuntime,
+    useActions: useStandalonePulseActions,
+    pause: pauseStandalonePulseAutomation,
+    resume: resumeStandalonePulseAutomation,
+    delete: deleteStandalonePulseAutomation
   },
   Operational: {
     StatusSummary: PulseOperationalStatusSummary,
