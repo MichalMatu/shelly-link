@@ -104,7 +104,8 @@ export const StandalonePulseInstallationDetail = ({
     (runtimeQuery.data !== undefined && !runtimeMatches);
 
   const copyScript = () => {
-    if (!scriptQuery.data || typeof navigator === 'undefined' || !navigator.clipboard) return;
+    if (!scriptQuery.data || typeof navigator === 'undefined' || !navigator.clipboard)
+      return;
     void navigator.clipboard.writeText(scriptQuery.data);
   };
 
