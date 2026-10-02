@@ -1,12 +1,15 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '../../../app/i18n.js';
+import { pulseCycleCopy } from '../../../app/locales/pulseCycle.js';
 import {
   DEFAULT_PULSE_CYCLE_FORM,
   parsePulseCycleForm,
   type PulseCycleFormDraft
 } from '../data/pulseCycleForm.js';
 import { PulseCycleEditor } from './PulseCycleEditor.js';
+
+const copy = pulseCycleCopy.pl;
 
 const renderEditor = ({
   draft = DEFAULT_PULSE_CYCLE_FORM,
@@ -39,13 +42,13 @@ const selectOption = (label: string, optionLabel: string) => {
 describe('PulseCycleEditor', () => {
   it('keeps optional Pulse compact while output behavior is Steady', () => {
     renderEditor();
-    expect(screen.getByLabelText('Zachowanie wyjścia')).toHaveValue('steady');
-    expect(screen.queryByText('Czas ON (s)')).not.toBeInTheDocument();
+    expect(screen.getByLabelText(copy.outputBehavior)).toHaveValue('steady');
+    expect(screen.queryByText(copy.onSeconds)).not.toBeInTheDocument();
   });
 
   it('switches the shared optional editor to Pulse', () => {
     const onChange = renderEditor();
-    selectOption('Zachowanie wyjścia', 'Pulse');
+    selectOption(copy.outputBehavior, copy.pulse);
     expect(onChange).toHaveBeenCalledWith({ enabled: true });
   });
 
@@ -56,19 +59,17 @@ describe('PulseCycleEditor', () => {
       executionMode: 'cycles'
     };
     const onChange = renderEditor({ draft });
-    expect(screen.getByText('Czas ON (s)')).toBeInTheDocument();
-    expect(screen.getByText('Czas OFF (s)')).toBeInTheDocument();
-    expect(screen.getByText('Liczba cykli')).toBeInTheDocument();
-    selectOption('Faza startowa', 'OFF');
+    expect(screen.getByText(copy.onSeconds)).toBeInTheDocument();
+    expect(screen.getByText(copy.offSeconds)).toBeInTheDocument();
+    expect(screen.getByText(copy.cycleCount)).toBeInTheDocument();
+    selectOption(copy.startPhase, copy.startOff);
     expect(onChange).toHaveBeenCalledWith({ startPhase: 'off' });
   });
 
   it('always shows the same parameters for standalone Pulse', () => {
     renderEditor({ optional: false });
-    expect(
-      screen.getByText('Przełączaj przekaźnik ON/OFF jednym wspólnym cyklem Pulse.')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Czas ON (s)')).toBeInTheDocument();
+    expect(screen.getByText(copy.description)).toBeInTheDocument();
+    expect(screen.getByText(copy.onSeconds)).toBeInTheDocument();
   });
 
   it('renders validation feedback on the invalid shared field', () => {
@@ -80,6 +81,6 @@ describe('PulseCycleEditor', () => {
     renderEditor({ draft });
     const input = screen.getAllByRole('spinbutton')[0];
     expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByText('Sprawdź dozwolony zakres wartości.')).toBeInTheDocument();
+    expect(screen.getByText(copy.invalidValue)).toBeInTheDocument();
   });
 });
