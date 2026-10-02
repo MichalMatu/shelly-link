@@ -6,9 +6,9 @@ import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { useTranslation } from '../../../app/i18n.js';
 import {
   ALL_RULE_PRESETS,
-  ClimateRuleEditor,
-  PulseCycleEditor
+  ClimateRuleEditor
 } from '../../../features/automations/index.js';
+import { PulseCycleEditor } from '../../../features/automations/pulseCyclePublic.js';
 import { useRuleSensorReadings } from '../../../flows/hardware-setup/useRuleSensorReadings.js';
 import { useSavedSensorLiveScanLifecycle } from '../../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
 import { canInstallScript, mutationError, type HardwarePageProps } from '../helpers.js';
