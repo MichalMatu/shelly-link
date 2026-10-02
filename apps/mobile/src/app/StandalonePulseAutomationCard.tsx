@@ -27,8 +27,7 @@ export const StandalonePulseAutomationCard = ({
   const pulseQuery = Pulse.Operational.useStatus(installation);
   const runtimeQuery = Pulse.Standalone.useRuntime(installation);
   const action = Pulse.Standalone.useActions(installation);
-  const runtimeMatches =
-    runtimeQuery.data?.automationScriptId === installation.script.id;
+  const runtimeMatches = runtimeQuery.data?.automationScriptId === installation.script.id;
   const automationRunning =
     runtimeMatches && runtimeQuery.data?.automationMode === 'auto';
   const manualControl = runtimeMatches && runtimeQuery.data?.automationMode === 'manual';
