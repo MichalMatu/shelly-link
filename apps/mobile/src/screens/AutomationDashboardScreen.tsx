@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { StandalonePulseAutomationCard } from '../app/StandalonePulseAutomationCard.js';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
-import { OperationalStatus, Pulse } from '../features/automations/index.js';
+import { Pulse } from '../features/automations/index.js';
 import {
   BleOnlyPlugDashboardCards,
   hasBleLocator,
@@ -25,10 +25,6 @@ import type {
   ClimateInstalledAutomation,
   InstalledAutomation
 } from '../flows/installations/model.js';
-import {
-  formatDiagnosticReason,
-  formatRelayState
-} from '../flows/installations/diagnosticPresentation.js';
 import {
   formatInstallationMetric,
   formatInstallationVpd,
@@ -252,23 +248,7 @@ const ClimateAutomationCard = ({
           }}
         />
       </div>
-      {pulseStatus ? (
-        <Pulse.Operational.StatusSummary status={pulseStatus} compact />
-      ) : (
-        <OperationalStatus.Summary
-          ariaLabel={t('detail.currentState')}
-          requestedOutput={formatRelayState(
-            snapshot?.diagnostics.automationRequestedRelayState ??
-              snapshot?.diagnostics.relayState,
-            '—'
-          )}
-          finalOutput={formatRelayState(relayState, '—')}
-          reason={
-            snapshot ? formatDiagnosticReason(snapshot.diagnostics.lastReason, t) : '—'
-          }
-          compact
-        />
-      )}
+      {pulseStatus && <Pulse.Operational.StatusSummary status={pulseStatus} compact />}
     </>
   );
 
