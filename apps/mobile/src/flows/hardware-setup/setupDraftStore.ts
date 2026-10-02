@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import {
   createClimateAutomationEditDraftPatch,
   DEFAULT_RULE_ADVANCED_SETTINGS,
+  Pulse,
   removeSensorSelection,
   selectSensorSelection,
   setAdditionalSensorSelection,
@@ -12,11 +13,6 @@ import {
   type ClimateInstalledAutomation,
   type SensorDraftActions
 } from '../../features/automations/index.js';
-import {
-  DEFAULT_PULSE_CYCLE_FORM,
-  pulseCycleFormFromConfig,
-  type PulseCycleFormDraft
-} from '../../features/automations/pulseCyclePublic.js';
 import {
   clearStoredHardwareSetupDraft,
   mergeRecoveredSensorRegistry,
@@ -33,6 +29,8 @@ export type {
   SensorDraftDevice,
   ShellyDraftDevice
 } from '../../features/hardware-setup/index.js';
+
+type PulseCycleFormDraft = ReturnType<typeof Pulse.Cycle.fromConfig>;
 
 export const DEFAULT_HARDWARE_SETUP_DRAFT: HardwareSetupDraft = {
   shellyNameInput: 'Shelly Plug S Gen3',
@@ -138,7 +136,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
   return {
     ...initialDraft,
     sensorMembershipEditStarted: false,
-    pulseCycleDraft: { ...DEFAULT_PULSE_CYCLE_FORM },
+    pulseCycleDraft: { ...Pulse.Cycle.defaultForm },
     setShellyNameInput: (shellyNameInput) => set({ shellyNameInput }),
     setShellyUrlInput: (shellyUrlInput) => set({ shellyUrlInput }),
     selectShellyDevice: (id) =>
@@ -229,7 +227,7 @@ export const useHardwareSetupDraftStore = create<HardwareSetupDraftState>((set) 
           createClimateAutomationEditDraftPatch(state, installation)
         ),
         sensorMembershipEditStarted: false,
-        pulseCycleDraft: pulseCycleFormFromConfig(installation.config.execution?.pulse)
+        pulseCycleDraft: Pulse.Cycle.fromConfig(installation.config.execution?.pulse)
       }));
     },
     commitClimateAutomationDraft: (installationId) =>
@@ -250,6 +248,6 @@ export const resetHardwareSetupDraftStore = () => {
   useHardwareSetupDraftStore.setState({
     ...DEFAULT_HARDWARE_SETUP_DRAFT,
     sensorMembershipEditStarted: false,
-    pulseCycleDraft: { ...DEFAULT_PULSE_CYCLE_FORM }
+    pulseCycleDraft: { ...Pulse.Cycle.defaultForm }
   });
 };
