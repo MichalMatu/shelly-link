@@ -103,7 +103,9 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     (state) => state.setMaxOnHoursInput
   );
   const pulseCycleDraft = useHardwareSetupDraftStore((state) => state.pulseCycleDraft);
-  const setPulseCycleDraft = useHardwareSetupDraftStore((state) => state.setPulseCycleDraft);
+  const setPulseCycleDraft = useHardwareSetupDraftStore(
+    (state) => state.setPulseCycleDraft
+  );
   const { upsertSensorDevice, ...sensorSetupFlow } = useSensorSetupFlow();
   const { sensorDevices } = sensorSetupFlow;
 
