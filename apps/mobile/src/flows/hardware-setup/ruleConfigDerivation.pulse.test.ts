@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_PULSE_CYCLE_FORM } from '../../features/automations/index.js';
+import { Pulse } from '../../features/automations/index.js';
 import { deriveClimateRuleState } from './ruleConfigDerivation.js';
 
 const sensor = {
@@ -26,7 +26,7 @@ describe('Climate shared Pulse form derivation', () => {
   it('preserves the exact Steady config shape when Pulse is disabled', () => {
     const result = deriveClimateRuleState({
       ...baseInput,
-      pulseCycleDraft: DEFAULT_PULSE_CYCLE_FORM
+      pulseCycleDraft: Pulse.Cycle.defaultForm
     });
 
     expect(result.configState.ok).toBe(true);
@@ -39,7 +39,7 @@ describe('Climate shared Pulse form derivation', () => {
     const result = deriveClimateRuleState({
       ...baseInput,
       pulseCycleDraft: {
-        ...DEFAULT_PULSE_CYCLE_FORM,
+        ...Pulse.Cycle.defaultForm,
         enabled: true,
         onSecondsInput: '2.5',
         offSecondsInput: '7',
@@ -68,7 +68,7 @@ describe('Climate shared Pulse form derivation', () => {
     const result = deriveClimateRuleState({
       ...baseInput,
       pulseCycleDraft: {
-        ...DEFAULT_PULSE_CYCLE_FORM,
+        ...Pulse.Cycle.defaultForm,
         enabled: true,
         onSecondsInput: '0.5'
       }
