@@ -246,5 +246,7 @@ test('standalone Pulse can be deleted safely from detail', async ({ page }) => {
   expect(rpc.calls).toContain('Script.Eval');
   expect(rpc.calls).toContain('Script.Stop');
   expect(rpc.calls).toContain('Script.Delete');
-  expect(rpc.calls.filter((method) => method === 'Switch.Set').length).toBeGreaterThanOrEqual(2);
+  expect(
+    rpc.calls.filter((method) => method === 'Switch.Set').length
+  ).toBeGreaterThanOrEqual(2);
 });
