@@ -27,6 +27,7 @@ export {
 } from './data/timeAutomationRuntime.js';
 export { timePulseAutomationRuntime } from './data/timePulseAutomationPublic.js';
 export { Pulse } from './pulsePublic.js';
+export { ClimateSetup } from './climateSetupPublic.js';
 export { setTimeAutomationManualRelay } from './data/timeAutomationRelayControl.js';
 export { TimeAutomationRuntimeError } from './data/timeAutomationRuntimeError.js';
 export {
