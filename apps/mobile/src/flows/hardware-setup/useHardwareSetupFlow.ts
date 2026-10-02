@@ -1,11 +1,9 @@
 import { useMemo } from 'react';
 import { useHardwareSetupDraftStore } from './setupDraftStore.js';
-import {
-  deriveClimateRuleState,
-  deriveShellyInputState
-} from './ruleConfigDerivation.js';
+import { deriveShellyInputState } from './ruleConfigDerivation.js';
 import { useClimateAutomationInstallFlow } from './useClimateAutomationInstallFlow.js';
 import {
+  ClimateSetup,
   useClimateAutomationScriptLoadDraftFlow,
   useShellyUsage
 } from '../../features/automations/index.js';
@@ -175,39 +173,21 @@ export const useHardwareSetupFlow = (editInstallationId?: string) => {
     configState,
     isThresholdValid,
     isVpdAssistValid
-  } = useMemo(
-    () =>
-      deriveClimateRuleState({
-        selectedSensor,
-        additionalSensors,
-        sensorAggregation,
-        rulePreset,
-        onThresholdInput,
-        offThresholdInput,
-        pulseCycleDraft,
-        vpdAssistEnabled,
-        vpdTargetInput,
-        rssiMinInput,
-        staleTimeoutMinInput,
-        minChangeMinInput,
-        maxOnHoursInput
-      }),
-    [
-      additionalSensors,
-      maxOnHoursInput,
-      minChangeMinInput,
-      offThresholdInput,
-      onThresholdInput,
-      pulseCycleDraft,
-      rssiMinInput,
-      rulePreset,
-      selectedSensor,
-      sensorAggregation,
-      staleTimeoutMinInput,
-      vpdAssistEnabled,
-      vpdTargetInput
-    ]
-  );
+  } = ClimateSetup.useRuleState({
+    selectedSensor,
+    additionalSensors,
+    sensorAggregation,
+    rulePreset,
+    onThresholdInput,
+    offThresholdInput,
+    pulseCycleDraft,
+    vpdAssistEnabled,
+    vpdTargetInput,
+    rssiMinInput,
+    staleTimeoutMinInput,
+    minChangeMinInput,
+    maxOnHoursInput
+  });
 
   const {
     canRunSafeRelayTest,
