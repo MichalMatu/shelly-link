@@ -4,25 +4,38 @@ import {
   type ClimateRuleDerivationInput
 } from '../data/climateRuleConfigDerivation.js';
 
-export const useClimateRuleSetupState = (input: ClimateRuleDerivationInput) => {
-  const {
-    selectedSensor,
-    additionalSensors,
-    sensorAggregation,
-    rulePreset,
-    onThresholdInput,
-    offThresholdInput,
-    pulseCycleDraft,
-    vpdAssistEnabled,
-    vpdTargetInput,
-    rssiMinInput,
-    staleTimeoutMinInput,
-    minChangeMinInput,
-    maxOnHoursInput
-  } = input;
-
-  return useMemo(
-    () => deriveClimateRuleState(input),
+export const useClimateRuleSetupState = ({
+  selectedSensor,
+  additionalSensors,
+  sensorAggregation,
+  rulePreset,
+  onThresholdInput,
+  offThresholdInput,
+  pulseCycleDraft,
+  vpdAssistEnabled,
+  vpdTargetInput,
+  rssiMinInput,
+  staleTimeoutMinInput,
+  minChangeMinInput,
+  maxOnHoursInput
+}: ClimateRuleDerivationInput) =>
+  useMemo(
+    () =>
+      deriveClimateRuleState({
+        selectedSensor,
+        additionalSensors,
+        sensorAggregation,
+        rulePreset,
+        onThresholdInput,
+        offThresholdInput,
+        pulseCycleDraft,
+        vpdAssistEnabled,
+        vpdTargetInput,
+        rssiMinInput,
+        staleTimeoutMinInput,
+        minChangeMinInput,
+        maxOnHoursInput
+      }),
     [
       additionalSensors,
       maxOnHoursInput,
@@ -39,4 +52,3 @@ export const useClimateRuleSetupState = (input: ClimateRuleDerivationInput) => {
       vpdTargetInput
     ]
   );
-};
