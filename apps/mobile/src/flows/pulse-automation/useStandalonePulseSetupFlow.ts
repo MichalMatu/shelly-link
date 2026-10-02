@@ -58,8 +58,7 @@ export const useStandalonePulseSetupFlow = (
         throw new Error('Shelly did not expose a stable device id.');
       }
       if (
-        normalizeShellyDeviceId(deviceId) !==
-        normalizeShellyDeviceId(selectedShelly.id)
+        normalizeShellyDeviceId(deviceId) !== normalizeShellyDeviceId(selectedShelly.id)
       ) {
         throw new Error('Shelly identity changed before Pulse installation.');
       }
