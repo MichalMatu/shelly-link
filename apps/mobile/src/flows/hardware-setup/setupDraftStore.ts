@@ -3,18 +3,20 @@ import type { SensorProfileId } from '@lcl/device-profiles';
 import { create } from 'zustand';
 import {
   createClimateAutomationEditDraftPatch,
-  DEFAULT_PULSE_CYCLE_FORM,
   DEFAULT_RULE_ADVANCED_SETTINGS,
-  pulseCycleFormFromConfig,
   removeSensorSelection,
   selectSensorSelection,
   setAdditionalSensorSelection,
   toggleAdditionalSensorSelection,
   upsertSensorSelection,
   type ClimateInstalledAutomation,
-  type PulseCycleFormDraft,
   type SensorDraftActions
 } from '../../features/automations/index.js';
+import {
+  DEFAULT_PULSE_CYCLE_FORM,
+  pulseCycleFormFromConfig,
+  type PulseCycleFormDraft
+} from '../../features/automations/pulseCyclePublic.js';
 import {
   clearStoredHardwareSetupDraft,
   mergeRecoveredSensorRegistry,
