@@ -15,6 +15,12 @@ const remainingLabel = (status: PulseOperationalStatus): string => {
   return seconds < 60 ? `${seconds} s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 };
 
+const reasonLabel = (
+  value: string | null,
+  reasons: Readonly<Record<string, string>>,
+  empty: string
+): string => (value ? (reasons[value] ?? value) : empty);
+
 export type PulseOperationalStatusSummaryProps = {
   status: PulseOperationalStatus | null | undefined;
   compact?: boolean;
@@ -72,13 +78,21 @@ export const PulseOperationalStatusSummary = ({
       </div>
       <div>
         <dt>{t('hardware.metrics.reason')}</dt>
-        <dd>{available && status ? (status.lastReason ?? labels.none) : '—'}</dd>
+        <dd>
+          {available && status
+            ? reasonLabel(status.lastReason, labels.reasons, labels.none)
+            : '—'}
+        </dd>
       </div>
       {!compact && (
         <>
           <div>
             <dt>{labels.automationFault}</dt>
-            <dd>{available && status ? (status.automationFault ?? labels.none) : '—'}</dd>
+            <dd>
+              {available && status
+                ? reasonLabel(status.automationFault, labels.reasons, labels.none)
+                : '—'}
+            </dd>
           </div>
           <div>
             <dt>{labels.hardSafety}</dt>
@@ -87,7 +101,7 @@ export const PulseOperationalStatusSummary = ({
                 ? status.hardSafety === null
                   ? '—'
                   : status.hardSafety
-                    ? status.hardSafetyReason ?? labels.active
+                    ? reasonLabel(status.hardSafetyReason, labels.reasons, labels.active)
                     : labels.clear
                 : '—'}
             </dd>
