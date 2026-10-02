@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
@@ -46,6 +46,7 @@ describe('useTimeAutomationSetupFlow edit state', () => {
     );
 
     expect(result.current.isEditingTimeAutomation).toBe(true);
+    expect(result.current.canConfigurePulse).toBe(false);
     expect(result.current.onTime).toBe('06:15');
     expect(result.current.offTime).toBe('22:45');
     expect(result.current.configState).toMatchObject({
@@ -67,7 +68,46 @@ describe('useTimeAutomationSetupFlow edit state', () => {
     );
 
     expect(result.current.isEditingTimeAutomation).toBe(false);
+    expect(result.current.canConfigurePulse).toBe(true);
     expect(result.current.onTime).toBe('08:00');
     expect(result.current.offTime).toBe('20:00');
+    expect(result.current.pulseCycleDraft.enabled).toBe(false);
+    expect(result.current.pulseCycleValidation).toEqual({ ok: true, config: null });
+  });
+
+  it('maps the shared Pulse draft to the qualified Time Pulse config', () => {
+    const { result } = renderHook(
+      () =>
+        useTimeAutomationSetupFlow({
+          id: 'shelly-new',
+          name: 'Nowe gniazdko',
+          baseUrl: 'http://192.168.0.25/',
+          scriptIdInput: '1'
+        }),
+      { wrapper }
+    );
+
+    act(() => {
+      result.current.setPulseCycleDraft({
+        enabled: true,
+        onSecondsInput: '5',
+        offSecondsInput: '10',
+        initialDelaySecondsInput: '2',
+        startPhase: 'off',
+        executionMode: 'cycles',
+        cyclesInput: '3'
+      });
+    });
+
+    expect(result.current.pulseCycleValidation).toEqual({
+      ok: true,
+      config: {
+        onMs: 5000,
+        offMs: 10000,
+        initialDelayMs: 2000,
+        startPhase: 'off',
+        execution: { mode: 'cycles', count: 3 }
+      }
+    });
   });
 });
