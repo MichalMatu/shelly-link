@@ -13,13 +13,13 @@ import {
 import { useMemo, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import {
-  ClimateSetup,
   createInstalledAutomation,
   findRelayOwnerConflict,
   findScheduleRelayConflict,
   updateClimateInstalledAutomation,
   useInstalledAutomationStore,
-  type ClimateInstalledAutomation
+  type ClimateInstalledAutomation,
+  type ClimateSetup
 } from '../../features/automations/index.js';
 import {
   detachPlugButtonForManagedAutomation,
