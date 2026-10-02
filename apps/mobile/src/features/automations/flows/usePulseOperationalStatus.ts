@@ -15,13 +15,14 @@ const pulseScriptId = (installation: ScriptPulseInstalledAutomation): number =>
 
 export const pulseOperationalStatusQueryKey = (
   installation: ScriptPulseInstalledAutomation | null
-) => [
-  'pulse-operational-status',
-  installation?.id ?? 'none',
-  installation?.shelly.baseUrl ?? '',
-  installation ? pulseScriptId(installation) : -1,
-  installation?.updatedAtMs ?? 0
-] as const;
+) =>
+  [
+    'pulse-operational-status',
+    installation?.id ?? 'none',
+    installation?.shelly.baseUrl ?? '',
+    installation ? pulseScriptId(installation) : -1,
+    installation?.updatedAtMs ?? 0
+  ] as const;
 
 export const usePulseOperationalStatus = (
   installation: ScriptPulseInstalledAutomation | null,
