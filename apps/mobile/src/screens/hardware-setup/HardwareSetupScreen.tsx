@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
 import { pulseCycleCopy } from '../../app/locales/pulseCycle.js';
 import { AppPageBack } from '../../components/AppPageBack.js';
+import { Pulse } from '../../features/automations/index.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
 import {
   defaultRulePresetForSetupIntent,
@@ -17,7 +18,6 @@ import {
 import { RuleSetupPage } from './pages/RuleSetupPage.js';
 import { SensorSetupPage } from './pages/SensorSetupPage.js';
 import { ShellySetupPage } from './pages/ShellySetupPage.js';
-import { StandalonePulseSetupPage } from './pages/StandalonePulseSetupPage.js';
 import { TimeScheduleSetupPage } from './pages/TimeScheduleSetupPage.js';
 
 type LocalShellyPage =
@@ -323,8 +323,8 @@ export const HardwareSetupScreen = ({
         />
       )}
       {setupIntent === 'pulse' && activeTab === 'pulse' && (
-        <StandalonePulseSetupPage
-          flow={flow}
+        <Pulse.Standalone.SetupPage
+          selectedShelly={flow.selectedShelly}
           {...(onSetupComplete ? { onInstalled: onSetupComplete } : {})}
         />
       )}
