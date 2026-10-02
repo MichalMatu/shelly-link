@@ -19,10 +19,7 @@ export type PulseOperationalStatus = {
   deviceUptimeMs: number | null;
 };
 
-export type PulseOperationalStatusInput = Omit<
-  PulseOperationalStatus,
-  'availability'
->;
+export type PulseOperationalStatusInput = Omit<PulseOperationalStatus, 'availability'>;
 
 const ACTIVE_PHASES = new Set<PulseOperationalPhase>(['delay', 'on', 'off']);
 const STALE_DEADLINE_GRACE_MS = 2_000;
@@ -81,7 +78,11 @@ const phaseFromCode = (code: unknown): PulseOperationalPhase | null => {
 };
 
 const finiteNumberOrNull = (value: unknown): number | null | undefined =>
-  value === null ? null : typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+  value === null
+    ? null
+    : typeof value === 'number' && Number.isFinite(value)
+      ? value
+      : undefined;
 
 const nonNegativeIntegerOrNull = (value: unknown): number | null | undefined =>
   value === null
@@ -139,7 +140,10 @@ export const decodePulseScriptOperationalState = (
 export const pulseScriptOperationalStatusEvalCode =
   'typeof R==="object"?JSON.stringify([R.ps,R.pc,R.pn,R.rs,R.a?1:0,R.af,typeof Shelly.getUptimeMs==="function"?Shelly.getUptimeMs():null]):""';
 
-export type PulseOperationalStatusClient = Pick<ShellyClient, 'evaluateScript' | 'getStatus'>;
+export type PulseOperationalStatusClient = Pick<
+  ShellyClient,
+  'evaluateScript' | 'getStatus'
+>;
 
 export const createPulseOperationalStatusClient = (
   baseUrl: string
