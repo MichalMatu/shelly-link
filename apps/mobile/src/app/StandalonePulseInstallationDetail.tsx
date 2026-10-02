@@ -72,8 +72,7 @@ export const StandalonePulseInstallationDetail = ({
   const savedDevice = savedPlugs.find((device) =>
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
-  const runtimeMatches =
-    runtimeQuery.data?.automationScriptId === installation.script.id;
+  const runtimeMatches = runtimeQuery.data?.automationScriptId === installation.script.id;
   const automationRunning =
     runtimeMatches && runtimeQuery.data?.automationMode === 'auto';
   const manualControl = runtimeMatches && runtimeQuery.data?.automationMode === 'manual';
