@@ -214,7 +214,7 @@ Plug Detail is one physical-device surface with capability-driven local sections
 Automation | History | BLE | Device | Script | Info
 ```
 
-A Plug shows only the sections supported by its ownership model. Climate exposes all six. Native Time Schedule omits `History` and `Script`. Standalone Pulse exposes `Automation | BLE | Device | Script | Info` and omits `History`; its Automation section owns current Pulse status, configured cycle parameters, AUTO/MANUAL lifecycle control, MANUAL-only relay control and safe uninstall. A plain saved Plug keeps the physical-device surfaces and an Automation empty state rather than inventing another detail shell. These sections are presentation boundaries, not new domain owners:
+A Plug shows only the sections supported by its ownership model. Climate exposes all six. Native Time Schedule omits `History` and `Script`. Standalone Pulse exposes `Automation | BLE | Device | Script | Info` and omits `History`; its Automation section owns current Pulse status, configured cycle parameters, AUTO/MANUAL lifecycle control, MANUAL-only relay control and safe uninstall. Its BLE section is read-only until temporary Plug BLE discovery can capture and restore standalone Pulse state without using the Climate-specific runtime-control protocol. A plain saved Plug keeps the physical-device surfaces and an Automation empty state rather than inventing another detail shell. These sections are presentation boundaries, not new domain owners:
 
 - **Automation** — installed automation state/configuration and deletion;
 - **History** — read-only Climate operational history from the managed KVS ring;
