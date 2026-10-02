@@ -2,6 +2,8 @@ import { climateSensorsForConfig } from '@lcl/script-generator';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ClimateOperationalStatusSection } from '../app/ClimateOperationalStatusSection.js';
+import { StandalonePulseInstallationDetail } from '../app/StandalonePulseInstallationDetail.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
@@ -51,9 +53,7 @@ import {
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
-import { ClimateOperationalStatusSection } from './ClimateOperationalStatusSection.js';
 import { RuleSetupPage } from './hardware-setup/pages/RuleSetupPage.js';
-import { StandalonePulseInstallationDetail } from './StandalonePulseInstallationDetail.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 
 const TECHNICAL_DIAGNOSTICS_REFRESH_MS = 3_000;
