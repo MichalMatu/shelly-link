@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Pulse } from '../../features/automations/index.js';
-import { deriveClimateRuleState } from './ruleConfigDerivation.js';
+import { ClimateSetup, Pulse } from '../../features/automations/index.js';
 
 const sensor = {
   id: 'A4:C1:38:4F:24:CD',
@@ -21,6 +20,8 @@ const baseInput = {
   minChangeMinInput: '2',
   maxOnHoursInput: '4'
 };
+
+const deriveClimateRuleState = ClimateSetup.deriveRuleState;
 
 describe('Climate shared Pulse form derivation', () => {
   it('preserves the exact Steady config shape when Pulse is disabled', () => {
