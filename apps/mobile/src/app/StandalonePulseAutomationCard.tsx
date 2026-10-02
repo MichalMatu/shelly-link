@@ -102,7 +102,9 @@ export const StandalonePulseAutomationCard = ({
   return (
     <PlugDashboardCardShell
       name={installation.shelly.name}
-      relayState={runtimeQuery.data?.relayOn ?? pulseQuery.data?.finalOutputOn ?? undefined}
+      relayState={
+        runtimeQuery.data?.relayOn ?? pulseQuery.data?.finalOutputOn ?? undefined
+      }
       busy={action.isPending}
       telemetry={{
         powerW: runtimeQuery.data?.telemetry.powerW,
