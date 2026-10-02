@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { DEFAULT_PULSE_CYCLE_FORM } from '../data/pulseCycleForm.js';
 import {
   deriveClimateRuleState,
   type ClimateRuleDerivationInput
@@ -6,12 +7,12 @@ import {
 
 export const useClimateRuleSetupState = ({
   selectedSensor,
-  additionalSensors,
-  sensorAggregation,
+  additionalSensors = [],
+  sensorAggregation = 'avg',
   rulePreset,
   onThresholdInput,
   offThresholdInput,
-  pulseCycleDraft,
+  pulseCycleDraft = DEFAULT_PULSE_CYCLE_FORM,
   vpdAssistEnabled,
   vpdTargetInput,
   rssiMinInput,
