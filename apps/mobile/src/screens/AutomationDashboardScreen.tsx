@@ -145,14 +145,19 @@ const ClimateAutomationCard = ({
               phase: pulseSnapshot.phase,
               cyclesCompleted: pulseSnapshot.cyclesCompleted,
               nextTransitionUptimeMs: pulseSnapshot.nextTransitionUptimeMs,
-              lastReason: pulseSnapshot.lastReason ?? snapshot?.diagnostics.lastReason ?? null,
+              lastReason:
+                pulseSnapshot.lastReason ?? snapshot?.diagnostics.lastReason ?? null,
               requestedOutputOn:
                 snapshot?.diagnostics.automationRequestedRelayState ?? null,
               finalOutputOn: relayState ?? null,
               automationFault:
-                controlStatus?.automationFault ?? snapshot?.diagnostics.automationFault ?? null,
+                controlStatus?.automationFault ??
+                snapshot?.diagnostics.automationFault ??
+                null,
               hardSafety:
-                controlStatus?.safetyLockout ?? snapshot?.diagnostics.safetyLockout ?? null,
+                controlStatus?.safetyLockout ??
+                snapshot?.diagnostics.safetyLockout ??
+                null,
               hardSafetyReason:
                 controlStatus?.safetyReason ?? snapshot?.diagnostics.safetyReason ?? null,
               deviceUptimeMs: currentUptimeMs
