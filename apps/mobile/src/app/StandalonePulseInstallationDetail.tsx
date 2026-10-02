@@ -1,6 +1,6 @@
 import { FeedbackPanel } from '@lcl/ui';
 import { useState } from 'react';
-import { Pulse, type StandalonePulseInstalledAutomation } from '../features/automations/index.js';
+import { Pulse, type InstalledAutomation } from '../features/automations/index.js';
 import {
   PlugDeviceSettingsSurface,
   PlugDetailTop,
@@ -9,6 +9,8 @@ import {
   type PlugDetailTab
 } from '../features/plugs/index.js';
 import { useTranslation } from './i18n.js';
+
+type StandalonePulseInstalledAutomation = Extract<InstalledAutomation, { kind: 'pulse' }>;
 
 const STANDALONE_PULSE_DETAIL_TABS = [
   'automation',
