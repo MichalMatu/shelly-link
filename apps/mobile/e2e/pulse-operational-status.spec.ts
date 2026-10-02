@@ -116,7 +116,9 @@ const expectNoHorizontalOverflow = async (page: Page) => {
 };
 
 for (const viewport of viewports) {
-  test(`Pulse operational status stays responsive on ${viewport.name}`, async ({ page }) => {
+  test(`Pulse operational status stays responsive on ${viewport.name}`, async ({
+    page
+  }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await seedStandalonePulseInstallation(page);
     await mockStandalonePulseRpc(page);
