@@ -38,15 +38,13 @@ const STANDALONE_PULSE_DETAIL_TABS = [
 type StandalonePulseInstallationDetailProps = {
   installation: StandalonePulseInstalledAutomation;
   onBack?: () => void;
-  onOpenBleDiscovery?: (deviceId: string) => void;
 };
 
 const secondsLabel = (milliseconds: number): string => `${milliseconds / 1_000} s`;
 
 export const StandalonePulseInstallationDetail = ({
   installation,
-  onBack,
-  onOpenBleDiscovery
+  onBack
 }: StandalonePulseInstallationDetailProps) => {
   const { locale, t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
@@ -55,8 +53,12 @@ export const StandalonePulseInstallationDetail = ({
   const pulseLabels = pulseCycleCopy[locale];
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
-  const pulseQuery = Pulse.Operational.useStatus(installation);
   const runtimeQuery = Pulse.Standalone.useRuntime(installation);
+  const runtimeMatches = runtimeQuery.data?.automationScriptId === installation.script.id;
+  const automationRunning =
+    runtimeMatches && runtimeQuery.data?.automationMode === 'auto';
+  const manualControl = runtimeMatches && runtimeQuery.data?.automationMode === 'manual';
+  const pulseQuery = Pulse.Operational.useStatus(automationRunning ? installation : null);
   const action = Pulse.Standalone.useActions(installation);
   const scriptQuery = Pulse.Standalone.useScriptSource(
     installation,
@@ -72,10 +74,6 @@ export const StandalonePulseInstallationDetail = ({
   const savedDevice = savedPlugs.find((device) =>
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
-  const runtimeMatches = runtimeQuery.data?.automationScriptId === installation.script.id;
-  const automationRunning =
-    runtimeMatches && runtimeQuery.data?.automationMode === 'auto';
-  const manualControl = runtimeMatches && runtimeQuery.data?.automationMode === 'manual';
   const runtimeControllable =
     runtimeMatches &&
     (runtimeQuery.data?.automationMode === 'auto' ||
@@ -201,9 +199,6 @@ export const StandalonePulseInstallationDetail = ({
             information={informationQuery.data}
             loading={informationQuery.isPending}
             error={informationQuery.isError}
-            {...(onOpenBleDiscovery
-              ? { onScan: () => onOpenBleDiscovery(installation.shelly.deviceId) }
-              : {})}
           />
         )}
 
