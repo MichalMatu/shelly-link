@@ -57,7 +57,9 @@ describe('Pulse operational status', () => {
   });
 
   it('returns unavailable for an unsupported or malformed snapshot', () => {
-    expect(normalizePulseOperationalStatus(null)).toEqual(unavailablePulseOperationalStatus());
+    expect(normalizePulseOperationalStatus(null)).toEqual(
+      unavailablePulseOperationalStatus()
+    );
     expect(decodePulseScriptOperationalState('[]')).toBeNull();
   });
 
