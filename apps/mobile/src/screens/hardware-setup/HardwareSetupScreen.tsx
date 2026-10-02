@@ -250,7 +250,11 @@ export const HardwareSetupScreen = ({
   return (
     <main className="demo-shell hardware-shell">
       {setupIntent && onBackToIntent && !plugAddOnly && !sensorAddOnly && (
-        <AppPageBack context={setupContext} label={t('intent.back')} onBack={onBackToIntent} />
+        <AppPageBack
+          context={setupContext}
+          label={t('intent.back')}
+          onBack={onBackToIntent}
+        />
       )}
 
       {!plugAddOnly && !sensorAddOnly && availableTabs.length > 1 && (
