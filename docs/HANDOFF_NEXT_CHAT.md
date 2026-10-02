@@ -1,8 +1,12 @@
 # Handoff — Dashboard status polish slice accepted after Pulse V1
 
-Status: **2026-10-02 — Pulse V1, Dashboard status polish slice 1, and the Time + Pulse boot-time clock-recovery fix are accepted on the PR #76 merge line. The clock-recovery code candidate is `66ac5f75df986fe638e7c49de32f4989df92e314`; frozen Climate golden UI remains unchanged.**
+Status: **2026-10-02 — PR #76 is merged to `main`. Pulse V1, Dashboard status polish slice 1, and the Time + Pulse boot-time clock-recovery fix are closed. Merge commit: `7a0d3612aa9562c2aa70680096b80b120643b110`; qualified PR head: `1b68491123922cd898858dc00154656e9b78d56d`; frozen Climate golden UI remains unchanged.**
 
 Repository: `MichalMatu/shelly-link`
+
+## Post-merge closeout
+
+PR #76 (`dashboard-status-polish` -> `main`) merged the full qualified Pulse V1 line, Time + Pulse clock-recovery fix, Dashboard status polish slice 1 and their acceptance documentation. The merge commit is `7a0d3612aa9562c2aa70680096b80b120643b110`; the final PR head was `1b68491123922cd898858dc00154656e9b78d56d`. The final PR head passed local full `pnpm check` and GitHub CI, including the canonical repository gate and responsive smoke. Working branches were retired after merge verification.
 
 ## Source of truth
 
@@ -26,7 +30,7 @@ Then fetch fresh `main`, all active Pulse branches and `agent-control:.agent/sta
 
 ## Branch and qualification state
 
-Keep `main` untouched until the Pulse working line is deliberately reviewed/merged.
+`main` now contains the completed Pulse V1 + Dashboard status polish line via PR #76. Start all new product work from fresh `main`.
 
 - accepted pre-Pulse `main`: `a2297e3040d98916782af5327a635b45375b19e1`;
 - Climate + Pulse branch: `pulse-v1-runtime-integration`;
@@ -46,18 +50,15 @@ Keep `main` untouched until the Pulse working line is deliberately reviewed/merg
 
 The Standalone descendants after the hardware candidate add app ownership/reconciliation integration, repository-boundary cleanup, tests and durable docs; they do not change the generated Standalone Shelly runtime. The code-only candidate passed full `pnpm check` with a clean worktree, and `@lcl/script-generator` passed **229/229 tests at 100% statements/branches/functions/lines**.
 
-No Pulse PR/merge has been performed. Fetch fresh branch HEADs instead of assuming a documentation SHA is still current.
+PR #76 was deliberately reviewed and merged on 2026-10-02. The retired Pulse/Dashboard working branches were deleted after ancestry verification. Fetch fresh `main` rather than reconstructing from historical branch SHAs.
 
-Durable remote branches should be limited to:
+Durable remote branches after the PR #76 closeout are limited to:
 
 - `main`;
 - `agent-control`;
-- `golden/climate-ui-20260928`;
-- `pulse-v1-runtime-integration`;
-- `pulse-v1-time-adapter`;
-- `pulse-v1-standalone-adapter`;
-- `pulse-v1-shared-ui`.
-- `dashboard-status-polish`.
+- `golden/climate-ui-20260928`.
+
+The retired branches `dashboard-status-polish`, `pulse-v1-runtime-integration`, `pulse-v1-time-adapter`, `pulse-v1-standalone-adapter`, `pulse-v1-shared-ui` and the technical `__noop` branch were deleted after merge/ownership verification.
 
 ## Qualified runtime contract
 
@@ -137,7 +138,7 @@ Continue the V1 plan in this order:
 2. UX redesign round 2 after the stable History/safety/Pulse foundation.
 3. Watchdog/recovery/soak stabilization and the final hardware matrix.
 4. V1 feature freeze.
-5. Review/PR/merge the Pulse working line deliberately; `main` remains untouched until that explicit step.
+5. Pulse/Dashboard merge closeout is complete; continue future work from fresh `main` and create new focused branches only when a new slice begins.
 
 ## Safety and execution rules
 
