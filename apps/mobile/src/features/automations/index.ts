@@ -8,10 +8,6 @@ export {
   type ClimateScriptDiagnosticRow
 } from './components/ClimateInstallationDetailSections.js';
 export {
-  PulseOperationalStatusSummary,
-  type PulseOperationalStatusSummaryProps
-} from './components/PulseOperationalStatusSummary.js';
-export {
   readShellyAutomationScriptState,
   readShellyControlStatus,
   readShellyManagedAutomationScriptCode,
@@ -38,26 +34,6 @@ export {
   type TimeAutomationRuntimeSnapshot
 } from './data/timeAutomationRuntimeState.js';
 export { findScheduleRelayConflict } from './data/timeAutomationSchedule.js';
-export {
-  createPulseOperationalStatusClient,
-  decodePulseScriptOperationalState,
-  normalizePulseOperationalStatus,
-  pulseOperationalRemainingMs,
-  pulseScriptOperationalStatusEvalCode,
-  readScriptPulseOperationalStatus,
-  unavailablePulseOperationalStatus,
-  type PulseOperationalAvailability,
-  type PulseOperationalPhase,
-  type PulseOperationalStatus,
-  type PulseOperationalStatusClient,
-  type PulseOperationalStatusInput,
-  type PulseScriptOperationalState
-} from './data/pulseOperationalStatus.js';
-export {
-  pulseOperationalStatusQueryKey,
-  usePulseOperationalStatus,
-  type ScriptPulseInstalledAutomation
-} from './flows/usePulseOperationalStatus.js';
 export {
   DEFAULT_RULE_ADVANCED_SETTINGS,
   RULE_ADVANCED_LIMITS,
@@ -106,31 +82,18 @@ export {
   climateInstalledAutomationSchema,
   createInstalledAutomation,
   createInstalledAutomationId,
-  createStandalonePulseInstalledAutomation,
-  createStandalonePulseInstalledAutomationId,
   createTimeInstalledAutomation,
   createTimeInstalledAutomationId,
-  createTimePulseInstalledAutomation,
   findInstalledRelayOwner,
   findRelayOwnerConflict,
   installedAutomationRelayId,
   installedAutomationSchema,
-  isStandalonePulseInstalledAutomation,
-  isTimePulseInstalledAutomation,
-  standalonePulseInstalledAutomationSchema,
   timeInstalledAutomationSchema,
   type ClimateInstalledAutomation,
   type InstalledAutomation,
   type InstalledAutomationKind,
-  type StandalonePulseInstalledAutomation,
-  type TimeInstalledAutomation,
-  type TimePulseInstalledAutomation
+  type TimeInstalledAutomation
 } from './data/installedAutomation.js';
-export {
-  deleteStandalonePulseAutomation,
-  pauseStandalonePulseAutomation,
-  resumeStandalonePulseAutomation
-} from './data/standalonePulseAutomationRuntime.js';
 export {
   INSTALLED_AUTOMATIONS_STORAGE_KEY,
   createInstalledAutomationRepository,
