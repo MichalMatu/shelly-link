@@ -4,6 +4,7 @@ import {
   pulseOperationalRemainingMs,
   type PulseOperationalStatus
 } from '../data/pulseOperationalStatus.js';
+import { AutomationOperationalStatusSummary } from './AutomationOperationalStatusSummary.js';
 
 const relayLabel = (value: boolean | null): string =>
   value === null ? '—' : value ? 'ON' : 'OFF';
@@ -30,84 +31,78 @@ export const PulseOperationalStatusSummary = ({
   status,
   compact = false
 }: PulseOperationalStatusSummaryProps) => {
-  const { locale, t } = useTranslation();
+  const { locale } = useTranslation();
   const labels = pulseOperationalStatusCopy[locale];
   const state = status?.availability ?? 'unavailable';
   const available = status?.availability !== 'unavailable';
 
   return (
-    <dl
-      className={`automation-summary installation-detail-summary${compact ? ' pulse-operational-summary--compact' : ''}`}
-      aria-label={labels.status}
-    >
-      <div>
-        <dt>{labels.status}</dt>
-        <dd>
-          {state === 'available'
-            ? labels.available
-            : state === 'stale'
-              ? labels.stale
-              : labels.unavailable}
-        </dd>
-      </div>
-      <div>
-        <dt>{t('hardware.metrics.relayRule')}</dt>
-        <dd>{available && status ? relayLabel(status.requestedOutputOn) : '—'}</dd>
-      </div>
-      <div>
-        <dt>{t('hardware.metrics.shellyRelay')}</dt>
-        <dd>{available && status ? relayLabel(status.finalOutputOn) : '—'}</dd>
-      </div>
-      <div>
-        <dt>{labels.phase}</dt>
-        <dd>{available && status?.phase ? labels.phases[status.phase] : '—'}</dd>
-      </div>
-      <div>
-        <dt>{labels.cycles}</dt>
-        <dd>
-          {available &&
-          status?.cyclesCompleted !== null &&
-          status?.cyclesCompleted !== undefined
-            ? `${status.cyclesCompleted} ${labels.cycleSuffix}`
-            : '—'}
-        </dd>
-      </div>
-      <div>
-        <dt>{labels.nextChange}</dt>
-        <dd>{available && status ? remainingLabel(status) : '—'}</dd>
-      </div>
-      <div>
-        <dt>{t('hardware.metrics.reason')}</dt>
-        <dd>
-          {available && status
-            ? reasonLabel(status.lastReason, labels.reasons, labels.none)
-            : '—'}
-        </dd>
-      </div>
-      {!compact && (
-        <>
-          <div>
-            <dt>{labels.automationFault}</dt>
-            <dd>
-              {available && status
-                ? reasonLabel(status.automationFault, labels.reasons, labels.none)
-                : '—'}
-            </dd>
-          </div>
-          <div>
-            <dt>{labels.hardSafety}</dt>
-            <dd>
-              {available && status
-                ? status.hardSafety === null
-                  ? '—'
-                  : status.hardSafety
-                    ? reasonLabel(status.hardSafetyReason, labels.reasons, labels.active)
-                    : labels.clear
-                : '—'}
-            </dd>
-          </div>
-        </>
-      )}
-    </dl>
+    <AutomationOperationalStatusSummary
+      ariaLabel={labels.status}
+      requestedOutput={available && status ? relayLabel(status.requestedOutputOn) : '—'}
+      finalOutput={available && status ? relayLabel(status.finalOutputOn) : '—'}
+      reason={
+        available && status
+          ? reasonLabel(status.lastReason, labels.reasons, labels.none)
+          : '—'
+      }
+      leadingRows={[
+        {
+          id: 'status',
+          label: labels.status,
+          value:
+            state === 'available'
+              ? labels.available
+              : state === 'stale'
+                ? labels.stale
+                : labels.unavailable
+        }
+      ]}
+      detailRows={[
+        {
+          id: 'phase',
+          label: labels.phase,
+          value: available && status?.phase ? labels.phases[status.phase] : '—'
+        },
+        {
+          id: 'cycles',
+          label: labels.cycles,
+          value:
+            available &&
+            status?.cyclesCompleted !== null &&
+            status?.cyclesCompleted !== undefined
+              ? `${status.cyclesCompleted} ${labels.cycleSuffix}`
+              : '—'
+        },
+        {
+          id: 'next-change',
+          label: labels.nextChange,
+          value: available && status ? remainingLabel(status) : '—'
+        }
+      ]}
+      extendedRows={[
+        {
+          id: 'automation-fault',
+          label: labels.automationFault,
+          value:
+            available && status
+              ? reasonLabel(status.automationFault, labels.reasons, labels.none)
+              : '—'
+        },
+        {
+          id: 'hard-safety',
+          label: labels.hardSafety,
+          value:
+            available && status
+              ? status.hardSafety === null
+                ? '—'
+                : status.hardSafety
+                  ? reasonLabel(status.hardSafetyReason, labels.reasons, labels.active)
+                  : labels.clear
+              : '—'
+        }
+      ]}
+      compact={compact}
+    />
   );
 };

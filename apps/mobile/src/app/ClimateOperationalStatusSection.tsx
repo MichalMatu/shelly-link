@@ -36,7 +36,10 @@ export const ClimateOperationalStatusSection = ({
   return (
     <ClimateAutomationDetailSection
       reason={diagnostics ? formatDiagnosticReason(diagnostics.lastReason, t) : missing}
-      relayRule={formatRelayState(diagnostics?.relayState, missing)}
+      relayRule={formatRelayState(
+        diagnostics?.automationRequestedRelayState ?? diagnostics?.relayState,
+        missing
+      )}
       shellyRelay={formatRelayState(shellyRelayState, missing)}
     />
   );

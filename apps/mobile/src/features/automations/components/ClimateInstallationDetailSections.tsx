@@ -1,5 +1,6 @@
 import { DiagnosticRow, FeedbackPanel, ScriptPreview } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
+import { AutomationOperationalStatusSummary } from './AutomationOperationalStatusSummary.js';
 
 export type ClimateRecoverySectionProps = {
   title: string;
@@ -50,20 +51,12 @@ export const ClimateAutomationDetailSection = ({
 
   return (
     <section className="installation-automation-live-state">
-      <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
-        <div>
-          <dt>{t('hardware.metrics.reason')}</dt>
-          <dd>{reason}</dd>
-        </div>
-        <div>
-          <dt>{t('hardware.metrics.relayRule')}</dt>
-          <dd>{relayRule}</dd>
-        </div>
-        <div>
-          <dt>{t('hardware.metrics.shellyRelay')}</dt>
-          <dd>{shellyRelay}</dd>
-        </div>
-      </dl>
+      <AutomationOperationalStatusSummary
+        ariaLabel={t('detail.currentState')}
+        requestedOutput={relayRule}
+        finalOutput={shellyRelay}
+        reason={reason}
+      />
     </section>
   );
 };

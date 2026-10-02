@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
+  OperationalStatus,
   deleteTimeAutomation,
   Pulse,
   timePulseAutomationRuntime,
@@ -138,21 +139,22 @@ export const TimeInstallationDetail = ({
             )}
 
             <section className="installation-automation-live-state plug-detail-section">
+              {pulseInstallation ? (
+                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
+              ) : (
+                <OperationalStatus.TimeSummary
+                  config={installation.config}
+                  localTime={runtimeQuery.data?.clock.localTime}
+                  relayOn={runtimeQuery.data?.relayOn}
+                  state={runtimeState}
+                />
+              )}
               <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
-                <div>
-                  <dt>{t('dashboard.output')}</dt>
-                  <dd>
-                    {runtimeQuery.data ? (runtimeQuery.data.relayOn ? 'ON' : 'OFF') : '—'}
-                  </dd>
-                </div>
                 <div>
                   <dt>{t('time.clock')}</dt>
                   <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
                 </div>
               </dl>
-              {pulseInstallation && (
-                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-              )}
             </section>
 
             <TimeScheduleSetupPage
