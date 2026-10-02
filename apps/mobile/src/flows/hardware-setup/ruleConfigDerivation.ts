@@ -1,26 +1,6 @@
-import { defaultRuleForPreset, type RulePresetId } from '@lcl/automation-core';
-import {
-  createDefaultShellyThermostatConfig,
-  generateShellyThermostatScript,
-  type ClimateSensor,
-  type ClimateSensorAggregation,
-  type ShellyThermostatConfig
-} from '@lcl/script-generator';
 import { t } from '../../app/i18n.js';
-import {
-  parseRuleAdvancedSettings,
-  Pulse,
-  validateRuleAdvancedSettings
-} from '../../features/automations/index.js';
 import type { SensorDraftDevice } from './setupDraftStore.js';
-import {
-  formatSensorId,
-  normalizeRuntimeAddress,
-  normalizeShellyUrl,
-  toNumberOrFallback
-} from './validation.js';
-
-type PulseCycleFormDraft = ReturnType<typeof Pulse.Cycle.fromConfig>;
+import { normalizeRuntimeAddress, normalizeShellyUrl } from './validation.js';
 
 export type ShellyInputState =
   | { ok: true; baseUrl: string; name: string }
@@ -29,37 +9,6 @@ export type ShellyInputState =
 export type SensorInputState =
   | { ok: true; device: SensorDraftDevice }
   | { ok: false; fieldErrors: { name?: string; mac?: string } };
-
-export type ClimateConfigState =
-  | { ok: true; config: ShellyThermostatConfig; script: string }
-  | { ok: false; error: string };
-
-type AdvancedRuleInputs = {
-  vpdAssistEnabled: boolean;
-  vpdTargetInput: string;
-  rssiMinInput: string;
-  staleTimeoutMinInput: string;
-  minChangeMinInput: string;
-  maxOnHoursInput: string;
-};
-
-type ClimateRuleDerivationInput = AdvancedRuleInputs & {
-  selectedSensor: SensorDraftDevice | null;
-  additionalSensors?: readonly SensorDraftDevice[];
-  sensorAggregation?: ClimateSensorAggregation;
-  rulePreset: RulePresetId;
-  onThresholdInput: string;
-  offThresholdInput: string;
-  pulseCycleDraft?: PulseCycleFormDraft;
-};
-
-const climateSensorFromDraft = (sensor: SensorDraftDevice): ClimateSensor => ({
-  profileId: sensor.profileId,
-  sensorId: formatSensorId(sensor.profileId, sensor.runtimeAddress),
-  runtimeAddress: sensor.runtimeAddress,
-  displayName: sensor.name,
-  parserValidated: true
-});
 
 export const deriveShellyInputState = ({
   shellyNameInput,
@@ -126,115 +75,5 @@ export const deriveSensorInputState = ({
       runtimeAddress,
       profileId: sensorProfileInput
     }
-  };
-};
-
-export const deriveClimateRuleState = ({
-  selectedSensor,
-  additionalSensors = [],
-  sensorAggregation = 'avg',
-  rulePreset,
-  onThresholdInput,
-  offThresholdInput,
-  pulseCycleDraft = Pulse.Cycle.defaultForm,
-  vpdAssistEnabled,
-  vpdTargetInput,
-  rssiMinInput,
-  staleTimeoutMinInput,
-  minChangeMinInput,
-  maxOnHoursInput
-}: ClimateRuleDerivationInput) => {
-  const advancedInputs: AdvancedRuleInputs = {
-    vpdAssistEnabled,
-    vpdTargetInput,
-    rssiMinInput,
-    staleTimeoutMinInput,
-    minChangeMinInput,
-    maxOnHoursInput
-  };
-  const advancedSettingsValidation = validateRuleAdvancedSettings(advancedInputs);
-  const pulseCycleValidation = Pulse.Cycle.parseForm(pulseCycleDraft);
-
-  let configState: ClimateConfigState;
-  try {
-    if (!selectedSensor) {
-      throw new Error(t('hardware.flow.noSelectedSensor'));
-    }
-    if (!advancedSettingsValidation.isValid) {
-      throw new Error(t('hardware.flow.advancedOptionsInvalid'));
-    }
-    if (!pulseCycleValidation.ok) {
-      throw new Error(t('hardware.flow.configInvalid'));
-    }
-
-    const base = createDefaultShellyThermostatConfig(
-      selectedSensor.profileId,
-      rulePreset
-    );
-    const advancedSettings = parseRuleAdvancedSettings(advancedInputs);
-    const config: ShellyThermostatConfig = {
-      ...base,
-      sensor: climateSensorFromDraft(selectedSensor),
-      ...(additionalSensors.length > 0
-        ? {
-            sensorSet: {
-              aggregation: sensorAggregation,
-              additionalSensors: additionalSensors.map(climateSensorFromDraft)
-            }
-          }
-        : {}),
-      ...(pulseCycleValidation.config
-        ? { execution: { pulse: pulseCycleValidation.config } }
-        : {}),
-      rule: {
-        ...base.rule,
-        control: {
-          ...base.rule.control,
-          onThreshold: toNumberOrFallback(
-            onThresholdInput,
-            base.rule.control.onThreshold
-          ),
-          offThreshold: toNumberOrFallback(
-            offThresholdInput,
-            base.rule.control.offThreshold
-          )
-        },
-        vpdAssist: {
-          enabled: vpdAssistEnabled,
-          targetKpa: advancedSettings.vpdTargetKpa
-        },
-        staleTimeoutSec: advancedSettings.staleTimeoutSec,
-        minChangeMs: advancedSettings.minChangeMs,
-        maxOnMs: advancedSettings.maxOnMs,
-        rssiMin: advancedSettings.rssiMin
-      }
-    };
-
-    configState = {
-      ok: true,
-      config,
-      script: generateShellyThermostatScript(config)
-    };
-  } catch (error) {
-    configState = {
-      ok: false,
-      error: error instanceof Error ? error.message : t('hardware.flow.configInvalid')
-    };
-  }
-
-  const onThreshold = Number(onThresholdInput);
-  const offThreshold = Number(offThresholdInput);
-  const direction = defaultRuleForPreset(rulePreset).control.direction;
-  const isThresholdValid =
-    Number.isFinite(onThreshold) &&
-    Number.isFinite(offThreshold) &&
-    (direction === 'below' ? onThreshold < offThreshold : onThreshold > offThreshold);
-
-  return {
-    advancedSettingsValidation,
-    pulseCycleValidation,
-    configState,
-    isThresholdValid,
-    isVpdAssistValid: advancedSettingsValidation.isVpdTargetValid
   };
 };
