@@ -6,9 +6,9 @@ import { AppToastViewport } from '../../../components/AppToastViewport.js';
 import { useTranslation } from '../../../app/i18n.js';
 import {
   ALL_RULE_PRESETS,
-  ClimateRuleEditor
+  ClimateRuleEditor,
+  Pulse
 } from '../../../features/automations/index.js';
-import { PulseCycleEditor } from '../../../features/automations/pulseCyclePublic.js';
 import { useRuleSensorReadings } from '../../../flows/hardware-setup/useRuleSensorReadings.js';
 import { useSavedSensorLiveScanLifecycle } from '../../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
 import { canInstallScript, mutationError, type HardwarePageProps } from '../helpers.js';
@@ -161,7 +161,7 @@ export const RuleSetupPage = ({
         install={() => flow.installMutation.mutate()}
         submitMode={flow.isEditingClimateAutomation ? 'edit' : 'install'}
       />
-      <PulseCycleEditor
+      <Pulse.Cycle.Editor
         draft={flow.pulseCycleDraft}
         validation={flow.pulseCycleValidation}
         onChange={flow.setPulseCycleDraft}
