@@ -8,12 +8,14 @@ import {
 } from '@lcl/script-generator';
 import { t } from '../../app/i18n.js';
 import {
+  parseRuleAdvancedSettings,
+  validateRuleAdvancedSettings
+} from '../../features/automations/index.js';
+import {
   DEFAULT_PULSE_CYCLE_FORM,
   parsePulseCycleForm,
-  parseRuleAdvancedSettings,
-  validateRuleAdvancedSettings,
   type PulseCycleFormDraft
-} from '../../features/automations/index.js';
+} from '../../features/automations/pulseCyclePublic.js';
 import type { SensorDraftDevice } from './setupDraftStore.js';
 import {
   formatSensorId,
