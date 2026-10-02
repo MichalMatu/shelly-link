@@ -14,6 +14,8 @@ import {
   ClimateBleDetailSection,
   ClimateScriptDetailSection,
   ClimateScriptDiagnosticsSection,
+  normalizePulseOperationalStatus,
+  PulseOperationalStatusSummary,
   useClimateHistory
 } from '../features/automations/index.js';
 import {
@@ -57,6 +59,7 @@ import {
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
 import { RuleSetupPage } from './hardware-setup/pages/RuleSetupPage.js';
+import { StandalonePulseInstallationDetail } from './StandalonePulseInstallationDetail.js';
 import { TimeInstallationDetail } from './TimeInstallationDetail.js';
 
 const TECHNICAL_DIAGNOSTICS_REFRESH_MS = 3_000;
@@ -91,7 +94,9 @@ export const InstallationDetailScreen = ({
   }, []);
 
   if (!installation) return <PlugDetailNotFound />;
-  if (installation.kind === 'pulse') return <PlugDetailNotFound />;
+  if (installation.kind === 'pulse') {
+    return <StandalonePulseInstallationDetail installation={installation} />;
+  }
 
   if (installation.kind === 'time') {
     return (
@@ -230,6 +235,28 @@ const ClimateInstallationDetail = ({
   const missing = t('common.missing');
   const configuredSensors = climateSensorsForConfig(installation.config);
   const shellyRelayState = snapshot?.plug?.relayState ?? control?.relayOn;
+  const pulseSnapshot = snapshot?.execution?.pulse;
+  const pulseStatus = installation.config.execution?.pulse
+    ? normalizePulseOperationalStatus(
+        pulseSnapshot
+          ? {
+              phase: pulseSnapshot.phase,
+              cyclesCompleted: pulseSnapshot.cyclesCompleted,
+              nextTransitionUptimeMs: pulseSnapshot.nextTransitionUptimeMs,
+              lastReason: pulseSnapshot.lastReason ?? diagnostics?.lastReason ?? null,
+              requestedOutputOn: diagnostics?.automationRequestedRelayState ?? null,
+              finalOutputOn: shellyRelayState ?? null,
+              automationFault: control?.automationFault ?? diagnostics?.automationFault ?? null,
+              hardSafety: control?.safetyLockout ?? diagnostics?.safetyLockout ?? null,
+              hardSafetyReason: control?.safetyReason ?? diagnostics?.safetyReason ?? null,
+              deviceUptimeMs:
+                snapshot?.time.uptimeSec != null && Number.isFinite(snapshot.time.uptimeSec)
+                  ? snapshot.time.uptimeSec * 1000
+                  : null
+            }
+          : null
+      )
+    : null;
   const resources = resourcesQuery.data;
   const { bleSensors, scriptRows } = formatClimateDetailDiagnostics({
     sensors: configuredSensors,
@@ -291,13 +318,19 @@ const ClimateInstallationDetail = ({
                 }}
               />
             )}
-            <ClimateAutomationDetailSection
-              reason={
-                diagnostics ? formatDiagnosticReason(diagnostics.lastReason, t) : missing
-              }
-              relayRule={formatRelayState(diagnostics?.relayState, missing)}
-              shellyRelay={formatRelayState(shellyRelayState, missing)}
-            />
+            {pulseStatus ? (
+              <section className="installation-automation-live-state">
+                <PulseOperationalStatusSummary status={pulseStatus} />
+              </section>
+            ) : (
+              <ClimateAutomationDetailSection
+                reason={
+                  diagnostics ? formatDiagnosticReason(diagnostics.lastReason, t) : missing
+                }
+                relayRule={formatRelayState(diagnostics?.relayState, missing)}
+                shellyRelay={formatRelayState(shellyRelayState, missing)}
+              />
+            )}
             {preparedAutomationDraftId === installation.id ? (
               <RuleSetupPage
                 flow={automationEditFlow}
