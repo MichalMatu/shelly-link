@@ -89,7 +89,12 @@ export const InstallationDetailScreen = ({
 
   if (!installation) return <PlugDetailNotFound />;
   if (installation.kind === 'pulse') {
-    return <StandalonePulseInstallationDetail installation={installation} onBack={onBack} />;
+    return (
+      <StandalonePulseInstallationDetail
+        installation={installation}
+        onBack={onBack}
+      />
+    );
   }
 
   if (installation.kind === 'time') {
