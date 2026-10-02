@@ -246,11 +246,14 @@ const ClimateInstallationDetail = ({
               lastReason: pulseSnapshot.lastReason ?? diagnostics?.lastReason ?? null,
               requestedOutputOn: diagnostics?.automationRequestedRelayState ?? null,
               finalOutputOn: shellyRelayState ?? null,
-              automationFault: control?.automationFault ?? diagnostics?.automationFault ?? null,
+              automationFault:
+                control?.automationFault ?? diagnostics?.automationFault ?? null,
               hardSafety: control?.safetyLockout ?? diagnostics?.safetyLockout ?? null,
-              hardSafetyReason: control?.safetyReason ?? diagnostics?.safetyReason ?? null,
+              hardSafetyReason:
+                control?.safetyReason ?? diagnostics?.safetyReason ?? null,
               deviceUptimeMs:
-                snapshot?.time.uptimeSec != null && Number.isFinite(snapshot.time.uptimeSec)
+                snapshot?.time.uptimeSec != null &&
+                Number.isFinite(snapshot.time.uptimeSec)
                   ? snapshot.time.uptimeSec * 1000
                   : null
             }
