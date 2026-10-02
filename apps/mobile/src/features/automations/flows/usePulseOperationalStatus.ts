@@ -6,8 +6,7 @@ import type {
 import { readScriptPulseOperationalStatus } from '../data/pulseOperationalStatus.js';
 
 export type ScriptPulseInstalledAutomation =
-  | TimePulseInstalledAutomation
-  | StandalonePulseInstalledAutomation;
+  TimePulseInstalledAutomation | StandalonePulseInstalledAutomation;
 
 const pulseScriptId = (installation: ScriptPulseInstalledAutomation): number =>
   installation.kind === 'time'
