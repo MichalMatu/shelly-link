@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { ClimateSetup } from '../../features/automations/index.js';
-import { deriveSensorInputState, deriveShellyInputState } from './ruleConfigDerivation.js';
+import {
+  deriveSensorInputState,
+  deriveShellyInputState
+} from './ruleConfigDerivation.js';
 
 const advancedDefaults = {
   vpdAssistEnabled: false,
