@@ -2,7 +2,7 @@ import type { TimeScheduleSetupFlow } from '../pageContracts.js';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useEffect, useState, type UIEvent } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import { PulseCycleEditor } from '../../../features/automations/pulseCyclePublic.js';
+import { Pulse } from '../../../features/automations/index.js';
 import { useTimeAutomationSetupFlow } from '../../../flows/time-automation/useTimeAutomationSetupFlow.js';
 import { mutationError, type HardwarePageProps } from '../helpers.js';
 import './TimeScheduleSetupPage.css';
@@ -235,7 +235,7 @@ export const TimeScheduleSetupPage = ({
       </div>
 
       {timeFlow.canConfigurePulse && (
-        <PulseCycleEditor
+        <Pulse.Cycle.Editor
           draft={timeFlow.pulseCycleDraft}
           validation={timeFlow.pulseCycleValidation}
           onChange={timeFlow.setPulseCycleDraft}
