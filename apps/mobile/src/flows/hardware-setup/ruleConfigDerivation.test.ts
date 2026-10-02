@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { ClimateSetup } from '../../features/automations/index.js';
 import {
-  deriveClimateRuleState,
   deriveSensorInputState,
   deriveShellyInputState
 } from './ruleConfigDerivation.js';
@@ -27,6 +27,8 @@ const additionalSensor = {
   runtimeAddress: 'C2:C0:00:30:64:01',
   profileId: 'tp357_custom_v1' as const
 };
+
+const deriveClimateRuleState = ClimateSetup.deriveRuleState;
 
 describe('hardware setup derivation', () => {
   it('normalizes valid Shelly and sensor draft inputs', () => {

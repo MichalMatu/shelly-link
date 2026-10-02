@@ -1,5 +1,6 @@
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslation } from '../app/i18n.js';
+import { OperationalStatus, Pulse } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
   PlugDashboardCardShell
@@ -24,6 +25,8 @@ export const TimeAutomationCard = ({
   const { t } = useTranslation();
   const query = useTimeAutomationRuntime(installation);
   const action = useTimeAutomationActions(installation);
+  const pulseInstallation = Pulse.Time.isInstalled(installation) ? installation : null;
+  const pulseQuery = Pulse.Operational.useStatus(pulseInstallation);
   const runtimeState = query.isPending
     ? 'loading'
     : query.isError
@@ -34,45 +37,54 @@ export const TimeAutomationCard = ({
   const runtimeControllable = automationRunning || manualControl;
 
   const body = (
-    <div className="automation-card__main" aria-label={t('time.scheduleSummary')}>
-      <div className="automation-card__primary-metric">
-        <strong aria-label={`${t('time.onTime')}: ${installation.config.onTime}`}>
-          {installation.config.onTime}
-        </strong>
-        <small>
-          <span>{t('time.onTime')}</span>
-        </small>
-      </div>
-
-      <div className="automation-card__secondary-metrics">
-        <div>
-          <span>{t('time.offTime')}</span>
-          <strong>{installation.config.offTime}</strong>
+    <>
+      <div className="automation-card__main" aria-label={t('time.scheduleSummary')}>
+        <div className="automation-card__primary-metric">
+          <strong aria-label={`${t('time.onTime')}: ${installation.config.onTime}`}>
+            {installation.config.onTime}
+          </strong>
+          <small>
+            <span>{t('time.onTime')}</span>
+          </small>
         </div>
-        <div>
-          <span>{t('dashboard.output')}</span>
-          <strong>{query.data ? (query.data.relayOn ? 'ON' : 'OFF') : '—'}</strong>
-        </div>
-      </div>
 
-      <PlugAutomationModeControl
-        autoActive={automationRunning}
-        manualActive={manualControl}
-        disabled={action.isPending || !runtimeControllable}
-        onAuto={() => {
-          if (!automationRunning) action.mutate('auto');
-        }}
-        onManual={() => {
-          if (!manualControl) action.mutate('manual');
-        }}
-      />
-    </div>
+        <div className="automation-card__secondary-metrics">
+          <div>
+            <span>{t('time.offTime')}</span>
+            <strong>{installation.config.offTime}</strong>
+          </div>
+        </div>
+
+        <PlugAutomationModeControl
+          autoActive={automationRunning}
+          manualActive={manualControl}
+          disabled={action.isPending || !runtimeControllable}
+          onAuto={() => {
+            if (!automationRunning) action.mutate('auto');
+          }}
+          onManual={() => {
+            if (!manualControl) action.mutate('manual');
+          }}
+        />
+      </div>
+      {pulseInstallation ? (
+        <Pulse.Operational.StatusSummary status={pulseQuery.data} compact />
+      ) : (
+        <OperationalStatus.TimeSummary
+          config={installation.config}
+          localTime={query.data?.clock.localTime}
+          relayOn={query.data?.relayOn}
+          state={runtimeState}
+          compact
+        />
+      )}
+    </>
   );
 
   const warningLabel =
     runtimeState === 'offline'
       ? t('dashboard.health.offline')
-      : runtimeState === 'attention'
+      : runtimeState === 'attention' || (pulseInstallation && pulseQuery.isError)
         ? t('dashboard.health.attention')
         : null;
   const footer =

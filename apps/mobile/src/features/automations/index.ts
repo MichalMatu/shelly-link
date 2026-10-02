@@ -15,10 +15,8 @@ export {
   type ShellyAutomationScriptState,
   type ShellyControlStatus
 } from './data/shellyManagedAutomation.js';
-export { readClimateHistory } from './data/climateHistory.js';
 export { ClimateHistorySection } from './components/ClimateHistorySection.js';
 export { climateHistoryQueryKey, useClimateHistory } from './flows/useClimateHistory.js';
-
 export {
   deleteTimeAutomation,
   installDailyTimeAutomation,
@@ -26,6 +24,9 @@ export {
   resumeTimeAutomation,
   updateDailyTimeAutomation
 } from './data/timeAutomationRuntime.js';
+export { timePulseAutomationRuntime } from './data/timePulseAutomationPublic.js';
+export { OperationalStatus, Pulse } from './automationPublic.js';
+export { ClimateSetup } from './climateSetupPublic.js';
 export { setTimeAutomationManualRelay } from './data/timeAutomationRelayControl.js';
 export { TimeAutomationRuntimeError } from './data/timeAutomationRuntimeError.js';
 export {
@@ -53,7 +54,6 @@ export {
   type ClimateAutomationScriptLoadTarget
 } from './flows/useClimateAutomationScriptLoadFlow.js';
 export { useClimateAutomationScriptLoadDraftFlow } from './flows/useClimateAutomationScriptLoadDraftFlow.js';
-
 export {
   dailyScheduleTimespec,
   dailyTimeAutomationConfigSchema,

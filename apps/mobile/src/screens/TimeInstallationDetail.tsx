@@ -4,7 +4,10 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
+  OperationalStatus,
   deleteTimeAutomation,
+  Pulse,
+  timePulseAutomationRuntime,
   useInstalledAutomationStore,
   type TimeInstalledAutomation
 } from '../features/automations/index.js';
@@ -47,6 +50,8 @@ export const TimeInstallationDetail = ({
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const runtimeQuery = useTimeAutomationRuntime(installation);
+  const pulseInstallation = Pulse.Time.isInstalled(installation) ? installation : null;
+  const pulseQuery = Pulse.Operational.useStatus(pulseInstallation);
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
   });
@@ -76,7 +81,10 @@ export const TimeInstallationDetail = ({
   }, []);
 
   const deleteMutation = useMutation({
-    mutationFn: () => deleteTimeAutomation(installation),
+    mutationFn: () =>
+      timePulseAutomationRuntime.isInstalled(installation)
+        ? timePulseAutomationRuntime.delete(installation)
+        : deleteTimeAutomation(installation),
     onSuccess: () => {
       queryClient.removeQueries({
         queryKey: timeAutomationRuntimeQueryKey(installation),
@@ -94,6 +102,7 @@ export const TimeInstallationDetail = ({
     : runtimeQuery.isError
       ? 'offline'
       : (runtimeQuery.data?.scheduleState ?? 'attention');
+  const pulseNeedsAttention = pulseInstallation !== null && pulseQuery.isError;
   return (
     <main className="demo-shell installation-detail-shell">
       <PlugDetailTop
@@ -114,7 +123,9 @@ export const TimeInstallationDetail = ({
                 <span>{t('common.refreshing')}</span>
               </div>
             )}
-            {(runtimeState === 'offline' || runtimeState === 'attention') && (
+            {(runtimeState === 'offline' ||
+              runtimeState === 'attention' ||
+              pulseNeedsAttention) && (
               <FeedbackPanel
                 tone="warning"
                 title={
@@ -128,13 +139,17 @@ export const TimeInstallationDetail = ({
             )}
 
             <section className="installation-automation-live-state plug-detail-section">
+              {pulseInstallation ? (
+                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
+              ) : (
+                <OperationalStatus.TimeSummary
+                  config={installation.config}
+                  localTime={runtimeQuery.data?.clock.localTime}
+                  relayOn={runtimeQuery.data?.relayOn}
+                  state={runtimeState}
+                />
+              )}
               <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
-                <div>
-                  <dt>{t('dashboard.output')}</dt>
-                  <dd>
-                    {runtimeQuery.data ? (runtimeQuery.data.relayOn ? 'ON' : 'OFF') : '—'}
-                  </dd>
-                </div>
                 <div>
                   <dt>{t('time.clock')}</dt>
                   <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
@@ -157,6 +172,7 @@ export const TimeInstallationDetail = ({
               inline
               onInstalled={() => {
                 void runtimeQuery.refetch();
+                if (pulseInstallation) void pulseQuery.refetch();
               }}
               onPendingChange={setTimeEditPending}
             />

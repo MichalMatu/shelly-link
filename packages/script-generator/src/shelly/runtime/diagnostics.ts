@@ -1,3 +1,12 @@
-export const renderRuntimeDiagnostics =
-  (): string => `function fv(o,k){return o&&o[k]!=null?o[k]:null}
-function diag(){var y=Shelly.getComponentStatus("sys"),w=ws();return JSON.stringify({v:C.v,z:C.k,s:[C.fa,C.n],q:[C.m,C.d,C.on,C.off,C.s/1000,C.r],y:y?[y.time||null,y.unixtime||null,y.uptime||null]:null,p:w?[!!w.output,fv(w,"apower"),fv(w,"voltage"),fv(w,"current"),w.aenergy?fv(w.aenergy,"total"):null,w.temperature?fv(w.temperature,"tC"):null]:null,g:[R.ls,R.t,R.h,R.b,R.r,R.on,R.rs,R.lc,R.os,R.nh,R.fh,R.cv,R.vp,R.eo,R.ef,R.l,R.ds,R.m,R.a,R.mt,R.mn,R.af,R.lk,R.lk?R.rs:null],d:pd(),u:[R.fc,C.ss?C.ss.length:1,C.ag==null?3:C.ag]})}`;
+export const renderRuntimeDiagnostics = (
+  executionEnabled = false,
+  pulseEnabled = false,
+  activeWindowEnabled = false
+): string => {
+  const executionDiagnostics = executionEnabled
+    ? `,e:[R.pa,${activeWindowEnabled ? 'R.wo' : 'null'},${pulseEnabled ? 'R.ps,R.pc,R.pn,R.rs' : 'null,null,null,null'}]`
+    : '';
+
+  return `function fv(o,k){return o&&o[k]!=null?o[k]:null}
+function diag(){var y=Shelly.getComponentStatus("sys"),w=ws();return JSON.stringify({v:C.v,z:C.k,s:[C.fa,C.n],q:[C.m,C.d,C.on,C.off,C.s/1000,C.r],y:y?[y.time||null,y.unixtime||null,y.uptime||null]:null,p:w?[!!w.output,fv(w,"apower"),fv(w,"voltage"),fv(w,"current"),w.aenergy?fv(w.aenergy,"total"):null,w.temperature?fv(w.temperature,"tC"):null]:null,g:[R.ls,R.t,R.h,R.b,R.r,R.on,R.rs,R.lc,R.os,R.nh,R.fh,R.cv,R.vp,R.eo,R.ef,R.l,R.ds,R.m,R.a,R.mt,R.mn,R.af,R.lk,R.lk?R.rs:null],d:pd(),u:[R.fc,C.ss?C.ss.length:1,C.ag==null?3:C.ag]${executionDiagnostics}})}`;
+};

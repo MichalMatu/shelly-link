@@ -1,8 +1,17 @@
+import {
+  PULSE_MAX_CYCLES,
+  PULSE_MAX_DURATION_MS,
+  PULSE_MAX_INITIAL_DELAY_MS,
+  PULSE_MAX_PHASE_MS,
+  PULSE_MIN_DURATION_MS,
+  PULSE_MIN_PHASE_MS
+} from '@lcl/automation-core';
 import { z } from 'zod';
 import {
   climateSensorAggregationForConfig,
   climateSensorsForConfig,
   MAX_CLIMATE_SENSORS,
+  type ClimateExecution,
   type ClimateSensor,
   type ClimateSensorAggregation,
   type ShellyThermostatConfig
@@ -23,6 +32,35 @@ const runtimeAggregationSchema = z.union([
   z.literal(2),
   z.literal(3)
 ]);
+
+const runtimePulseSchema = z
+  .tuple([
+    z.number().int().min(PULSE_MIN_PHASE_MS).max(PULSE_MAX_PHASE_MS),
+    z.number().int().min(PULSE_MIN_PHASE_MS).max(PULSE_MAX_PHASE_MS),
+    z.number().int().min(0).max(PULSE_MAX_INITIAL_DELAY_MS),
+    z.union([z.literal(0), z.literal(1)]),
+    z.number().int().min(-PULSE_MAX_DURATION_MS).max(PULSE_MAX_CYCLES)
+  ])
+  .superRefine((pulse, context) => {
+    const limit = pulse[4];
+    const valid =
+      limit === 0 ||
+      (limit >= 1 && limit <= PULSE_MAX_CYCLES) ||
+      (limit <= -PULSE_MIN_DURATION_MS && limit >= -PULSE_MAX_DURATION_MS);
+    if (!valid) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [4],
+        message: 'Pulse runtime execution limit is invalid.'
+      });
+    }
+  });
+
+const runtimeActiveWindowSchema = z
+  .tuple([z.number().int().min(0).max(1_439), z.number().int().min(0).max(1_439)])
+  .refine((window) => window[0] !== window[1], {
+    message: 'Runtime active-window endpoints must differ.'
+  });
 
 export const shellyRuntimeConfigSchema = z
   .object({
@@ -47,7 +85,9 @@ export const shellyRuntimeConfigSchema = z
     vp: z.number().min(0).max(5),
     p: z.union([z.literal(0), z.literal(1)]).optional(),
     ss: z.array(runtimeSensorSchema).min(2).max(MAX_CLIMATE_SENSORS).optional(),
-    ag: runtimeAggregationSchema.optional()
+    ag: runtimeAggregationSchema.optional(),
+    e: runtimePulseSchema.optional(),
+    w: runtimeActiveWindowSchema.optional()
   })
   .superRefine((config, context) => {
     if ((config.ss === undefined) !== (config.ag === undefined)) {
@@ -62,6 +102,8 @@ export const shellyRuntimeConfigSchema = z
 export type ShellyRuntimeConfig = z.infer<typeof shellyRuntimeConfigSchema>;
 export type ShellyRuntimeSensor = z.infer<typeof runtimeSensorSchema>;
 export type ShellyRuntimeAggregation = z.infer<typeof runtimeAggregationSchema>;
+export type ShellyRuntimePulse = z.infer<typeof runtimePulseSchema>;
+export type ShellyRuntimeActiveWindow = z.infer<typeof runtimeActiveWindowSchema>;
 
 const compactAddress = (address: string): string =>
   address.replace(/[:-]/g, '').toUpperCase();
@@ -106,6 +148,57 @@ export const runtimeAggregationFromFlag = (
   }
 };
 
+const runtimePulseForExecution = (
+  pulse: NonNullable<ClimateExecution['pulse']>
+): ShellyRuntimePulse => [
+  pulse.onMs,
+  pulse.offMs,
+  pulse.initialDelayMs,
+  pulse.startPhase === 'off' ? 1 : 0,
+  pulse.execution.mode === 'continuous'
+    ? 0
+    : pulse.execution.mode === 'cycles'
+      ? pulse.execution.count
+      : -pulse.execution.durationMs
+];
+
+const clockTimeToMinute = (value: string): number => {
+  const [hour, minute] = value.split(':').map(Number);
+  return hour! * 60 + minute!;
+};
+
+const minuteToClockTime = (value: number): string =>
+  `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+
+export const climateExecutionFromRuntimeConfig = (
+  config: ShellyRuntimeConfig
+): ClimateExecution | undefined => {
+  const pulse = config.e
+    ? {
+        onMs: config.e[0],
+        offMs: config.e[1],
+        initialDelayMs: config.e[2],
+        startPhase: config.e[3] === 1 ? ('off' as const) : ('on' as const),
+        execution:
+          config.e[4] === 0
+            ? ({ mode: 'continuous' } as const)
+            : config.e[4] > 0
+              ? ({ mode: 'cycles', count: config.e[4] } as const)
+              : ({ mode: 'duration', durationMs: -config.e[4] } as const)
+      }
+    : undefined;
+  const activeWindow = config.w
+    ? {
+        startTime: minuteToClockTime(config.w[0]),
+        endTime: minuteToClockTime(config.w[1])
+      }
+    : undefined;
+
+  return pulse || activeWindow
+    ? { ...(pulse ? { pulse } : {}), ...(activeWindow ? { activeWindow } : {}) }
+    : undefined;
+};
+
 export const createShellyRuntimeConfig = (
   config: ShellyThermostatConfig,
   hash: string
@@ -120,6 +213,8 @@ export const createShellyRuntimeConfig = (
         }
       : {};
   const debounce = config.rule.relayDebounce;
+  const pulse = config.execution?.pulse;
+  const activeWindow = config.execution?.activeWindow;
 
   return {
     a: primaryRuntimeSensor[0],
@@ -142,7 +237,16 @@ export const createShellyRuntimeConfig = (
     v: config.version,
     vp: config.rule.vpdAssist.enabled ? config.rule.vpdAssist.targetKpa : 0,
     p: primaryRuntimeSensor[2],
-    ...multiSensorRuntime
+    ...multiSensorRuntime,
+    ...(pulse ? { e: runtimePulseForExecution(pulse) } : {}),
+    ...(activeWindow
+      ? {
+          w: [
+            clockTimeToMinute(activeWindow.startTime),
+            clockTimeToMinute(activeWindow.endTime)
+          ] as ShellyRuntimeActiveWindow
+        }
+      : {})
   };
 };
 

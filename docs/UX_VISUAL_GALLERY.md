@@ -81,3 +81,23 @@ Canonical viewport: **412 × 915 CSS px**. These images are the committed Playwr
 ## 20-climate-button-mode-managed
 
 ![20-climate-button-mode-managed](../apps/mobile/e2e/responsive.spec.ts-snapshots/20-climate-button-mode-managed-darwin.png)
+
+## 21-time-info
+
+![21-time-info](../apps/mobile/e2e/responsive.spec.ts-snapshots/21-time-info-darwin.png)
+
+## 23-climate-history
+
+![23-climate-history](../apps/mobile/e2e/responsive.spec.ts-snapshots/23-climate-history-darwin.png)
+
+## 24-climate-pulse-setup
+
+![24-climate-pulse-setup](../apps/mobile/e2e/responsive.spec.ts-snapshots/24-climate-pulse-setup-darwin.png)
+
+## 25-time-pulse-setup
+
+![25-time-pulse-setup](../apps/mobile/e2e/responsive.spec.ts-snapshots/25-time-pulse-setup-darwin.png)
+
+## 26-standalone-pulse-setup
+
+![26-standalone-pulse-setup](../apps/mobile/e2e/responsive.spec.ts-snapshots/26-standalone-pulse-setup-darwin.png)

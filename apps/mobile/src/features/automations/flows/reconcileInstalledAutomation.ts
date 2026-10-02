@@ -10,8 +10,10 @@ import { hashScriptCode, normalizeShellyDeviceId } from '@lcl/shelly-client';
 import {
   createInstalledAutomation,
   installedAutomationRelayId,
+  isTimePulseInstalledAutomation,
   type ClimateInstalledAutomation,
   type InstalledAutomation,
+  type StandalonePulseInstalledAutomation,
   type TimeInstalledAutomation
 } from '../data/installedAutomation.js';
 import { readShellyAutomationScriptState } from '../data/shellyManagedAutomation.js';
@@ -103,13 +105,47 @@ const climateRuntimeMatches = async (
   );
 };
 
+const timeRuntimeMatches = async (
+  installation: TimeInstalledAutomation,
+  services: InstalledAutomationReconciliationServices
+): Promise<boolean> => {
+  if ((await services.readTimeScheduleState(installation)) === 'attention') return false;
+  if (!isTimePulseInstalledAutomation(installation)) return true;
+
+  const evidence = await services.readClimateRuntime(installation.shelly.baseUrl);
+  return (
+    evidence.scriptId === installation.pulseRuntime.script.id &&
+    evidence.running &&
+    evidence.code !== null &&
+    hashScriptCode(evidence.code) === installation.pulseRuntime.script.hash
+  );
+};
+
+const standalonePulseRuntimeMatches = async (
+  installation: StandalonePulseInstalledAutomation,
+  services: InstalledAutomationReconciliationServices
+): Promise<boolean> => {
+  const evidence = await services.readClimateRuntime(installation.shelly.baseUrl);
+  return (
+    evidence.scriptId === installation.script.id &&
+    evidence.running &&
+    evidence.code !== null &&
+    hashScriptCode(evidence.code) === installation.script.hash
+  );
+};
+
 const runtimeMatches = async (
   installation: InstalledAutomation,
   services: InstalledAutomationReconciliationServices
-): Promise<boolean> =>
-  installation.kind === 'climate'
-    ? climateRuntimeMatches(installation, services)
-    : (await services.readTimeScheduleState(installation)) !== 'attention';
+): Promise<boolean> => {
+  if (installation.kind === 'climate') {
+    return climateRuntimeMatches(installation, services);
+  }
+  if (installation.kind === 'time') {
+    return timeRuntimeMatches(installation, services);
+  }
+  return standalonePulseRuntimeMatches(installation, services);
+};
 
 const decodeRecoverableClimateRuntime = (
   evidence: ClimateRuntimeEvidence
@@ -190,7 +226,8 @@ const recoveredClimateConfig = (
       consecutiveHits: settings.consecutiveHits,
       failSafe: settings.failSafe,
       bootState: settings.bootState
-    }
+    },
+    ...(settings.execution ? { execution: settings.execution } : {})
   };
 };
 

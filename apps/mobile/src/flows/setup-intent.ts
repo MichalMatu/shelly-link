@@ -1,6 +1,6 @@
 import type { RulePresetId } from '@lcl/automation-core';
 
-export type SetupIntent = 'temperature' | 'humidity' | 'time';
+export type SetupIntent = 'temperature' | 'humidity' | 'time' | 'pulse';
 
 const TEMPERATURE_PRESETS: readonly RulePresetId[] = ['heating', 'cooling'];
 const HUMIDITY_PRESETS: readonly RulePresetId[] = ['humidifying', 'dehumidifying'];
@@ -18,6 +18,7 @@ export const rulePresetsForSetupIntent = (
     case 'humidity':
       return HUMIDITY_PRESETS;
     case 'time':
+    case 'pulse':
     case null:
     case undefined:
       return ALL_PRESETS;
@@ -33,6 +34,7 @@ export const defaultRulePresetForSetupIntent = (
     case 'humidity':
       return 'humidifying';
     case 'time':
+    case 'pulse':
       return null;
   }
 };

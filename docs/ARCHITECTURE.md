@@ -92,20 +92,42 @@ While a Climate automation owns a Plug S Gen3, the app converges `PLUGS_UI.contr
 
 ### Rule/action timing pipeline
 
-Normal automation requests do not control the relay directly. The currently integrated Climate path is:
+Normal Climate rule decisions do not control the relay directly. The qualified execution path is:
 
 ```text
-rule decision
--> requested Set ON/OFF
+Climate rule decision / parent request
+-> optional active-window gate
+-> optional shared Pulse cycle
+-> requested AUTO output
 -> optional relay debounce
 -> minimum ON/OFF timing gate
--> final AUTO/MANUAL + fault + hard-safety arbiter
+-> AUTO/MANUAL + automation-fault + hard-safety arbiter
 -> physical relay
 ```
 
-Hard safety and other forced-OFF paths remain authoritative and are never delayed by debounce or minimum-ON timing. The legacy `minChangeMs` behavior is the minimum-OFF/cooldown owner; adding another cooldown owner would duplicate semantics.
+The optional execution layer changes requested AUTO output only; it is not a second relay owner. Pulse phase timers and active-window boundary timers are local one-shot Shelly timers. Existing minimum ON/OFF, debounce, MANUAL, automation-fault and hard-safety ownership stays centralized in the relay/runtime arbiter. Hard safety and other forced-OFF paths remain authoritative and are never delayed by Pulse, debounce or minimum-ON timing. The legacy `minChangeMs` behavior remains the minimum-OFF/cooldown owner; adding another cooldown owner would duplicate semantics.
 
-Pure domain primitives also exist for Pulse actions, bounded Pulse cycles, daily time windows and flat AND/OR condition composition. The Pulse-cycle model supports ON/OFF phases, initial delay, Continuous/Cycles/Duration execution, selectable start phase and safe-OFF completion. Climate configuration may optionally carry Pulse and/or an active daily window; absence of that optional execution block preserves the existing steady configuration shape. Until generated-runtime integration is completed, these remain foundations rather than installed runtime capabilities and must not be presented as if Shelly executes them. Existing steady Time automation remains a native Shelly schedule and keeps its current schedule semantics.
+The shared Pulse-cycle model supports ON/OFF phases, optional initial delay, Continuous/Cycles/Duration execution, selectable start phase and safe-OFF completion. Climate configuration may optionally carry `execution.pulse` and/or `execution.activeWindow`; absence of `execution` preserves the existing steady Climate configuration shape and runtime behavior. Active windows use Shelly local time, may cross midnight and fail safe OFF when local time is not trustworthy. Parent inactive, active-window close, MANUAL takeover, automation fault and hard safety cancel the active Pulse cycle instead of allowing it to finish.
+
+The generated Climate execution path is qualified. Existing Steady Time remains two native Shelly `Switch.Set` schedules and no script. Time + Pulse is also qualified as an explicit composition: `DailyTimeAutomationConfig` stays unchanged; native ON/OFF schedules own the daily window and call the run-on-boot Pulse script through `Script.Eval` `rq(true)` / `rq(false)` boundaries; the script owns Pulse phase timing only and reuses the same shared Pulse-cycle engine.
+
+Standalone Pulse is qualified as the parentless composition of that same shared engine. Its typed config is `{ relayId, pulse }`; the generated script owns only Pulse phase timing for the selected relay, starts with an explicit safe OFF, never persists transient phase/timer state, and uses `rq(true)` / `rq(false)` only as lifecycle start/cancel control. Durable ownership, physical identity checks, one-owner-per-relay conflict detection, install/pause/resume/delete safe-OFF handling and script ID/hash reconciliation reuse the existing automation lifecycle rather than creating a parallel subsystem.
+
+### Pulse operational status
+
+Operational status is a read-only mobile normalization/presentation layer over Shelly-owned runtime state; it is not another execution owner.
+
+The normalized model carries availability (`available` / `stale` / `unavailable`), Pulse phase, completed cycles, next-transition uptime, last reason, automation-requested output, final relay output, automation fault, hard-safety state/reason and device uptime. Remaining time is derived for display from device uptime and the reported deadline; the phone never advances a Pulse timer.
+
+Climate maps the existing managed-runtime diagnostic path into this model. Time + Pulse and standalone Pulse query their existing shared-engine state through read-only `Script.Eval` over `R.ps`, `R.pc`, `R.pn`, `R.rs`, requested output and automation fault, while Shelly status supplies the final physical relay state. Invalid/missing state fails to `unavailable`; an active phase whose reported deadline is already behind device uptime beyond the bounded grace becomes `stale`.
+
+Dashboard and detail consume one shared Pulse status presentation. The compact dashboard view omits secondary fault/safety rows; full detail retains automation fault and hard-safety information. This capability does not modify generated script source, timing, persistence, restart semantics, safety precedence or automation lifecycle.
+
+### Shared operational-status presentation
+
+The broader mobile status language is presentation-only and reuses authoritative state owners rather than creating a new runtime model. Pulse and Steady Time share a small presentation primitive for requested output, final physical relay and reason. Time requested output is derived only from Shelly local time plus the existing schedule-domain helper while the native schedule is running; paused/MANUAL mode reports no automation request. Climate continues to consume its managed-runtime diagnostics, including the explicit automation-requested relay state.
+
+Frozen Climate dashboard/detail geometry remains an explicit UX contract. Shared status presentation must not move transport, persistence, polling or runtime ownership into React, and it must not bypass the accepted Climate golden contract merely to make components look structurally identical.
 
 ## Climate engine and persistent config
 
@@ -122,11 +144,11 @@ mobile configuration
               -> relay
 ```
 
-The current Climate runtime is `climate-engine-v1`. Supported thermometer profiles share one generated runtime body; automation-specific values live in typed compact config.
+The current Climate runtime is `climate-engine-v1`. Supported thermometer profiles share one generated runtime body; automation-specific values live in typed compact config. Optional Pulse and active-window execution state is also represented compactly and generated only when the configuration uses it.
 
-Explicit Climate edits currently replace the managed runtime using the current generator instead of preserving development-era script instances. Recovery may read persisted config while retaining the current generated-runtime decoding fallback.
+Explicit Climate edits currently replace the managed runtime using the current generator instead of preserving development-era script instances. Recovery may read persisted config while retaining the current generated-runtime decoding fallback. Persistent runtime config, decode and reconciliation round-trip optional Pulse/active-window execution without moving transient phase/timer state into persistence.
 
-History v2 uses a namespaced/versioned `shellylink.history.*` KVS ring owned by the same managed Climate runtime. History writes are observational and best-effort: KVS failure must not affect relay arbitration or safety. Runtime configuration and History remain separate persistence concerns and do not create another automation owner.
+History v2 uses a namespaced/versioned `shellylink.history.*` KVS ring owned by the same managed Climate runtime. History writes are observational and best-effort: KVS failure must not affect relay arbitration or safety. Runtime configuration and History remain separate persistence concerns and do not create another automation owner. Pulse-driven transitions use the existing requested/final relay and reason-code history model rather than a second History format.
 
 ## Climate sensors
 
@@ -134,7 +156,7 @@ A Climate automation supports 1–4 thermometers with `avg`, `min`, `max` or `fi
 
 Normalized physical BLE `runtimeAddress` is the logical thermometer identity at the mobile/runtime boundary. Phone discovery, Plug discovery, installed config and recovery converge on that identity.
 
-Sensor display names are presentation metadata, but the compact runtime config embeds them in generated script source. Climate config therefore caps each display name at 26 escaped UTF-8 JSON-content bytes; the 9500 B generated-script guard remains the final source-size authority.
+Sensor display names are presentation metadata, but the compact runtime config embeds them in generated script source. Climate config therefore caps each display name at 26 escaped UTF-8 JSON-content bytes. Keep 9500 B as the preferred generated-script optimization target; the accepted hard ceiling for the qualified Pulse/active-window runtime is **12000 B**, and the generator size guard is the final authority.
 
 Freshness is evaluated independently per sensor. Stale/unusable members do not contribute; if no configured member remains usable, AUTO records an automation fault and safe OFF wins. Incomplete advertisements must not make old temperature/humidity values fresh. MANUAL does not use thermometer data to authorize explicit relay ON/OFF; hard safety remains independent and higher priority.
 
@@ -239,6 +261,6 @@ Refactor only to fix ownership, remove a concrete blocker or enable an agreed fe
 
 Architecture documents contain durable contracts, not chronological test history.
 
-Real-device claims belong in `docs/testing/hardware-matrix.md`. UI geometry belongs in the UX contract/gallery. Session-specific implementation state belongs in `docs/HANDOFF_NEXT_CHAT.md`.
+Real-device claims belong in `docs/testing/hardware-matrix.md` or a focused dated acceptance record. Qualified Pulse runtime evidence is recorded in `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`, `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md` and `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md`. UI geometry belongs in the UX contract/gallery. Session-specific implementation state belongs in `docs/HANDOFF_NEXT_CHAT.md`.
 
 Hardware-facing behavior requires real-device acceptance. Mutating tests must record the final relay/device state when that state matters for safety.

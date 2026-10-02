@@ -3,7 +3,8 @@ import {
   pauseTimeAutomation,
   readTimeAutomationRuntime,
   resumeTimeAutomation,
-  setTimeAutomationManualRelay
+  setTimeAutomationManualRelay,
+  timePulseAutomationRuntime
 } from '../../features/automations/index.js';
 import type { TimeInstalledAutomation } from '../installations/model.js';
 
@@ -40,11 +41,19 @@ export const useTimeAutomationActions = (installation: TimeInstalledAutomation) 
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (action: TimeAutomationAction) => {
+    mutationFn: async (action: TimeAutomationAction) => {
       switch (action) {
         case 'auto':
+          if (timePulseAutomationRuntime.isInstalled(installation)) {
+            await timePulseAutomationRuntime.resume(installation);
+            return readTimeAutomationRuntime(installation);
+          }
           return resumeTimeAutomation(installation);
         case 'manual':
+          if (timePulseAutomationRuntime.isInstalled(installation)) {
+            await timePulseAutomationRuntime.pause(installation);
+            return readTimeAutomationRuntime(installation);
+          }
           return pauseTimeAutomation(installation);
         case 'on':
           return setTimeAutomationManualRelay(installation, true);

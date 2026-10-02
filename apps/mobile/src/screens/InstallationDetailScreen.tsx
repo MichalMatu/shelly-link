@@ -2,13 +2,14 @@ import { climateSensorsForConfig } from '@lcl/script-generator';
 import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ClimateOperationalStatusSection } from '../app/ClimateOperationalStatusSection.js';
+import { StandalonePulseInstallationDetail } from '../app/StandalonePulseInstallationDetail.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
-  ClimateAutomationDetailSection,
   ClimateHistorySection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
@@ -28,11 +29,7 @@ import {
   type PlugDetailTab
 } from '../features/plugs/index.js';
 import { installationRecoveryState } from '../flows/installations/healthRecovery.js';
-import {
-  formatClimateDetailDiagnostics,
-  formatDiagnosticReason,
-  formatRelayState
-} from '../flows/installations/diagnosticPresentation.js';
+import { formatClimateDetailDiagnostics } from '../flows/installations/diagnosticPresentation.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
@@ -91,6 +88,9 @@ export const InstallationDetailScreen = ({
   }, []);
 
   if (!installation) return <PlugDetailNotFound />;
+  if (installation.kind === 'pulse') {
+    return <StandalonePulseInstallationDetail installation={installation} />;
+  }
 
   if (installation.kind === 'time') {
     return (
@@ -169,7 +169,6 @@ const ClimateInstallationDetail = ({
   const scriptCopy = installationScriptPreviewCopy[locale];
   const scriptQueryKey = installedAutomationScriptSourceQueryKey(installation);
   const snapshot = diagnosticsQuery.isSuccess ? diagnosticsQuery.data : undefined;
-  const diagnostics = snapshot?.diagnostics;
   const control = controlQuery.data;
   const scriptMatch = control
     ? installedAutomationScriptMatch(installation, control)
@@ -228,7 +227,6 @@ const ClimateInstallationDetail = ({
 
   const missing = t('common.missing');
   const configuredSensors = climateSensorsForConfig(installation.config);
-  const shellyRelayState = snapshot?.plug?.relayState ?? control?.relayOn;
   const resources = resourcesQuery.data;
   const { bleSensors, scriptRows } = formatClimateDetailDiagnostics({
     sensors: configuredSensors,
@@ -290,12 +288,12 @@ const ClimateInstallationDetail = ({
                 }}
               />
             )}
-            <ClimateAutomationDetailSection
-              reason={
-                diagnostics ? formatDiagnosticReason(diagnostics.lastReason, t) : missing
-              }
-              relayRule={formatRelayState(diagnostics?.relayState, missing)}
-              shellyRelay={formatRelayState(shellyRelayState, missing)}
+            <ClimateOperationalStatusSection
+              installation={installation}
+              snapshot={snapshot}
+              control={control}
+              missing={missing}
+              t={t}
             />
             {preparedAutomationDraftId === installation.id ? (
               <RuleSetupPage

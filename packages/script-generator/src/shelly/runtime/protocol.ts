@@ -50,6 +50,8 @@ export const decodeClimateRuntimeControlState = (
 };
 
 const encodedRuntimeState = 'JSON.stringify([R.m,R.mn?1:0,R.af,R.lk?1:0,R.lk?R.rs:null])';
+const cancelPulse = (reason: string): string =>
+  `if(typeof cx==="function")cx(${JSON.stringify(reason)});`;
 
 export const climateRuntimeControlStateEvalCode = `typeof R==="object"&&typeof sw==="function"?${encodedRuntimeState}:""`;
 
@@ -57,12 +59,12 @@ export const climateRuntimeSetControlModeEvalCode = (
   mode: ClimateRuntimeControlMode
 ): string => {
   if (mode === 'manual') {
-    return '(function(){if(R.lk)return-2;if(R.m!=1)R.mt=nw();R.m=1;R.nh=R.fh=0;R.mn=false;R.rs="mn";sw(false,"mn",1);return 1})()';
+    return `(function(){if(R.lk)return-2;${cancelPulse('mn')}if(R.m!=1)R.mt=nw();R.m=1;R.nh=R.fh=0;R.mn=false;R.rs="mn";sw(false,"mn",1);return 1})()`;
   }
-  return '(function(){if(R.lk)return-2;if(R.m)R.mt=nw();R.m=0;R.nh=R.fh=0;R.mn=false;R.a=false;R.ls=null;R.af="st";R.rs="ar";sw(false,"ar",1);return 0})()';
+  return `(function(){if(R.lk)return-2;${cancelPulse('ar')}if(R.m)R.mt=nw();R.m=0;R.nh=R.fh=0;R.mn=false;R.a=false;R.ls=null;R.af="st";R.rs="ar";sw(false,"ar",1);return 0})()`;
 };
 
-export const climateRuntimeResetSafetyLockoutEvalCode = `(function(){if(!R.lk)return ${encodedRuntimeState};R.lk=false;R.mn=false;R.a=false;R.nh=R.fh=0;R.ls=null;if(!R.m)R.af="st";R.rs=R.m?"mn":"ar";sw(false,R.rs,1);return ${encodedRuntimeState}})()`;
+export const climateRuntimeResetSafetyLockoutEvalCode = `(function(){if(!R.lk)return ${encodedRuntimeState};${cancelPulse('ar')}R.lk=false;R.mn=false;R.a=false;R.nh=R.fh=0;R.ls=null;if(!R.m)R.af="st";R.rs=R.m?"mn":"ar";sw(false,R.rs,1);return ${encodedRuntimeState}})()`;
 
 export const climateRuntimeSetManualRelayEvalCode = (on: boolean): string => {
   const returnValue = on ? 1 : 0;
@@ -84,5 +86,5 @@ export const climateRuntimeRestoreControlStateEvalCode = (
       ? 'true'
       : 'false';
 
-  return `(function(){R.m=${mode};R.mn=${manualRequest};R.af=${automationFault};R.lk=${lockout};R.rs=R.lk?${safetyReason}:R.m?"mn":R.af||"ar";R.a=false;R.ls=null;R.mt=nw();R.nh=R.fh=0;sw(${finalRelay},R.rs,1);return ${encodedRuntimeState}})()`;
+  return `(function(){${cancelPulse('rr')}R.m=${mode};R.mn=${manualRequest};R.af=${automationFault};R.lk=${lockout};R.rs=R.lk?${safetyReason}:R.m?"mn":R.af||"ar";R.a=false;R.ls=null;R.mt=nw();R.nh=R.fh=0;sw(${finalRelay},R.rs,1);return ${encodedRuntimeState}})()`;
 };

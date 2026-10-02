@@ -6,8 +6,9 @@ import type {
 } from '@lcl/automation-core';
 import type { SensorProfileId } from '@lcl/device-profiles';
 import { z } from 'zod';
-import type { ClimateSensorAggregation } from './config.js';
+import type { ClimateExecution, ClimateSensorAggregation } from './config.js';
 import {
+  climateExecutionFromRuntimeConfig,
   decodeShellyRuntimeConfig,
   decodeShellyRuntimeConfigJson,
   runtimeAggregationFromFlag,
@@ -53,6 +54,7 @@ export interface DecodedShellyThermostatSettings {
   consecutiveHits: number;
   failSafe: 'off';
   bootState: 'off';
+  execution?: ClimateExecution;
 }
 
 export interface DecodedShellyThermostatScript {
@@ -173,6 +175,7 @@ export const decodeShellyThermostatScript = (
           turnOffMs: runtimeConfig.z ?? 0
         }
       : null;
+  const execution = climateExecutionFromRuntimeConfig(runtimeConfig);
 
   return {
     generatorVersion: metadataLine(script, 'g'),
@@ -210,7 +213,8 @@ export const decodeShellyThermostatScript = (
       rssiMin: runtimeConfig.r,
       consecutiveHits: runtimeConfig.h,
       failSafe: 'off',
-      bootState: 'off'
+      bootState: 'off',
+      ...(execution ? { execution } : {})
     }
   };
 };

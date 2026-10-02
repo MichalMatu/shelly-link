@@ -4,8 +4,10 @@ import { calculateVpdKpa } from '@lcl/automation-core';
 import { IconAlertTriangle, IconPlug } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
+import { StandalonePulseAutomationCard } from '../app/StandalonePulseAutomationCard.js';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import { Pulse } from '../features/automations/index.js';
 import {
   BleOnlyPlugDashboardCards,
   hasBleLocator,
@@ -132,6 +134,34 @@ const ClimateAutomationCard = ({
     snapshot?.plug?.relayState ??
     controlStatus?.relayOn ??
     snapshot?.diagnostics.relayState;
+  const pulseSnapshot = snapshot?.execution?.pulse;
+  const pulseStatus = installation.config.execution?.pulse
+    ? Pulse.Operational.normalizeStatus(
+        pulseSnapshot
+          ? {
+              phase: pulseSnapshot.phase,
+              cyclesCompleted: pulseSnapshot.cyclesCompleted,
+              nextTransitionUptimeMs: pulseSnapshot.nextTransitionUptimeMs,
+              lastReason:
+                pulseSnapshot.lastReason ?? snapshot?.diagnostics.lastReason ?? null,
+              requestedOutputOn:
+                snapshot?.diagnostics.automationRequestedRelayState ?? null,
+              finalOutputOn: relayState ?? null,
+              automationFault:
+                controlStatus?.automationFault ??
+                snapshot?.diagnostics.automationFault ??
+                null,
+              hardSafety:
+                controlStatus?.safetyLockout ??
+                snapshot?.diagnostics.safetyLockout ??
+                null,
+              hardSafetyReason:
+                controlStatus?.safetyReason ?? snapshot?.diagnostics.safetyReason ?? null,
+              deviceUptimeMs: currentUptimeMs
+            }
+          : null
+      )
+    : null;
   const controlsHumidity = installation.config.rule.control.metric === 'humidity';
   const thresholdSummary = installationThresholdSummary(installation, t);
   const thresholdLines = controlsHumidity
@@ -181,42 +211,45 @@ const ClimateAutomationCard = ({
   }
 
   const body = (
-    <div className="automation-card__main" aria-label={t('dashboard.currentValues')}>
-      <div className="automation-card__primary-metric">
-        <strong aria-label={`${primaryMetric.label}: ${primaryMetric.value}`}>
-          {primaryMetric.value}
-        </strong>
-        <small aria-label={`${t('dashboard.thresholds')}: ${thresholdSummary}`}>
-          {thresholdLines.map((line) => (
-            <span key={line}>{line}</span>
-          ))}
-        </small>
-      </div>
-
-      <div className="automation-card__secondary-metrics">
-        <div>
-          <strong aria-label={`${secondaryMetric.label}: ${secondaryMetric.value}`}>
-            {secondaryMetric.value}
+    <>
+      <div className="automation-card__main" aria-label={t('dashboard.currentValues')}>
+        <div className="automation-card__primary-metric">
+          <strong aria-label={`${primaryMetric.label}: ${primaryMetric.value}`}>
+            {primaryMetric.value}
           </strong>
+          <small aria-label={`${t('dashboard.thresholds')}: ${thresholdSummary}`}>
+            {thresholdLines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
+          </small>
         </div>
-        <div>
-          <span>{t('dashboard.vpd')}</span>
-          <strong>{formatInstallationVpd(currentVpdKpa, targetVpdKpa)}</strong>
-        </div>
-      </div>
 
-      <PlugAutomationModeControl
-        autoActive={automationRunning}
-        manualActive={manualControl}
-        disabled={action.isPending || !runtimeControllable}
-        onAuto={() => {
-          if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
-        }}
-        onManual={() => {
-          if (!manualControl) action.mutate('manual');
-        }}
-      />
-    </div>
+        <div className="automation-card__secondary-metrics">
+          <div>
+            <strong aria-label={`${secondaryMetric.label}: ${secondaryMetric.value}`}>
+              {secondaryMetric.value}
+            </strong>
+          </div>
+          <div>
+            <span>{t('dashboard.vpd')}</span>
+            <strong>{formatInstallationVpd(currentVpdKpa, targetVpdKpa)}</strong>
+          </div>
+        </div>
+
+        <PlugAutomationModeControl
+          autoActive={automationRunning}
+          manualActive={manualControl}
+          disabled={action.isPending || !runtimeControllable}
+          onAuto={() => {
+            if (controlStatus?.automationMode !== 'auto') action.mutate('auto');
+          }}
+          onManual={() => {
+            if (!manualControl) action.mutate('manual');
+          }}
+        />
+      </div>
+      {pulseStatus && <Pulse.Operational.StatusSummary status={pulseStatus} compact />}
+    </>
   );
 
   const footer =
@@ -268,7 +301,13 @@ const ClimateAutomationCard = ({
 };
 
 const AutomationCard = ({ installation, onOpen, onNameChange }: AutomationCardProps) =>
-  installation.kind === 'time' ? (
+  installation.kind === 'pulse' ? (
+    <StandalonePulseAutomationCard
+      installation={installation}
+      onOpen={onOpen}
+      onNameChange={(value) => onNameChange(installation, value)}
+    />
+  ) : installation.kind === 'time' ? (
     <TimeAutomationCard
       installation={installation}
       onOpen={onOpen}

@@ -34,7 +34,20 @@ const TIME_HARDWARE_TABS = [
   }
 ] as const;
 
-export type HardwareTabId = 'shelly' | 'sensor' | 'rule' | 'schedule';
+const PULSE_HARDWARE_TABS = [
+  {
+    id: 'shelly',
+    labelKey: 'hardware.nav.shelly',
+    titleKey: 'hardware.nav.shellyTitle'
+  },
+  {
+    id: 'pulse',
+    labelKey: 'hardware.nav.rule',
+    titleKey: 'hardware.nav.ruleTitle'
+  }
+] as const;
+
+export type HardwareTabId = 'shelly' | 'sensor' | 'rule' | 'schedule' | 'pulse';
 
 export const availableTabsForIntent = (
   setupIntent?: SetupIntent,
@@ -48,6 +61,11 @@ export const availableTabsForIntent = (
     return fixedShellyId
       ? TIME_HARDWARE_TABS.filter((tab) => tab.id === 'schedule')
       : TIME_HARDWARE_TABS;
+  }
+  if (setupIntent === 'pulse') {
+    return fixedShellyId
+      ? PULSE_HARDWARE_TABS.filter((tab) => tab.id === 'pulse')
+      : PULSE_HARDWARE_TABS;
   }
   return fixedShellyId
     ? CLIMATE_HARDWARE_TABS.filter((tab) => tab.id === 'rule')

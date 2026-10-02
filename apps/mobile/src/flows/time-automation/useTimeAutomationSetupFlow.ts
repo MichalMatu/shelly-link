@@ -8,6 +8,7 @@ import {
   createTimeInstalledAutomation,
   findInstalledRelayOwner,
   installDailyTimeAutomation,
+  Pulse,
   readShellyControlStatus,
   TimeAutomationRuntimeError,
   updateTimeInstalledAutomation,
@@ -16,6 +17,8 @@ import {
 } from '../../features/automations/index.js';
 import type { ShellyDraftDevice } from '../hardware-setup/setupDraftStore.js';
 import { dailyTimeAutomationConfigSchema } from './config.js';
+
+type PulseCycleFormDraft = ReturnType<typeof Pulse.Cycle.fromConfig>;
 
 const localizedRuntimeError = (error: unknown): Error | unknown => {
   if (!(error instanceof TimeAutomationRuntimeError)) {
@@ -47,6 +50,9 @@ export const useTimeAutomationSetupFlow = (
     : null;
   const [onTime, setOnTime] = useState(editingInstallation?.config.onTime ?? '08:00');
   const [offTime, setOffTime] = useState(editingInstallation?.config.offTime ?? '20:00');
+  const [pulseCycleDraft, setPulseCycleDraftState] = useState<PulseCycleFormDraft>(() =>
+    Pulse.Cycle.fromConfig(editingInstallation?.pulseRuntime?.pulse)
+  );
   const upsertInstallation = useInstalledAutomationStore(
     (state) => state.upsertInstallation
   );
@@ -55,6 +61,9 @@ export const useTimeAutomationSetupFlow = (
     if (!editingInstallation) return;
     setOnTime(editingInstallation.config.onTime);
     setOffTime(editingInstallation.config.offTime);
+    setPulseCycleDraftState(
+      Pulse.Cycle.fromConfig(editingInstallation.pulseRuntime?.pulse)
+    );
   }, [editingInstallation]);
 
   const configState = useMemo(() => {
@@ -67,6 +76,12 @@ export const useTimeAutomationSetupFlow = (
       ? ({ ok: true, config: parsed.data } as const)
       : ({ ok: false, error: t('time.validation.invalidTimes') } as const);
   }, [editingInstallation?.config.relayId, offTime, onTime]);
+  const pulseCycleValidation = useMemo(
+    () => Pulse.Cycle.parseForm(pulseCycleDraft),
+    [pulseCycleDraft]
+  );
+  const setPulseCycleDraft = (patch: Partial<PulseCycleFormDraft>) =>
+    setPulseCycleDraftState((draft) => ({ ...draft, ...patch }));
 
   const installMutation = useMutation({
     mutationFn: async () => {
@@ -75,6 +90,9 @@ export const useTimeAutomationSetupFlow = (
       }
       if (!configState.ok) {
         throw new Error(configState.error);
+      }
+      if (!pulseCycleValidation.ok) {
+        throw new Error(t('hardware.flow.configInvalid'));
       }
 
       if (editInstallationId) {
@@ -127,23 +145,43 @@ export const useTimeAutomationSetupFlow = (
         throw new Error(t('time.errors.climateScriptPresent'));
       }
 
-      let schedule: { onJobId: number; offJobId: number };
       try {
-        schedule = await installDailyTimeAutomation({
+        if (pulseCycleValidation.config) {
+          const runtime = await Pulse.Time.install({
+            clients: { device: deviceClient, schedules: scheduleClient },
+            config: {
+              schedule: configState.config,
+              pulse: pulseCycleValidation.config
+            }
+          });
+          return Pulse.Time.createInstalledAutomation({
+            shelly: deviceInfo,
+            shellyName: selectedShelly.name,
+            baseUrl: selectedShelly.baseUrl,
+            onJobId: runtime.schedule.onJobId,
+            offJobId: runtime.schedule.offJobId,
+            scriptId: runtime.script.id,
+            scriptHash: runtime.script.hash,
+            config: configState.config,
+            pulse: pulseCycleValidation.config
+          });
+        }
+
+        const schedule = await installDailyTimeAutomation({
           clients: { device: deviceClient, schedules: scheduleClient },
+          config: configState.config
+        });
+        return createTimeInstalledAutomation({
+          shelly: deviceInfo,
+          shellyName: selectedShelly.name,
+          baseUrl: selectedShelly.baseUrl,
+          onJobId: schedule.onJobId,
+          offJobId: schedule.offJobId,
           config: configState.config
         });
       } catch (error) {
         throw localizedRuntimeError(error);
       }
-      return createTimeInstalledAutomation({
-        shelly: deviceInfo,
-        shellyName: selectedShelly.name,
-        baseUrl: selectedShelly.baseUrl,
-        onJobId: schedule.onJobId,
-        offJobId: schedule.offJobId,
-        config: configState.config
-      });
     },
     onSuccess: (installation) => upsertInstallation(installation)
   });
@@ -154,7 +192,11 @@ export const useTimeAutomationSetupFlow = (
     offTime,
     setOffTime,
     configState,
+    pulseCycleDraft,
+    setPulseCycleDraft,
+    pulseCycleValidation,
     isEditingTimeAutomation: editInstallationId !== undefined,
+    canConfigurePulse: editInstallationId === undefined,
     installMutation
   };
 };

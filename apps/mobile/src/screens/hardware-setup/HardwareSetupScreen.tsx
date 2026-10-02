@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
+import { pulseCycleCopy } from '../../app/locales/pulseCycle.js';
 import { AppPageBack } from '../../components/AppPageBack.js';
+import { Pulse } from '../../features/automations/index.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
 import {
   defaultRulePresetForSetupIntent,
@@ -50,7 +52,7 @@ export const HardwareSetupScreen = ({
   sensorSettingsOnlyId,
   onSensorSettingsRemoved
 }: HardwareSetupScreenProps = {}) => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const flow = useHardwareSetupFlow();
   const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
   const availableTabs = useMemo(
@@ -177,7 +179,7 @@ export const HardwareSetupScreen = ({
           <AppPageBack label={t('hardware.nav.shelly')} onBack={closeSettings} />
           <ShellySetupPage
             flow={flow}
-            enableBleDiscovery={setupIntent !== 'time'}
+            enableBleDiscovery={setupIntent !== 'time' && setupIntent !== 'pulse'}
             settingsOnlyDeviceId={localShellyPage.deviceId}
             onSettingsClose={closeSettings}
             onBleScanPageRequest={(device) =>
@@ -229,7 +231,7 @@ export const HardwareSetupScreen = ({
           <ShellySetupPage
             flow={flow}
             addOnly
-            enableBleDiscovery={setupIntent !== 'time'}
+            enableBleDiscovery={setupIntent !== 'time' && setupIntent !== 'pulse'}
           />
         ) : (
           <SensorSetupPage flow={flow} addOnly primaryAddAction={localSensorAddMode} />
@@ -238,11 +240,18 @@ export const HardwareSetupScreen = ({
     );
   }
 
+  const setupContext =
+    setupIntent === 'pulse'
+      ? pulseCycleCopy[locale].description
+      : setupIntent
+        ? t(`intent.${setupIntent}.context`)
+        : '';
+
   return (
     <main className="demo-shell hardware-shell">
       {setupIntent && onBackToIntent && !plugAddOnly && !sensorAddOnly && (
         <AppPageBack
-          context={t(`intent.${setupIntent}.context`)}
+          context={setupContext}
           label={t('intent.back')}
           onBack={onBackToIntent}
         />
@@ -263,10 +272,10 @@ export const HardwareSetupScreen = ({
               }
               type="button"
               aria-current={activeTab === tab.id ? 'page' : undefined}
-              title={t(tab.titleKey)}
+              title={tab.id === 'pulse' ? 'Pulse' : t(tab.titleKey)}
               onClick={() => selectTab(tab.id)}
             >
-              {t(tab.labelKey)}
+              {tab.id === 'pulse' ? 'Pulse' : t(tab.labelKey)}
             </button>
           ))}
         </nav>
@@ -275,7 +284,7 @@ export const HardwareSetupScreen = ({
       {activeTab === 'shelly' && (
         <ShellySetupPage
           flow={flow}
-          enableBleDiscovery={setupIntent !== 'time'}
+          enableBleDiscovery={setupIntent !== 'time' && setupIntent !== 'pulse'}
           addOnly={plugAddOnly}
           onAddRequest={openPlugAdd}
           {...(!plugAddOnly && !sensorAddOnly
@@ -292,7 +301,7 @@ export const HardwareSetupScreen = ({
             : {})}
         />
       )}
-      {setupIntent !== 'time' && activeTab === 'sensor' && (
+      {setupIntent !== 'time' && setupIntent !== 'pulse' && activeTab === 'sensor' && (
         <SensorSetupPage
           flow={flow}
           addOnly={sensorAddOnly}
@@ -300,7 +309,7 @@ export const HardwareSetupScreen = ({
           primaryAddAction={sensorAddOnly ? sensorAddMode : 'manual'}
         />
       )}
-      {setupIntent !== 'time' && activeTab === 'rule' && (
+      {setupIntent !== 'time' && setupIntent !== 'pulse' && activeTab === 'rule' && (
         <RuleSetupPage
           flow={flow}
           selectablePresets={selectableRulePresets}
@@ -310,6 +319,12 @@ export const HardwareSetupScreen = ({
       {setupIntent === 'time' && activeTab === 'schedule' && (
         <TimeScheduleSetupPage
           flow={flow}
+          {...(onSetupComplete ? { onInstalled: onSetupComplete } : {})}
+        />
+      )}
+      {setupIntent === 'pulse' && activeTab === 'pulse' && (
+        <Pulse.Standalone.SetupPage
+          selectedShelly={flow.selectedShelly}
           {...(onSetupComplete ? { onInstalled: onSetupComplete } : {})}
         />
       )}

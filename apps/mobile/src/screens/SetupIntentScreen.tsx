@@ -1,5 +1,6 @@
 import { IconChevronRight } from '@tabler/icons-react';
 import { useTranslation } from '../app/i18n.js';
+import { pulseCycleCopy } from '../app/locales/pulseCycle.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 
 type SetupIntentScreenProps = {
@@ -28,7 +29,8 @@ const INTENT_CHOICES = [
 ] as const;
 
 export const SetupIntentScreen = ({ onSelect }: SetupIntentScreenProps) => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
+  const pulseCopy = pulseCycleCopy[locale];
 
   return (
     <main className="demo-shell intent-shell">
@@ -53,6 +55,13 @@ export const SetupIntentScreen = ({ onSelect }: SetupIntentScreenProps) => {
             <IconChevronRight className="intent-choice__action" aria-hidden="true" />
           </button>
         ))}
+        <button className="intent-choice" type="button" onClick={() => onSelect('pulse')}>
+          <span className="intent-choice__copy">
+            <strong>{pulseCopy.title}</strong>
+            <span>{pulseCopy.description}</span>
+          </span>
+          <IconChevronRight className="intent-choice__action" aria-hidden="true" />
+        </button>
       </section>
     </main>
   );

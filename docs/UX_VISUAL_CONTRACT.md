@@ -42,7 +42,8 @@ Current shared patterns include:
 - shared Plug dashboard shell and Plug controls;
 - shared Plug detail tabs and Plug Device/Info surfaces;
 - shared `Disclosure` behavior;
-- Thermometer presentation under `features/thermometers`.
+- Thermometer presentation under `features/thermometers`;
+- one shared `PulseCycleEditor` / pulse form model for Climate, Time and standalone Pulse setup.
 
 ## Product contracts
 
@@ -67,6 +68,12 @@ Dashboard cards prioritize identity, live readings and compact telemetry. Rename
 ### Add Plug
 
 The normal flow stays simple. Technical scan range is available through the compact `Zakres skanowania` disclosure and remains visible in its collapsed summary.
+
+### Pulse setup/editor
+
+Climate and Time use the same optional Pulse editor: `Zachowanie wyjścia` stays compact in Steady mode and reveals the shared Pulse-cycle fields only after selecting Pulse. Standalone Pulse uses the exact same editor/model with Pulse always active rather than introducing a parallel form.
+
+Canonical accepted states are `24-climate-pulse-setup`, `25-time-pulse-setup` and `26-standalone-pulse-setup`. The intentional product-entry/setup deltas also update `08-automation-intent`, `09-time-setup` and `16-climate-setup`. The frozen Climate Automation detail golden remains unchanged; new setup controls must not leak into that legacy inline detail composition without an explicit product-design decision.
 
 ## Surface roles
 
