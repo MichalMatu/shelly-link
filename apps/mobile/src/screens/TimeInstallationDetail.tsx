@@ -126,7 +126,9 @@ export const TimeInstallationDetail = ({
                 <span>{t('common.refreshing')}</span>
               </div>
             )}
-            {(runtimeState === 'offline' || runtimeState === 'attention' || pulseNeedsAttention) && (
+            {(runtimeState === 'offline' ||
+              runtimeState === 'attention' ||
+              pulseNeedsAttention) && (
               <FeedbackPanel
                 tone="warning"
                 title={
