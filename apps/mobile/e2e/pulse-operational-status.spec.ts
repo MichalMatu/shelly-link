@@ -228,6 +228,36 @@ for (const viewport of viewports) {
   });
 }
 
+test('standalone Pulse supports safe AUTO and MANUAL relay control', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedStandalonePulseInstallation(page);
+  const rpc = await mockStandalonePulseRpc(page);
+  await page.goto('/');
+
+  const card = page
+    .getByText('Pompa Pulse', { exact: true })
+    .locator('xpath=ancestor::article[1]');
+  const auto = card.getByRole('button', { name: 'AUTO' });
+  const manual = card.getByRole('button', { name: 'MANUAL' });
+  const turnOn = card.getByRole('button', { name: 'ON' });
+
+  await expect(auto).toHaveAttribute('aria-pressed', 'true');
+  await expect(turnOn).toBeDisabled();
+
+  await manual.click();
+  await expect(manual).toHaveAttribute('aria-pressed', 'true');
+  await expect(turnOn).toBeEnabled();
+  await expect.poll(() => rpc.calls.includes('Script.Stop')).toBe(true);
+
+  await turnOn.click();
+  await expect(turnOn).toHaveAttribute('aria-pressed', 'true');
+
+  await auto.click();
+  await expect(auto).toHaveAttribute('aria-pressed', 'true');
+  await expect(turnOn).toBeDisabled();
+  await expect.poll(() => rpc.calls.includes('Script.Start')).toBe(true);
+});
+
 test('standalone Pulse can be deleted safely from detail', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await seedStandalonePulseInstallation(page);
