@@ -5,9 +5,12 @@ import {
   pulseCycleFormFromConfig
 } from './data/pulseCycleForm.js';
 import {
+  createStandalonePulseInstalledAutomation,
   createTimePulseInstalledAutomation,
+  isStandalonePulseInstalledAutomation,
   isTimePulseInstalledAutomation
 } from './data/installedAutomation.js';
+import { installStandalonePulseAutomation } from './data/standalonePulseAutomationRuntime.js';
 import { installTimePulseAutomation } from './data/timePulseAutomationRuntime.js';
 
 export const Pulse = {
@@ -21,5 +24,10 @@ export const Pulse = {
     createInstalledAutomation: createTimePulseInstalledAutomation,
     install: installTimePulseAutomation,
     isInstalled: isTimePulseInstalledAutomation
+  },
+  Standalone: {
+    createInstalledAutomation: createStandalonePulseInstalledAutomation,
+    install: installStandalonePulseAutomation,
+    isInstalled: isStandalonePulseInstalledAutomation
   }
 } as const;
