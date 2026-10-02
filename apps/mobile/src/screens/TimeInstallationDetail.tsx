@@ -5,11 +5,9 @@ import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   deleteTimeAutomation,
-  isTimePulseInstalledAutomation,
-  PulseOperationalStatusSummary,
+  Pulse,
   timePulseAutomationRuntime,
   useInstalledAutomationStore,
-  usePulseOperationalStatus,
   type TimeInstalledAutomation
 } from '../features/automations/index.js';
 import {
@@ -51,10 +49,8 @@ export const TimeInstallationDetail = ({
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const runtimeQuery = useTimeAutomationRuntime(installation);
-  const pulseInstallation = isTimePulseInstalledAutomation(installation)
-    ? installation
-    : null;
-  const pulseQuery = usePulseOperationalStatus(pulseInstallation);
+  const pulseInstallation = Pulse.Time.isInstalled(installation) ? installation : null;
+  const pulseQuery = Pulse.Operational.useStatus(pulseInstallation);
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
   });
@@ -155,7 +151,7 @@ export const TimeInstallationDetail = ({
                 </div>
               </dl>
               {pulseInstallation && (
-                <PulseOperationalStatusSummary status={pulseQuery.data} />
+                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
               )}
             </section>
 
