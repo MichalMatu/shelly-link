@@ -11,6 +11,7 @@ import {
   createTimePulseInstalledAutomation,
   isTimePulseInstalledAutomation
 } from './data/installedAutomation.js';
+import { normalizePulseOperationalStatus } from './data/pulseOperationalStatus.js';
 import { installTimePulseAutomation } from './data/timePulseAutomationRuntime.js';
 import { usePulseOperationalStatus } from './flows/usePulseOperationalStatus.js';
 
@@ -32,6 +33,7 @@ export const Pulse = {
   Operational: {
     StatusSummary: PulseOperationalStatusSummary,
     ClimateStatusSummary: ClimatePulseOperationalStatusSummary,
+    normalizeStatus: normalizePulseOperationalStatus,
     useStatus: usePulseOperationalStatus
   }
 } as const;
