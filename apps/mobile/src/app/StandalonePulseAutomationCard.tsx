@@ -1,7 +1,9 @@
 import { IconAlertTriangle } from '@tabler/icons-react';
-import { Pulse, type StandalonePulseInstalledAutomation } from '../features/automations/index.js';
+import { Pulse, type InstalledAutomation } from '../features/automations/index.js';
 import { PlugDashboardCardShell } from '../features/plugs/index.js';
 import { useTranslation } from './i18n.js';
+
+type StandalonePulseInstalledAutomation = Extract<InstalledAutomation, { kind: 'pulse' }>;
 
 type StandalonePulseAutomationCardProps = {
   installation: StandalonePulseInstalledAutomation;
