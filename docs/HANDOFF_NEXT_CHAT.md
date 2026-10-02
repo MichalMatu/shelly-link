@@ -1,6 +1,6 @@
 # Handoff — Pulse V1 after shared setup/editor UI acceptance
 
-Status: **2026-10-02 — Climate + Pulse, Time + Pulse and Standalone Pulse runtimes are qualified, and the shared Pulse setup/editor UI plus responsive visual acceptance are complete. Dashboard/detail Pulse phase/progress/status remains.**
+Status: **2026-10-02 — Climate + Pulse, Time + Pulse and Standalone Pulse runtimes are qualified, the shared Pulse setup/editor UI plus responsive visual acceptance are complete, and the final dashboard/detail phase/progress/status read path has been audited. Operational status implementation remains.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -17,7 +17,8 @@ Read in this order:
 5. `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`;
 6. `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md`;
 7. `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md`;
-8. `docs/UX_VISUAL_CONTRACT.md`.
+8. `docs/testing/pulse-v1-operational-status-read-path-audit-2026-10-02.md`;
+9. `docs/UX_VISUAL_CONTRACT.md`.
 
 Then fetch fresh `main`, all active Pulse branches and `agent-control:.agent/status/daemon.json`. Verify there is no active/duplicate task or open PR before changing anything. Never copy a Local Agent binding from this document or an older chat.
 
@@ -35,7 +36,8 @@ Keep `main` untouched until the Pulse working line is deliberately reviewed/merg
 - hardware-tested Standalone runtime/code: `bcfb01f5c6e76bcf571ed013bc650f4d847861e6`;
 - final Standalone code-only qualification candidate before durable closeout: `452b69d957dcc0f4d4efb5c777a5c186bfdbc247`.
 - Shared Pulse UI branch: `pulse-v1-shared-ui`;
-- accepted shared setup/editor + responsive visual acceptance: `99ae14745215e5d267ed2588806a1bc0d05c6420`.
+- accepted shared setup/editor + responsive visual acceptance: `99ae14745215e5d267ed2588806a1bc0d05c6420`;
+- durable shared-UI closeout baseline before the operational-status audit: `cd0a335e65ff1c0f0a58340704e7192bdee458c6`.
 
 The Standalone descendants after the hardware candidate add app ownership/reconciliation integration, repository-boundary cleanup, tests and durable docs; they do not change the generated Standalone Shelly runtime. The code-only candidate passed full `pnpm check` with a clean worktree, and `@lcl/script-generator` passed **229/229 tests at 100% statements/branches/functions/lines**.
 
@@ -90,13 +92,27 @@ The accepted shared UI head is `99ae14745215e5d267ed2588806a1bc0d05c6420` on `pu
 
 Responsive acceptance covers the five canonical viewports for Time, standalone Pulse and the current Plug setup flow. Canonical Darwin states are `24-climate-pulse-setup`, `25-time-pulse-setup` and `26-standalone-pulse-setup`; the intentional setup/intent deltas refreshed `08-automation-intent`, `09-time-setup` and `16-climate-setup`. Frozen Climate detail state `02-climate-automation` remains byte-for-byte protected by keeping the new Pulse editor out of the legacy inline detail form. Final pre-push canonical visual verification passed 5/5.
 
+### Operational Pulse status read path — audited, implementation pending
+
+The pre-implementation audit is recorded in `docs/testing/pulse-v1-operational-status-read-path-audit-2026-10-02.md`. It found that the remaining status slice does **not** need a new runtime timer or generated-script behavior merely to expose phase/progress.
+
+- Climate already exposes the needed Pulse operational state through its existing diagnostic path: `phase`, `cyclesCompleted`, `nextTransitionUptimeMs`, `lastReason`.
+- Time + Pulse already keeps equivalent transient state as `R.ps`, `R.pc`, `R.pn`, `R.rs` and can expose it through the existing `Script.Eval` transport pattern.
+- Standalone Pulse embeds the same shared engine/state and can use the same read-only `Script.Eval` status adapter as Time.
+- React may derive display values such as remaining time from device-reported uptime/deadline data, but React must never own the Pulse timer.
+
+Treat this as a read-only protocol/normalization/presentation slice unless a concrete failing test proves a runtime change is necessary. Do not modify generated scripts, timing semantics, restart behavior, safety precedence, persistence or lifecycle just to display status.
+
 ## Next implementation order
 
-Pulse V1 is **not complete**, but the runtime and shared setup/editor UI slices are closed. Continue in this order:
+Pulse V1 is **not complete**, but the runtime and shared setup/editor UI slices are closed and the final status read path is understood. Continue in this order:
 
-1. **Dashboard/detail Pulse phase/progress/status** integrated into the existing requested/final output, reason, automation-fault and hard-safety language. Keep timer ownership in the Shelly runtime, never React.
-2. Run focused cross-mode regression for status presentation; repeat size/hardware qualification only if the remaining work actually changes generated runtime or real-device behavior.
-3. Perform final Pulse V1 durable closeout once operational status is accepted.
+1. Define one normalized read-only Pulse operational-status model shared by Climate, Time and standalone Pulse.
+2. Reuse Climate `/diag` status and add the smallest typed `Script.Eval` status adapter for Time + Pulse and standalone Pulse over `R.ps/R.pc/R.pn/R.rs`.
+3. Integrate Pulse phase/progress/reason into the existing dashboard/detail requested-output, final-output, reason, automation-fault and hard-safety language. Do not create a separate diagnostics island and do not move timer ownership into React.
+4. Cover normalization, unavailable/stale/read-failure behavior and cross-mode presentation with focused tests, then run responsive/visual acceptance.
+5. Repeat size/hardware qualification only if the implementation actually changes generated runtime or real-device behavior.
+6. Perform final Pulse V1 durable closeout once operational status is accepted.
 
 After Pulse V1 is stable, resume Dashboard status polish, UX redesign round 2, watchdog/stabilization and v1 feature freeze from `docs/ROADMAP.md`.
 
