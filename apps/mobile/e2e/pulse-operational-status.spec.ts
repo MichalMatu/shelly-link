@@ -72,9 +72,7 @@ const mockStandalonePulseRpc = async (page: Page) => {
         break;
       case 'Shelly.GetStatus':
         result = {
-          ...(scriptPresent
-            ? { 'script:7': { id: 7, running: scriptRunning } }
-            : {}),
+          ...(scriptPresent ? { 'script:7': { id: 7, running: scriptRunning } } : {}),
           'switch:0': {
             id: 0,
             output: relayOn,
