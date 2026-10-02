@@ -1,6 +1,6 @@
 # Handoff — Dashboard status polish slice accepted after Pulse V1
 
-Status: **2026-10-02 — Pulse V1 is closed and Dashboard status polish slice 1 is accepted. The accepted Dashboard status implementation head is `08a50db96f126e04dd509c246581939aabcde3d6` on `dashboard-status-polish`; frozen Climate golden UI remains unchanged.**
+Status: **2026-10-02 — Pulse V1, Dashboard status polish slice 1, and the Time + Pulse boot-time clock-recovery fix are accepted on the PR #76 merge line. The clock-recovery code candidate is `66ac5f75df986fe638e7c49de32f4989df92e314`; frozen Climate golden UI remains unchanged.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -19,7 +19,8 @@ Read in this order:
 7. `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md`;
 8. `docs/testing/pulse-v1-operational-status-read-path-audit-2026-10-02.md`;
 9. `docs/testing/pulse-v1-operational-status-acceptance-2026-10-02.md`;
-10. `docs/UX_VISUAL_CONTRACT.md`.
+10. `docs/testing/time-pulse-clock-recovery-acceptance-2026-10-02.md`;
+11. `docs/UX_VISUAL_CONTRACT.md`.
 
 Then fetch fresh `main`, all active Pulse branches and `agent-control:.agent/status/daemon.json`. Verify there is no active/duplicate task or open PR before changing anything. Never copy a Local Agent binding from this document or an older chat.
 
@@ -41,6 +42,7 @@ Keep `main` untouched until the Pulse working line is deliberately reviewed/merg
 - durable shared-UI closeout baseline before the operational-status audit: `cd0a335e65ff1c0f0a58340704e7192bdee458c6`;
 - accepted operational-status implementation + responsive acceptance: `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`.
 - Dashboard status polish branch: `dashboard-status-polish`; accepted slice-1 code/acceptance head: `08a50db96f126e04dd509c246581939aabcde3d6`.
+- PR #76 review clock-recovery fix: `66ac5f75df986fe638e7c49de32f4989df92e314`; fail-safe OFF now retries the Shelly clock gate every 30 s and clears only `tm` after time becomes trustworthy.
 
 The Standalone descendants after the hardware candidate add app ownership/reconciliation integration, repository-boundary cleanup, tests and durable docs; they do not change the generated Standalone Shelly runtime. The code-only candidate passed full `pnpm check` with a clean worktree, and `@lcl/script-generator` passed **229/229 tests at 100% statements/branches/functions/lines**.
 
@@ -120,6 +122,10 @@ The mobile operational-status presentation now has one shared `requested output 
 The frozen Climate dashboard/detail visual contract remains unchanged: the Stage 7 work did not casually grow Climate card geometry, and the UX gate rejected accidental Climate golden regeneration. Only the intentional Time dashboard/detail snapshots changed. Full responsive Playwright passed **46/46** and the exact implementation line passed full `pnpm check`. See `docs/testing/dashboard-status-polish-acceptance-2026-10-02.md`.
 
 No generated runtime, RPC path, polling cadence, lifecycle, persistence or hardware behavior changed.
+
+### Time + Pulse boot-time clock recovery — accepted
+
+PR #76 review found and closed one merge blocker: an unsynchronized Shelly clock at boot left Time + Pulse in permanent `tm` fault even after time later synchronized. Candidate `66ac5f75df986fe638e7c49de32f4989df92e314` preserves immediate safe OFF, schedules a bounded 30 s clock recheck, clears only the clock fault after trust returns, and never clears unrelated protection/relay faults. Script-generator regression coverage is 14/14 for the Time + Pulse runtime. Real Plug S Gen3 requalification observed physical Pulse ON/OFF plus cancellation and finished with the existing production Standalone Pulse source/state unchanged, schedules unchanged and final relay explicitly OFF. See `docs/testing/time-pulse-clock-recovery-acceptance-2026-10-02.md`.
 
 ## Next implementation order
 

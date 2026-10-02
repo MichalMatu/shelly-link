@@ -116,3 +116,7 @@ A hardware-facing slice is complete only when the relevant combination is verifi
 Presentation-only acceptance may preserve app data and avoid runtime mutation; record that distinction explicitly rather than treating visual inspection as automation acceptance.
 
 When firmware, device model or BLE behavior changes materially, add a new dated row rather than rewriting old evidence.
+
+## 2026-10-02 Time + Pulse clock-recovery requalification
+
+- **PASS — configured Plug S Gen3 `shellyplugsg3-e4b063d7f530`:** exact code candidate `66ac5f75df986fe638e7c49de32f4989df92e314`; temporary Time + Pulse runtime 2164 B (`mem_used=1386`, `mem_free=22302`); boot safe OFF, physical Pulse ON/OFF observed, cancellation held OFF. Cleanup removed the temporary script and verified the pre-existing completed Standalone Pulse source hash `lcl-87002b6d`, terminal runtime state, and empty schedules were unchanged; final relay explicitly OFF. The second known Plug `shellyplugsg3-e4b063e3e298` was unreachable, so it was not mutated. Detailed evidence: `docs/testing/time-pulse-clock-recovery-acceptance-2026-10-02.md`.
