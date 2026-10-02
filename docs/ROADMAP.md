@@ -33,7 +33,7 @@ The mobile UI presents the same typed records through the completed History visu
 
 Maximum continuous ON, relay-control failures and native Shelly protection errors converge on one first-fault-wins hard-safety latch. Reset remains safe OFF. Plug-owned firmware limits remain the authority for device electrical/thermal ceilings.
 
-### 3. Rule/action expansion — runtimes qualified; shared Pulse setup UI accepted
+### 3. Rule/action expansion — Pulse V1 completed 2026-10-02
 
 Merged foundations/runtime work:
 
@@ -54,7 +54,7 @@ Merged foundations/runtime work:
 - Time + Pulse lifecycle/reconciliation covering install rollback, pause/resume/delete, physical identity, synchronized-clock requirements, exact schedule/script evidence and safe-OFF recovery;
 - qualified Standalone Pulse adapter/runtime using the exact same shared Pulse engine with no Climate/Time parent, fresh safe-OFF restart semantics, durable ownership, identity-gated lifecycle and exact script reconciliation.
 
-The pure `RelayPulseAction` / one-shot state machine remains supported. Climate configuration may carry optional `execution.pulse` and/or `execution.activeWindow`; when `execution` is absent, the existing steady Climate config shape and behavior remain unchanged. The generated Climate + Pulse + optional active-window runtime slice is qualified on candidate `fe50778d956906749c00f9da9b7237e6e617c970`. The Time + Pulse runtime/adapter is qualified on candidate `c62f08d252d3d86d3c23ec8f0ad630f3b611a758`. The Standalone Pulse hardware-tested runtime candidate is `bcfb01f5c6e76bcf571ed013bc650f4d847861e6`; later code-only descendant `523b43849d85d7fc0c369ac2d2c23b31182d42f5` adds app-facing model exports without changing generated runtime behavior. The shared Pulse setup/editor UI is accepted on `99ae14745215e5d267ed2588806a1bc0d05c6420` and reuses one form model/component across Climate, Time and standalone Pulse. Operational dashboard/detail phase/progress status remains the final active Pulse V1 slice. Pulse V1 is defined in section 6.
+The pure `RelayPulseAction` / one-shot state machine remains supported. Climate configuration may carry optional `execution.pulse` and/or `execution.activeWindow`; when `execution` is absent, the existing steady Climate config shape and behavior remain unchanged. The generated Climate + Pulse + optional active-window runtime slice is qualified on candidate `fe50778d956906749c00f9da9b7237e6e617c970`. The Time + Pulse runtime/adapter is qualified on candidate `c62f08d252d3d86d3c23ec8f0ad630f3b611a758`. The Standalone Pulse hardware-tested runtime candidate is `bcfb01f5c6e76bcf571ed013bc650f4d847861e6`; later code-only descendant `523b43849d85d7fc0c369ac2d2c23b31182d42f5` adds app-facing model exports without changing generated runtime behavior. The shared Pulse setup/editor UI is accepted on `99ae14745215e5d267ed2588806a1bc0d05c6420` and reuses one form model/component across Climate, Time and standalone Pulse. Operational dashboard/detail phase/progress status is now accepted on `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`; Pulse V1 is complete. The status implementation reuses Climate diagnostics and read-only `Script.Eval` state for Time/standalone without changing generated runtime behavior. Pulse V1 is defined in section 6.
 
 Advanced rule candidates that remain parked and do **not** block Pulse V1:
 
@@ -87,7 +87,7 @@ All five panels share the same truthful time domain and one compact time row bel
 
 Focused History tests, mobile typecheck, UX quality gate and the final repository `pnpm check` passed. Samsung S22+ / Android 16 preserving-data acceptance confirmed five stacked panels, no horizontal overflow, compact phone geometry and an Output SVG path with `fill: none` and square `H/V` transitions. The canonical Darwin History snapshot was subsequently refreshed deliberately and the full responsive suite passed 36/36. No runtime, KVS, `HistoryRecord[]`, schedule or relay behavior changed.
 
-### 6. Pulse V1 — runtimes + shared setup UI qualified; operational status next
+### 6. Pulse V1 — completed 2026-10-02
 
 Pulse becomes a first-class automation capability with **one shared pulse-cycle engine** and two product entry points. Do not implement separate temperature-pulse, humidity-pulse, time-pulse or standalone-pulse runtimes.
 
@@ -161,13 +161,11 @@ Standalone Pulse adapter/runtime is qualified as of 2026-10-02. It has no Climat
 
 Shared setup/editor UI and responsive visual acceptance are qualified as of 2026-10-02 on `99ae14745215e5d267ed2588806a1bc0d05c6420`. One `PulseCycleEditor` and one pulse form model are reused by Climate, Time and standalone Pulse. Climate/Time expose compact Steady/Pulse output behavior; standalone Pulse uses the same editor directly. Canonical visual states `24-climate-pulse-setup`, `25-time-pulse-setup` and `26-standalone-pulse-setup` are committed, while the frozen Climate detail golden remains unchanged.
 
-Before calling **all of Pulse V1** complete, still:
+Operational dashboard/detail status is also qualified as of 2026-10-02 on `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`. One normalized read-only Pulse operational-status model is shared across Climate, Time and standalone Pulse. Climate maps its existing `/diag` state; Time + Pulse and standalone Pulse read the already-running shared-engine state through typed read-only `Script.Eval` and combine it with the actual Shelly relay state. The phone derives remaining display time from device uptime/deadline values but never owns Pulse timing. Compact dashboard and full detail presentation use the existing requested/final-output, reason, automation-fault and hard-safety language rather than a separate diagnostics island.
 
-- integrate Pulse phase/progress into dashboard/detail status where accepted by product UX, using the existing requested/final-output, reason, automation-fault and hard-safety language;
-- run focused responsive/visual acceptance for that status presentation;
-- repeat size/hardware qualification only if remaining work changes generated runtime or hardware behavior.
+Operational-status acceptance passed focused responsive E2E **5/5**, full `pnpm check`, and the complete responsive Playwright suite **46/46** on the exact implementation head. The same application code was built and installed on Samsung SM-S906B / Android 16 with `adb install -r`, preserving app data and passing cold-start/411 px no-overflow smoke. The preserved phone state contains a steady Climate installation rather than Pulse, so that Android smoke is not claimed as live Pulse status hardware proof. Generated runtime was unchanged, therefore runtime size and relay-hardware requalification were not repeated.
 
-Once Pulse V1 is qualified and stable, resume the existing V1 product plan below rather than immediately expanding the runtime with every advanced Pulse idea.
+Pulse V1 is complete. Resume Dashboard status polish, UX redesign round 2, watchdog/stabilization and v1 feature freeze rather than expanding Pulse immediately with additional runtime modes.
 
 ### 7. Dashboard status polish
 

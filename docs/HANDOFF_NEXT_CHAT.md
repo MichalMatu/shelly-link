@@ -1,6 +1,6 @@
-# Handoff — Pulse V1 after shared setup/editor UI acceptance
+# Handoff — Pulse V1 closed after operational status acceptance
 
-Status: **2026-10-02 — Climate + Pulse, Time + Pulse and Standalone Pulse runtimes are qualified, the shared Pulse setup/editor UI plus responsive visual acceptance are complete, and the final dashboard/detail phase/progress/status read path has been audited. Operational status implementation remains.**
+Status: **2026-10-02 — Climate + Pulse, Time + Pulse and Standalone Pulse runtimes are qualified; shared setup/editor UI and dashboard/detail operational status are accepted; Pulse V1 implementation is closed. The accepted operational-status implementation head is `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -18,7 +18,8 @@ Read in this order:
 6. `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md`;
 7. `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md`;
 8. `docs/testing/pulse-v1-operational-status-read-path-audit-2026-10-02.md`;
-9. `docs/UX_VISUAL_CONTRACT.md`.
+9. `docs/testing/pulse-v1-operational-status-acceptance-2026-10-02.md`;
+10. `docs/UX_VISUAL_CONTRACT.md`.
 
 Then fetch fresh `main`, all active Pulse branches and `agent-control:.agent/status/daemon.json`. Verify there is no active/duplicate task or open PR before changing anything. Never copy a Local Agent binding from this document or an older chat.
 
@@ -37,7 +38,8 @@ Keep `main` untouched until the Pulse working line is deliberately reviewed/merg
 - final Standalone code-only qualification candidate before durable closeout: `452b69d957dcc0f4d4efb5c777a5c186bfdbc247`.
 - Shared Pulse UI branch: `pulse-v1-shared-ui`;
 - accepted shared setup/editor + responsive visual acceptance: `99ae14745215e5d267ed2588806a1bc0d05c6420`;
-- durable shared-UI closeout baseline before the operational-status audit: `cd0a335e65ff1c0f0a58340704e7192bdee458c6`.
+- durable shared-UI closeout baseline before the operational-status audit: `cd0a335e65ff1c0f0a58340704e7192bdee458c6`;
+- accepted operational-status implementation + responsive acceptance: `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`.
 
 The Standalone descendants after the hardware candidate add app ownership/reconciliation integration, repository-boundary cleanup, tests and durable docs; they do not change the generated Standalone Shelly runtime. The code-only candidate passed full `pnpm check` with a clean worktree, and `@lcl/script-generator` passed **229/229 tests at 100% statements/branches/functions/lines**.
 
@@ -92,29 +94,32 @@ The accepted shared UI head is `99ae14745215e5d267ed2588806a1bc0d05c6420` on `pu
 
 Responsive acceptance covers the five canonical viewports for Time, standalone Pulse and the current Plug setup flow. Canonical Darwin states are `24-climate-pulse-setup`, `25-time-pulse-setup` and `26-standalone-pulse-setup`; the intentional setup/intent deltas refreshed `08-automation-intent`, `09-time-setup` and `16-climate-setup`. Frozen Climate detail state `02-climate-automation` remains byte-for-byte protected by keeping the new Pulse editor out of the legacy inline detail form. Final pre-push canonical visual verification passed 5/5.
 
-### Operational Pulse status read path — audited, implementation pending
+### Operational Pulse status — closed
 
-The pre-implementation audit is recorded in `docs/testing/pulse-v1-operational-status-read-path-audit-2026-10-02.md`. It found that the remaining status slice does **not** need a new runtime timer or generated-script behavior merely to expose phase/progress.
+Pulse operational status is one read-only normalized capability shared by Climate, Time and standalone Pulse. The mobile model carries availability, phase, completed cycles, next transition uptime, reason, automation-requested output, final relay output, automation fault, hard-safety state/reason and device uptime.
 
-- Climate already exposes the needed Pulse operational state through its existing diagnostic path: `phase`, `cyclesCompleted`, `nextTransitionUptimeMs`, `lastReason`.
-- Time + Pulse already keeps equivalent transient state as `R.ps`, `R.pc`, `R.pn`, `R.rs` and can expose it through the existing `Script.Eval` transport pattern.
-- Standalone Pulse embeds the same shared engine/state and can use the same read-only `Script.Eval` status adapter as Time.
-- React may derive display values such as remaining time from device-reported uptime/deadline data, but React must never own the Pulse timer.
+- Climate reuses the existing `/diag` read path and maps its Pulse diagnostics into the shared model.
+- Time + Pulse and standalone Pulse use the smallest read-only `Script.Eval` adapter over existing runtime state (`R.ps`, `R.pc`, `R.pn`, `R.rs`, requested output and automation fault) plus device uptime; `Shelly.GetStatus` remains the authority for the final physical relay state.
+- React derives remaining display time only from device-reported uptime/deadline data. React never owns or advances a Pulse timer.
+- Active phase data whose device uptime has passed the reported deadline beyond the bounded grace is marked stale; malformed/missing state becomes unavailable rather than inventing a phase.
+- Dashboard uses the compact shared status summary; detail uses the full summary and includes automation-fault and hard-safety rows. Climate, Time and standalone Pulse share the same presentation language.
+- No generated Shelly runtime, timing semantics, restart behavior, persistence, safety precedence or lifecycle behavior changed for this status slice.
 
-Treat this as a read-only protocol/normalization/presentation slice unless a concrete failing test proves a runtime change is necessary. Do not modify generated scripts, timing semantics, restart behavior, safety precedence, persistence or lifecycle just to display status.
+Acceptance on `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`: focused responsive operational-status E2E passed **5/5** canonical viewports; the exact completion head passed full `pnpm check`; the complete responsive Playwright suite passed **46/46**. The dated acceptance record contains the detailed evidence.
+
+Samsung S22+ / Android 16 preserving-data installation of the same application code also passed build/install/cold-start/layout smoke. The phone currently contains a non-Pulse Climate installation, so this smoke is explicitly **not** claimed as live Pulse operational-status hardware acceptance. No hardware requalification was required because generated runtime/device behavior did not change.
 
 ## Next implementation order
 
-Pulse V1 is **not complete**, but the runtime and shared setup/editor UI slices are closed and the final status read path is understood. Continue in this order:
+Pulse V1 is closed. Do not reopen the qualified runtime/setup/status slices without a concrete failing test, hardware issue or accepted product change.
 
-1. Define one normalized read-only Pulse operational-status model shared by Climate, Time and standalone Pulse.
-2. Reuse Climate `/diag` status and add the smallest typed `Script.Eval` status adapter for Time + Pulse and standalone Pulse over `R.ps/R.pc/R.pn/R.rs`.
-3. Integrate Pulse phase/progress/reason into the existing dashboard/detail requested-output, final-output, reason, automation-fault and hard-safety language. Do not create a separate diagnostics island and do not move timer ownership into React.
-4. Cover normalization, unavailable/stale/read-failure behavior and cross-mode presentation with focused tests, then run responsive/visual acceptance.
-5. Repeat size/hardware qualification only if the implementation actually changes generated runtime or real-device behavior.
-6. Perform final Pulse V1 durable closeout once operational status is accepted.
+Continue the V1 plan in this order:
 
-After Pulse V1 is stable, resume Dashboard status polish, UX redesign round 2, watchdog/stabilization and v1 feature freeze from `docs/ROADMAP.md`.
+1. Dashboard status polish for the broader product status language beyond the now-accepted Pulse phase/progress surface.
+2. UX redesign round 2 after the stable History/safety/Pulse foundation.
+3. Watchdog/recovery/soak stabilization and the final hardware matrix.
+4. V1 feature freeze.
+5. Review/PR/merge the Pulse working line deliberately; `main` remains untouched until that explicit step.
 
 ## Safety and execution rules
 

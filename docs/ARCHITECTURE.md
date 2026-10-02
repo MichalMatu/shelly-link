@@ -113,6 +113,16 @@ The generated Climate execution path is qualified. Existing Steady Time remains 
 
 Standalone Pulse is qualified as the parentless composition of that same shared engine. Its typed config is `{ relayId, pulse }`; the generated script owns only Pulse phase timing for the selected relay, starts with an explicit safe OFF, never persists transient phase/timer state, and uses `rq(true)` / `rq(false)` only as lifecycle start/cancel control. Durable ownership, physical identity checks, one-owner-per-relay conflict detection, install/pause/resume/delete safe-OFF handling and script ID/hash reconciliation reuse the existing automation lifecycle rather than creating a parallel subsystem.
 
+### Pulse operational status
+
+Operational status is a read-only mobile normalization/presentation layer over Shelly-owned runtime state; it is not another execution owner.
+
+The normalized model carries availability (`available` / `stale` / `unavailable`), Pulse phase, completed cycles, next-transition uptime, last reason, automation-requested output, final relay output, automation fault, hard-safety state/reason and device uptime. Remaining time is derived for display from device uptime and the reported deadline; the phone never advances a Pulse timer.
+
+Climate maps the existing managed-runtime diagnostic path into this model. Time + Pulse and standalone Pulse query their existing shared-engine state through read-only `Script.Eval` over `R.ps`, `R.pc`, `R.pn`, `R.rs`, requested output and automation fault, while Shelly status supplies the final physical relay state. Invalid/missing state fails to `unavailable`; an active phase whose reported deadline is already behind device uptime beyond the bounded grace becomes `stale`.
+
+Dashboard and detail consume one shared Pulse status presentation. The compact dashboard view omits secondary fault/safety rows; full detail retains automation fault and hard-safety information. This capability does not modify generated script source, timing, persistence, restart semantics, safety precedence or automation lifecycle.
+
 ## Climate engine and persistent config
 
 The stable direction is:
