@@ -214,7 +214,7 @@ Plug Detail is one physical-device surface with capability-driven local sections
 Automation | History | BLE | Device | Script | Info
 ```
 
-A Plug shows only the sections supported by its ownership model. Climate exposes all six. Native Time Schedule omits `History` and `Script`. A plain saved Plug keeps the physical-device surfaces and an Automation empty state rather than inventing another detail shell. These sections are presentation boundaries, not new domain owners:
+A Plug shows only the sections supported by its ownership model. Climate exposes all six. Native Time Schedule omits `History` and `Script`. Standalone Pulse exposes `Automation | BLE | Device | Script | Info` and omits `History`; its Automation section owns current Pulse status, configured cycle parameters, AUTO/MANUAL lifecycle control, MANUAL-only relay control and safe uninstall. A plain saved Plug keeps the physical-device surfaces and an Automation empty state rather than inventing another detail shell. These sections are presentation boundaries, not new domain owners:
 
 - **Automation** — installed automation state/configuration and deletion;
 - **History** — read-only Climate operational history from the managed KVS ring;
@@ -222,6 +222,8 @@ A Plug shows only the sections supported by its ownership model. Climate exposes
 - **Device** — Shelly-owned settings such as LED, button mode and Cloud plus explicit management actions approved for that transport/state;
 - **Script** — managed runtime source/preview;
 - **Info** — identity, firmware/network/health and runtime resource diagnostics.
+
+Standalone Pulse dashboard/detail management composes the qualified runtime lifecycle rather than reimplementing it in React. Entering MANUAL pauses/cancels Pulse to safe OFF before direct relay control becomes available; returning to AUTO starts the existing runtime through its identity-gated resume path. Standalone Pulse uninstall uses the existing identity-verified safe-OFF delete path and removes durable app ownership only after device deletion succeeds.
 
 The available capability tabs remain the first Plug Detail content. Top-level detail/intent pages do not render a duplicate page-local Back when persistent bottom navigation or platform/browser Back already returns to the parent product section. `AppPageBack` is reserved for true nested subflows that return to a specific parent context. The top chrome intentionally contains the tab strip only: do not insert a separate identity summary card between the tabs and the owning section. Identity, model, transport, firmware and network detail belong under **Info** unless a future product design gives them a new explicit owner.
 
