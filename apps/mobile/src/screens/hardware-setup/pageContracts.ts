@@ -128,3 +128,4 @@ export type RuleSetupFlow = Pick<
 >;
 
 export type TimeScheduleSetupFlow = Pick<HardwareSetupFlow, 'selectedShelly'>;
+export type StandalonePulseSetupFlow = Pick<HardwareSetupFlow, 'selectedShelly'>;
