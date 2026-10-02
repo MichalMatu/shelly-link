@@ -1,5 +1,6 @@
 import type { Locale } from '../i18n.js';
-import type { PulseOperationalPhase } from '../../features/automations/data/pulseOperationalStatus.js';
+
+type PulseOperationalPhase = 'inactive' | 'delay' | 'on' | 'off' | 'completed';
 
 export type PulseOperationalStatusCopy = {
   status: string;
