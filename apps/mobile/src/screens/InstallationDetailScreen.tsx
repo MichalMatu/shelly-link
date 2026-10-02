@@ -14,7 +14,6 @@ import {
   ClimateBleDetailSection,
   ClimateScriptDetailSection,
   ClimateScriptDiagnosticsSection,
-  normalizePulseOperationalStatus,
   PulseOperationalStatusSummary,
   useClimateHistory
 } from '../features/automations/index.js';
@@ -36,6 +35,7 @@ import {
   formatRelayState
 } from '../flows/installations/diagnosticPresentation.js';
 import type { ClimateInstalledAutomation } from '../flows/installations/model.js';
+import { climatePulseOperationalStatus } from '../flows/installations/pulseOperationalStatus.js';
 import { installedAutomationHealth } from '../flows/installations/runtimeDiagnostics.js';
 import {
   deleteInstalledAutomation,
@@ -235,31 +235,11 @@ const ClimateInstallationDetail = ({
   const missing = t('common.missing');
   const configuredSensors = climateSensorsForConfig(installation.config);
   const shellyRelayState = snapshot?.plug?.relayState ?? control?.relayOn;
-  const pulseSnapshot = snapshot?.execution?.pulse;
-  const pulseStatus = installation.config.execution?.pulse
-    ? normalizePulseOperationalStatus(
-        pulseSnapshot
-          ? {
-              phase: pulseSnapshot.phase,
-              cyclesCompleted: pulseSnapshot.cyclesCompleted,
-              nextTransitionUptimeMs: pulseSnapshot.nextTransitionUptimeMs,
-              lastReason: pulseSnapshot.lastReason ?? diagnostics?.lastReason ?? null,
-              requestedOutputOn: diagnostics?.automationRequestedRelayState ?? null,
-              finalOutputOn: shellyRelayState ?? null,
-              automationFault:
-                control?.automationFault ?? diagnostics?.automationFault ?? null,
-              hardSafety: control?.safetyLockout ?? diagnostics?.safetyLockout ?? null,
-              hardSafetyReason:
-                control?.safetyReason ?? diagnostics?.safetyReason ?? null,
-              deviceUptimeMs:
-                snapshot?.time.uptimeSec != null &&
-                Number.isFinite(snapshot.time.uptimeSec)
-                  ? snapshot.time.uptimeSec * 1000
-                  : null
-            }
-          : null
-      )
-    : null;
+  const pulseStatus = climatePulseOperationalStatus({
+    installation,
+    snapshot,
+    control
+  });
   const resources = resourcesQuery.data;
   const { bleSensors, scriptRows } = formatClimateDetailDiagnostics({
     sensors: configuredSensors,
