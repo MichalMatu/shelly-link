@@ -2,6 +2,7 @@ import type { TimeScheduleSetupFlow } from '../pageContracts.js';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useEffect, useState, type UIEvent } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
+import { PulseCycleEditor } from '../../../features/automations/pulseCyclePublic.js';
 import { useTimeAutomationSetupFlow } from '../../../flows/time-automation/useTimeAutomationSetupFlow.js';
 import { mutationError, type HardwarePageProps } from '../helpers.js';
 import './TimeScheduleSetupPage.css';
@@ -233,6 +234,14 @@ export const TimeScheduleSetupPage = ({
         </div>
       </div>
 
+      {timeFlow.canConfigurePulse && (
+        <PulseCycleEditor
+          draft={timeFlow.pulseCycleDraft}
+          validation={timeFlow.pulseCycleValidation}
+          onChange={timeFlow.setPulseCycleDraft}
+        />
+      )}
+
       {!inline && (
         <div className="time-schedule-guidance">
           <p className="time-schedule-note">{t('time.localClockHint')}</p>
@@ -247,6 +256,7 @@ export const TimeScheduleSetupPage = ({
           disabled={
             !flow.selectedShelly ||
             !timeFlow.configState.ok ||
+            !timeFlow.pulseCycleValidation.ok ||
             timeFlow.installMutation.isPending
           }
           onClick={() => void install()}
