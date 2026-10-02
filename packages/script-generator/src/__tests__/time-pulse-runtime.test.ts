@@ -97,7 +97,11 @@ const runGenerated = ({
     timers,
     relayCalls,
     advance,
-    emit: (event: unknown) => eventHandler?.(event)
+    emit: (event: unknown) => eventHandler?.(event),
+    setClock: (time: string, unixtime: number) => {
+      sysStatus.time = time;
+      sysStatus.unixtime = unixtime;
+    }
   };
 };
 
@@ -178,10 +182,32 @@ describe('Time + Pulse generated runtime', () => {
     expect(runtime.relayCalls.at(-1)).toBe(true);
   });
 
-  it('fails safe OFF when the Shelly clock is not trustworthy', () => {
+  it('fails safe OFF while the Shelly clock is not trustworthy', () => {
     const runtime = runGenerated({ localTime: '23:30', unixTime: 0 });
     expect(runtime.relayCalls).toEqual([false]);
-    expect(runtime.timers.size).toBe(0);
+    expect(runtime.timers.size).toBe(1);
+    expect(runtime.api.rq(true)).toBe(-1);
+  });
+
+  it('recovers automatically after the Shelly clock becomes trustworthy', () => {
+    const runtime = runGenerated({ localTime: '23:30', unixTime: 0 });
+    expect(runtime.relayCalls).toEqual([false]);
+
+    runtime.setClock('23:30', 1_800_000_000);
+    runtime.advance(30_000);
+
+    expect(runtime.relayCalls.at(-1)).toBe(true);
+    expect(runtime.api.rq(true)).toBe(1);
+  });
+
+  it('does not clear a protection fault while recovering the clock', () => {
+    const runtime = runGenerated({ localTime: '23:30', unixTime: 0 });
+    runtime.emit({ component: 'switch:0', delta: { errors: ['overtemp'] } });
+    runtime.setClock('23:30', 1_800_000_000);
+
+    runtime.advance(30_000);
+
+    expect(runtime.relayCalls.at(-1)).toBe(false);
     expect(runtime.api.rq(true)).toBe(-1);
   });
 

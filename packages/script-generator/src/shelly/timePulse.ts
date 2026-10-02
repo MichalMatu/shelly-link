@@ -65,7 +65,7 @@ function ft(q){R.af=q||"sf";cx();R.a=false;ff()}`;
 
 const renderTimePulseGate = (): string =>
   `function rq(o){if(!o){var p=R.ps>0&&R.ps<4;cx();R.a=false;sw(false,p?"pp":"pw");return 0}if(R.af)return-1;px();return 1}
-function bw(){var y=Shelly.getComponentStatus("sys"),t=y&&y.time,u=y&&y.unixtime,m=t?(t.slice(0,2)-0)*60+(t.slice(3,5)-0):-1,a=C.w[0],b=C.w[1];if(!u||u<1600000000||m<0||m>1439||m!==m){R.af="tm";rq(false);return}R.af=null;rq(a<b?m>=a&&m<b:m>=a||m<b)}`;
+function bw(){var y=Shelly.getComponentStatus("sys"),t=y&&y.time,u=y&&y.unixtime,m=t?(t.slice(0,2)-0)*60+(t.slice(3,5)-0):-1,a=C.w[0],b=C.w[1];if(!u||u<1600000000||m<0||m>1439||m!==m){if(!R.af||R.af==="tm")R.af="tm";rq(false);Timer.set(30000,false,bw);return}if(R.af==="tm")R.af=null;if(R.af)return;rq(a<b?m>=a&&m<b:m>=a||m<b)}`;
 
 const renderTimePulseBoot =
   (): string => `function bt(){Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.af="rc";ff();return}R.on=false;var s=Shelly.getComponentStatus("switch:"+C.i);if(s&&s.errors&&s.errors[0]){ft(s.errors[0]);return}bw()})}
