@@ -1,6 +1,7 @@
-import { FeedbackPanel, Modal } from '@lcl/ui';
+import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   ClimateScriptDetailSection,
   Pulse,
@@ -48,6 +49,18 @@ export const StandalonePulseInstallationDetail = ({
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const toastIdRef = useRef(0);
+  const pushToast = useCallback((tone: ToastTone, title: string) => {
+    toastIdRef.current += 1;
+    setToasts((current) => [
+      ...current.slice(-2),
+      { id: `pulse-detail-toast-${toastIdRef.current}`, tone, title }
+    ]);
+  }, []);
+  const dismissToast = useCallback((id: string) => {
+    setToasts((current) => current.filter((toast) => toast.id !== id));
+  }, []);
   const pulseLabels = pulseCycleCopy[locale];
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
@@ -93,9 +106,14 @@ export const StandalonePulseInstallationDetail = ({
     (runtimeQuery.data !== undefined && !runtimeMatches);
 
   const copyScript = () => {
-    if (!scriptQuery.data || typeof navigator === 'undefined' || !navigator.clipboard)
+    if (!scriptQuery.data || typeof navigator === 'undefined' || !navigator.clipboard) {
+      pushToast('warning', scriptLabels.copyFailed);
       return;
-    void navigator.clipboard.writeText(scriptQuery.data);
+    }
+    void navigator.clipboard
+      .writeText(scriptQuery.data)
+      .then(() => pushToast('ok', scriptLabels.copyDone))
+      .catch(() => pushToast('warning', scriptLabels.copyFailed));
   };
 
   return (
@@ -251,6 +269,13 @@ export const StandalonePulseInstallationDetail = ({
         deviceName={forgetOpen && savedDevice ? savedDevice.name : null}
         automationName={forgetOpen ? installation.shelly.name : null}
         onClose={() => setForgetOpen(false)}
+      />
+
+      <AppToastViewport
+        dismissLabel={t('toast.dismiss')}
+        label={t('toast.regionLabel')}
+        toasts={toasts}
+        onDismiss={dismissToast}
       />
     </main>
   );
