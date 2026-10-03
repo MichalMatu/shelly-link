@@ -1,0 +1,273 @@
+[
+  {
+    "schema": "shelly-link-product-matrix-case.v1",
+    "name": "valid-climate-composition",
+    "caseIndex": 9000,
+    "seed": 12655230,
+    "kind": "climate",
+    "expectation": "accept",
+    "tags": ["valid", "climate", "dehumidifying", "mixed", "pulse-window"],
+    "dimensions": {
+      "mode": "dehumidifying",
+      "sensorCount": 4,
+      "profilePattern": "mixed",
+      "aggregation": "firstValid",
+      "vpd": true,
+      "executionShape": "pulse-window",
+      "windowKind": "overnight",
+      "pulseMode": "continuous",
+      "startPhase": "off",
+      "initialDelay": "enabled",
+      "onMs": 2000,
+      "offMs": 1000
+    },
+    "config": {
+      "version": 1,
+      "sensor": {
+        "profileId": "xiaomi_lywsd03mmc_bthome_v2",
+        "sensorId": "matrix-9000-0",
+        "runtimeAddress": "02:4C:43:01:82:B8",
+        "displayName": "Xiaomi 1",
+        "parserValidated": true
+      },
+      "output": {
+        "profileId": "shelly_plug_s_gen3",
+        "relayId": 0
+      },
+      "rule": {
+        "mode": "dehumidifying",
+        "control": {
+          "metric": "humidity",
+          "direction": "above",
+          "onThreshold": 77,
+          "offThreshold": 73
+        },
+        "vpdAssist": {
+          "enabled": true,
+          "targetKpa": 0.8
+        },
+        "staleTimeoutSec": 30,
+        "minChangeMs": 1000,
+        "maxOnMs": 3600000,
+        "rssiMin": -80,
+        "consecutiveHits": 2,
+        "failSafe": "off",
+        "bootState": "off",
+        "relayDebounce": {
+          "turnOnMs": 0,
+          "turnOffMs": 1000
+        }
+      },
+      "diagnostics": {
+        "enabled": true
+      },
+      "sensorSet": {
+        "aggregation": "firstValid",
+        "additionalSensors": [
+          {
+            "profileId": "tp357_custom_v1",
+            "sensorId": "matrix-9000-1",
+            "runtimeAddress": "02:4C:43:01:82:DD",
+            "displayName": "TP357 2",
+            "parserValidated": true
+          },
+          {
+            "profileId": "xiaomi_lywsd03mmc_bthome_v2",
+            "sensorId": "matrix-9000-2",
+            "runtimeAddress": "02:4C:43:01:83:02",
+            "displayName": "Xiaomi 3",
+            "parserValidated": true
+          },
+          {
+            "profileId": "tp357_custom_v1",
+            "sensorId": "matrix-9000-3",
+            "runtimeAddress": "02:4C:43:01:83:27",
+            "displayName": "TP357 4",
+            "parserValidated": true
+          }
+        ]
+      },
+      "execution": {
+        "activeWindow": {
+          "startTime": "23:59",
+          "endTime": "00:01"
+        },
+        "pulse": {
+          "onMs": 2000,
+          "offMs": 1000,
+          "initialDelayMs": 30000,
+          "startPhase": "off",
+          "execution": {
+            "mode": "continuous"
+          }
+        }
+      }
+    }
+  },
+  {
+    "schema": "shelly-link-product-matrix-case.v1",
+    "name": "valid-time-pulse",
+    "caseIndex": 9001,
+    "seed": 465470,
+    "kind": "time-pulse",
+    "expectation": "accept",
+    "tags": ["valid", "time", "pulse", "overnight", "duration"],
+    "dimensions": {
+      "windowKind": "overnight",
+      "pulseMode": "duration",
+      "startPhase": "off",
+      "initialDelay": "enabled",
+      "onMs": 60000,
+      "offMs": 86400000
+    },
+    "config": {
+      "schedule": {
+        "relayId": 0,
+        "onTime": "23:59",
+        "offTime": "00:01"
+      },
+      "pulse": {
+        "onMs": 60000,
+        "offMs": 86400000,
+        "initialDelayMs": 1000,
+        "startPhase": "off",
+        "execution": {
+          "mode": "duration",
+          "durationMs": 60000
+        }
+      }
+    }
+  },
+  {
+    "schema": "shelly-link-product-matrix-case.v1",
+    "name": "valid-standalone-pulse",
+    "caseIndex": 9002,
+    "seed": 5742877,
+    "kind": "standalone-pulse",
+    "expectation": "accept",
+    "tags": ["valid", "standalone-pulse", "cycles"],
+    "dimensions": {
+      "pulseMode": "cycles",
+      "startPhase": "off",
+      "initialDelay": "enabled",
+      "onMs": 1000,
+      "offMs": 10000
+    },
+    "config": {
+      "relayId": 0,
+      "pulse": {
+        "onMs": 1000,
+        "offMs": 10000,
+        "initialDelayMs": 1000,
+        "startPhase": "off",
+        "execution": {
+          "mode": "cycles",
+          "count": 100000
+        }
+      }
+    }
+  },
+  {
+    "schema": "shelly-link-product-matrix-case.v1",
+    "name": "valid-pulse-core-boundaries",
+    "caseIndex": 9003,
+    "seed": 723581,
+    "kind": "pulse-core",
+    "expectation": "accept",
+    "tags": ["valid", "pulse-core", "continuous"],
+    "dimensions": {
+      "pulseMode": "continuous",
+      "startPhase": "on",
+      "initialDelay": "enabled",
+      "onMs": 2000,
+      "offMs": 60000
+    },
+    "config": {
+      "onMs": 2000,
+      "offMs": 60000,
+      "initialDelayMs": 30000,
+      "startPhase": "on",
+      "execution": {
+        "mode": "continuous"
+      }
+    }
+  },
+  {
+    "schema": "shelly-link-product-matrix-case.v1",
+    "name": "invalid-climate-duplicate-sensor",
+    "caseIndex": 9100,
+    "seed": 854814,
+    "kind": "climate",
+    "expectation": "reject",
+    "tags": ["invalid", "climate", "sensor-identity"],
+    "dimensions": {
+      "invalidReason": "duplicate-runtime-address"
+    },
+    "config": {
+      "version": 1,
+      "sensor": {
+        "profileId": "xiaomi_lywsd03mmc_bthome_v2",
+        "sensorId": "demo-xiaomi-bthome",
+        "runtimeAddress": "AA:BB:CC:DD:EE:FF",
+        "displayName": "Xiaomi LYWSD03MMC demo",
+        "parserValidated": true
+      },
+      "output": {
+        "profileId": "shelly_plug_s_gen3",
+        "relayId": 0
+      },
+      "rule": {
+        "mode": "heating",
+        "control": {
+          "metric": "temperature",
+          "direction": "below",
+          "onThreshold": 19,
+          "offThreshold": 20
+        },
+        "vpdAssist": {
+          "enabled": false,
+          "targetKpa": 1.2
+        },
+        "staleTimeoutSec": 120,
+        "minChangeMs": 120000,
+        "maxOnMs": 14400000,
+        "rssiMin": -85,
+        "consecutiveHits": 2,
+        "failSafe": "off",
+        "bootState": "off"
+      },
+      "diagnostics": {
+        "enabled": true
+      },
+      "sensorSet": {
+        "aggregation": "avg",
+        "additionalSensors": [
+          {
+            "profileId": "xiaomi_lywsd03mmc_bthome_v2",
+            "sensorId": "duplicate",
+            "runtimeAddress": "AA:BB:CC:DD:EE:FF",
+            "displayName": "Xiaomi LYWSD03MMC demo",
+            "parserValidated": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "schema": "shelly-link-product-matrix-case.v1",
+    "name": "invalid-time-steady-equal-boundaries",
+    "caseIndex": 9101,
+    "seed": 1822,
+    "kind": "time-steady",
+    "expectation": "reject",
+    "tags": ["invalid", "time", "steady"],
+    "dimensions": {
+      "invalidReason": "equal-boundaries"
+    },
+    "config": {
+      "relayId": 0,
+      "onTime": "08:00",
+      "offTime": "08:00"
+    }
+  }
+]
