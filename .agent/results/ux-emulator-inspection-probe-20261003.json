@@ -1,0 +1,60 @@
+{
+  "allow_write": false,
+  "attempt_id": "0d2eae2e4fff71d30cf9300a",
+  "command_timeout": 900,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 478,
+      "command": "set -e; SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}; echo SDK=$SDK; ls -la \"$SDK/emulator/emulator\" \"$SDK/platform-tools/adb\"; echo '--- AVDs ---'; \"$SDK/emulator/emulator\" -list-avds || true; echo '--- adb devices ---'; \"$SDK/platform-tools/adb\" devices -l; echo '--- android project ---'; test -d apps/mobile/android && echo yes; echo '--- branch ---'; git rev-parse HEAD",
+      "current_rss_mb": 2.27,
+      "elapsed_seconds": 0.969,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "output": "SDK=/Users/michal/Library/Android/sdk\n-rwxr-xr-x@ 1 michal  staff   8419504 Sep  9 07:51 /Users/michal/Library/Android/sdk/emulator/emulator\n-rwxr-xr-x@ 1 michal  staff  18844128 Aug  8 17:18 /Users/michal/Library/Android/sdk/platform-tools/adb\n--- AVDs ---\nmedium_phone\n--- adb devices ---\n* daemon not running; starting now at tcp:5037\n* daemon started successfully\nList of devices attached\n\n--- android project ---\nyes\n--- branch ---\n7d77d4be65a60c3f2c3e3d2e4ca0b8e6647f6897\n",
+      "output_policy": "stream",
+      "output_truncated": false,
+      "peak_rss_mb": 2.27,
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.2",
+  "edits": {},
+  "finished_at": "2026-10-03T06:35:55.992073+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.068,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.076,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "ux-emulator-inspection-probe-20261003",
+  "idle_timeout": 300,
+  "memory_limit_mb": 2048,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 0.969,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-03T06:35:53.253725+00:00",
+  "status": "done",
+  "task_digest": "dd38c191b8179e33a9e4daa79c6ed0d2a39a7dd5e0999d7a143d341696a5c781",
+  "task_timeout": 1800,
+  "verification": [],
+  "work_branch": "ux/polish-foundation-20261003"
+}

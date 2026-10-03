@@ -1,0 +1,9 @@
+{
+  "id": "shelly-detail-identity-source-pass-20260926-748",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "started_at": null,
+  "finished_at": "2026-09-26T22:07:13.694698+00:00",
+  "daemon_version": "4.18.25",
+  "error": "JSONDecodeError: Invalid control character at: line 14 column 203 (char 688)"
+}

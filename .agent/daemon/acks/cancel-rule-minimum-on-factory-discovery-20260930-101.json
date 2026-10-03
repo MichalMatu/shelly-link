@@ -1,0 +1,14 @@
+{
+  "id": "cancel-rule-minimum-on-factory-discovery-20260930-101",
+  "action": "cancel_task",
+  "status": "accepted",
+  "daemon_version": "4.19.9",
+  "updated_at": "2026-09-30T09:25:52.780601+00:00",
+  "repository_id": "shelly-link",
+  "repository": "MichalMatu/shelly-link",
+  "control_branch": "agent-control",
+  "default_branch": "main",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "task_id": "rule-minimum-on-factory-discovery-20260930-101",
+  "result": "terminating_active_task"
+}

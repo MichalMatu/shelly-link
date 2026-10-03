@@ -1,0 +1,133 @@
+diff --git a/apps/mobile/src/screens/TimeInstallationDetail.tsx b/apps/mobile/src/screens/TimeInstallationDetail.tsx
+index 302d8ca5..00000000 100644
+--- a/apps/mobile/src/screens/TimeInstallationDetail.tsx
++++ b/apps/mobile/src/screens/TimeInstallationDetail.tsx
+@@ -120,6 +120,9 @@ export const TimeInstallationDetail = ({
+             )}
+ 
+             <section className="installation-automation-live-state plug-detail-section">
++              <h2 className="plug-detail-section__title">
++                {t('detail.currentState')}
++              </h2>
+               {pulseInstallation ? (
+                 <Pulse.Operational.StatusSummary status={pulseQuery.data} />
+               ) : (
+@@ -140,25 +143,30 @@ export const TimeInstallationDetail = ({
+                 </div>
+               </dl>
+             </section>
+ 
+-            <TimeScheduleSetupPage
+-              flow={{
+-                selectedShelly: {
+-                  id: installation.shelly.deviceId,
+-                  name: installation.shelly.name,
+-                  baseUrl: installation.shelly.baseUrl,
+-                  scriptIdInput: '1',
+-                  model: installation.shelly.model,
+-                  gen: installation.shelly.gen
+-                }
+-              }}
+-              editInstallationId={installation.id}
+-              inline
+-              onInstalled={() => {
+-                void runtimeQuery.refetch();
+-                if (pulseInstallation) void pulseQuery.refetch();
+-              }}
+-              onPendingChange={setTimeEditPending}
+-            />
++            <section className="plug-detail-section">
++              <h2 className="plug-detail-section__title">
++                {t('detail.configuration')}
++              </h2>
++              <TimeScheduleSetupPage
++                flow={{
++                  selectedShelly: {
++                    id: installation.shelly.deviceId,
++                    name: installation.shelly.name,
++                    baseUrl: installation.shelly.baseUrl,
++                    scriptIdInput: '1',
++                    model: installation.shelly.model,
++                    gen: installation.shelly.gen
++                  }
++                }}
++                editInstallationId={installation.id}
++                inline
++                onInstalled={() => {
++                  void runtimeQuery.refetch();
++                  if (pulseInstallation) void pulseQuery.refetch();
++                }}
++                onPendingChange={setTimeEditPending}
++              />
++            </section>
+ 
+             <div className="installation-detail-delete-action">
+               <button
+diff --git a/apps/mobile/src/app/StandalonePulseInstallationDetail.tsx b/apps/mobile/src/app/StandalonePulseInstallationDetail.tsx
+index 67049deb..00000000 100644
+--- a/apps/mobile/src/app/StandalonePulseInstallationDetail.tsx
++++ b/apps/mobile/src/app/StandalonePulseInstallationDetail.tsx
+@@ -118,7 +118,13 @@ export const StandalonePulseInstallationDetail = ({
+             )}
+ 
+             <section className="installation-automation-live-state plug-detail-section">
++              <h2 className="plug-detail-section__title">
++                {t('detail.currentState')}
++              </h2>
+               <Pulse.Operational.StatusSummary status={pulseQuery.data} />
++            </section>
++
++            <section className="plug-detail-section">
++              <h2 className="plug-detail-section__title">{t('detail.configuration')}</h2>
+               <dl className="automation-summary installation-detail-summary">
+                 <div>
+                   <dt>{pulseLabels.onSeconds}</dt>
+diff --git a/apps/mobile/e2e/visual-contract.ts b/apps/mobile/e2e/visual-contract.ts
+index 5fcc080d..00000000 100644
+--- a/apps/mobile/e2e/visual-contract.ts
++++ b/apps/mobile/e2e/visual-contract.ts
+@@ -29,7 +29,8 @@ export const visualScreenNames = [
+   '25-time-pulse-setup',
+   '26-standalone-pulse-setup',
+   '27-standalone-pulse-dashboard',
+-  '28-thermometer-settings'
++  '28-thermometer-settings',
++  '29-standalone-pulse-detail'
+ ] as const;
+ 
+ export type VisualScreenName = (typeof visualScreenNames)[number];
+diff --git a/apps/mobile/e2e/pulse-operational-status.spec.ts b/apps/mobile/e2e/pulse-operational-status.spec.ts
+index a9042914..00000000 100644
+--- a/apps/mobile/e2e/pulse-operational-status.spec.ts
++++ b/apps/mobile/e2e/pulse-operational-status.spec.ts
+@@ -218,6 +218,10 @@ for (const viewport of viewports) {
+     await expect(
+       page.locator('.plug-detail-tabs__item[data-automation-icon="clock"]')
+     ).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Stan bieżący' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Konfiguracja' })).toBeVisible();
+     await expectPulseRuntimeControlsAbsent(page);
+ 
+     const detailSurface = page.locator('.plug-detail-surface');
+@@ -235,6 +239,9 @@ for (const viewport of viewports) {
+     await expect(page.getByRole('button', { name: 'Bluetooth' })).toBeVisible();
+     await expect(page.getByRole('button', { name: 'Skrypt' })).toBeVisible();
+     await expectNoHorizontalOverflow(page);
++    if (viewport.name === 'phone-large') {
++      await expectVisualScreen(page, '29-standalone-pulse-detail');
++    }
+ 
+     const surfaceBox = await detailSurface.boundingBox();
+     const fullBox = await fullStatus.boundingBox();
+diff --git a/apps/mobile/e2e/responsive.spec.ts b/apps/mobile/e2e/responsive.spec.ts
+index ad4f2dbc..00000000 100644
+--- a/apps/mobile/e2e/responsive.spec.ts
++++ b/apps/mobile/e2e/responsive.spec.ts
+@@ -1010,6 +1010,8 @@ for (const viewport of viewports) {
+     await expect(page.getByRole('heading', { name: 'Shelly Plug S Gen3' })).toHaveCount(
+       0
+     );
++    await expect(page.getByRole('heading', { name: 'Stan bieżący' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Konfiguracja' })).toBeVisible();
+     await expect(page.getByRole('heading', { name: 'Harmonogram' })).toHaveCount(0);
+     await expect(page.getByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();

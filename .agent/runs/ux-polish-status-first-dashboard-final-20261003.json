@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "ux-polish-status-first-dashboard-final-20261003",
+  "task_digest": "2d4e8c1f9088448b692f33f865239c9ab2156ee2accd629f7258330b2e209412",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T04:52:47.197963+00:00",
+  "attempt_id": "6e392d94da0528da780a2284",
+  "daemon_version": "4.20.1",
+  "daemon_pid": 67317,
+  "updated_at": "2026-10-03T04:52:47.602726+00:00",
+  "pid": 67317
+}

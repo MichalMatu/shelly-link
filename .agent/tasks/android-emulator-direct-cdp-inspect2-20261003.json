@@ -1,0 +1,15 @@
+{
+  "id": "android-emulator-direct-cdp-inspect2-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "inspection/android-emulator-20261003",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "task_timeout": 7200,
+  "idle_timeout": 900,
+  "commands": [
+    "git status --short && git rev-parse HEAD && git rev-parse origin/inspection/android-emulator-20261003",
+    "git fetch origin agent-control && git show origin/agent-control:.agent/tasks/android-emulator-direct-cdp-inspect2-20261003.payload/run.sh > /tmp/android-direct-cdp-wrapper2.sh && chmod +x /tmp/android-direct-cdp-wrapper2.sh && /tmp/android-direct-cdp-wrapper2.sh"
+  ]
+}

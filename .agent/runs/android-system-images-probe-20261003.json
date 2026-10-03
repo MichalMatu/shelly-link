@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "android-system-images-probe-20261003",
+  "task_digest": "f22b8b6b3a3e3b89eca3b46c4caa5149a89aead419411ddd66d11cebe85fdb0e",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-03T07:06:25.383211+00:00",
+  "attempt_id": "4f2bcbacabfa254da299e6a3",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 17295,
+  "updated_at": "2026-10-03T07:06:25.644835+00:00",
+  "pid": 17295
+}

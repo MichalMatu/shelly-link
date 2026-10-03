@@ -1,0 +1,21 @@
+{
+  "id": "ux-polish-shared-setup-nav-fixed-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "ux/polish-foundation-20261003",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 3072,
+  "task_timeout": 7200,
+  "idle_timeout": 900,
+  "commands": [
+    "git status --short && git rev-parse HEAD && git rev-parse origin/ux/polish-foundation-20261003",
+    "git fetch origin agent-control && git show origin/agent-control:.agent/payloads/ux-polish-shared-setup-nav-20261003.py | python3 -",
+    "pnpm exec prettier --write apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx apps/mobile/src/theme/theme.css scripts/quality/ux-gate.mjs docs/UX_VISUAL_CONTRACT.md apps/mobile/src/__tests__/hardware-setup.test.tsx",
+    "pnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx src/routes/hardwareSetupTabNavigation.pulse.test.ts && pnpm quality:ux",
+    "git diff --check",
+    "git add apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx apps/mobile/src/theme/theme.css scripts/quality/ux-gate.mjs docs/UX_VISUAL_CONTRACT.md apps/mobile/src/__tests__/hardware-setup.test.tsx && git commit -m 'Reuse shared setup segmented navigation'",
+    "pnpm check:full",
+    "git push --no-verify origin HEAD:ux/polish-foundation-20261003"
+  ]
+}

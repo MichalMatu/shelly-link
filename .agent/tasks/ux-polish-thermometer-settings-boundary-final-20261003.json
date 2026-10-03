@@ -1,0 +1,28 @@
+{
+  "id": "ux-polish-thermometer-settings-boundary-final-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "ux/polish-foundation-20261003",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "task_timeout": 10800,
+  "idle_timeout": 900,
+  "commands": [
+    "git status --short --untracked-files=all && git rev-parse HEAD && git rev-parse origin/ux/polish-foundation-20261003",
+    "git fetch origin agent-control && git show origin/agent-control:.agent/payloads/ux-polish-thermometer-settings-20261003.py | python3 - && git show origin/agent-control:.agent/payloads/ux-polish-thermometer-settings-responsive-fix-20261003.py | python3 - && git show origin/agent-control:.agent/payloads/ux-polish-thermometer-settings-boundary-fix-20261003.py | python3 -",
+    "pnpm exec prettier --write apps/mobile/src/features/thermometers/components/SensorLiveReadings.tsx apps/mobile/src/features/thermometers/components/ThermometerSettingsPage.tsx apps/mobile/src/features/thermometers/components/ThermometerSettingsPage.css apps/mobile/src/features/thermometers/components/ThermometerSettingsRoute.tsx apps/mobile/src/features/thermometers/components/SavedSensorCard.tsx apps/mobile/src/features/thermometers/index.ts apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/app/locales/en.ts apps/mobile/src/app/locales/pl.ts apps/mobile/src/app/locales/de.ts apps/mobile/src/app/locales/es.ts apps/mobile/src/app/locales/fr.ts apps/mobile/src/app/locales/it.ts apps/mobile/src/app/locales/ptBr.ts apps/mobile/src/__tests__/app-routes.test.tsx apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/visual-contract.ts docs/UX_VISUAL_CONTRACT.md scripts/quality/ux-gate.mjs",
+    "pnpm quality:ux && pnpm quality:repo && pnpm typecheck && git diff --check",
+    "pnpm --filter @lcl/mobile exec vitest run src/__tests__/app-routes.test.tsx src/screens/hardware-setup/pages/SensorSetupPresentation.test.tsx src/__tests__/hardware-setup.test.tsx --maxWorkers=2",
+    "PORT=$(python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()\"); LCL_E2E_PORT=$PORT pnpm e2e:visual:update",
+    "python3 -c \"import subprocess; rows=subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],text=True).splitlines(); got=sorted(row[3:] for row in rows if row[3:].endswith('.png')); expected=sorted(['apps/mobile/e2e/responsive.spec.ts-snapshots/12-thermometers-dashboard-darwin.png','apps/mobile/e2e/responsive.spec.ts-snapshots/28-thermometer-settings-darwin.png']); print('visual snapshot delta:', got); assert got == expected, (got, expected)\"",
+    "PORT=$(python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()\"); LCL_E2E_PORT=$PORT pnpm e2e:visual",
+    "git add apps/mobile/src/features/thermometers/components/SensorLiveReadings.tsx apps/mobile/src/features/thermometers/components/ThermometerSettingsPage.tsx apps/mobile/src/features/thermometers/components/ThermometerSettingsPage.css apps/mobile/src/features/thermometers/components/ThermometerSettingsRoute.tsx apps/mobile/src/features/thermometers/components/SavedSensorCard.tsx apps/mobile/src/features/thermometers/index.ts apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/app/locales/en.ts apps/mobile/src/app/locales/pl.ts apps/mobile/src/app/locales/de.ts apps/mobile/src/app/locales/es.ts apps/mobile/src/app/locales/fr.ts apps/mobile/src/app/locales/it.ts apps/mobile/src/app/locales/ptBr.ts apps/mobile/src/__tests__/app-routes.test.tsx apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/visual-contract.ts docs/UX_VISUAL_CONTRACT.md scripts/quality/ux-gate.mjs apps/mobile/e2e/responsive.spec.ts-snapshots/12-thermometers-dashboard-darwin.png apps/mobile/e2e/responsive.spec.ts-snapshots/28-thermometer-settings-darwin.png && git commit -m 'Polish Thermometer settings hierarchy'",
+    "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck",
+    "pnpm -r --filter '!@lcl/mobile' test",
+    "pnpm --filter @lcl/mobile exec vitest run --passWithNoTests --maxWorkers=2",
+    "pnpm test:product-matrix && pnpm test:coverage:core && pnpm build && pnpm quality:performance",
+    "node scripts/quality/run-prepush-e2e.mjs e2e:responsive",
+    "git status --short --untracked-files=all && git push --no-verify origin HEAD:ux/polish-foundation-20261003"
+  ]
+}

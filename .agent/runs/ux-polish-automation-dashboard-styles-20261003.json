@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "ux-polish-automation-dashboard-styles-20261003",
+  "task_digest": "00778e6139e91f249628902c4d53ac710b8b0a174e4242c8351ff05441517d20",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T05:01:26.479385+00:00",
+  "attempt_id": "c8601f0dccd6b3e6987323a4",
+  "daemon_version": "4.20.1",
+  "daemon_pid": 90470,
+  "updated_at": "2026-10-03T05:01:26.935338+00:00",
+  "pid": 90470
+}

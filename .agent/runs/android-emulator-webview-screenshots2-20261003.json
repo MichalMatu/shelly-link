@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "android-emulator-webview-screenshots2-20261003",
+  "task_digest": "c6c0e99c787a39170216fa90b51b5adc4b46cdb045c2b00252c1e19d14a7e32e",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-03T17:06:57.953170+00:00",
+  "attempt_id": "03d8f34bb611414780662cb1",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 97476,
+  "updated_at": "2026-10-03T17:06:58.607312+00:00",
+  "pid": 97476
+}

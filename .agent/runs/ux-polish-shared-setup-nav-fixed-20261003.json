@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "ux-polish-shared-setup-nav-fixed-20261003",
+  "task_digest": "83fbb4ee8c6bf1fa6624c5cac1480f6416aa986b1571149f575ab31825685540",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T04:27:31.161786+00:00",
+  "attempt_id": "abb899117d14cbd6d1eddd07",
+  "daemon_version": "4.20.0",
+  "daemon_pid": 25498,
+  "updated_at": "2026-10-03T04:27:31.947108+00:00",
+  "pid": 25498
+}

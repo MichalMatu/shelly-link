@@ -1,0 +1,20 @@
+{
+  "id": "ux-time-pulse-detail-hierarchy-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "ux/polish-foundation-20261003",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "task_timeout": 7200,
+  "idle_timeout": 900,
+  "commands": [
+    "git status --short && git rev-parse HEAD && git rev-parse origin/ux/polish-foundation-20261003",
+    "git fetch origin agent-control && git show origin/agent-control:.agent/tasks/ux-time-pulse-detail-hierarchy-20261003.payload/change.patch > /tmp/ux-time-pulse-detail.patch && git apply --check /tmp/ux-time-pulse-detail.patch && git apply /tmp/ux-time-pulse-detail.patch",
+    "pnpm --filter @lcl/mobile test",
+    "pnpm --filter @lcl/mobile exec playwright test e2e/responsive.spec.ts --grep 'daily time automation installs and renders on phone-large' --update-snapshots",
+    "pnpm --filter @lcl/mobile exec playwright test e2e/pulse-operational-status.spec.ts --grep 'Pulse operational status stays responsive on phone-large' --update-snapshots",
+    "pnpm check",
+    "git status --short && git diff --check && git add apps/mobile/src/screens/TimeInstallationDetail.tsx apps/mobile/src/app/StandalonePulseInstallationDetail.tsx apps/mobile/e2e/visual-contract.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/pulse-operational-status.spec.ts apps/mobile/e2e/responsive.spec.ts-snapshots/11-time-detail-darwin.png apps/mobile/e2e/pulse-operational-status.spec.ts-snapshots/27-standalone-pulse-dashboard-darwin.png apps/mobile/e2e/pulse-operational-status.spec.ts-snapshots/29-standalone-pulse-detail-darwin.png && git commit -m 'Polish Time and Pulse detail hierarchy' && git push origin HEAD:ux/polish-foundation-20261003"
+  ]
+}

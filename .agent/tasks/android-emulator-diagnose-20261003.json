@@ -1,0 +1,14 @@
+{
+  "id": "android-emulator-diagnose-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "inspection/android-emulator-20261003",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "task_timeout": 1200,
+  "idle_timeout": 300,
+  "commands": [
+    "set -e; echo '--- emulator log ---'; tail -200 /tmp/shelly-link-emulator.log 2>/dev/null || true; echo '--- avd config ---'; cat $HOME/.android/avd/medium_phone.avd/config.ini 2>/dev/null || true; echo '--- avd ini ---'; cat $HOME/.android/avd/medium_phone.ini 2>/dev/null || true; echo '--- sdk packages matching system image/emulator ---'; SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}; grep -E 'Pkg.Revision|Pkg.Path|AndroidVersion.ApiLevel|SystemImage.Abi' $HOME/.android/avd/medium_phone.avd/package.xml 2>/dev/null || true; \"$SDK/emulator/emulator\" -version | head -20; echo '--- adb ---'; \"$SDK/platform-tools/adb\" devices -l"
+  ]
+}

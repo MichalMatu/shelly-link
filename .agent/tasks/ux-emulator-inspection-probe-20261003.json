@@ -1,0 +1,14 @@
+{
+  "id": "ux-emulator-inspection-probe-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "ux/polish-foundation-20261003",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 2048,
+  "task_timeout": 1800,
+  "idle_timeout": 300,
+  "commands": [
+    "set -e; SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}; echo SDK=$SDK; ls -la \"$SDK/emulator/emulator\" \"$SDK/platform-tools/adb\"; echo '--- AVDs ---'; \"$SDK/emulator/emulator\" -list-avds || true; echo '--- adb devices ---'; \"$SDK/platform-tools/adb\" devices -l; echo '--- android project ---'; test -d apps/mobile/android && echo yes; echo '--- branch ---'; git rev-parse HEAD"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "android-emulator-inspect-lite-20261003",
+  "task_digest": "2f65bc6a9145925512c75aa73d2926ea90e909ef4ab520126bb8e490f4410832",
+  "status": "failed",
+  "failure_reason": "command_background_process_leak",
+  "finished_at": "2026-10-03T07:05:00.015150+00:00",
+  "attempt_id": "b2a88e3120df3d3265979c4d",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 11287,
+  "updated_at": "2026-10-03T07:05:00.263478+00:00",
+  "pid": 11287
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "ux-polish-thermometer-settings-20261003",
+  "task_digest": "af16b2acdc3965d0efffc5c673fb8470a210ece1c1b12d23af47720b743e7975",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T05:38:18.759939+00:00",
+  "attempt_id": "974acb2333e93a11aa5c07f2",
+  "daemon_version": "4.20.2",
+  "daemon_pid": 57529,
+  "updated_at": "2026-10-03T05:38:19.260176+00:00",
+  "pid": 57529
+}

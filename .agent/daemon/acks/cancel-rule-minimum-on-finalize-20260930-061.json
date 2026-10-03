@@ -1,0 +1,14 @@
+{
+  "id": "cancel-rule-minimum-on-finalize-20260930-061",
+  "action": "cancel_task",
+  "status": "accepted",
+  "daemon_version": "4.19.9",
+  "updated_at": "2026-09-30T08:33:53.830431+00:00",
+  "repository_id": "shelly-link",
+  "repository": "MichalMatu/shelly-link",
+  "control_branch": "agent-control",
+  "default_branch": "main",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "task_id": "rule-minimum-on-finalize-20260930-061",
+  "result": "terminating_active_task"
+}

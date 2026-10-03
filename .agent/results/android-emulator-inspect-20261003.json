@@ -1,0 +1,11 @@
+{
+  "attempt_id": "e84ba11ded8b6d9737770f2b",
+  "daemon_version": "4.20.3",
+  "error": "Previous daemon instance ended while this task was claimed. Automatic replay was blocked.",
+  "failure_reason": "interrupted_previous_attempt",
+  "finished_at": "2026-10-03T06:49:25.465733+00:00",
+  "id": "android-emulator-inspect-20261003",
+  "started_at": "2026-10-03T06:40:19.494556+00:00",
+  "status": "failed",
+  "task_digest": "7c1a049934918f1e8186c369539a257e4138b5ce0cf564f481cba8339f677954"
+}

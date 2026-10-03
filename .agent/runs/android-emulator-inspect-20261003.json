@@ -1,0 +1,11 @@
+{
+  "event": "recovered_interrupted_attempt",
+  "status": "failed",
+  "failure_reason": "interrupted_previous_attempt",
+  "attempt_id": "e84ba11ded8b6d9737770f2b",
+  "task_digest": "7c1a049934918f1e8186c369539a257e4138b5ce0cf564f481cba8339f677954",
+  "updated_at": "2026-10-03T06:49:28.048252+00:00",
+  "task_id": "android-emulator-inspect-20261003",
+  "daemon_version": "4.20.3",
+  "pid": 88420
+}

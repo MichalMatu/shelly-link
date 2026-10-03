@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "android-emulator-direct-cdp-inspect-20261003",
+  "task_digest": "3439187d4c7e292e4f5bf7a16994ccebe35051d474471e27a6359c0c660d10ca",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T16:04:49.893202+00:00",
+  "attempt_id": "401dce3d682d4cc65190ee21",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 92938,
+  "updated_at": "2026-10-03T16:04:50.111874+00:00",
+  "pid": 92938
+}

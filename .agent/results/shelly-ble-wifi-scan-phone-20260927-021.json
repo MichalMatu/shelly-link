@@ -1,0 +1,88 @@
+{
+  "id": "shelly-ble-wifi-scan-phone-20260927-021",
+  "status": "failed",
+  "mode": "commands",
+  "work_branch": "work/shelly-ble-transport",
+  "allow_write": false,
+  "started_at": "2026-09-27T01:12:00.670479+00:00",
+  "command_timeout": 900,
+  "edits": {},
+  "commands": [
+    {
+      "command": "set -euo pipefail; test \"$(git rev-parse HEAD)\" = \"d99652f22b7696921ea50cb16f6cb83835a7e596\"; test -z \"$(git status --short)\"",
+      "exit_code": 0,
+      "output": "",
+      "elapsed_seconds": 0.412,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": null,
+      "output_policy": "stream",
+      "captured_output_chars": 0,
+      "output_truncated": false,
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    },
+    {
+      "command": "set -euo pipefail; SDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"; ADB=\"$SDK/platform-tools/adb\"; SERIAL=RFCT70L7E8J; python3 - <<'PY'\nimport os,re,subprocess,time,xml.etree.ElementTree as ET\nSDK=os.path.expanduser(os.environ.get('ANDROID_SDK_ROOT') or os.environ.get('ANDROID_HOME') or '~/Library/Android/sdk'); adb=SDK+'/platform-tools/adb'; serial='RFCT70L7E8J'\ndef sh(*args): return subprocess.run([adb,'-s',serial,*args],check=True,capture_output=True,text=True)\ndef dump(name):\n sh('shell','uiautomator','dump',f'/sdcard/{name}.xml'); sh('pull',f'/sdcard/{name}.xml',f'/tmp/{name}.xml'); return ET.parse(f'/tmp/{name}.xml').getroot()\ndef center(bounds):\n m=re.match(r'\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]',bounds); assert m,bounds; x1,y1,x2,y2=map(int,m.groups()); return str((x1+x2)//2),str((y1+y2)//2)\ndef tap(node): x,y=center(node.attrib['bounds']); sh('shell','input','tap',x,y); time.sleep(2)\ntime.sleep(2); root=dump('sl-wifi-scan-start')\nvals=[(n,n.attrib.get('text','').strip(),n.attrib.get('content-desc','').strip()) for n in root.iter('node')]\nif not any(d in ('Plug settings','Ustawienia gniazdka') for _,_,d in vals):\n targets=[n for n,t,d in vals if '· Bluetooth' in d]\n if not targets:\n  print('START_UI');\n  for n,t,d in vals:\n   if t or d: print(repr(t),repr(d),n.attrib.get('bounds',''))\n  raise SystemExit('No Bluetooth Plug detail target found')\n tap(targets[0]); root=dump('sl-wifi-scan-detail'); vals=[(n,n.attrib.get('text','').strip(),n.attrib.get('content-desc','').strip()) for n in root.iter('node')]\ntabs=[n for n,t,d in vals if d in ('Plug settings','Ustawienia gniazdka')]; assert len(tabs)==1,[(t,d) for _,t,d in vals if t or d]; tap(tabs[0]); root=dump('sl-wifi-scan-device'); vals=[(n,n.attrib.get('text','').strip(),n.attrib.get('content-desc','').strip()) for n in root.iter('node')]\nscan=[n for n,t,d in vals if t in ('Scan networks','Skanuj sieci') or d in ('Scan networks','Skanuj sieci')]; assert len(scan)==1,[(t,d) for _,t,d in vals if t or d]; tap(scan[0]); time.sleep(10); root=dump('sl-wifi-scan-after'); print('AFTER_SCAN_UI')\nfor n in root.iter('node'):\n t=n.attrib.get('text','').strip(); d=n.attrib.get('content-desc','').strip();\n if t or d: print(repr(t),repr(d),n.attrib.get('bounds',''))\nPY",
+      "exit_code": 1,
+      "output": "Traceback (most recent call last):\n  File \"<stdin>\", line 9, in <module>\n  File \"<stdin>\", line 5, in dump\n  File \"<stdin>\", line 3, in sh\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.9_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py\", line 577, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['/Users/michal/Library/Android/sdk/platform-tools/adb', '-s', 'RFCT70L7E8J', 'shell', 'uiautomator', 'dump', '/sdcard/sl-wifi-scan-start.xml']' returned non-zero exit status 137.\n",
+      "elapsed_seconds": 7.802,
+      "timed_out": false,
+      "idle_timed_out": false,
+      "memory_limit_mb": 2048,
+      "memory_limited": false,
+      "background_process_leak": false,
+      "peak_rss_mb": 26.56,
+      "output_policy": "stream",
+      "captured_output_chars": 610,
+      "output_truncated": false,
+      "current_rss_mb": 26.56,
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 2,
+      "stage_phase": "commands"
+    }
+  ],
+  "verification": [],
+  "stages": [
+    {
+      "stage_name": "command-1",
+      "stage_index": 1,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "passed",
+      "elapsed_seconds": 0.412
+    },
+    {
+      "stage_name": "command-2",
+      "stage_index": 2,
+      "stage_total": 2,
+      "stage_phase": "commands",
+      "outcome": "failed",
+      "elapsed_seconds": 7.802
+    }
+  ],
+  "git_status": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.115
+  },
+  "git_diff": {
+    "exit_code": 0,
+    "output": "",
+    "elapsed_seconds": 0.073
+  },
+  "failure_reason": "command_failed",
+  "finished_at": "2026-09-27T01:12:10.615244+00:00",
+  "task_digest": "79d727dea78598c5ed588f0abae606dfef28e15926c5d8ff1fde163f1500868a",
+  "idle_timeout": 300,
+  "task_timeout": 1200,
+  "memory_limit_mb": 2048,
+  "attempt_id": "c0f4292e922ba3b62a6f21c9",
+  "daemon_version": "4.18.26"
+}

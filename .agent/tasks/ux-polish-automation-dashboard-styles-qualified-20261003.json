@@ -1,0 +1,26 @@
+{
+  "id": "ux-polish-automation-dashboard-styles-qualified-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "ux/polish-foundation-20261003",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 4096,
+  "task_timeout": 10800,
+  "idle_timeout": 900,
+  "commands": [
+    "git status --short --untracked-files=all && git rev-parse HEAD && git rev-parse origin/ux/polish-foundation-20261003",
+    "git fetch origin agent-control && git show origin/agent-control:.agent/payloads/ux-polish-automation-dashboard-styles-20261003.py | python3 - && git show origin/agent-control:.agent/payloads/ux-polish-automation-dashboard-css-gate-20261003.py | python3 -",
+    "pnpm exec prettier --write apps/mobile/src/features/automation-dashboard/components/AutomationDashboardBody.tsx apps/mobile/src/features/automation-dashboard/components/AutomationDashboardBody.css apps/mobile/src/screens/AutomationDashboardScreen.css scripts/quality/ux-gate.mjs",
+    "pnpm quality:ux && pnpm quality:repo && pnpm typecheck && git diff --check",
+    "PORT=$(python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()\"); LCL_E2E_PORT=$PORT pnpm e2e:visual",
+    "python3 -c \"import subprocess; rows=subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],text=True).splitlines(); png=[row[3:] for row in rows if row[3:].endswith('.png')]; print('visual snapshot delta:', png); assert png == []\"",
+    "git add apps/mobile/src/features/automation-dashboard/components/AutomationDashboardBody.tsx apps/mobile/src/features/automation-dashboard/components/AutomationDashboardBody.css apps/mobile/src/screens/AutomationDashboardScreen.css scripts/quality/ux-gate.mjs && git commit -m 'Keep automation dashboard styles feature-local'",
+    "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck",
+    "pnpm -r --filter '!@lcl/mobile' test",
+    "pnpm --filter @lcl/mobile exec vitest run --passWithNoTests --maxWorkers=2",
+    "pnpm test:product-matrix && pnpm test:coverage:core && pnpm build && pnpm quality:performance",
+    "node scripts/quality/run-prepush-e2e.mjs e2e:responsive",
+    "git status --short --untracked-files=all && git push --no-verify origin HEAD:ux/polish-foundation-20261003"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "cancel-history-stacked-visual-refresh-20261001-717",
+  "action": "cancel_task",
+  "status": "accepted",
+  "daemon_version": "4.19.11",
+  "updated_at": "2026-10-01T04:20:09.339902+00:00",
+  "repository_id": "shelly-link",
+  "repository": "MichalMatu/shelly-link",
+  "control_branch": "agent-control",
+  "default_branch": "main",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "task_id": "history-stacked-visual-refresh-20261001-717",
+  "result": "terminating_active_task"
+}

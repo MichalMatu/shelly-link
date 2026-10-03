@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "android-emulator-googleapis-inspect-20261003",
+  "task_digest": "0969fcdf4d76e7578f04d63d8783a51a9ca8dd31910458e15e40c18194422f4d",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T07:10:33.656882+00:00",
+  "attempt_id": "e98f657fb703157385d3272a",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 21636,
+  "updated_at": "2026-10-03T07:10:33.925969+00:00",
+  "pid": 21636
+}

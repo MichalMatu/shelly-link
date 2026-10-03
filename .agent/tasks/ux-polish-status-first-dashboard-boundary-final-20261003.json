@@ -1,0 +1,23 @@
+{
+  "id": "ux-polish-status-first-dashboard-boundary-final-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "ux/polish-foundation-20261003",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 3072,
+  "task_timeout": 7200,
+  "idle_timeout": 900,
+  "commands": [
+    "git status --short --untracked-files=all && git rev-parse HEAD && git rev-parse origin/ux/polish-foundation-20261003",
+    "git fetch origin agent-control && git show origin/agent-control:.agent/payloads/ux-polish-status-first-dashboard-20261003.py | python3 - && git show origin/agent-control:.agent/payloads/ux-polish-status-first-boundary-fix-20261003.py | python3 -",
+    "pnpm exec prettier --write apps/mobile/src/components/AutomationDashboardBody.tsx apps/mobile/src/features/automations/index.ts apps/mobile/src/screens/TimeAutomationCard.tsx apps/mobile/src/app/StandalonePulseAutomationCard.tsx apps/mobile/src/screens/AutomationDashboardScreen.css apps/mobile/e2e/visual-contract.ts apps/mobile/e2e/pulse-operational-status.spec.ts package.json docs/UX_VISUAL_CONTRACT.md",
+    "pnpm quality:ux && pnpm quality:repo && pnpm typecheck && git diff --check",
+    "PORT=$(python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()\"); LCL_E2E_PORT=$PORT pnpm e2e:visual:update",
+    "python3 -c \"import subprocess; rows=subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],text=True).splitlines(); got=sorted(row[3:] for row in rows if row[3:].endswith('.png')); expected=sorted(['apps/mobile/e2e/responsive.spec.ts-snapshots/10-time-dashboard-darwin.png','apps/mobile/e2e/pulse-operational-status.spec.ts-snapshots/27-standalone-pulse-dashboard-darwin.png']); print('visual snapshot delta:', got); assert got == expected, (got, expected)\"",
+    "PORT=$(python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()\"); LCL_E2E_PORT=$PORT pnpm e2e:visual",
+    "git add apps/mobile/src/components/AutomationDashboardBody.tsx apps/mobile/src/features/automations/index.ts apps/mobile/src/screens/TimeAutomationCard.tsx apps/mobile/src/app/StandalonePulseAutomationCard.tsx apps/mobile/src/screens/AutomationDashboardScreen.css apps/mobile/e2e/visual-contract.ts apps/mobile/e2e/pulse-operational-status.spec.ts package.json docs/UX_VISUAL_CONTRACT.md apps/mobile/e2e/responsive.spec.ts-snapshots/10-time-dashboard-darwin.png apps/mobile/e2e/pulse-operational-status.spec.ts-snapshots/27-standalone-pulse-dashboard-darwin.png && git commit -m 'Make Time and Pulse dashboards status-first'",
+    "pnpm check:full",
+    "git push --no-verify origin HEAD:ux/polish-foundation-20261003"
+  ]
+}

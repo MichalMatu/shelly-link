@@ -1,0 +1,14 @@
+{
+  "id": "android-system-images-probe-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "inspection/android-emulator-20261003",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "task_timeout": 1200,
+  "idle_timeout": 300,
+  "commands": [
+    "SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}; echo '--- installed system images ---'; find \"$SDK/system-images\" -maxdepth 4 -type f -name package.xml -print | sort | while read f; do echo \"### $f\"; grep -E '<path>|<api-level>|<tag>|<abi>' \"$f\" | head -20; done; echo '--- avds ---'; \"$SDK/emulator/emulator\" -list-avds"
+  ]
+}

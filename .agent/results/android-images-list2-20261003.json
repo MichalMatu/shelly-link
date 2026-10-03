@@ -1,0 +1,60 @@
+{
+  "allow_write": false,
+  "attempt_id": "ead5ece3c32fad20e24c0a9b",
+  "command_timeout": 900,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 2150,
+      "command": "SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}; echo SYSTEM_IMAGES; find \"$SDK/system-images\" -maxdepth 4 -type f -name package.xml -print | sort; echo DIRS; find \"$SDK/system-images\" -mindepth 3 -maxdepth 3 -type d -print | sort; echo AVDS; \"$SDK/emulator/emulator\" -list-avds; echo DEVICES; \"$SDK/cmdline-tools/latest/bin/avdmanager\" list device 2>/dev/null | grep -E '^id:|Name:' | head -80 || true",
+      "current_rss_mb": 4.28,
+      "elapsed_seconds": 1.165,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 1024,
+      "memory_limited": false,
+      "output": "SYSTEM_IMAGES\n/Users/michal/Library/Android/sdk/system-images/android-36/google_apis/arm64-v8a/package.xml\n/Users/michal/Library/Android/sdk/system-images/android-36/google_apis_playstore/arm64-v8a/package.xml\nDIRS\n/Users/michal/Library/Android/sdk/system-images/android-36/google_apis/arm64-v8a\n/Users/michal/Library/Android/sdk/system-images/android-36/google_apis_playstore/arm64-v8a\nAVDS\nmedium_phone\nDEVICES\nid: 0 or \"automotive_1024p_landscape\"\n    Name: Automotive (1024p landscape)\nid: 1 or \"Galaxy Nexus\"\n    Name: Galaxy Nexus\nid: 2 or \"desktop_large\"\n    Name: Large Desktop\nid: 3 or \"desktop_medium\"\n    Name: Medium Desktop\nid: 4 or \"medium_phone\"\n    Name: Medium Phone\nid: 5 or \"medium_tablet\"\n    Name: Medium Tablet\nid: 6 or \"Nexus 10\"\n    Name: Nexus 10\nid: 7 or \"Nexus 4\"\n    Name: Nexus 4\nid: 8 or \"Nexus 5\"\n    Name: Nexus 5\nid: 9 or \"Nexus 5X\"\n    Name: Nexus 5X\nid: 10 or \"Nexus 6\"\n    Name: Nexus 6\nid: 11 or \"Nexus 6P\"\n    Name: Nexus 6P\nid: 12 or \"Nexus 7 2013\"\n    Name: Nexus 7\nid: 13 or \"Nexus 7\"\n    Name: Nexus 7 (2012)\nid: 14 or \"Nexus 9\"\n    Name: Nexus 9\nid: 15 or \"Nexus One\"\n    Name: Nexus One\nid: 16 or \"Nexus S\"\n    Name: Nexus S\nid: 17 or \"pixel\"\n    Name: Pixel\nid: 18 or \"pixel_2\"\n    Name: Pixel 2\nid: 19 or \"pixel_2_xl\"\n    Name: Pixel 2 XL\nid: 20 or \"pixel_3\"\n    Name: Pixel 3\nid: 21 or \"pixel_3_xl\"\n    Name: Pixel 3 XL\nid: 22 or \"pixel_3a\"\n    Name: Pixel 3a\nid: 23 or \"pixel_3a_xl\"\n    Name: Pixel 3a XL\nid: 24 or \"pixel_4\"\n    Name: Pixel 4\nid: 25 or \"pixel_4_xl\"\n    Name: Pixel 4 XL\nid: 26 or \"pixel_4a\"\n    Name: Pixel 4a\nid: 27 or \"pixel_5\"\n    Name: Pixel 5\nid: 28 or \"pixel_6\"\n    Name: Pixel 6\nid: 29 or \"pixel_6_pro\"\n    Name: Pixel 6 Pro\nid: 30 or \"pixel_6a\"\n    Name: Pixel 6a\nid: 31 or \"pixel_7\"\n    Name: Pixel 7\nid: 32 or \"pixel_7_pro\"\n    Name: Pixel 7 Pro\nid: 33 or \"pixel_c\"\n    Name: Pixel C\nid: 34 or \"pixel_tablet\"\n    Name: Pixel Tablet\nid: 35 or \"pixel_xl\"\n    Name: Pixel XL\nid: 36 or \"resizable\"\n    Name: Resizable (Experimental)\nid: 37 or \"desktop_small\"\n    Name: Small Desktop\nid: 38 or \"small_phone\"\n    Name: Small Phone\nid: 39 or \"tv_1080p\"\n    Name: Television (1080p)\n",
+      "output_policy": "stream",
+      "output_truncated": false,
+      "peak_rss_mb": 4.28,
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.3",
+  "edits": {},
+  "finished_at": "2026-10-03T07:06:49.131894+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.073,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.08,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "android-images-list2-20261003",
+  "idle_timeout": 300,
+  "memory_limit_mb": 1024,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 1.165,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-03T07:06:46.496126+00:00",
+  "status": "done",
+  "task_digest": "de473670ff91bb5b79b0179905a5df76a4333365117f0c9b28904bc1ae79d321",
+  "task_timeout": 1200,
+  "verification": [],
+  "work_branch": "inspection/android-emulator-20261003"
+}

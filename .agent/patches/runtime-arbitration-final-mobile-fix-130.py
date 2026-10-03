@@ -1,0 +1,9 @@
+from pathlib import Path
+
+path = Path('apps/mobile/src/flows/hardware-setup/schemas.ts')
+text = path.read_text()
+old = """    g: z.tuple([\n      z.number().nullable(),\n      z.number().nullable(),\n      z.number().nullable(),\n      z.number().nullable(),\n      z.number().nullable(),\n      z.boolean(),\n      z.string(),\n      z.number().nullable(),\n      z.number().nullable(),\n      z.number(),\n      z.number(),\n      z.number().nullable(),\n      z.number().nullable(),\n      z.number().nullable(),\n      z.number().nullable(),\n      z.number().nullable(),\n      z.string(),\n      runtimeControlModeCodeSchema.optional(),\n      z.boolean().optional()\n    ])\n"""
+new = """    g: z.union([\n      z.tuple([\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.boolean(),\n        z.string(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number(),\n        z.number(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.string()\n      ]),\n      z.tuple([\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.boolean(),\n        z.string(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number(),\n        z.number(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.number().nullable(),\n        z.string(),\n        runtimeControlModeCodeSchema,\n        z.boolean()\n      ])\n    ])\n"""
+if old not in text:
+    raise SystemExit('expected diagnostic tuple block not found')
+path.write_text(text.replace(old, new, 1))

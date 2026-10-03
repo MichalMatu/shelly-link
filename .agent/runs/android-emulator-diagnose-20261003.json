@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "android-emulator-diagnose-20261003",
+  "task_digest": "bf4b9708bae058d00152b2cf3b1bc14c6236346307a87e919750ea39e43245cb",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-03T06:49:36.219812+00:00",
+  "attempt_id": "ea6560e87c6a668133c2c317",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 88420,
+  "updated_at": "2026-10-03T06:49:36.453850+00:00",
+  "pid": 88420
+}

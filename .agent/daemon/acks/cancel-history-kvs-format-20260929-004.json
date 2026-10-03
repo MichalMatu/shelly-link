@@ -1,0 +1,14 @@
+{
+  "id": "cancel-history-kvs-format-20260929-004",
+  "action": "cancel_task",
+  "status": "rejected",
+  "daemon_version": "4.19.8",
+  "updated_at": "2026-09-29T21:30:55.806235+00:00",
+  "repository_id": "shelly-link",
+  "repository": "MichalMatu/shelly-link",
+  "control_branch": "agent-control",
+  "default_branch": "main",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "task_id": "history-kvs-format-20260929-004",
+  "result": "task_not_pending"
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "ux-time-pulse-detail-hierarchy-20261003",
+  "task_digest": "ad8fb0ecc3ad81508f482d53f0ed2a6ff007b4d8d5e31c05ab18adbd71e58cde",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T17:23:00.067083+00:00",
+  "attempt_id": "386483cb044e44f686df8137",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 40935,
+  "updated_at": "2026-10-03T17:23:00.314012+00:00",
+  "pid": 40935
+}

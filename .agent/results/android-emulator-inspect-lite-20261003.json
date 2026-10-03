@@ -1,0 +1,90 @@
+{
+  "allow_write": true,
+  "attempt_id": "b2a88e3120df3d3265979c4d",
+  "command_timeout": 900,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 82,
+      "command": "git status --short && git rev-parse HEAD && git rev-parse origin/inspection/android-emulator-20261003",
+      "current_rss_mb": 2.09,
+      "elapsed_seconds": 0.418,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "7d77d4be65a60c3f2c3e3d2e4ca0b8e6647f6897\n7d77d4be65a60c3f2c3e3d2e4ca0b8e6647f6897\n",
+      "output_policy": "stream",
+      "output_truncated": false,
+      "peak_rss_mb": 2.09,
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 2,
+      "timed_out": false
+    },
+    {
+      "background_process_leak": true,
+      "captured_output_chars": 6791,
+      "command": "git fetch origin agent-control && git show origin/agent-control:.agent/payloads/android-emulator-inspect-20261003.sh > /tmp/android-emulator-inspect-lite.sh && python3 -c \"import base64; exec(base64.b64decode('CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApwID0gUGF0aCgiL3RtcC9hbmRyb2lkLWVtdWxhdG9yLWluc3BlY3QtbGl0ZS5zaCIpCnMgPSBwLnJlYWRfdGV4dCgpCm9sZF9zdGFydCA9ICciJEVNVSIgLWF2ZCAiJEFWRCIgLW5vLXNuYXBzaG90LXNhdmUgLW5vLWF1ZGlvIC1uby1ib290LWFuaW0gLW5vLXdpbmRvdyA+IiRFTVVfTE9HIiAyPiYxICYnCm5ld19zdGFydCA9ICdBTkRST0lEX0VNVUxBVE9SX1dBSVRfVElNRV9CRUZPUkVfS0lMTD01ICIkRU1VIiAtYXZkICIkQVZEIiAtbm8tc25hcHNob3QgLW5vLWF1ZGlvIC1uby1ib290LWFuaW0gLW5vLXdpbmRvdyAtZ3B1IGhvc3QgLWZlYXR1cmUgLVZ1bGthbiAtY29yZXMgMiAtbWVtb3J5IDE1MzYgPiIkRU1VX0xPRyIgMj4mMSAmJwppZiBvbGRfc3RhcnQgbm90IGluIHM6CiAgICByYWlzZSBTeXN0ZW1FeGl0KCJlbXVsYXRvciBzdGFydCBsaW5lIG5vdCBmb3VuZCIpCnMgPSBzLnJlcGxhY2Uob2xkX3N0YXJ0LCBuZXdfc3RhcnQsIDEpCgpvbGRfd2FpdCA9ICcnJyIkQURCIiB3YWl0LWZvci1kZXZpY2UKZm9yIF8gaW4gJChzZXEgMSAxODApOyBkbwogIGlmIFtbICIkKCIkQURCIiBzaGVsbCBnZXRwcm9wIHN5cy5ib290X2NvbXBsZXRlZCAyPi9kZXYvbnVsbCB8IHRyIC1kICdcXHInKSIgPT0gIjEiIF1dOyB0aGVuCiAgICBicmVhawogIGZpCiAgc2xlZXAgMQpkb25lCltbICIkKCIkQURCIiBzaGVsbCBnZXRwcm9wIHN5cy5ib290X2NvbXBsZXRlZCB8IHRyIC1kICdcXHInKSIgPT0gIjEiIF1dJycnCm5ld193YWl0ID0gJycnQURCX1JFQURZPTAKZm9yIF8gaW4gJChzZXEgMSAxNTApOyBkbwogIGlmICIkQURCIiBkZXZpY2VzIHwgYXdrICdOUj4xICYmICQxIH4gL15lbXVsYXRvci0vICYmICQyPT0iZGV2aWNlIiB7Zm91bmQ9MX0gRU5EIHtleGl0IGZvdW5kPzA6MX0nOyB0aGVuCiAgICBBREJfUkVBRFk9MQogICAgYnJlYWsKICBmaQogIGlmICEga2lsbCAtMCAiJEVNVV9QSUQiID4vZGV2L251bGwgMj4mMTsgdGhlbgogICAgZWNobyAiRW11bGF0b3IgZXhpdGVkIGJlZm9yZSBBREIgYmVjYW1lIHJlYWR5LiIgPiYyCiAgICB0YWlsIC0xMjAgIiRFTVVfTE9HIiA+JjIgfHwgdHJ1ZQogICAgZXhpdCAxCiAgZmkKICBzbGVlcCAxCmRvbmUKaWYgW1sgIiRBREJfUkVBRFkiICE9ICIxIiBdXTsgdGhlbgogIGVjaG8gIkVtdWxhdG9yIGRpZCBub3QgYmVjb21lIGFuIEFEQiBkZXZpY2Ugd2l0aGluIDE1MCBzZWNvbmRzLiIgPiYyCiAgdGFpbCAtMTYwICIkRU1VX0xPRyIgPiYyIHx8IHRydWUKICBleGl0IDEKZmkKCkJPT1RfUkVBRFk9MApmb3IgXyBpbiAkKHNlcSAxIDE4MCk7IGRvCiAgaWYgW1sgIiQoIiRBREIiIHNoZWxsIGdldHByb3Agc3lzLmJvb3RfY29tcGxldGVkIDI+L2Rldi9udWxsIHwgdHIgLWQgJ1xccicpIiA9PSAiMSIgXV07IHRoZW4KICAgIEJPT1RfUkVBRFk9MQogICAgYnJlYWsKICBmaQogIHNsZWVwIDEKZG9uZQppZiBbWyAiJEJPT1RfUkVBRFkiICE9ICIxIiBdXTsgdGhlbgogIGVjaG8gIkFuZHJvaWQgZGlkIG5vdCBmaW5pc2ggYm9vdCB3aXRoaW4gMTgwIHNlY29uZHMgYWZ0ZXIgQURCIGFwcGVhcmVkLiIgPiYyCiAgdGFpbCAtMTYwICIkRU1VX0xPRyIgPiYyIHx8IHRydWUKICBleGl0IDEKZmknJycKaWYgb2xkX3dhaXQgbm90IGluIHM6CiAgICByYWlzZSBTeXN0ZW1FeGl0KCJhZGIgd2FpdCBibG9jayBub3QgZm91bmQiKQpzID0gcy5yZXBsYWNlKG9sZF93YWl0LCBuZXdfd2FpdCwgMSkKcC53cml0ZV90ZXh0KHMpCg=='))\" && chmod +x /tmp/android-emulator-inspect-lite.sh && /tmp/android-emulator-inspect-lite.sh",
+      "current_rss_mb": 296.2,
+      "elapsed_seconds": 157.698,
+      "exit_code": 126,
+      "failure_reason": "command_background_process_leak",
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                agent-control -> FETCH_HEAD\n   445d37ae6..8470dc09d  agent-control -> origin/agent-control\nemulator pid=11777\n* daemon not running; starting now at tcp:5037\n* daemon started successfully\nEmulator did not become an ADB device within 150 seconds.\nINFO         | Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)\nINFO         | Graphics backend: gfxstream\nINFO         | Found systemPath /Users/michal/Library/Android/sdk/system-images/android-36/google_apis_playstore/arm64-v8a/\nINFO         | Guest usage of host flag 'VulkanVirtualQueue' will be ignored.\nINFO         | Feature 'Vulkan' (21) is overridden to 'disabled'\nINFO         | Increasing RAM size to 2560MB\nINFO         | Guest GLES Driver: Auto (ext controls)\nINFO         | emuglConfig_init: vulkan_mode_selected:host gles_mode_selected:host\nINFO         | Checking system compatibility:\nINFO         |   Checking: hasSufficientDiskSpace\nINFO         |      Ok: Disk space requirements to run avd: `medium_phone` are met\nINFO         |   Checking: hasSufficientHwGpu\nINFO         |      Ok: Hardware GPU requirements to run avd: `medium_phone` are passed\nINFO         |   Checking: hasSufficientSystem\nINFO         |      Ok: System requirements to run avd: `medium_phone` are met\nINFO         | Storing crashdata in: /tmp/android-michal/emu-crash-37.1.11.db, detection is enabled for process: 11777\nINFO         | Initializing gfxstream backend\nINFO         | startOpenglesRendererImpl: gpu info\nINFO         | \nINFO         | Graphics Adapter Vendor Google (Apple)\nINFO         | Graphics Adapter Android Emulator OpenGL ES Translator (Apple M1)\nINFO         | Graphics API Version OpenGL ES 3.0 (4.1 Metal - 90.5)\nINFO         | Graphics API Extensions GL_OES_EGL_sync GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint GL_OES_texture_float GL_OES_texture_float_linear GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture GL_OES_texture_npot GL_OES_rgb8_rgba8 GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 \nINFO         | Graphics Device Extensions N/A\nINFO         | Sending adb public key [QAAAAIk2UVNH4DI+9LglhSg9+vD2n3T5agetxPgPrXJZKrEbBz6uLbptPhk0wzA8ncEvmYPb4hz35cIOblLsPDzwQm7RrHoi/6llfQWRIVZ+kUD1pbDuMfr3kXPJ3LZgbsqCu7LnFtcZuZ4uMsPNSSw/bdZpwxI5L/UqAGwmFK804DcAeeQQqXh/qal6bAg2RITd3W8NCY5hb3U3WnwUZ71RsS/8hmffFEoji8/FJ2QyUP7nCfxR4eX03VOdPM3woNhiT3daY1PyjmiI+aKBVkJTumaNdMoVBmBdW3BxMEz23mG7o9ZYhQMwyWT4Inmai9lY1kjGhGkI6AmFZ4sGGXNpZG9MGBPU4J0Vxnds4K6OJlzlWNkzHQe414J12HIqQaw+Np2FV9pWWnuSlx/DcNBZez72b1XZQwbMd8Edu+ydhJ7O6yIQAGDnU59+MIvaMMJpBNtiZGT5QzFYSsBXxOrNhY1H9ot1twNM+TMaR0kxgIABYS3psg3UuN3EuCsg1oh1QuMt/5zZnpaYtvt3Aqk1wsHl9a00naj5F2hklTdFjcPMIgOYyWwr8wxlP86+nLwtjo7hK5Tdo3uMkiFqMOKl3Rgc3d8nbLLQj+M5IWOrXE6Ex1Hb6vArVWbN8neKusavH9zjUTlFU6T/uWEfH23VUtzMO8ZyzZLNkCW8UmRTthbUFSgCmwEAAQA= michal@unknown]\nINFO         | Userspace boot properties:\nINFO         |   androidboot.boot_devices=a003800.virtio_mmio\nINFO         |   androidboot.dalvik.vm.heapsize=576m\nINFO         |   androidboot.debug.hwui.renderer=skiagl\nINFO         |   androidboot.debug.sf.nobootanimation=1\nINFO         |   androidboot.hardware=ranchu\nINFO         |   androidboot.hardware.gltransport=pipe\nINFO         |   androidboot.logcat=*:V\nINFO         |   androidboot.opengles.version=196608\nINFO         |   androidboot.qemu=1\nINFO         |   androidboot.qemu.adb.pubkey=QAAAAIk2UVNH4DI+9LglhSg9+vD2n3T5agetxPgPrXJZKrEbBz6uLbptPhk0wzA8ncEvmYPb4hz35cIOblLsPDzwQm7RrHoi/6llfQWRIVZ+kUD1pbDuMfr3kXPJ3LZgbsqCu7LnFtcZuZ4uMsPNSSw/bdZpwxI5L/UqAGwmFK804DcAeeQQqXh/qal6bAg2RITd3W8NCY5hb3U3WnwUZ71RsS/8hmffFEoji8/FJ2QyUP7nCfxR4eX03VOdPM3woNhiT3daY1PyjmiI+aKBVkJTumaNdMoVBmBdW3BxMEz23mG7o9ZYhQMwyWT4Inmai9lY1kjGhGkI6AmFZ4sGGXNpZG9MGBPU4J0Vxnds4K6OJlzlWNkzHQe414J12HIqQaw+Np2FV9pWWnuSlx/DcNBZez72b1XZQwbMd8Edu+ydhJ7O6yIQAGDnU59+MIvaMMJpBNtiZGT5QzFYSsBXxOrNhY1H9ot1twNM+TMaR0kxgIABYS3psg3UuN3EuCsg1oh1QuMt/5zZnpaYtvt3Aqk1wsHl9a00naj5F2hklTdFjcPMIgOYyWwr8wxlP86+nLwtjo7hK5Tdo3uMkiFqMOKl3Rgc3d8nbLLQj+M5IWOrXE6Ex1Hb6vArVWbN8neKusavH9zjUTlFU6T/uWEfH23VUtzMO8ZyzZLNkCW8UmRTthbUFSgCmwEAAQA= michal@unknown\nINFO         |   androidboot.qemu.avd_name=medium_phone\nINFO         |   androidboot.qemu.camera_hq_edge_processing=0\nINFO         |   androidboot.qemu.camera_protocol_ver=1\nINFO         |   androidboot.qemu.cpuvulkan.version=4206592\nINFO         |   androidboot.qemu.gltransport.drawFlushInterval=800\nINFO         |   androidboot.qemu.gltransport.name=pipe\nINFO         |   androidboot.qemu.hwcodec.avcdec=2\nINFO         |   androidboot.qemu.hwcodec.hevcdec=2\nINFO         |   androidboot.qemu.hwcodec.vpxdec=2\nINFO         |   androidboot.qemu.settings.system.screen_off_timeout=2147483647\nINFO         |   androidboot.qemu.skin=1080x2400\nINFO         |   androidboot.qemu.virtiowifi=1\nINFO         |   androidboot.qemu.vsync=60\nINFO         |   androidboot.serialno=EMULATOR37X1X11X0\nINFO         |   androidboot.vbmeta.digest=6b98218b46c523e17f8b4a810c5a51b4af28f327c436ce0d286bf937f545cfd7\nINFO         |   androidboot.vbmeta.hash_alg=sha256\nINFO         |   androidboot.vbmeta.size=6720\nINFO         |   androidboot.veritymode=enforcing\nINFO         | Monitoring duration of emulator setup.\nWARNING      | The emulator now requires a signed jwt token for gRPC access! Use the -grpc flag if you really want an open unprotected grpc port\nINFO         | Using security allow list from: /Users/michal/Library/Android/sdk/emulator/lib/emulator_access.json\nINFO         | The active JSON Web Key Sets can be found here: /Users/michal/Library/Caches/TemporaryItems/avd/running/11777/jwks/aea7b77c-bbd9-4848-b5fb-6c3cb323ea58/active.jwk\nINFO         | Scanning /Users/michal/Library/Caches/TemporaryItems/avd/running/11777/jwks/aea7b77c-bbd9-4848-b5fb-6c3cb323ea58 for jwk keys.\nINFO         | Started GRPC server at 127.0.0.1:8554, security: Local, auth: +token\nINFO         | Advertising in: /Users/michal/Library/Caches/TemporaryItems/avd/running/pid_11777.ini\nINFO         | Successfully initialized netsim WiFi\nINFO         | Activated packet streamer for uwb emulation\nINFO         | Activated packet streamer for bluetooth emulation\nINFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420 \nINFO         | setDisplayActiveConfig: id:0, 1080x2400\nWARNING      | getEnvironmentConfig: No environment config is provided\nINFO         | getEnvironmentConfig: Using default virtual scene mode for the environment.\nINFO         | getEnvironmentConfig: Using default configuration for mode mesh3d for the environment.\nINFO         | Initializing a scene with mode: mesh3d, argument: Toren1BD.obj\n",
+      "output_policy": "stream",
+      "output_truncated": false,
+      "peak_rss_mb": 447.42,
+      "stage_index": 2,
+      "stage_name": "command-2",
+      "stage_phase": "commands",
+      "stage_total": 2,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.3",
+  "edits": {},
+  "failure_reason": "command_background_process_leak",
+  "finished_at": "2026-10-03T07:05:00.015150+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.074,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.102,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "android-emulator-inspect-lite-20261003",
+  "idle_timeout": 900,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 0.418,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 2
+    },
+    {
+      "elapsed_seconds": 157.698,
+      "outcome": "failed",
+      "stage_index": 2,
+      "stage_name": "command-2",
+      "stage_phase": "commands",
+      "stage_total": 2
+    }
+  ],
+  "started_at": "2026-10-03T07:02:20.264974+00:00",
+  "status": "failed",
+  "task_digest": "2f65bc6a9145925512c75aa73d2926ea90e909ef4ab520126bb8e490f4410832",
+  "task_timeout": 7200,
+  "verification": [],
+  "work_branch": "inspection/android-emulator-20261003"
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "android-images-list2-20261003",
+  "task_digest": "de473670ff91bb5b79b0179905a5df76a4333365117f0c9b28904bc1ae79d321",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-03T07:06:49.131894+00:00",
+  "attempt_id": "ead5ece3c32fad20e24c0a9b",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 18024,
+  "updated_at": "2026-10-03T07:06:49.360862+00:00",
+  "pid": 18024
+}

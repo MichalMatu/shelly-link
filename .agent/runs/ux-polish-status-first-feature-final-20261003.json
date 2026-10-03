@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "ux-polish-status-first-feature-final-20261003",
+  "task_digest": "14198eb129c132f7f084de3dddf0e6da1d914da2f8510323843601d14aca071f",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-03T04:59:53.819766+00:00",
+  "attempt_id": "b3b8de70b8df5ebe6423cbc4",
+  "daemon_version": "4.20.1",
+  "daemon_pid": 74258,
+  "updated_at": "2026-10-03T04:59:54.074013+00:00",
+  "pid": 74258
+}

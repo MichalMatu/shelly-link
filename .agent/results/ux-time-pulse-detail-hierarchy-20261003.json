@@ -1,0 +1,89 @@
+{
+  "allow_write": true,
+  "attempt_id": "386483cb044e44f686df8137",
+  "command_timeout": 900,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 82,
+      "command": "git status --short && git rev-parse HEAD && git rev-parse origin/ux/polish-foundation-20261003",
+      "current_rss_mb": 5.19,
+      "elapsed_seconds": 0.422,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "7d77d4be65a60c3f2c3e3d2e4ca0b8e6647f6897\n7d77d4be65a60c3f2c3e3d2e4ca0b8e6647f6897\n",
+      "output_policy": "stream",
+      "output_truncated": false,
+      "peak_rss_mb": 5.19,
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 7,
+      "timed_out": false
+    },
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 195,
+      "command": "git fetch origin agent-control && git show origin/agent-control:.agent/tasks/ux-time-pulse-detail-hierarchy-20261003.payload/change.patch > /tmp/ux-time-pulse-detail.patch && git apply --check /tmp/ux-time-pulse-detail.patch && git apply /tmp/ux-time-pulse-detail.patch",
+      "current_rss_mb": 7.11,
+      "elapsed_seconds": 1.089,
+      "exit_code": 128,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                agent-control -> FETCH_HEAD\n   99b7e183c..d8b1ce5fe  agent-control -> origin/agent-control\nerror: corrupt patch at line 85\n",
+      "output_policy": "stream",
+      "output_truncated": false,
+      "peak_rss_mb": 7.11,
+      "stage_index": 2,
+      "stage_name": "command-2",
+      "stage_phase": "commands",
+      "stage_total": 7,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.3",
+  "edits": {},
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T17:23:00.067083+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.083,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.104,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "ux-time-pulse-detail-hierarchy-20261003",
+  "idle_timeout": 900,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 0.422,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 7
+    },
+    {
+      "elapsed_seconds": 1.089,
+      "outcome": "failed",
+      "stage_index": 2,
+      "stage_name": "command-2",
+      "stage_phase": "commands",
+      "stage_total": 7
+    }
+  ],
+  "started_at": "2026-10-03T17:22:57.039880+00:00",
+  "status": "failed",
+  "task_digest": "ad8fb0ecc3ad81508f482d53f0ed2a6ff007b4d8d5e31c05ab18adbd71e58cde",
+  "task_timeout": 7200,
+  "verification": [],
+  "work_branch": "ux/polish-foundation-20261003"
+}

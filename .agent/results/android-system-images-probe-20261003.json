@@ -1,0 +1,60 @@
+{
+  "allow_write": false,
+  "attempt_id": "4f2bcbacabfa254da299e6a3",
+  "command_timeout": 900,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 404,
+      "command": "SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}; echo '--- installed system images ---'; find \"$SDK/system-images\" -maxdepth 4 -type f -name package.xml -print | sort | while read f; do echo \"### $f\"; grep -E '<path>|<api-level>|<tag>|<abi>' \"$f\" | head -20; done; echo '--- avds ---'; \"$SDK/emulator/emulator\" -list-avds",
+      "current_rss_mb": 3.66,
+      "elapsed_seconds": 0.437,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 1024,
+      "memory_limited": false,
+      "output": "--- installed system images ---\n### /Users/michal/Library/Android/sdk/system-images/android-36/google_apis/arm64-v8a/package.xml\n      <api-level>36</api-level>\n      <tag>\n      <abi>arm64-v8a</abi>\n### /Users/michal/Library/Android/sdk/system-images/android-36/google_apis_playstore/arm64-v8a/package.xml\n      <api-level>36</api-level>\n      <tag>\n      <abi>arm64-v8a</abi>\n--- avds ---\nmedium_phone\n",
+      "output_policy": "stream",
+      "output_truncated": false,
+      "peak_rss_mb": 3.66,
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.3",
+  "edits": {},
+  "finished_at": "2026-10-03T07:06:25.383211+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.072,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.078,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "android-system-images-probe-20261003",
+  "idle_timeout": 300,
+  "memory_limit_mb": 1024,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 0.437,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "command-1",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-03T07:06:23.484441+00:00",
+  "status": "done",
+  "task_digest": "f22b8b6b3a3e3b89eca3b46c4caa5149a89aead419411ddd66d11cebe85fdb0e",
+  "task_timeout": 1200,
+  "verification": [],
+  "work_branch": "inspection/android-emulator-20261003"
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "ux-emulator-inspection-probe-20261003",
+  "task_digest": "dd38c191b8179e33a9e4daa79c6ed0d2a39a7dd5e0999d7a143d341696a5c781",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-03T06:35:55.992073+00:00",
+  "attempt_id": "0d2eae2e4fff71d30cf9300a",
+  "daemon_version": "4.20.2",
+  "daemon_pid": 59513,
+  "updated_at": "2026-10-03T06:35:56.212241+00:00",
+  "pid": 59513
+}

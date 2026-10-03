@@ -1,0 +1,9 @@
+{
+  "id": "shelly-ux-final-full-gate-install-20260927-761",
+  "status": "failed",
+  "failure_reason": "invalid_task_file",
+  "started_at": null,
+  "finished_at": "2026-09-26T22:41:52.554875+00:00",
+  "daemon_version": "4.18.25",
+  "error": "ValueError: resource 'machine' must be declared alone"
+}

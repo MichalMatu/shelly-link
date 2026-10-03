@@ -1,0 +1,14 @@
+{
+  "id": "cancel-android-emulator-inspect-20261003-a",
+  "action": "cancel_task",
+  "status": "accepted",
+  "daemon_version": "4.20.3",
+  "updated_at": "2026-10-03T06:47:22.765919+00:00",
+  "repository_id": "shelly-link",
+  "repository": "MichalMatu/shelly-link",
+  "control_branch": "agent-control",
+  "default_branch": "main",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "task_id": "android-emulator-inspect-20261003",
+  "result": "terminating_active_task"
+}

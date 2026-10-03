@@ -1,0 +1,14 @@
+{
+  "id": "android-images-list2-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "inspection/android-emulator-20261003",
+  "allow_write": false,
+  "resources": [],
+  "memory_limit_mb": 1024,
+  "task_timeout": 1200,
+  "idle_timeout": 300,
+  "commands": [
+    "SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}; echo SYSTEM_IMAGES; find \"$SDK/system-images\" -maxdepth 4 -type f -name package.xml -print | sort; echo DIRS; find \"$SDK/system-images\" -mindepth 3 -maxdepth 3 -type d -print | sort; echo AVDS; \"$SDK/emulator/emulator\" -list-avds; echo DEVICES; \"$SDK/cmdline-tools/latest/bin/avdmanager\" list device 2>/dev/null | grep -E '^id:|Name:' | head -80 || true"
+  ]
+}

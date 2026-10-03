@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "ux-polish-thermometer-settings-boundary-final-20261003",
+  "task_digest": "af45a4aa77efa12d00ffd4cfdf428a7bbc9936dff47f90b1a55e7db030c3480a",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-03T05:42:39.763867+00:00",
+  "attempt_id": "ab0e447639c9c6b6223ae6a5",
+  "daemon_version": "4.20.2",
+  "daemon_pid": 64328,
+  "updated_at": "2026-10-03T05:42:40.259668+00:00",
+  "pid": 64328
+}
