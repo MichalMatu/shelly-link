@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 3,
+  "index": 4,
   "total": 10,
-  "command": "pnpm exec prettier --write apps/mobile/e2e/led-settings.spec.ts apps/mobile/e2e/visual-contract.ts package.json docs/UX_VISUAL_CONTRACT.md docs/UX_POLISH_CHECKPOINT_20261003.md",
-  "pid": 38520,
+  "command": "pnpm quality:ux && pnpm quality:repo && pnpm typecheck && git diff --check",
+  "pid": 38617,
   "timeout": 900,
   "idle_timeout": 900,
   "memory_limit_mb": 3072,
-  "started_at": "2026-10-03T18:41:17.597412+00:00",
-  "stage_name": "command-3",
-  "stage_index": 3,
+  "started_at": "2026-10-03T18:41:19.411159+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "ux-polish-ble-detail-visual-20261003",
@@ -18,5 +18,5 @@
   "task_digest": "87115bb2b58ca2dbb40504e16f788913ff2598c82cc4a621dbdc104343f926af",
   "daemon_version": "4.20.3",
   "daemon_pid": 38193,
-  "updated_at": "2026-10-03T18:41:17.670729+00:00"
+  "updated_at": "2026-10-03T18:41:19.429925+00:00"
 }
