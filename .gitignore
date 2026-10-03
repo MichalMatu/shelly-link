@@ -48,6 +48,7 @@ artifacts/hardware/*.jsonl
 artifacts/hardware/*.summary.md
 artifacts/hardware/*.log
 artifacts/releases/
+artifacts/release-evidence/
 
 # editor / OS
 .DS_Store

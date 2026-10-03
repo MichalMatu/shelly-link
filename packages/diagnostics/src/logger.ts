@@ -9,6 +9,12 @@ export type DiagnosticEventKind =
   | 'script-upload'
   | 'relay-test'
   | 'automation-decision'
+  | 'rpc-read'
+  | 'rpc-mutation'
+  | 'reconcile'
+  | 'storage'
+  | 'doctor'
+  | 'release'
   | 'error';
 
 export interface DiagnosticEvent {

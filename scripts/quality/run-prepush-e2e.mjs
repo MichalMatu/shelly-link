@@ -1,7 +1,13 @@
 import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
 
-const command = process.platform === 'darwin' ? 'e2e:visual' : 'e2e:responsive';
+const supportedCommands = new Set(['e2e:responsive', 'e2e:visual']);
+const requestedCommand = process.argv[2]?.trim();
+const command =
+  requestedCommand ?? (process.platform === 'darwin' ? 'e2e:visual' : 'e2e:responsive');
+if (!supportedCommands.has(command)) {
+  throw new Error(`Unsupported E2E command: ${command}`);
+}
 
 const findAvailablePort = () =>
   new Promise((resolve, reject) => {

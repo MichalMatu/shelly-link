@@ -19,6 +19,7 @@ The following are established product/runtime contracts, not active project slic
 - History/Datalogger in the existing Climate runtime via a namespaced KVS ring, typed mobile read path and History detail surface;
 - native Shelly power/current/thermal protections feed the latched Runtime Safety Supervisor rather than being duplicated as guessed app thresholds.
 - deterministic seeded product-matrix hardening is part of the canonical repository gate: 1000 replayable mixed valid/invalid cases plus a persistent regression corpus cover supported Climate/Time/Pulse compositions without replacing responsive or real-device acceptance.
+- release hardening includes a read-only Shelly Doctor, redacted support evidence + bounded event journal, fault injection, persistence/reconciliation fuzzing, mobile bundle/polling budgets and reproducible release-quality evidence keyed to the exact commit.
 
 See `docs/ARCHITECTURE.md` for durable ownership/safety contracts and `docs/testing/hardware-matrix.md` for real-device evidence.
 

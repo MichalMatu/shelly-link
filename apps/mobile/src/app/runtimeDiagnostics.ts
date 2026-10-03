@@ -1,3 +1,4 @@
+import { recordDiagnosticEvent } from '../platform/diagnosticJournal.js';
 export type RuntimeIssueKind = 'error' | 'unhandledrejection' | 'manual';
 
 export type RuntimeIssue = {
@@ -65,6 +66,12 @@ export const reportRuntimeIssue = (
   }
 
   runtimeIssues.push(issue);
+  recordDiagnosticEvent({
+    kind: 'error',
+    severity: 'error',
+    message: issue.message,
+    fields: { issueKind: issue.kind, ...(issue.source ? { source: issue.source } : {}) }
+  });
   if (runtimeIssues.length > maxRuntimeIssues) {
     runtimeIssues.splice(0, runtimeIssues.length - maxRuntimeIssues);
   }

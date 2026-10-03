@@ -1,6 +1,19 @@
 import react from '@vitejs/plugin-react';
+import { execFileSync } from 'node:child_process';
 import type { IncomingMessage } from 'node:http';
 import { defineConfig, type Plugin } from 'vite';
+
+const buildGitSha = (): string => {
+  const configured = process.env.VITE_GIT_SHA?.trim();
+  if (configured) return configured;
+  try {
+    return execFileSync('git', ['rev-parse', '--short=12', 'HEAD'], {
+      encoding: 'utf8'
+    }).trim();
+  } catch {
+    return 'unknown';
+  }
+};
 
 const SHELLY_DEV_PROXY_PATH = '/__lcl_shelly_proxy';
 
@@ -162,6 +175,9 @@ const shellyDevProxy = (): Plugin => ({
 });
 
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_GIT_SHA': JSON.stringify(buildGitSha())
+  },
   plugins: [react(), shellyDevProxy()],
   build: {
     rollupOptions: {
