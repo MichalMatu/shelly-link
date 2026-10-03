@@ -6,6 +6,7 @@ import {
   resumeStandalonePulseAutomation
 } from '../data/standalonePulseAutomationRuntime.js';
 import { setStandalonePulseManualRelay } from '../data/standalonePulseManualRelay.js';
+import { assertStandalonePulseRuntimeCurrent } from '../data/standalonePulseRuntimeIdentity.js';
 import { readShellyControlStatus } from '../data/shellyManagedAutomation.js';
 
 export const standalonePulseRuntimeQueryKey = (
@@ -47,6 +48,7 @@ export const useStandalonePulseActions = (
     mutationFn: async (action: StandalonePulseAction) => {
       switch (action) {
         case 'auto':
+          await assertStandalonePulseRuntimeCurrent(installation);
           await resumeStandalonePulseAutomation(installation);
           return readShellyControlStatus(installation.shelly.baseUrl);
         case 'manual':
