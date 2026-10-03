@@ -54,3 +54,8 @@ Constraints:
 - do not change Time/Pulse runtime, transport, persistence, polling, device identity checks, deletion semantics, or mutation lifecycle;
 - retain existing tabs/capabilities and current safe delete modals;
 - add/review canonical visual evidence for standalone Pulse detail; existing Time detail visual is `11-time-detail`.
+
+## Post-checkpoint progress
+
+- `9accb1bb818a76b003ef0bd8f3656e124e78df9a` completed the Time / standalone Pulse detail hierarchy. Canonical `11-time-detail` was refreshed and `29-standalone-pulse-detail` was added; canonical visual and `pnpm check:full` passed.
+- Next evidence-only slice adds a canonical BLE-only Plug Detail state; no product runtime or device behavior is changed.

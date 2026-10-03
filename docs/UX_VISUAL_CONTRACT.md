@@ -65,6 +65,8 @@ Saved-Plug forget actions are available only when no installed automation owns t
 
 Managed Climate Button Mode is read-only while Climate owns the relay; do not show a disabled editable form.
 
+BLE-only Plug Detail exposes only the Device and Info capabilities; unsupported Automation, BLE and Script tabs stay absent. The canonical browser state is `30-ble-only-plug-detail`.
+
 ### Thermometers
 
 Dashboard cards prioritize identity, live readings and compact telemetry. Rename, PVVX time sync, delete and technical identity belong in nested Thermometer settings, not as a cluster of permanent dashboard actions. The nested page groups Identity, Live readings and Device actions; its canonical state is `28-thermometer-settings`.
