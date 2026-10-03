@@ -248,6 +248,9 @@ for (const viewport of viewports) {
     expect(fullBox!.x + fullBox!.width).toBeLessThanOrEqual(
       surfaceBox!.x + surfaceBox!.width + 1
     );
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '29-standalone-pulse-detail');
+    }
   });
 }
 

@@ -138,54 +138,67 @@ export const TimeInstallationDetail = ({
               </FeedbackPanel>
             )}
 
-            <section className="installation-automation-live-state plug-detail-section">
-              {pulseInstallation ? (
-                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-              ) : (
-                <OperationalStatus.TimeSummary
-                  config={installation.config}
-                  localTime={runtimeQuery.data?.clock.localTime}
-                  relayOn={runtimeQuery.data?.relayOn}
-                  state={runtimeState}
+            <div className="installation-detail-hierarchy">
+              <section className="installation-detail-hierarchy__section">
+                <h3 className="installation-detail-hierarchy__title">
+                  {t('detail.currentState')}
+                </h3>
+                {pulseInstallation ? (
+                  <Pulse.Operational.StatusSummary status={pulseQuery.data} />
+                ) : (
+                  <OperationalStatus.TimeSummary
+                    config={installation.config}
+                    localTime={runtimeQuery.data?.clock.localTime}
+                    relayOn={runtimeQuery.data?.relayOn}
+                    state={runtimeState}
+                  />
+                )}
+                <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
+                  <div>
+                    <dt>{t('time.clock')}</dt>
+                    <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section className="installation-detail-hierarchy__section">
+                <h3 className="installation-detail-hierarchy__title">
+                  {t('detail.configuration')}
+                </h3>
+                <TimeScheduleSetupPage
+                  flow={{
+                    selectedShelly: {
+                      id: installation.shelly.deviceId,
+                      name: installation.shelly.name,
+                      baseUrl: installation.shelly.baseUrl,
+                      scriptIdInput: '1',
+                      model: installation.shelly.model,
+                      gen: installation.shelly.gen
+                    }
+                  }}
+                  editInstallationId={installation.id}
+                  inline
+                  onInstalled={() => {
+                    void runtimeQuery.refetch();
+                    if (pulseInstallation) void pulseQuery.refetch();
+                  }}
+                  onPendingChange={setTimeEditPending}
                 />
-              )}
-              <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
-                <div>
-                  <dt>{t('time.clock')}</dt>
-                  <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
-                </div>
-              </dl>
-            </section>
+              </section>
 
-            <TimeScheduleSetupPage
-              flow={{
-                selectedShelly: {
-                  id: installation.shelly.deviceId,
-                  name: installation.shelly.name,
-                  baseUrl: installation.shelly.baseUrl,
-                  scriptIdInput: '1',
-                  model: installation.shelly.model,
-                  gen: installation.shelly.gen
-                }
-              }}
-              editInstallationId={installation.id}
-              inline
-              onInstalled={() => {
-                void runtimeQuery.refetch();
-                if (pulseInstallation) void pulseQuery.refetch();
-              }}
-              onPendingChange={setTimeEditPending}
-            />
-
-            <div className="installation-detail-delete-action">
-              <button
-                className="secondary-action secondary-action--danger"
-                type="button"
-                disabled={deleteMutation.isPending || timeEditPending}
-                onClick={() => setDeleteOpen(true)}
-              >
-                {t('time.detail.delete')}
-              </button>
+              <section className="installation-detail-danger-zone">
+                <h3 className="installation-detail-hierarchy__title">
+                  {t('time.detail.delete')}
+                </h3>
+                <button
+                  className="secondary-action secondary-action--danger"
+                  type="button"
+                  disabled={deleteMutation.isPending || timeEditPending}
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  {t('time.detail.delete')}
+                </button>
+              </section>
             </div>
           </>
         )}

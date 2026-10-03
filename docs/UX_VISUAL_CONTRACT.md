@@ -59,6 +59,8 @@ Time and standalone Pulse dashboard cards are status-first: current operational 
 
 Physical Plug detail is capability-driven. Reuse the shared tab and surface components. Time and Climate may expose different capabilities, but must not own separate detail chrome.
 
+Time and standalone Pulse Automation detail are status-first and use the same information hierarchy: current operational state, configuration, then a visually separated destructive uninstall action. Time may edit its schedule inline inside Configuration; standalone Pulse remains read-only for runtime/configuration. Climate detail remains frozen and is not normalized into this hierarchy. Canonical states are `11-time-detail` and `29-standalone-pulse-detail`.
+
 Saved-Plug forget actions are available only when no installed automation owns that physical Plug. When ownership exists, removal is blocked with an explanation and a direct route to the owning automation. Thermometer cards keep their destructive trash action on the card itself; removal is blocked when an installed Climate automation references that thermometer.
 
 Managed Climate Button Mode is read-only while Climate owns the relay; do not show a disabled editable form.

@@ -138,45 +138,59 @@ export const StandalonePulseInstallationDetail = ({
               </FeedbackPanel>
             )}
 
-            <section className="installation-automation-live-state plug-detail-section">
-              <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-              <dl className="automation-summary installation-detail-summary">
-                <div>
-                  <dt>{pulseLabels.onSeconds}</dt>
-                  <dd>{secondsLabel(installation.config.pulse.onMs)}</dd>
-                </div>
-                <div>
-                  <dt>{pulseLabels.offSeconds}</dt>
-                  <dd>{secondsLabel(installation.config.pulse.offMs)}</dd>
-                </div>
-                <div>
-                  <dt>{pulseLabels.initialDelaySeconds}</dt>
-                  <dd>{secondsLabel(installation.config.pulse.initialDelayMs)}</dd>
-                </div>
-                <div>
-                  <dt>{pulseLabels.startPhase}</dt>
-                  <dd>
-                    {installation.config.pulse.startPhase === 'on'
-                      ? pulseLabels.startOn
-                      : pulseLabels.startOff}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{pulseLabels.execution}</dt>
-                  <dd>{executionLabel}</dd>
-                </div>
-              </dl>
-            </section>
+            <div className="installation-detail-hierarchy">
+              <section className="installation-detail-hierarchy__section">
+                <h3 className="installation-detail-hierarchy__title">
+                  {t('detail.currentState')}
+                </h3>
+                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
+              </section>
 
-            <div className="installation-detail-delete-action">
-              <button
-                className="secondary-action secondary-action--danger"
-                type="button"
-                disabled={deleteMutation.isPending}
-                onClick={() => setDeleteOpen(true)}
-              >
-                {managementLabels.deleteAction}
-              </button>
+              <section className="installation-detail-hierarchy__section">
+                <h3 className="installation-detail-hierarchy__title">
+                  {t('detail.configuration')}
+                </h3>
+                <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
+                  <div>
+                    <dt>{pulseLabels.onSeconds}</dt>
+                    <dd>{secondsLabel(installation.config.pulse.onMs)}</dd>
+                  </div>
+                  <div>
+                    <dt>{pulseLabels.offSeconds}</dt>
+                    <dd>{secondsLabel(installation.config.pulse.offMs)}</dd>
+                  </div>
+                  <div>
+                    <dt>{pulseLabels.initialDelaySeconds}</dt>
+                    <dd>{secondsLabel(installation.config.pulse.initialDelayMs)}</dd>
+                  </div>
+                  <div>
+                    <dt>{pulseLabels.startPhase}</dt>
+                    <dd>
+                      {installation.config.pulse.startPhase === 'on'
+                        ? pulseLabels.startOn
+                        : pulseLabels.startOff}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{pulseLabels.execution}</dt>
+                    <dd>{executionLabel}</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section className="installation-detail-danger-zone">
+                <h3 className="installation-detail-hierarchy__title">
+                  {managementLabels.deleteAction}
+                </h3>
+                <button
+                  className="secondary-action secondary-action--danger"
+                  type="button"
+                  disabled={deleteMutation.isPending}
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  {managementLabels.deleteAction}
+                </button>
+              </section>
             </div>
           </>
         )}
