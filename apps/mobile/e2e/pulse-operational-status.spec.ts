@@ -26,7 +26,7 @@ const seedStandalonePulseInstallation = async (page: Page) => {
               model: 'S3PL-00112EU',
               gen: 3
             },
-            script: { id: 7, hash: 'standalone-pulse-e2e' },
+            script: { id: 7, hash: 'lcl-0163838b' },
             config: {
               relayId: 0,
               pulse: {
@@ -46,13 +46,23 @@ const seedStandalonePulseInstallation = async (page: Page) => {
   });
 };
 
-const mockStandalonePulseRpc = async (page: Page) => {
+const mockStandalonePulseRpc = async (
+  page: Page,
+  options: { scriptCode?: string } = {}
+) => {
+  let scriptPresent = true;
+  let scriptRunning = true;
+  let relayOn = true;
+  const calls: string[] = [];
+  const scriptCode = options.scriptCode ?? '// standalone pulse runtime';
+
   const handleRpc = async (route: Route) => {
     const requestBody = JSON.parse(route.request().postData() ?? '{}') as {
       id?: number | string;
       method?: string;
-      params?: { code?: string };
+      params?: { code?: string; on?: boolean };
     };
+    calls.push(requestBody.method ?? 'unknown');
 
     let result: unknown = {};
     switch (requestBody.method) {
@@ -66,13 +76,13 @@ const mockStandalonePulseRpc = async (page: Page) => {
         break;
       case 'Shelly.GetStatus':
         result = {
-          'script:7': { id: 7, running: true },
+          ...(scriptPresent ? { 'script:7': { id: 7, running: scriptRunning } } : {}),
           'switch:0': {
             id: 0,
-            output: true,
-            apower: 18.4,
+            output: relayOn,
+            apower: relayOn ? 18.4 : 0,
             voltage: 230.2,
-            current: 0.08,
+            current: relayOn ? 0.08 : 0,
             aenergy: { total: 320 }
           },
           sys: {
@@ -83,14 +93,50 @@ const mockStandalonePulseRpc = async (page: Page) => {
           }
         };
         break;
+      case 'Script.List':
+        result = {
+          scripts: scriptPresent
+            ? [
+                {
+                  id: 7,
+                  name: 'Shelly Link Pulse',
+                  enable: true,
+                  running: scriptRunning
+                }
+              ]
+            : []
+        };
+        break;
+      case 'Script.GetCode':
+        result = { data: scriptCode, left: 0 };
+        break;
       case 'Script.Eval':
         if (requestBody.params?.code?.includes('R.ps,R.pc,R.pn,R.rs')) {
           result = {
             result: JSON.stringify([2, 3, 3_665_000, 'po', 1, null, 3_600_000])
           };
         } else {
+          relayOn = false;
           result = { result: '' };
         }
+        break;
+      case 'Script.Stop':
+        scriptRunning = false;
+        result = { was_running: true };
+        break;
+      case 'Script.Start':
+        scriptRunning = true;
+        relayOn = false;
+        result = { was_running: false };
+        break;
+      case 'Script.Delete':
+        scriptPresent = false;
+        scriptRunning = false;
+        result = {};
+        break;
+      case 'Switch.Set':
+        relayOn = requestBody.params?.on === true;
+        result = { was_on: !relayOn };
         break;
       default:
         result = {};
@@ -105,6 +151,7 @@ const mockStandalonePulseRpc = async (page: Page) => {
 
   await page.route('**/__lcl_shelly_proxy?**', handleRpc);
   await page.route('http://192.168.0.30/rpc', handleRpc);
+  return { calls };
 };
 
 const expectNoHorizontalOverflow = async (page: Page) => {
@@ -113,6 +160,12 @@ const expectNoHorizontalOverflow = async (page: Page) => {
     scrollWidth: document.documentElement.scrollWidth
   }));
   expect(overflow.scrollWidth - overflow.viewportWidth).toBeLessThanOrEqual(1);
+};
+
+const expectPulseRuntimeControlsAbsent = async (page: Page) => {
+  for (const name of ['AUTO', 'MANUAL', 'ON', 'OFF']) {
+    await expect(page.getByRole('button', { name, exact: true })).toHaveCount(0);
+  }
 };
 
 for (const viewport of viewports) {
@@ -130,6 +183,17 @@ for (const viewport of viewports) {
     const compactStatus = card.getByLabel('Stan Pulse');
 
     await expect(card).toBeVisible();
+    await expect(card.getByRole('button', { name: 'AUTO', exact: true })).toBeVisible();
+    await expect(card.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
+    await expect(card.getByRole('button', { name: 'ON', exact: true })).toBeVisible();
+    await expect(card.getByRole('button', { name: 'OFF', exact: true })).toBeVisible();
+    await expect(card).toContainText('30 s');
+    await expect(card).toContainText('60 s');
+    await expect(card).toContainText('Ciągłe');
+    await expect(card).toContainText('18.4 W');
+    await expect(card).toContainText('230 V');
+    await expect(card).toContainText('320 Wh');
+    await expect(card).toContainText('14:00');
     await expect(compactStatus).toBeVisible();
     await expect(compactStatus).toContainText('Aktualny');
     await expect(compactStatus).toContainText('ON');
@@ -150,6 +214,11 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Szczegóły: Pompa Pulse · Wi-Fi' }).click();
 
+    await expect(
+      page.locator('.plug-detail-tabs__item[data-automation-icon="clock"]')
+    ).toBeVisible();
+    await expectPulseRuntimeControlsAbsent(page);
+
     const detailSurface = page.locator('.plug-detail-surface');
     const fullStatus = detailSurface.getByLabel('Stan Pulse');
     await expect(fullStatus).toBeVisible();
@@ -160,6 +229,11 @@ for (const viewport of viewports) {
     await expect(fullStatus).toContainText('Błąd automatyki');
     await expect(fullStatus).toContainText('Brak');
     await expect(fullStatus).toContainText('Twarde bezpieczeństwo');
+    await expect(detailSurface).toContainText('30 s');
+    await expect(detailSurface).toContainText('60 s');
+    await expect(page.getByRole('button', { name: 'Usuń automatykę' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Bluetooth' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Skrypt' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     const surfaceBox = await detailSurface.boundingBox();
@@ -172,3 +246,93 @@ for (const viewport of viewports) {
     );
   });
 }
+
+test('standalone Pulse supports safe AUTO and MANUAL relay control', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedStandalonePulseInstallation(page);
+  const rpc = await mockStandalonePulseRpc(page);
+  await page.goto('/');
+
+  const card = page
+    .getByText('Pompa Pulse', { exact: true })
+    .locator('xpath=ancestor::article[1]');
+  const auto = card.getByRole('button', { name: 'AUTO' });
+  const manual = card.getByRole('button', { name: 'MANUAL' });
+  const turnOn = card.getByRole('button', { name: 'ON' });
+
+  await expect(auto).toHaveAttribute('aria-pressed', 'true');
+  await expect(turnOn).toBeDisabled();
+
+  await manual.click();
+  await expect(manual).toHaveAttribute('aria-pressed', 'true');
+  await expect(turnOn).toBeEnabled();
+  await expect.poll(() => rpc.calls.includes('Script.Stop')).toBe(true);
+
+  await turnOn.click();
+  await expect(turnOn).toHaveAttribute('aria-pressed', 'true');
+
+  await auto.click();
+  await expect(auto).toHaveAttribute('aria-pressed', 'true');
+  await expect(turnOn).toBeDisabled();
+  await expect.poll(() => rpc.calls.includes('Script.Start')).toBe(true);
+});
+
+test('standalone Pulse refuses AUTO and manual ON when the installed script hash changed', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedStandalonePulseInstallation(page);
+  const rpc = await mockStandalonePulseRpc(page, {
+    scriptCode: '// tampered standalone pulse runtime'
+  });
+  await page.goto('/');
+
+  const card = page
+    .getByText('Pompa Pulse', { exact: true })
+    .locator('xpath=ancestor::article[1]');
+  const auto = card.getByRole('button', { name: 'AUTO' });
+  const manual = card.getByRole('button', { name: 'MANUAL' });
+  const turnOn = card.getByRole('button', { name: 'ON' });
+
+  await manual.click();
+  await expect(manual).toHaveAttribute('aria-pressed', 'true');
+  await expect(turnOn).toBeEnabled();
+  await expect.poll(() => rpc.calls.includes('Script.Stop')).toBe(true);
+
+  const switchSetCountAfterPause = rpc.calls.filter(
+    (method) => method === 'Switch.Set'
+  ).length;
+  await turnOn.click();
+  await expect
+    .poll(() => rpc.calls.filter((method) => method === 'Switch.Set').length)
+    .toBe(switchSetCountAfterPause);
+  await expect(turnOn).not.toHaveAttribute('aria-pressed', 'true');
+
+  await auto.click();
+  await expect
+    .poll(() => rpc.calls.filter((method) => method === 'Script.Start').length)
+    .toBe(0);
+  await expect(manual).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('standalone Pulse can be deleted safely from detail', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedStandalonePulseInstallation(page);
+  const rpc = await mockStandalonePulseRpc(page);
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Szczegóły: Pompa Pulse · Wi-Fi' }).click();
+  await page.getByRole('button', { name: 'Usuń automatykę' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Usunąć automatykę Pulse?');
+  await dialog.getByRole('button', { name: 'Usuń' }).click();
+
+  await expect(dialog).toBeHidden();
+  await expect.poll(() => rpc.calls.includes('Script.Delete')).toBe(true);
+  await expect
+    .poll(() => rpc.calls.filter((method) => method === 'Switch.Set').length)
+    .toBeGreaterThanOrEqual(2);
+  await expect(page.getByText('Pompa Pulse', { exact: true })).toHaveCount(0);
+  expect(rpc.calls).toContain('Script.Eval');
+  expect(rpc.calls).toContain('Script.Stop');
+});
