@@ -20,11 +20,7 @@ export const PRODUCT_MATRIX_DEFAULT_SEED = 1_337;
 export type ProductMatrixMode = 'valid' | 'invalid' | 'mixed';
 export type ProductMatrixExpectation = 'accept' | 'reject';
 export type ProductMatrixKind =
-  | 'climate'
-  | 'time-steady'
-  | 'time-pulse'
-  | 'standalone-pulse'
-  | 'pulse-core';
+  'climate' | 'time-steady' | 'time-pulse' | 'standalone-pulse' | 'pulse-core';
 
 export interface ProductMatrixCase {
   schema: typeof PRODUCT_MATRIX_CASE_SCHEMA;
@@ -38,7 +34,12 @@ export interface ProductMatrixCase {
   config: unknown;
 }
 
-type CaseFactory = (caseIndex: number, caseSeed: number, rng: DeterministicRng) => ProductMatrixCase;
+type CaseFactory = (
+  caseIndex: number,
+  caseSeed: number,
+  rng: DeterministicRng,
+  variantIndex: number
+) => ProductMatrixCase;
 
 type SensorProfileId = ShellyThermostatConfig['sensor']['profileId'];
 type Aggregation = NonNullable<ShellyThermostatConfig['sensorSet']>['aggregation'];
@@ -53,7 +54,12 @@ const SENSOR_PROFILES = [
   'xiaomi_lywsd03mmc_bthome_v2',
   'tp357_custom_v1'
 ] as const satisfies readonly SensorProfileId[];
-const AGGREGATIONS = ['avg', 'min', 'max', 'firstValid'] as const satisfies readonly Aggregation[];
+const AGGREGATIONS = [
+  'avg',
+  'min',
+  'max',
+  'firstValid'
+] as const satisfies readonly Aggregation[];
 const DAY_WINDOWS = [
   ['06:00', '18:00'],
   ['08:15', '20:45'],
@@ -64,7 +70,13 @@ const OVERNIGHT_WINDOWS = [
   ['20:30', '07:15'],
   ['23:59', '00:01']
 ] as const;
-const PULSE_PHASE_VALUES = [PULSE_MIN_PHASE_MS, 2_000, 10_000, 60_000, PULSE_MAX_PHASE_MS] as const;
+const PULSE_PHASE_VALUES = [
+  PULSE_MIN_PHASE_MS,
+  2_000,
+  10_000,
+  60_000,
+  PULSE_MAX_PHASE_MS
+] as const;
 const PULSE_DELAY_VALUES = [0, 1_000, 30_000, PULSE_MAX_INITIAL_DELAY_MS] as const;
 const PULSE_CYCLE_VALUES = [1, 2, 7, 100, PULSE_MAX_CYCLES] as const;
 const PULSE_DURATION_VALUES = [
@@ -131,17 +143,30 @@ const baseCase = (
 
 const addressFor = (caseIndex: number, sensorIndex: number): string => {
   const suffix = (caseIndex * 11 + sensorIndex * 37) >>> 0;
-  const bytes = [0x02, 0x4c, 0x43, (suffix >>> 16) & 0xff, (suffix >>> 8) & 0xff, suffix & 0xff];
-  return bytes.map((value) => value.toString(16).padStart(2, '0')).join(':').toUpperCase();
+  const bytes = [
+    0x02,
+    0x4c,
+    0x43,
+    (suffix >>> 16) & 0xff,
+    (suffix >>> 8) & 0xff,
+    suffix & 0xff
+  ];
+  return bytes
+    .map((value) => value.toString(16).padStart(2, '0'))
+    .join(':')
+    .toUpperCase();
 };
 
-const pulseConfig = (rng: DeterministicRng): PulseCycleConfig => {
-  const executionMode = rng.pick(['continuous', 'cycles', 'duration'] as const);
+const pulseConfig = (rng: DeterministicRng, variantIndex: number): PulseCycleConfig => {
+  const executionModes = ['continuous', 'cycles', 'duration'] as const;
+  const startPhases = ['on', 'off'] as const;
+  const executionMode = executionModes[variantIndex % executionModes.length]!;
   return {
     onMs: rng.pick(PULSE_PHASE_VALUES),
     offMs: rng.pick(PULSE_PHASE_VALUES),
-    initialDelayMs: rng.pick(PULSE_DELAY_VALUES),
-    startPhase: rng.pick(['on', 'off'] as const),
+    initialDelayMs:
+      PULSE_DELAY_VALUES[Math.floor(variantIndex / 6) % PULSE_DELAY_VALUES.length]!,
+    startPhase: startPhases[Math.floor(variantIndex / 3) % startPhases.length]!,
     execution:
       executionMode === 'continuous'
         ? { mode: 'continuous' }
@@ -159,8 +184,11 @@ const pulseDimensions = (pulse: PulseCycleConfig): ProductMatrixCase['dimensions
   offMs: pulse.offMs
 });
 
-const timeWindow = (rng: DeterministicRng): { startTime: string; endTime: string; kind: 'day' | 'overnight' } => {
-  const kind = rng.pick(['day', 'overnight'] as const);
+const timeWindow = (
+  rng: DeterministicRng,
+  forcedKind?: 'day' | 'overnight'
+): { startTime: string; endTime: string; kind: 'day' | 'overnight' } => {
+  const kind = forcedKind ?? rng.pick(['day', 'overnight'] as const);
   const [startTime, endTime] = rng.pick(kind === 'day' ? DAY_WINDOWS : OVERNIGHT_WINDOWS);
   return { startTime, endTime, kind };
 };
@@ -185,7 +213,8 @@ const climateSensors = (
       profileId,
       sensorId: `matrix-${caseIndex}-${index}`,
       runtimeAddress: addressFor(caseIndex, index),
-      displayName: profileId === 'tp357_custom_v1' ? `TP357 ${index + 1}` : `Xiaomi ${index + 1}`,
+      displayName:
+        profileId === 'tp357_custom_v1' ? `TP357 ${index + 1}` : `Xiaomi ${index + 1}`,
       parserValidated: true
     };
   });
@@ -204,23 +233,23 @@ const climateSensors = (
   };
 };
 
-const validClimate: CaseFactory = (caseIndex, caseSeed, rng) => {
-  const mode = MODES[caseIndex % MODES.length]!;
-  const sensorCount = (caseIndex % 4) + 1;
-  const profilePattern = ['xiaomi', 'tp357', 'mixed'][caseIndex % 3] as
-    | 'xiaomi'
-    | 'tp357'
-    | 'mixed';
-  const aggregation = AGGREGATIONS[caseIndex % AGGREGATIONS.length]!;
-  const vpdEnabled = rng.bool();
-  const executionShape = ['none', 'window', 'pulse', 'pulse-window'][caseIndex % 4] as
-    | 'none'
-    | 'window'
-    | 'pulse'
-    | 'pulse-window';
+const validClimate: CaseFactory = (caseIndex, caseSeed, rng, variantIndex) => {
+  const mode = MODES[variantIndex % MODES.length]!;
+  const sensorCount = (Math.floor(variantIndex / 2) % 4) + 1;
+  const profilePattern = ['xiaomi', 'tp357', 'mixed'][
+    Math.floor(variantIndex / 3) % 3
+  ] as 'xiaomi' | 'tp357' | 'mixed';
+  const aggregation = AGGREGATIONS[Math.floor(variantIndex / 5) % AGGREGATIONS.length]!;
+  const vpdEnabled = variantIndex % 2 === 1;
+  const executionShape = ['none', 'window', 'pulse', 'pulse-window'][
+    Math.floor(variantIndex / 4) % 4
+  ] as 'none' | 'window' | 'pulse' | 'pulse-window';
 
   let config = climateSensors(
-    createDefaultShellyThermostatConfig(SENSOR_PROFILES[caseIndex % SENSOR_PROFILES.length]!, mode),
+    createDefaultShellyThermostatConfig(
+      SENSOR_PROFILES[variantIndex % SENSOR_PROFILES.length]!,
+      mode
+    ),
     caseIndex,
     sensorCount,
     profilePattern,
@@ -228,8 +257,14 @@ const validClimate: CaseFactory = (caseIndex, caseSeed, rng) => {
   );
 
   const defaultControl = config.rule.control;
-  const delta = defaultControl.metric === 'temperature' ? rng.pick([0.5, 1, 2]) : rng.pick([2, 5, 10]);
-  const center = defaultControl.metric === 'temperature' ? rng.pick([18, 22, 28]) : rng.pick([45, 60, 75]);
+  const delta =
+    defaultControl.metric === 'temperature'
+      ? rng.pick([0.5, 1, 2])
+      : rng.pick([2, 5, 10]);
+  const center =
+    defaultControl.metric === 'temperature'
+      ? rng.pick([18, 22, 28])
+      : rng.pick([45, 60, 75]);
   const control =
     defaultControl.direction === 'below'
       ? { ...defaultControl, onThreshold: center - delta, offThreshold: center + delta }
@@ -238,13 +273,13 @@ const validClimate: CaseFactory = (caseIndex, caseSeed, rng) => {
   const execution: ShellyThermostatConfig['execution'] = {};
   let windowKind = 'none';
   if (executionShape === 'window' || executionShape === 'pulse-window') {
-    const window = timeWindow(rng);
+    const window = timeWindow(rng, variantIndex % 2 === 0 ? 'day' : 'overnight');
     execution.activeWindow = { startTime: window.startTime, endTime: window.endTime };
     windowKind = window.kind;
   }
   let pulse: PulseCycleConfig | undefined;
   if (executionShape === 'pulse' || executionShape === 'pulse-window') {
-    pulse = pulseConfig(rng);
+    pulse = pulseConfig(rng, variantIndex);
     execution.pulse = pulse;
   }
 
@@ -296,8 +331,8 @@ const validClimate: CaseFactory = (caseIndex, caseSeed, rng) => {
   );
 };
 
-const validTimeSteady: CaseFactory = (caseIndex, caseSeed, rng) => {
-  const window = timeWindow(rng);
+const validTimeSteady: CaseFactory = (caseIndex, caseSeed, rng, variantIndex) => {
+  const window = timeWindow(rng, variantIndex % 2 === 0 ? 'day' : 'overnight');
   const config = { relayId: 0, onTime: window.startTime, offTime: window.endTime };
   return baseCase(
     caseIndex,
@@ -311,9 +346,9 @@ const validTimeSteady: CaseFactory = (caseIndex, caseSeed, rng) => {
   );
 };
 
-const validTimePulse: CaseFactory = (caseIndex, caseSeed, rng) => {
-  const window = timeWindow(rng);
-  const pulse = pulseConfig(rng);
+const validTimePulse: CaseFactory = (caseIndex, caseSeed, rng, variantIndex) => {
+  const window = timeWindow(rng, variantIndex % 2 === 0 ? 'day' : 'overnight');
+  const pulse = pulseConfig(rng, variantIndex);
   return baseCase(
     caseIndex,
     caseSeed,
@@ -329,8 +364,8 @@ const validTimePulse: CaseFactory = (caseIndex, caseSeed, rng) => {
   );
 };
 
-const validStandalonePulse: CaseFactory = (caseIndex, caseSeed, rng) => {
-  const pulse = pulseConfig(rng);
+const validStandalonePulse: CaseFactory = (caseIndex, caseSeed, rng, variantIndex) => {
+  const pulse = pulseConfig(rng, variantIndex);
   return baseCase(
     caseIndex,
     caseSeed,
@@ -343,8 +378,8 @@ const validStandalonePulse: CaseFactory = (caseIndex, caseSeed, rng) => {
   );
 };
 
-const validPulseCore: CaseFactory = (caseIndex, caseSeed, rng) => {
-  const pulse = pulseConfig(rng);
+const validPulseCore: CaseFactory = (caseIndex, caseSeed, rng, variantIndex) => {
+  const pulse = pulseConfig(rng, variantIndex);
   return baseCase(
     caseIndex,
     caseSeed,
@@ -358,7 +393,10 @@ const validPulseCore: CaseFactory = (caseIndex, caseSeed, rng) => {
 };
 
 const invalidClimateThreshold: CaseFactory = (caseIndex, caseSeed) => {
-  const config = createDefaultShellyThermostatConfig('xiaomi_lywsd03mmc_bthome_v2', 'heating');
+  const config = createDefaultShellyThermostatConfig(
+    'xiaomi_lywsd03mmc_bthome_v2',
+    'heating'
+  );
   return baseCase(
     caseIndex,
     caseSeed,
@@ -465,13 +503,16 @@ const invalidStandalonePulse: CaseFactory = (caseIndex, caseSeed) =>
 
 const invalidPulseCore: CaseFactory = (caseIndex, caseSeed, rng) => {
   const variant = caseIndex % 3;
-  const base = pulseConfig(rng);
+  const base = pulseConfig(rng, caseIndex);
   const config: PulseCycleConfig =
     variant === 0
       ? { ...base, onMs: PULSE_MIN_PHASE_MS - 1 }
       : variant === 1
         ? { ...base, execution: { mode: 'cycles', count: 0 } }
-        : { ...base, execution: { mode: 'duration', durationMs: PULSE_MAX_DURATION_MS + 1 } };
+        : {
+            ...base,
+            execution: { mode: 'duration', durationMs: PULSE_MAX_DURATION_MS + 1 }
+          };
   return baseCase(
     caseIndex,
     caseSeed,
@@ -528,10 +569,13 @@ export const generateProductMatrixCases = (
 
   const rootRng = new DeterministicRng(seed);
   const factories = factoriesForMode(mode);
+  const factoryCounts = new Map<CaseFactory, number>();
   return Array.from({ length: caseCount }, (_, caseIndex) => {
     const caseSeed = rootRng.nextUint32();
     const rng = new DeterministicRng(caseSeed);
     const factory = factories[caseIndex % factories.length]!;
-    return factory(caseIndex, caseSeed, rng);
+    const variantIndex = factoryCounts.get(factory) ?? 0;
+    factoryCounts.set(factory, variantIndex + 1);
+    return factory(caseIndex, caseSeed, rng, variantIndex);
   });
 };

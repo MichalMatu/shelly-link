@@ -55,9 +55,15 @@ const assertScriptIsStableAndValid = (
   label: string
 ): void => {
   invariant(script === regenerated, `${label}: script generation is not deterministic.`);
-  invariant(scriptBytes(script) <= maximumBytes, `${label}: generated script exceeds ${maximumBytes} B.`);
+  invariant(
+    scriptBytes(script) <= maximumBytes,
+    `${label}: generated script exceeds ${maximumBytes} B.`
+  );
   invariant(!script.includes('{{'), `${label}: unresolved template marker found.`);
-  invariant(!script.includes('__PLACEHOLDER__'), `${label}: unresolved placeholder found.`);
+  invariant(
+    !script.includes('__PLACEHOLDER__'),
+    `${label}: unresolved placeholder found.`
+  );
   try {
     // Shelly Script is JavaScript. Parsing it here catches malformed generated source without executing it.
     new Function(script);
@@ -72,14 +78,20 @@ const assertPulseBoundaries = (pulse: PulseCycleConfig, label: string): void => 
   const atStart = evaluatePulseCycle(pulse, startedAtMs, startedAtMs);
 
   if (pulse.initialDelayMs > 0) {
-    invariant(atStart.status === 'delay', `${label}: initial delay must start in delay state.`);
+    invariant(
+      atStart.status === 'delay',
+      `${label}: initial delay must start in delay state.`
+    );
     invariant(atStart.relayOn === false, `${label}: initial delay must be relay OFF.`);
     const beforeBoundary = evaluatePulseCycle(
       pulse,
       startedAtMs,
       startedAtMs + pulse.initialDelayMs - 1
     );
-    invariant(beforeBoundary.status === 'delay', `${label}: delay ended one millisecond early.`);
+    invariant(
+      beforeBoundary.status === 'delay',
+      `${label}: delay ended one millisecond early.`
+    );
   }
 
   const activeStart = evaluatePulseCycle(
@@ -87,7 +99,10 @@ const assertPulseBoundaries = (pulse: PulseCycleConfig, label: string): void => 
     startedAtMs,
     startedAtMs + pulse.initialDelayMs
   );
-  invariant(activeStart.status === 'running', `${label}: active boundary must enter running state.`);
+  invariant(
+    activeStart.status === 'running',
+    `${label}: active boundary must enter running state.`
+  );
   invariant(activeStart.phase === pulse.startPhase, `${label}: wrong start phase.`);
   invariant(
     activeStart.relayOn === (pulse.startPhase === 'on'),
@@ -100,7 +115,10 @@ const assertPulseBoundaries = (pulse: PulseCycleConfig, label: string): void => 
       startedAtMs,
       startedAtMs + pulse.initialDelayMs + pulse.onMs + pulse.offMs + 1
     );
-    invariant(later.status === 'running', `${label}: continuous Pulse unexpectedly completed.`);
+    invariant(
+      later.status === 'running',
+      `${label}: continuous Pulse unexpectedly completed.`
+    );
     return;
   }
 
@@ -115,9 +133,15 @@ const assertPulseBoundaries = (pulse: PulseCycleConfig, label: string): void => 
     startedAtMs,
     startedAtMs + pulse.initialDelayMs + completionElapsedMs
   );
-  invariant(completed.status === 'completed', `${label}: bounded Pulse did not complete at boundary.`);
+  invariant(
+    completed.status === 'completed',
+    `${label}: bounded Pulse did not complete at boundary.`
+  );
   invariant(completed.relayOn === false, `${label}: completed Pulse must finish OFF.`);
-  invariant(completed.nextTransitionAtMs === null, `${label}: completed Pulse retained a transition.`);
+  invariant(
+    completed.nextTransitionAtMs === null,
+    `${label}: completed Pulse retained a transition.`
+  );
 };
 
 const controlMeasurement = (
@@ -126,14 +150,19 @@ const controlMeasurement = (
   controlValue?: number
 ): ThermostatMeasurement => ({
   temperatureC:
-    rule.control.metric === 'temperature' ? (controlValue ?? rule.control.onThreshold) : 24,
+    rule.control.metric === 'temperature'
+      ? (controlValue ?? rule.control.onThreshold)
+      : 24,
   humidityPct:
     rule.control.metric === 'humidity' ? (controlValue ?? rule.control.onThreshold) : 60,
   rssi: -55,
   seenAtMs
 });
 
-const assertClimateFailSafeInvariants = (config: ShellyThermostatConfig, label: string): void => {
+const assertClimateFailSafeInvariants = (
+  config: ShellyThermostatConfig,
+  label: string
+): void => {
   const rule = config.rule as ThermostatRule;
   const stale = evaluateThresholdDecision({
     rule,
@@ -143,13 +172,13 @@ const assertClimateFailSafeInvariants = (config: ShellyThermostatConfig, label: 
       onStartedMs: BASE_NOW_MS - 60_000,
       lastChangeMs: BASE_NOW_MS - 60_000
     },
-    measurement: controlMeasurement(
-      rule,
-      BASE_NOW_MS - rule.staleTimeoutSec * 1_000 - 1
-    ),
+    measurement: controlMeasurement(rule, BASE_NOW_MS - rule.staleTimeoutSec * 1_000 - 1),
     nowMs: BASE_NOW_MS
   });
-  invariant(stale.requestedRelayOn === false, `${label}: stale sensor did not request OFF.`);
+  invariant(
+    stale.requestedRelayOn === false,
+    `${label}: stale sensor did not request OFF.`
+  );
   invariant(stale.reason === 'sensor-stale', `${label}: stale sensor reason changed.`);
 
   const boot = evaluateThresholdDecision({
@@ -190,11 +219,26 @@ const replayClimate = (matrixCase: ProductMatrixCase): void => {
   );
 
   const decoded = decodeShellyThermostatScript(script);
-  invariant(decoded !== null, `${matrixCase.name}: generated Climate script did not decode.`);
-  invariant(decoded.runtimeMode === 'climate-engine-v1', `${matrixCase.name}: wrong Climate runtime mode.`);
-  invariant(decoded.configHash === configHash(config), `${matrixCase.name}: Climate config hash mismatch.`);
-  invariant(decoded.settings.mode === config.rule.mode, `${matrixCase.name}: Climate mode did not round-trip.`);
-  invariant(decoded.settings.relayId === config.output.relayId, `${matrixCase.name}: relay id did not round-trip.`);
+  invariant(
+    decoded !== null,
+    `${matrixCase.name}: generated Climate script did not decode.`
+  );
+  invariant(
+    decoded.runtimeMode === 'climate-engine-v1',
+    `${matrixCase.name}: wrong Climate runtime mode.`
+  );
+  invariant(
+    decoded.configHash === configHash(config),
+    `${matrixCase.name}: Climate config hash mismatch.`
+  );
+  invariant(
+    decoded.settings.mode === config.rule.mode,
+    `${matrixCase.name}: Climate mode did not round-trip.`
+  );
+  invariant(
+    decoded.settings.relayId === config.output.relayId,
+    `${matrixCase.name}: relay id did not round-trip.`
+  );
   invariant(
     jsonEqual(decoded.settings.execution ?? null, config.execution ?? null),
     `${matrixCase.name}: Climate execution config did not round-trip.`
@@ -211,7 +255,10 @@ const replayClimate = (matrixCase: ProductMatrixCase): void => {
   );
   configuredSensors.forEach((sensor, index) => {
     const decodedSensor = decoded.settings.sensors[index];
-    invariant(decodedSensor !== undefined, `${matrixCase.name}: missing decoded sensor ${index}.`);
+    invariant(
+      decodedSensor !== undefined,
+      `${matrixCase.name}: missing decoded sensor ${index}.`
+    );
     invariant(
       decodedSensor.runtimeAddress === sensor.runtimeAddress,
       `${matrixCase.name}: sensor ${index} address did not round-trip.`
@@ -227,7 +274,8 @@ const replayClimate = (matrixCase: ProductMatrixCase): void => {
   });
 
   assertClimateFailSafeInvariants(config, matrixCase.name);
-  if (config.execution?.pulse) assertPulseBoundaries(config.execution.pulse, matrixCase.name);
+  if (config.execution?.pulse)
+    assertPulseBoundaries(config.execution.pulse, matrixCase.name);
 };
 
 const replayTimeSteady = (matrixCase: ProductMatrixCase): void => {
@@ -243,9 +291,18 @@ const replayTimeSteady = (matrixCase: ProductMatrixCase): void => {
     return;
   }
 
-  invariant(typeof config.onTime === 'string' && typeof config.offTime === 'string', `${matrixCase.name}: invalid Time shape.`);
-  invariant(dailyScheduleTimespec(config.onTime).length > 0, `${matrixCase.name}: ON timespec missing.`);
-  invariant(dailyScheduleTimespec(config.offTime).length > 0, `${matrixCase.name}: OFF timespec missing.`);
+  invariant(
+    typeof config.onTime === 'string' && typeof config.offTime === 'string',
+    `${matrixCase.name}: invalid Time shape.`
+  );
+  invariant(
+    dailyScheduleTimespec(config.onTime).length > 0,
+    `${matrixCase.name}: ON timespec missing.`
+  );
+  invariant(
+    dailyScheduleTimespec(config.offTime).length > 0,
+    `${matrixCase.name}: OFF timespec missing.`
+  );
   invariant(
     expectedRelayOnForClockTime(config, config.onTime) === true,
     `${matrixCase.name}: schedule must be active at ON boundary.`
@@ -259,7 +316,10 @@ const replayTimeSteady = (matrixCase: ProductMatrixCase): void => {
 const replayTimePulse = (matrixCase: ProductMatrixCase): void => {
   if (matrixCase.expectation === 'reject') {
     const parsed = timePulseAutomationConfigSchema.safeParse(matrixCase.config);
-    invariant(!parsed.success, `${matrixCase.name}: invalid Time + Pulse config was accepted.`);
+    invariant(
+      !parsed.success,
+      `${matrixCase.name}: invalid Time + Pulse config was accepted.`
+    );
     return;
   }
 
@@ -275,7 +335,10 @@ const replayTimePulse = (matrixCase: ProductMatrixCase): void => {
   );
   const decoded = decodeShellyTimePulseScript(script);
   invariant(decoded !== null, `${matrixCase.name}: Time + Pulse script did not decode.`);
-  invariant(jsonEqual(decoded, config), `${matrixCase.name}: Time + Pulse config did not round-trip.`);
+  invariant(
+    jsonEqual(decoded, config),
+    `${matrixCase.name}: Time + Pulse config did not round-trip.`
+  );
   invariant(
     expectedRelayOnForClockTime(config.schedule, config.schedule.onTime) === true,
     `${matrixCase.name}: Time + Pulse ON boundary is inactive.`
@@ -290,7 +353,10 @@ const replayTimePulse = (matrixCase: ProductMatrixCase): void => {
 const replayStandalonePulse = (matrixCase: ProductMatrixCase): void => {
   if (matrixCase.expectation === 'reject') {
     const parsed = standalonePulseAutomationConfigSchema.safeParse(matrixCase.config);
-    invariant(!parsed.success, `${matrixCase.name}: invalid standalone Pulse config was accepted.`);
+    invariant(
+      !parsed.success,
+      `${matrixCase.name}: invalid standalone Pulse config was accepted.`
+    );
     return;
   }
 
@@ -305,8 +371,14 @@ const replayStandalonePulse = (matrixCase: ProductMatrixCase): void => {
     matrixCase.name
   );
   const decoded = decodeShellyStandalonePulseScript(script);
-  invariant(decoded !== null, `${matrixCase.name}: standalone Pulse script did not decode.`);
-  invariant(jsonEqual(decoded, config), `${matrixCase.name}: standalone Pulse config did not round-trip.`);
+  invariant(
+    decoded !== null,
+    `${matrixCase.name}: standalone Pulse script did not decode.`
+  );
+  invariant(
+    jsonEqual(decoded, config),
+    `${matrixCase.name}: standalone Pulse config did not round-trip.`
+  );
   assertPulseBoundaries(config.pulse, matrixCase.name);
 };
 
@@ -413,7 +485,10 @@ const requireDimensionValues = (
 ): void => {
   const actual = new Set(report.dimensions[name] ?? []);
   for (const value of values) {
-    invariant(actual.has(String(value)), `Product matrix coverage is missing ${name}=${String(value)}.`);
+    invariant(
+      actual.has(String(value)),
+      `Product matrix coverage is missing ${name}=${String(value)}.`
+    );
   }
 };
 
@@ -422,8 +497,17 @@ export const assertProductMatrixCoverage = (
   mode: ProductMatrixMode
 ): ProductMatrixCoverageReport => {
   const report = buildProductMatrixCoverageReport(cases);
-  for (const kind of ['climate', 'time-steady', 'time-pulse', 'standalone-pulse', 'pulse-core']) {
-    invariant((report.byKind[kind] ?? 0) > 0, `Product matrix coverage is missing ${kind}.`);
+  for (const kind of [
+    'climate',
+    'time-steady',
+    'time-pulse',
+    'standalone-pulse',
+    'pulse-core'
+  ]) {
+    invariant(
+      (report.byKind[kind] ?? 0) > 0,
+      `Product matrix coverage is missing ${kind}.`
+    );
   }
 
   if (mode !== 'invalid') {
@@ -438,7 +522,12 @@ export const assertProductMatrixCoverage = (
     requireDimensionValues(report, 'profilePattern', ['xiaomi', 'tp357', 'mixed']);
     requireDimensionValues(report, 'aggregation', ['avg', 'min', 'max', 'firstValid']);
     requireDimensionValues(report, 'vpd', [true, false]);
-    requireDimensionValues(report, 'executionShape', ['none', 'window', 'pulse', 'pulse-window']);
+    requireDimensionValues(report, 'executionShape', [
+      'none',
+      'window',
+      'pulse',
+      'pulse-window'
+    ]);
     requireDimensionValues(report, 'windowKind', ['day', 'overnight']);
     requireDimensionValues(report, 'pulseMode', ['continuous', 'cycles', 'duration']);
     requireDimensionValues(report, 'startPhase', ['on', 'off']);

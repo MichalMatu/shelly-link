@@ -94,6 +94,7 @@ const parseArgs = (argv: readonly string[]): CliOptions => {
       case '-h':
         console.log(usage);
         process.exit(0);
+        break;
       default:
         throw new Error(`Unknown argument: ${String(argument)}\n\n${usage}`);
     }
@@ -102,7 +103,10 @@ const parseArgs = (argv: readonly string[]): CliOptions => {
 };
 
 const sanitizeName = (value: string): string =>
-  value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
 const writeCorpus = async (
   outDir: string,
@@ -124,7 +128,11 @@ const writeCorpus = async (
       )
     )
   );
-  await writeFile(join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  await writeFile(
+    join(outDir, 'report.json'),
+    `${JSON.stringify(report, null, 2)}\n`,
+    'utf8'
+  );
 };
 
 const listJsonFiles = async (directory: string): Promise<string[]> => {
@@ -133,7 +141,9 @@ const listJsonFiles = async (directory: string): Promise<string[]> => {
     entries.map(async (entry): Promise<string[]> => {
       const fullPath = join(directory, entry.name);
       if (entry.isDirectory()) return listJsonFiles(fullPath);
-      return entry.isFile() && entry.name.endsWith('.json') && entry.name !== 'report.json'
+      return entry.isFile() &&
+        entry.name.endsWith('.json') &&
+        entry.name !== 'report.json'
         ? [fullPath]
         : [];
     })
@@ -172,17 +182,29 @@ const replayCases = (cases: readonly ProductMatrixCase[], source: string): void 
 const runSelfTest = (): void => {
   const first = generateProductMatrixCases(256, PRODUCT_MATRIX_DEFAULT_SEED, 'mixed');
   const second = generateProductMatrixCases(256, PRODUCT_MATRIX_DEFAULT_SEED, 'mixed');
-  const different = generateProductMatrixCases(256, PRODUCT_MATRIX_DEFAULT_SEED + 1, 'mixed');
+  const different = generateProductMatrixCases(
+    256,
+    PRODUCT_MATRIX_DEFAULT_SEED + 1,
+    'mixed'
+  );
 
   if (JSON.stringify(first) !== JSON.stringify(second)) {
-    throw new Error('Product matrix self-test failed: same seed produced different corpus.');
+    throw new Error(
+      'Product matrix self-test failed: same seed produced different corpus.'
+    );
   }
   if (JSON.stringify(first) === JSON.stringify(different)) {
-    throw new Error('Product matrix self-test failed: different seed produced identical corpus.');
+    throw new Error(
+      'Product matrix self-test failed: different seed produced identical corpus.'
+    );
   }
-  const ids = new Set(first.map((matrixCase) => `${matrixCase.caseIndex}:${matrixCase.seed}`));
+  const ids = new Set(
+    first.map((matrixCase) => `${matrixCase.caseIndex}:${matrixCase.seed}`)
+  );
   if (ids.size !== first.length) {
-    throw new Error('Product matrix self-test failed: duplicate generated case identity.');
+    throw new Error(
+      'Product matrix self-test failed: duplicate generated case identity.'
+    );
   }
   replayCases(first, 'self-test');
   assertProductMatrixCoverage(first, 'mixed');
@@ -195,7 +217,8 @@ const main = async (): Promise<void> => {
 
   if (options.replayCorpus) {
     const cases = await loadCorpus(options.replayCorpus);
-    if (cases.length === 0) throw new Error(`No product matrix cases found in ${options.replayCorpus}.`);
+    if (cases.length === 0)
+      throw new Error(`No product matrix cases found in ${options.replayCorpus}.`);
     replayCases(cases, basename(options.replayCorpus));
     console.log(`Product matrix replay passed (${cases.length} persistent cases).`);
     return;
