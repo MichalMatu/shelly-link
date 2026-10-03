@@ -42,7 +42,9 @@
     "e2e:visual": "node scripts/quality/require-canonical-visual-platform.mjs && LCL_VISUAL_CONTRACT=1 playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts --grep \"installed automation dashboard shows Shelly runtime on phone-large|daily time automation installs and renders on phone-large|current Plug setup routes have no horizontal overflow on phone-large|standalone Pulse setup is responsive on phone-large|plain saved Plug exposes the same LED settings without an installed automation\"",
     "e2e:visual:update": "node scripts/quality/require-canonical-visual-platform.mjs && LCL_VISUAL_CONTRACT=1 playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts --grep \"installed automation dashboard shows Shelly runtime on phone-large|daily time automation installs and renders on phone-large|current Plug setup routes have no horizontal overflow on phone-large|standalone Pulse setup is responsive on phone-large|plain saved Plug exposes the same LED settings without an installed automation\" --update-snapshots",
     "test:product-matrix": "tsx scripts/analysis/product-matrix-fuzzer.ts --self-test && tsx scripts/analysis/product-matrix-fuzzer.ts --cases 1000 --seed 1337 --mode mixed --replay-persistent test/fixtures/product-matrix",
-    "doctor:shelly": "tsx scripts/diagnostics/shelly-doctor.ts"
+    "doctor:shelly": "tsx scripts/diagnostics/shelly-doctor.ts",
+    "test:fault-injection": "pnpm --filter @lcl/mobile exec vitest run src/features/automations/flows/diagnosticFaultInjection.test.ts",
+    "test:persistence-reconciliation": "pnpm --filter @lcl/mobile exec vitest run src/features/automations/flows/persistenceReconciliationFuzzer.test.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [
