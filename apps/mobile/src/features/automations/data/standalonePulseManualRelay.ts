@@ -6,6 +6,7 @@ import {
   readShellyControlStatus,
   type ShellyControlStatus
 } from './shellyManagedAutomation.js';
+import { assertStandalonePulseRuntimeCurrent } from './standalonePulseRuntimeIdentity.js';
 
 const requireStoredIdentity = async (
   installation: StandalonePulseInstalledAutomation,
@@ -36,6 +37,7 @@ export const setStandalonePulseManualRelay = async (
   ) {
     throw new Error('Manual relay control requires a paused Pulse automation.');
   }
+  await assertStandalonePulseRuntimeCurrent(installation);
 
   unwrapShellyResult(
     on
