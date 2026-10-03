@@ -1,0 +1,23 @@
+{
+  "id": "ux-polish-shared-feedback-footer-retry-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "ux/polish-foundation-20261003",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 3072,
+  "task_timeout": 7200,
+  "idle_timeout": 900,
+  "commands": [
+    "git status --short && git fetch origin ux/polish-foundation-20261003 agent-control && git reset --hard origin/ux/polish-foundation-20261003 && git rev-parse HEAD",
+    "git show origin/agent-control:.agent/tasks/ux-polish-shared-feedback-footer-20261003.payload/apply.py | python3 -",
+    "pnpm exec prettier --write apps/mobile/src/features/automation-dashboard/components/AutomationCardFeedbackFooter.tsx apps/mobile/src/features/automation-dashboard/index.ts apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/screens/TimeAutomationCard.tsx apps/mobile/src/app/StandalonePulseAutomationCard.tsx",
+    "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && git diff --check",
+    "pnpm -r --filter '!@lcl/mobile' test",
+    "pnpm --filter @lcl/mobile exec vitest run --passWithNoTests --maxWorkers=2",
+    "pnpm test:product-matrix && pnpm test:coverage:core && pnpm build && pnpm quality:performance",
+    "node scripts/quality/run-prepush-e2e.mjs e2e:responsive && node scripts/quality/run-prepush-e2e.mjs e2e:visual && python3 -c \"import subprocess; rows=subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],text=True).splitlines(); png=[row[3:] for row in rows if row[3:].endswith('.png')]; print('visual snapshot delta:', png); assert png == [], png\"",
+    "git add apps/mobile/src/features/automation-dashboard/components/AutomationCardFeedbackFooter.tsx apps/mobile/src/features/automation-dashboard/index.ts apps/mobile/src/screens/AutomationDashboardScreen.tsx apps/mobile/src/screens/TimeAutomationCard.tsx apps/mobile/src/app/StandalonePulseAutomationCard.tsx && git commit -m 'Share automation dashboard feedback footer'",
+    "git push --no-verify origin HEAD:ux/polish-foundation-20261003"
+  ]
+}
