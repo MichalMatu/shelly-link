@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 2,
+  "index": 4,
   "total": 10,
-  "command": "git show origin/agent-control:.agent/tasks/ux-polish-shared-feedback-footer-20261003.payload/apply.py | python3 -",
-  "pid": 90483,
+  "command": "pnpm quality:ux && pnpm quality:repo && pnpm typecheck && git diff --check",
+  "pid": 90613,
   "timeout": 900,
   "idle_timeout": 900,
   "memory_limit_mb": 3072,
-  "started_at": "2026-10-03T19:06:47.778414+00:00",
-  "stage_name": "command-2",
-  "stage_index": 2,
+  "started_at": "2026-10-03T19:06:51.558210+00:00",
+  "stage_name": "command-4",
+  "stage_index": 4,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "ux-polish-shared-feedback-footer-20261003",
@@ -18,5 +18,5 @@
   "task_digest": "1e2d269fe7798a4aa1dbf2e534b9486859617633d336861d279c265cbb9ee880",
   "daemon_version": "4.20.3",
   "daemon_pid": 90255,
-  "updated_at": "2026-10-03T19:06:47.890315+00:00"
+  "updated_at": "2026-10-03T19:06:51.584187+00:00"
 }
