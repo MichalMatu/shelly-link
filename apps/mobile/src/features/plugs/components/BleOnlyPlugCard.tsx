@@ -1,8 +1,8 @@
-import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { useSavedBlePlugRuntime } from '../flows/useSavedBlePlugRuntime.js';
 import { PlugDashboardCardShell } from './PlugDashboardCardShell.js';
+import { PlugDashboardFeedbackFooter } from './PlugDashboardFeedbackFooter.js';
 
 export type BleOnlyPlugCardProps = {
   plug: SavedPlugWithBleLocator;
@@ -44,22 +44,12 @@ export const BleOnlyPlugCard = ({ plug, onNameChange, onOpen }: BleOnlyPlugCardP
       detailContext={t('common.bluetooth')}
       footer={
         hasError ? (
-          <footer className="automation-card__footer">
-            {runtime.isOffline && (
-              <div
-                className="automation-card__status automation-card__status--offline"
-                role="alert"
-              >
-                <IconAlertTriangle aria-hidden="true" />
-                <span>{t('dashboard.readFailed')}</span>
-              </div>
-            )}
-            {runtime.isRelayError && (
-              <span className="automation-control-error" role="alert">
-                {t('detail.actionFailed')}
-              </span>
-            )}
-          </footer>
+          <PlugDashboardFeedbackFooter
+            warningLabel={runtime.isOffline ? t('dashboard.readFailed') : null}
+            warningTone="offline"
+            warningRole="alert"
+            actionErrorLabel={runtime.isRelayError ? t('detail.actionFailed') : null}
+          />
         ) : undefined
       }
       onNameChange={onNameChange}

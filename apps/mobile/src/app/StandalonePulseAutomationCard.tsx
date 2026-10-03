@@ -1,11 +1,9 @@
-import {
-  AutomationCardFeedbackFooter,
-  AutomationDashboardBody
-} from '../features/automation-dashboard/index.js';
+import { AutomationDashboardBody } from '../features/automation-dashboard/index.js';
 import { Pulse, type InstalledAutomation } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
-  PlugDashboardCardShell
+  PlugDashboardCardShell,
+  PlugDashboardFeedbackFooter
 } from '../features/plugs/index.js';
 import { pulseCycleCopy } from './locales/pulseCycle.js';
 import { useTranslation } from './i18n.js';
@@ -83,7 +81,7 @@ export const StandalonePulseAutomationCard = ({
     (runtimeQuery.data !== undefined && !runtimeMatches) ||
     action.isError;
   const footer = warning ? (
-    <AutomationCardFeedbackFooter
+    <PlugDashboardFeedbackFooter
       warningLabel={t('dashboard.health.attention')}
       actionErrorLabel={action.isError ? t('detail.actionFailed') : null}
     />

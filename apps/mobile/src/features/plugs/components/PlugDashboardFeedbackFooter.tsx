@@ -1,21 +1,23 @@
 import { IconAlertTriangle } from '@tabler/icons-react';
 
-type AutomationCardFeedbackFooterProps = {
+type PlugDashboardFeedbackFooterProps = {
   warningLabel?: string | null;
   warningTone?: string;
   actionErrorLabel?: string | null;
+  warningRole?: 'status' | 'alert';
 };
 
-export const AutomationCardFeedbackFooter = ({
+export const PlugDashboardFeedbackFooter = ({
   warningLabel,
   warningTone = 'attention',
-  actionErrorLabel
-}: AutomationCardFeedbackFooterProps) => (
+  actionErrorLabel,
+  warningRole = 'status'
+}: PlugDashboardFeedbackFooterProps) => (
   <footer className="automation-card__footer">
     {warningLabel && (
       <div
         className={`automation-card__status automation-card__status--${warningTone}`}
-        role="status"
+        role={warningRole}
       >
         <IconAlertTriangle aria-hidden="true" />
         <span>{warningLabel}</span>

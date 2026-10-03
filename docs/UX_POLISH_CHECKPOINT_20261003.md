@@ -38,24 +38,35 @@ WebView evidence:
 
 Durable emulator evidence lives on separate branch `inspection/android-emulator-20261003` (full device PNGs, DOM reports, and reduced previews). The first recovered device screenshot contains a transient Android `System UI isn't responding` dialog. Therefore use this evidence for real-device geometry/flow/overflow confirmation, but do not promote the contaminated device screenshot to a golden visual baseline. Canonical visual acceptance remains the macOS Playwright contract.
 
-## Next slice
+## UX polish closeout
 
-Continue UX polish with **Time Detail / standalone Pulse Detail hierarchy** only. Desired information order:
+Completed after the original checkpoint:
 
-1. current operational status;
-2. clearly separated configuration;
-3. editing where supported (Time only);
-4. clearly separated destructive uninstall action.
+- `9accb1bb818a76b003ef0bd8f3656e124e78df9a` established the Time / standalone Pulse detail hierarchy. Canonical `11-time-detail` was refreshed and `29-standalone-pulse-detail` was added.
+- `f1bf7c4f8e4659f0380aea45f81d4239e9d483f1` added canonical `30-ble-only-plug-detail`, proving that BLE-only Plug Detail exposes only supported Device and Info capabilities.
+- `e217a2725651d580621026339eb5134471267dcd` removed duplicated automation-card feedback markup. The final ownership cleanup keeps that shared feedback role beside `PlugDashboardCardShell` in `features/plugs` and reuses it for Climate, Time, standalone Pulse and BLE-only Plug cards.
 
-Constraints:
+Final audit findings:
 
-- do not change Climate detail or frozen Climate golden surfaces;
-- do not add runtime controls to standalone Pulse detail;
-- do not change Time/Pulse runtime, transport, persistence, polling, device identity checks, deletion semantics, or mutation lifecycle;
-- retain existing tabs/capabilities and current safe delete modals;
-- add/review canonical visual evidence for standalone Pulse detail; existing Time detail visual is `11-time-detail`.
+- setup top navigation is the shared `SegmentedControl`; the retained `setup-top-nav` selectors are styling hooks, not a second navigation implementation;
+- no hard-coded `'Pulse'` UI label remains in `HardwareSetupScreen`;
+- `AppPageBack` remains only in nested discovery/settings flows, not the top-level Add Plug/Add Thermometer pages;
+- Plug Detail capability filtering uses `availableTabs`, including BLE-only Device + Info and the qualified Time/Pulse capability sets;
+- the remaining direct Clipboard API call sites all surface success/failure feedback;
+- broad internal `climate` / `time` naming is implementation vocabulary and is deliberately not renamed in this UX slice.
 
-## Post-checkpoint progress
+Qualification note:
 
-- `9accb1bb818a76b003ef0bd8f3656e124e78df9a` completed the Time / standalone Pulse detail hierarchy. Canonical `11-time-detail` was refreshed and `29-standalone-pulse-detail` was added; canonical visual and `pnpm check:full` passed.
-- Next evidence-only slice adds a canonical BLE-only Plug Detail state; no product runtime or device behavior is changed.
+- one default-concurrency `pnpm check:full` attempt on the 8 GB Mac produced six heterogeneous mobile-test failures (492/498 passed), including an existing 5-second timeout and asynchronous mock interference across unrelated `hardware-setup` / `climate-delete` tests;
+- the same tree passed the complete mobile suite 498/498 with `--maxWorkers=2`; no timeout or expectation was weakened;
+- the stable full qualification path runs format/lint/quality/typecheck, all non-mobile tests, mobile Vitest at two workers, Product Matrix, core coverage, build/performance, full responsive E2E and canonical visual comparison;
+- final visual acceptance must remain zero-delta for this ownership refactor.
+
+## Deferred beyond UX polish
+
+- safe standalone Pulse inline edit/replacement lifecycle;
+- generalized temporary BLE discovery restoration before active standalone Pulse BLE scanning;
+- watchdog/recovery/soak stabilization and the final real-hardware matrix;
+- final V1 release qualification.
+
+`main` remains unchanged by this UX branch until an explicit merge decision.

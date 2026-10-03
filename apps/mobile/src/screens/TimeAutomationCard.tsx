@@ -1,12 +1,10 @@
 import { useTranslation } from '../app/i18n.js';
-import {
-  AutomationCardFeedbackFooter,
-  AutomationDashboardBody
-} from '../features/automation-dashboard/index.js';
+import { AutomationDashboardBody } from '../features/automation-dashboard/index.js';
 import { OperationalStatus, Pulse } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
-  PlugDashboardCardShell
+  PlugDashboardCardShell,
+  PlugDashboardFeedbackFooter
 } from '../features/plugs/index.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import {
@@ -83,7 +81,7 @@ export const TimeAutomationCard = ({
         : null;
   const footer =
     warningLabel || action.isError ? (
-      <AutomationCardFeedbackFooter
+      <PlugDashboardFeedbackFooter
         warningLabel={warningLabel}
         warningTone={runtimeState === 'offline' ? 'offline' : 'attention'}
         actionErrorLabel={action.isError ? t('detail.actionFailed') : null}
