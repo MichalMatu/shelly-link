@@ -26,7 +26,7 @@ const seedStandalonePulseInstallation = async (page: Page) => {
               model: 'S3PL-00112EU',
               gen: 3
             },
-            script: { id: 7, hash: 'standalone-pulse-e2e' },
+            script: { id: 7, hash: 'lcl-0163838b' },
             config: {
               relayId: 0,
               pulse: {
@@ -46,11 +46,15 @@ const seedStandalonePulseInstallation = async (page: Page) => {
   });
 };
 
-const mockStandalonePulseRpc = async (page: Page) => {
+const mockStandalonePulseRpc = async (
+  page: Page,
+  options: { scriptCode?: string } = {}
+) => {
   let scriptPresent = true;
   let scriptRunning = true;
   let relayOn = true;
   const calls: string[] = [];
+  const scriptCode = options.scriptCode ?? '// standalone pulse runtime';
 
   const handleRpc = async (route: Route) => {
     const requestBody = JSON.parse(route.request().postData() ?? '{}') as {
@@ -104,7 +108,7 @@ const mockStandalonePulseRpc = async (page: Page) => {
         };
         break;
       case 'Script.GetCode':
-        result = { data: '// standalone pulse runtime', left: 0 };
+        result = { data: scriptCode, left: 0 };
         break;
       case 'Script.Eval':
         if (requestBody.params?.code?.includes('R.ps,R.pc,R.pn,R.rs')) {
@@ -256,6 +260,40 @@ test('standalone Pulse supports safe AUTO and MANUAL relay control', async ({ pa
   await expect(auto).toHaveAttribute('aria-pressed', 'true');
   await expect(turnOn).toBeDisabled();
   await expect.poll(() => rpc.calls.includes('Script.Start')).toBe(true);
+});
+
+test('standalone Pulse refuses AUTO and manual ON when the installed script hash changed', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedStandalonePulseInstallation(page);
+  const rpc = await mockStandalonePulseRpc(page, {
+    scriptCode: '// tampered standalone pulse runtime'
+  });
+  await page.goto('/');
+
+  const card = page
+    .getByText('Pompa Pulse', { exact: true })
+    .locator('xpath=ancestor::article[1]');
+  const auto = card.getByRole('button', { name: 'AUTO' });
+  const manual = card.getByRole('button', { name: 'MANUAL' });
+  const turnOn = card.getByRole('button', { name: 'ON' });
+
+  await manual.click();
+  await expect(manual).toHaveAttribute('aria-pressed', 'true');
+  await expect(turnOn).toBeEnabled();
+  await expect.poll(() => rpc.calls.includes('Script.Stop')).toBe(true);
+
+  const switchSetCountAfterPause = rpc.calls.filter((method) => method === 'Switch.Set').length;
+  await turnOn.click();
+  await expect
+    .poll(() => rpc.calls.filter((method) => method === 'Switch.Set').length)
+    .toBe(switchSetCountAfterPause);
+  await expect(turnOn).not.toHaveAttribute('aria-pressed', 'true');
+
+  await auto.click();
+  await expect.poll(() => rpc.calls.filter((method) => method === 'Script.Start').length).toBe(0);
+  await expect(manual).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('standalone Pulse can be deleted safely from detail', async ({ page }) => {
