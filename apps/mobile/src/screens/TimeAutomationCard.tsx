@@ -1,6 +1,8 @@
-import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslation } from '../app/i18n.js';
-import { AutomationDashboardBody } from '../features/automation-dashboard/index.js';
+import {
+  AutomationCardFeedbackFooter,
+  AutomationDashboardBody
+} from '../features/automation-dashboard/index.js';
 import { OperationalStatus, Pulse } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
@@ -81,24 +83,11 @@ export const TimeAutomationCard = ({
         : null;
   const footer =
     warningLabel || action.isError ? (
-      <footer className="automation-card__footer">
-        {warningLabel && (
-          <div
-            className={`automation-card__status automation-card__status--${
-              runtimeState === 'offline' ? 'offline' : 'attention'
-            }`}
-            role="status"
-          >
-            <IconAlertTriangle aria-hidden="true" />
-            <span>{warningLabel}</span>
-          </div>
-        )}
-        {action.isError && (
-          <span className="automation-control-error" role="alert">
-            {t('detail.actionFailed')}
-          </span>
-        )}
-      </footer>
+      <AutomationCardFeedbackFooter
+        warningLabel={warningLabel}
+        warningTone={runtimeState === 'offline' ? 'offline' : 'attention'}
+        actionErrorLabel={action.isError ? t('detail.actionFailed') : null}
+      />
     ) : undefined;
 
   return (

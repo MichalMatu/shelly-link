@@ -1,12 +1,13 @@
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { calculateVpdKpa } from '@lcl/automation-core';
-import { IconAlertTriangle, IconPlug } from '@tabler/icons-react';
+import { IconPlug } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { StandalonePulseAutomationCard } from '../app/StandalonePulseAutomationCard.js';
 import { useTranslation } from '../app/i18n.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import { AutomationCardFeedbackFooter } from '../features/automation-dashboard/index.js';
 import { Pulse } from '../features/automations/index.js';
 import {
   BleOnlyPlugDashboardCards,
@@ -254,22 +255,11 @@ const ClimateAutomationCard = ({
 
   const footer =
     warningLabel || action.isError ? (
-      <footer className="automation-card__footer">
-        {warningLabel && (
-          <div
-            className={`automation-card__status automation-card__status--${warningClass}`}
-            role="status"
-          >
-            <IconAlertTriangle aria-hidden="true" />
-            <span>{warningLabel}</span>
-          </div>
-        )}
-        {action.isError && (
-          <span className="automation-control-error" role="alert">
-            {t('detail.actionFailed')}
-          </span>
-        )}
-      </footer>
+      <AutomationCardFeedbackFooter
+        warningLabel={warningLabel}
+        warningTone={warningClass}
+        actionErrorLabel={action.isError ? t('detail.actionFailed') : null}
+      />
     ) : undefined;
 
   return (

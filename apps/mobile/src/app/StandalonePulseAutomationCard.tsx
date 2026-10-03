@@ -1,5 +1,7 @@
-import { IconAlertTriangle } from '@tabler/icons-react';
-import { AutomationDashboardBody } from '../features/automation-dashboard/index.js';
+import {
+  AutomationCardFeedbackFooter,
+  AutomationDashboardBody
+} from '../features/automation-dashboard/index.js';
 import { Pulse, type InstalledAutomation } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
@@ -81,20 +83,10 @@ export const StandalonePulseAutomationCard = ({
     (runtimeQuery.data !== undefined && !runtimeMatches) ||
     action.isError;
   const footer = warning ? (
-    <footer className="automation-card__footer">
-      <div
-        className="automation-card__status automation-card__status--attention"
-        role="status"
-      >
-        <IconAlertTriangle aria-hidden="true" />
-        <span>{t('dashboard.health.attention')}</span>
-      </div>
-      {action.isError && (
-        <span className="automation-control-error" role="alert">
-          {t('detail.actionFailed')}
-        </span>
-      )}
-    </footer>
+    <AutomationCardFeedbackFooter
+      warningLabel={t('dashboard.health.attention')}
+      actionErrorLabel={action.isError ? t('detail.actionFailed') : null}
+    />
   ) : undefined;
 
   return (
