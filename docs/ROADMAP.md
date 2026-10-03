@@ -169,7 +169,7 @@ Operational dashboard/detail status is also qualified as of 2026-10-02 on `6a6f0
 
 Operational-status acceptance passed focused responsive E2E **5/5**, full `pnpm check`, and the complete responsive Playwright suite **46/46** on the exact implementation head. The same application code was built and installed on Samsung SM-S906B / Android 16 with `adb install -r`, preserving app data and passing cold-start/411 px no-overflow smoke. The preserved phone state contains a steady Climate installation rather than Pulse, so that Android smoke is not claimed as live Pulse status hardware proof. Generated runtime was unchanged, therefore runtime size and relay-hardware requalification were not repeated.
 
-Pulse V1 is complete. Resume Dashboard status polish, UX redesign round 2, watchdog/stabilization and v1 feature freeze rather than expanding Pulse immediately with additional runtime modes.
+Pulse V1 is complete. The 2026-10-03 UX polish round is also closed: Time/standalone Pulse status hierarchy, nested Thermometer settings, capability-driven Plug Detail, shared setup navigation and shared Plug feedback ownership are accepted. Resume safe standalone Pulse replacement lifecycle, BLE discovery restoration generalization, watchdog/recovery/soak stabilization and V1 feature freeze rather than reopening completed UX or expanding Pulse with unrelated runtime modes.
 
 ### 7. Dashboard status polish — slice 1 accepted 2026-10-02
 
