@@ -1,0 +1,19 @@
+{
+  "viewport": {
+    "innerWidth": 412,
+    "innerHeight": 891,
+    "dpr": 2.625,
+    "scrollWidth": 412,
+    "clientWidth": 412,
+    "scrollHeight": 891
+  },
+  "headings": ["Przedpokój"],
+  "buttons": [
+    "Skanuj termometry BLE telefonem",
+    "Ustawienia termometru Przedpokój",
+    "Gniazdka",
+    "Termometry",
+    "Ustawienia"
+  ],
+  "mainText": "Przedpokój\nTemperatura\n— °C\nWilgotność\n— %\n—\n—\n—"
+}
