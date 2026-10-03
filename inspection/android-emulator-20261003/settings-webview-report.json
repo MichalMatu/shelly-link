@@ -1,0 +1,24 @@
+{
+  "viewport": {
+    "innerWidth": 412,
+    "innerHeight": 891,
+    "dpr": 2.625,
+    "scrollWidth": 412,
+    "clientWidth": 412,
+    "scrollHeight": 891
+  },
+  "headings": [
+    "Ustawienia termometru",
+    "Tożsamość",
+    "Odczyty na żywo",
+    "Akcje urządzenia"
+  ],
+  "buttons": [
+    "Ustaw czas",
+    "Usuń termometr tylko z aplikacji",
+    "Gniazdka",
+    "Termometry",
+    "Ustawienia"
+  ],
+  "mainText": "Ustawienia termometru\nTOŻSAMOŚĆ\nPrzedpokój\nNazwa termometru\nTyp\nBTHome v2\nMAC termometru\nA4:C1:38:4F:24:CD\nODCZYTY NA ŻYWO\nTemperatura\n— °C\nWilgotność\n— %\n—\n—\n—\nAKCJE URZĄDZENIA\nUstaw czas\nUsuń termometr tylko z aplikacji"
+}
