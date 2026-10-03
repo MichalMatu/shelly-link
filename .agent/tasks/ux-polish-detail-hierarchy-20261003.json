@@ -1,0 +1,23 @@
+{
+  "id": "ux-polish-detail-hierarchy-20261003",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "work_branch": "ux/polish-foundation-20261003",
+  "allow_write": true,
+  "resources": [],
+  "memory_limit_mb": 3072,
+  "task_timeout": 7200,
+  "idle_timeout": 900,
+  "commands": [
+    "git status --short && git fetch origin ux/polish-foundation-20261003 agent-control && git reset --hard origin/ux/polish-foundation-20261003 && git rev-parse HEAD",
+    "git show origin/agent-control:.agent/tasks/ux-polish-detail-hierarchy-20261003.payload/apply.py | python3 -",
+    "pnpm exec prettier --write apps/mobile/src/screens/TimeInstallationDetail.tsx apps/mobile/src/app/StandalonePulseInstallationDetail.tsx apps/mobile/src/features/plugs/components/PlugDetailTabs.css apps/mobile/e2e/visual-contract.ts apps/mobile/e2e/pulse-operational-status.spec.ts docs/UX_VISUAL_CONTRACT.md docs/UX_POLISH_CHECKPOINT_20261003.md",
+    "pnpm --filter @lcl/mobile exec vitest run src/__tests__/time-automation.test.tsx src/__tests__/standalone-pulse-management.test.tsx && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && git diff --check",
+    "PORT=$(python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()\"); LCL_E2E_PORT=$PORT pnpm e2e:visual:update",
+    "python3 -c \"import subprocess; rows=subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],text=True).splitlines(); got=sorted(row[3:] for row in rows if row[3:].endswith('.png')); expected=sorted(['apps/mobile/e2e/responsive.spec.ts-snapshots/11-time-detail-darwin.png','apps/mobile/e2e/pulse-operational-status.spec.ts-snapshots/29-standalone-pulse-detail-darwin.png']); print('visual snapshot delta:', got); assert got == expected, (got, expected)\"",
+    "PORT=$(python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()\"); LCL_E2E_PORT=$PORT pnpm e2e:visual",
+    "git add apps/mobile/src/screens/TimeInstallationDetail.tsx apps/mobile/src/app/StandalonePulseInstallationDetail.tsx apps/mobile/src/features/plugs/components/PlugDetailTabs.css apps/mobile/e2e/visual-contract.ts apps/mobile/e2e/pulse-operational-status.spec.ts docs/UX_VISUAL_CONTRACT.md docs/UX_POLISH_CHECKPOINT_20261003.md apps/mobile/e2e/responsive.spec.ts-snapshots/11-time-detail-darwin.png apps/mobile/e2e/pulse-operational-status.spec.ts-snapshots/29-standalone-pulse-detail-darwin.png && git commit -m 'Polish Time and Pulse detail hierarchy'",
+    "pnpm check:full",
+    "git push --no-verify origin HEAD:ux/polish-foundation-20261003"
+  ]
+}
