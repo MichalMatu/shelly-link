@@ -972,6 +972,59 @@ const checkSegmentedControlContract = async () => {
   }
 };
 
+const checkStandalonePulseControlPlacement = async () => {
+  const dashboardCardPath = 'apps/mobile/src/app/StandalonePulseAutomationCard.tsx';
+  const detailPath = 'apps/mobile/src/app/StandalonePulseInstallationDetail.tsx';
+  const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
+    path.endsWith('.tsx')
+  );
+  const [dashboardCardSource, detailSource] = await Promise.all([
+    readRepoFile(dashboardCardPath),
+    readRepoFile(detailPath)
+  ]);
+
+  for (const required of [
+    'Pulse.Standalone.useActions(installation)',
+    '<PlugAutomationModeControl',
+    "onTurnRelayOn={() => action.mutate('on')}",
+    "onTurnRelayOff={() => action.mutate('off')}"
+  ]) {
+    if (!dashboardCardSource.includes(required)) {
+      addFailure(
+        dashboardCardPath,
+        'standalone Pulse dashboard card must remain the sole runtime-control surface'
+      );
+    }
+  }
+
+  for (const blocked of [
+    'PlugAutomationModeControl',
+    'PlugRelayControls',
+    'Pulse.Standalone.useActions('
+  ]) {
+    if (detailSource.includes(blocked)) {
+      addFailure(
+        detailPath,
+        'standalone Pulse detail must remain read-only for AUTO/MANUAL and relay control'
+      );
+    }
+  }
+  if (!detailSource.includes('automationIcon="clock"')) {
+    addFailure(detailPath, 'standalone Pulse Automation tab must use the clock icon');
+  }
+
+  for (const path of tsxPaths) {
+    if (path === dashboardCardPath) continue;
+    const source = await readRepoFile(path);
+    if (source.includes('Pulse.Standalone.useActions(')) {
+      addFailure(
+        path,
+        'standalone Pulse AUTO/MANUAL and relay actions are dashboard-card-only'
+      );
+    }
+  }
+};
+
 const checkPackageRuntimeCopy = async () => {
   const blockedCopyPattern =
     /(['"`])(?:(?!\1).)*(?:[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]|Kopiuj|Temperatura|Wilgotność|Bateria|brak|zgodne|blokada|Skan BLE|zabrakło pamięci)(?:(?!\1).)*\1/;
@@ -1009,6 +1062,7 @@ await checkCanonicalVisualPlatformContract();
 await checkFrozenClimateVisualContract();
 await checkDisclosureContract();
 await checkSegmentedControlContract();
+await checkStandalonePulseControlPlacement();
 await checkPackageRuntimeCopy();
 
 if (failures.length > 0) {

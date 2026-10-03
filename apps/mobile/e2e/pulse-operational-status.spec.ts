@@ -162,6 +162,12 @@ const expectNoHorizontalOverflow = async (page: Page) => {
   expect(overflow.scrollWidth - overflow.viewportWidth).toBeLessThanOrEqual(1);
 };
 
+const expectPulseRuntimeControlsAbsent = async (page: Page) => {
+  for (const name of ['AUTO', 'MANUAL', 'ON', 'OFF']) {
+    await expect(page.getByRole('button', { name, exact: true })).toHaveCount(0);
+  }
+};
+
 for (const viewport of viewports) {
   test(`Pulse operational status stays responsive on ${viewport.name}`, async ({
     page
@@ -177,6 +183,10 @@ for (const viewport of viewports) {
     const compactStatus = card.getByLabel('Stan Pulse');
 
     await expect(card).toBeVisible();
+    await expect(card.getByRole('button', { name: 'AUTO', exact: true })).toBeVisible();
+    await expect(card.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
+    await expect(card.getByRole('button', { name: 'ON', exact: true })).toBeVisible();
+    await expect(card.getByRole('button', { name: 'OFF', exact: true })).toBeVisible();
     await expect(card).toContainText('30 s');
     await expect(card).toContainText('60 s');
     await expect(card).toContainText('Ciągłe');
@@ -203,6 +213,11 @@ for (const viewport of viewports) {
     );
 
     await page.getByRole('button', { name: 'Szczegóły: Pompa Pulse · Wi-Fi' }).click();
+
+    await expect(
+      page.locator('.plug-detail-tabs__item[data-automation-icon="clock"]')
+    ).toBeVisible();
+    await expectPulseRuntimeControlsAbsent(page);
 
     const detailSurface = page.locator('.plug-detail-surface');
     const fullStatus = detailSurface.getByLabel('Stan Pulse');
