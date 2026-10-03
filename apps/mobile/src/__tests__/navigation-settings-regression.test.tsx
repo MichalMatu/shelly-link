@@ -165,7 +165,7 @@ describe('navigation and settings regression coverage', () => {
       'aria-current',
       'page'
     );
-    expect(screen.getByRole('button', { name: 'Skrypt' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Skrypt' })).toBeNull();
     expect(screen.getByText('Brak automatyzacji')).toBeVisible();
     expect(
       screen.getByText(
