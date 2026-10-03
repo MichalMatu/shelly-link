@@ -27,3 +27,20 @@ export const clearDiagnosticEvents = (): void => {
   journal.clear();
   dispatchChange();
 };
+
+export const recordReconciliationDiagnostic = (
+  status: string,
+  installationCount: number,
+  recoveredSensorCount: number
+): DiagnosticEvent =>
+  recordDiagnosticEvent({
+    kind: 'reconcile',
+    severity:
+      status === 'conflict'
+        ? 'error'
+        : status === 'changed' || status === 'unavailable'
+          ? 'warning'
+          : 'info',
+    message: 'Installed automation reconciliation completed',
+    fields: { status, installationCount, recoveredSensorCount }
+  });

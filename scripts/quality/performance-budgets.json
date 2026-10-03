@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "mobileDist": {
+    "totalJsBytes": 1572864,
+    "largestJsBytes": 655360,
+    "totalCssBytes": 196608,
+    "maxJsFiles": 16
+  },
+  "source": {
+    "minPollingIntervalMs": 1000
+  }
+}

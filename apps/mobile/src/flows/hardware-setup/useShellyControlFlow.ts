@@ -1,3 +1,4 @@
+import { recordReconciliationDiagnostic } from '../../platform/diagnosticJournal.js';
 import { unwrapShellyResult } from '../../platform/shellyResult.js';
 import { createShellyTransport } from '../../platform/shellyHttpTransport.js';
 import { useMutation } from '@tanstack/react-query';
@@ -180,6 +181,11 @@ export const useShellyControlFlow = () => {
         model: status.deviceInfo.model,
         gen: status.deviceInfo.gen
       });
+      recordReconciliationDiagnostic(
+        reconciliation.status,
+        reconciliation.installationIds.length,
+        reconciliation.recoveredSensors.length
+      );
       return {
         ...status,
         checkedDevice,

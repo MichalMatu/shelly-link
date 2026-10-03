@@ -269,6 +269,18 @@ Generated cases are ephemeral. `test/fixtures/product-matrix/` is the persistent
 
 This is the fast deterministic logic/configuration layer only. Responsive Playwright remains the presentation/geometry layer, and dated real-device evidence in `docs/testing/hardware-matrix.md` remains the authority for Shelly firmware, BLE reception, schedules, relay behavior and Android acceptance. Passing the product matrix never substitutes for hardware qualification.
 
+## Diagnostic and release-quality tooling
+
+Shelly Link keeps diagnostics local-first and evidence-driven. The shared `@lcl/diagnostics` package owns bounded diagnostic event types, redaction and the read-only Shelly Doctor evaluation model. `pnpm doctor:shelly -- --base-url <url>` performs read-only device/status/script/schedule inspection and can verify canonical identity, expected script id/hash and Time clock/schedule evidence without mutating the device.
+
+The mobile HTTP transport records a bounded in-memory journal of RPC method/result/latency metadata only; RPC parameters, URLs and payloads are not journaled. Runtime errors and reconciliation outcomes use the same 200-event journal. Support Report includes build SHA, persistence schema versions, saved-device/automation summaries, recent runtime issues and recent journal events, then applies secret/IP/MAC redaction before copying. The journal is diagnostic evidence, not durable product state or another automation owner.
+
+Failure hardening includes explicit fault-injection tests proving that ambiguous runtime/schedule mutations are never automatically retried, identity failure blocks mutation, post-mutation safe-OFF failure stops the flow and failed verification cannot be reported as success. A deterministic persistence/reconciliation fuzzer rejects malformed durable ownership, preserves the last valid payload after invalid writes, detects duplicate relay ownership, distinguishes unavailable/changed runtime and never adopts a foreign non-Shelly-Link script.
+
+The canonical gate also enforces simple performance budgets after the production mobile build: total/largest JavaScript, total CSS, JS chunk count and a one-second minimum for literal production polling intervals. Shelly generated-script byte ceilings remain owned by the generator/product matrix rather than this bundle budget.
+
+`pnpm release:qualify` runs the full canonical and responsive gates plus the canonical visual contract, then emits ignored `artifacts/release-evidence/<sha>.json` and `.md` containing the exact Git SHA, version, tool versions, product-matrix seed/corpus contract, performance measurements and SHA-256 hashes of the built mobile artifacts. Evidence generation refuses to run standalone without the qualification marker. `pnpm release:qualify:hardware` additionally runs the real Shelly hardware matrix and rewrites the evidence with hardware qualification marked PASS. Software qualification never substitutes for hardware acceptance where device behavior changed.
+
 ## Evidence and acceptance
 
 Architecture documents contain durable contracts, not chronological test history.
