@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 7,
+  "index": 8,
   "total": 10,
-  "command": "python3 -c \"import subprocess; rows=subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],text=True).splitlines(); png=[row[3:] for row in rows if row[3:].endswith('.png')]; print('visual snapshot delta:', png); assert png == [], png\"",
-  "pid": 95070,
+  "command": "pnpm check:full",
+  "pid": 95092,
   "timeout": 900,
   "idle_timeout": 900,
   "memory_limit_mb": 3072,
-  "started_at": "2026-10-03T19:09:48.234429+00:00",
-  "stage_name": "command-7",
-  "stage_index": 7,
+  "started_at": "2026-10-03T19:09:48.752337+00:00",
+  "stage_name": "command-8",
+  "stage_index": 8,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "ux-polish-shared-feedback-footer-20261003",
@@ -18,5 +18,5 @@
   "task_digest": "1e2d269fe7798a4aa1dbf2e534b9486859617633d336861d279c265cbb9ee880",
   "daemon_version": "4.20.3",
   "daemon_pid": 90255,
-  "updated_at": "2026-10-03T19:09:48.259153+00:00"
+  "updated_at": "2026-10-03T19:09:48.772106+00:00"
 }
