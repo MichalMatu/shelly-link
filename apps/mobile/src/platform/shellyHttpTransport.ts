@@ -1,10 +1,24 @@
 import { FetchShellyRpcTransport } from '@lcl/shelly-client';
+import { recordDiagnosticEvent } from './diagnosticJournal.js';
 import {
   Capacitor,
   CapacitorHttp,
   type HttpHeaders,
   type HttpResponse
 } from '@capacitor/core';
+
+const rpcMethodFromRequest = (init: RequestInit | undefined): string | null => {
+  if (typeof init?.body !== 'string') return null;
+  try {
+    const parsed = JSON.parse(init.body) as { method?: unknown };
+    return typeof parsed.method === 'string' ? parsed.method : null;
+  } catch {
+    return null;
+  }
+};
+
+const isMutationMethod = (method: string): boolean =>
+  /\.(?:Set|Create|Update|Delete|Start|Stop|PutCode|Eval)$/.test(method);
 
 const SHELLY_DEV_PROXY_PATH = '/__lcl_shelly_proxy';
 const DEFAULT_SHELLY_RPC_TIMEOUT_MS = 8000;
@@ -111,10 +125,36 @@ export const createShellyFetch =
       input instanceof URL
         ? input
         : new URL(typeof input === 'string' ? input : input.url);
-    if (shouldUseNativeShellyHttp()) {
-      return nativeShellyFetch(targetUrl, init, timeoutMs);
+    const rpcMethod = rpcMethodFromRequest(init);
+    const startedAtMs = Date.now();
+    try {
+      const response = shouldUseNativeShellyHttp()
+        ? await nativeShellyFetch(targetUrl, init, timeoutMs)
+        : await fetch(resolveShellyRequestUrl(targetUrl), init);
+      if (rpcMethod) {
+        recordDiagnosticEvent({
+          kind: isMutationMethod(rpcMethod) ? 'rpc-mutation' : 'rpc-read',
+          severity: response.ok ? 'info' : 'warning',
+          message: `${rpcMethod} ${response.ok ? 'completed' : 'failed'}`,
+          fields: {
+            method: rpcMethod,
+            status: response.status,
+            latencyMs: Date.now() - startedAtMs
+          }
+        });
+      }
+      return response;
+    } catch (error) {
+      if (rpcMethod) {
+        recordDiagnosticEvent({
+          kind: isMutationMethod(rpcMethod) ? 'rpc-mutation' : 'rpc-read',
+          severity: 'error',
+          message: `${rpcMethod} transport error`,
+          fields: { method: rpcMethod, latencyMs: Date.now() - startedAtMs }
+        });
+      }
+      throw error;
     }
-    return fetch(resolveShellyRequestUrl(targetUrl), init);
   };
 
 export const createShellyTransport = (

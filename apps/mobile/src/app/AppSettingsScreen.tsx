@@ -1,4 +1,14 @@
 import { Capacitor } from '@capacitor/core';
+import {
+  INSTALLED_AUTOMATION_VERSION,
+  useInstalledAutomationStore
+} from '../features/automations/index.js';
+import { SAVED_PLUG_VERSION, useSavedPlugStore } from '../features/plugs/index.js';
+import {
+  clearDiagnosticEvents,
+  diagnosticJournalChangeEvent,
+  getDiagnosticEvents
+} from '../platform/diagnosticJournal.js';
 import { Disclosure, DiagnosticRow, type DiagnosticRowProps } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import {
@@ -71,6 +81,11 @@ export const AppSettingsScreen = (_props: AppSettingsScreenProps = {}) => {
   );
   const [themeMode, setThemeModeState] = useState<ThemeMode>(() => getThemeMode());
   const [runtimeIssues, setRuntimeIssues] = useState(() => getRuntimeIssues());
+  const [diagnosticEvents, setDiagnosticEvents] = useState(() => getDiagnosticEvents());
+  const savedPlugs = useSavedPlugStore((state) => state.plugs);
+  const installedAutomations = useInstalledAutomationStore(
+    (state) => state.installations
+  );
   const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle');
 
   useEffect(() => {
@@ -82,14 +97,17 @@ export const AppSettingsScreen = (_props: AppSettingsScreenProps = {}) => {
       setLocalePreferenceState(getLocalePreference());
       setThemeModeState(getThemeMode());
       setRuntimeIssues(getRuntimeIssues());
+      setDiagnosticEvents(getDiagnosticEvents());
     };
 
     window.addEventListener(localePreferenceChangeEvent, refresh);
     window.addEventListener(runtimeIssuesChangeEvent, refresh);
+    window.addEventListener(diagnosticJournalChangeEvent, refresh);
     window.addEventListener(themeModeChangeEvent, refresh);
     return () => {
       window.removeEventListener(localePreferenceChangeEvent, refresh);
       window.removeEventListener(runtimeIssuesChangeEvent, refresh);
+      window.removeEventListener(diagnosticJournalChangeEvent, refresh);
       window.removeEventListener(themeModeChangeEvent, refresh);
     };
   }, []);
@@ -106,7 +124,9 @@ export const AppSettingsScreen = (_props: AppSettingsScreenProps = {}) => {
 
   const clearDiagnostics = () => {
     clearRuntimeIssues();
+    clearDiagnosticEvents();
     setRuntimeIssues([]);
+    setDiagnosticEvents([]);
     setCopyState('idle');
   };
 
@@ -116,15 +136,26 @@ export const AppSettingsScreen = (_props: AppSettingsScreenProps = {}) => {
   ];
   const supportReport = createSupportReport({
     platform,
-    shellyDevices: [],
+    buildSha: import.meta.env.VITE_GIT_SHA ?? 'development',
+    installedAutomationSchemaVersion: INSTALLED_AUTOMATION_VERSION,
+    savedPlugSchemaVersion: SAVED_PLUG_VERSION,
+    shellyDevices: savedPlugs.map((plug) => ({
+      name: plug.name,
+      detail: `${plug.model} gen${plug.generation}; firmware=${plug.firmwareId ?? 'unknown'}; wifi=${plug.wifiBaseUrl ? 'yes' : 'no'}; ble=${plug.bleDeviceId ? 'yes' : 'no'}`
+    })),
     sensorDevices: [],
+    installedAutomations: installedAutomations.map((installation) => ({
+      name: installation.id,
+      detail: `${installation.kind}; device=${installation.shelly.deviceId}; updated=${installation.updatedAtMs}`
+    })),
     selectedShelly: t('common.missing'),
     selectedSensor: t('common.missing'),
     lastDiagnostics: [],
     activeLocale: locale,
     localePreference,
     themeMode,
-    runtimeIssues
+    runtimeIssues,
+    diagnosticEvents
   });
 
   const copyReport = () => {

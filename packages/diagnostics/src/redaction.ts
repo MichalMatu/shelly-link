@@ -6,11 +6,14 @@ export interface RedactionOptions {
 const SECRET_KEY_PATTERN = /(token|secret|password|authorization|auth|api[-_]?key)/i;
 const IPV4_PATTERN = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
 const MAC_PATTERN = /\b[0-9a-f]{2}(?::[0-9a-f]{2}){5}\b/gi;
+const INLINE_SECRET_PATTERN =
+  /\b(password|passphrase|token|secret|authorization|api[-_]?key)\s*[:=]\s*([^\s,;]+)/gi;
 
 export const redactString = (value: string, options: RedactionOptions = {}): string => {
   let redacted = value
     .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [REDACTED]')
-    .replace(/gho_[A-Za-z0-9_]+/g, '[REDACTED_TOKEN]');
+    .replace(/gho_[A-Za-z0-9_]+/g, '[REDACTED_TOKEN]')
+    .replace(INLINE_SECRET_PATTERN, (_match, key: string) => `${key}=[REDACTED]`);
 
   if (options.redactIp) {
     redacted = redacted.replace(IPV4_PATTERN, '[REDACTED_IP]');

@@ -47,3 +47,11 @@ describe('diagnostics redaction', () => {
     expect(summary).not.toContain('aa:bb:cc:dd:ee:ff');
   });
 });
+
+describe('inline secret redaction', () => {
+  it('redacts key-value secrets inside strings', () => {
+    expect(redactValue('password=hunter2 token:abc123')).toBe(
+      'password=[REDACTED] token=[REDACTED]'
+    );
+  });
+});
