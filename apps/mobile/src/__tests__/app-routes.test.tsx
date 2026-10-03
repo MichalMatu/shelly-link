@@ -329,7 +329,7 @@ describe('AppRoutes navigation shell', () => {
     );
   });
 
-  it('keeps Thermometer management on the dashboard with a direct delete action', async () => {
+  it('opens nested Thermometer settings from a dashboard summary card', async () => {
     useHardwareSetupDraftStore.getState().upsertSensorDevice({
       id: 'A4:C1:38:4F:24:CD',
       name: 'Przedpokój',
@@ -344,15 +344,24 @@ describe('AppRoutes navigation shell', () => {
     expect(card).not.toBeNull();
     expect(
       within(card as HTMLElement).getByRole('button', {
-        name: 'Usuń termometr tylko z aplikacji'
+        name: 'Ustawienia termometru Przedpokój'
       })
     ).toBeVisible();
     expect(
       within(card as HTMLElement).queryByRole('button', {
-        name: 'Ustawienia termometru Przedpokój'
+        name: 'Usuń termometr tylko z aplikacji'
       })
     ).toBeNull();
-    expect(within(card as HTMLElement).getByText('A4:C1:38:4F:24:CD')).toBeVisible();
+    expect(within(card as HTMLElement).queryByText('A4:C1:38:4F:24:CD')).toBeNull();
+
+    fireEvent.click(
+      within(card as HTMLElement).getByRole('button', {
+        name: 'Ustawienia termometru Przedpokój'
+      })
+    );
+    expect(
+      await screen.findByText('mock-sensor-settings-A4:C1:38:4F:24:CD')
+    ).toBeVisible();
     expect(screen.getByRole('button', { name: 'Termometry' })).toHaveAttribute(
       'aria-current',
       'page'

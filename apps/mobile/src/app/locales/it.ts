@@ -482,6 +482,9 @@ export const it = {
       settings: 'Impostazioni termometro',
       settingsAria: 'Impostazioni termometro {name}',
       settingsTitle: 'Impostazioni termometro',
+      identitySection: 'Identità',
+      liveReadingsSection: 'Letture in tempo reale',
+      deviceActionsSection: 'Azioni del dispositivo',
       noBleFound: 'Nessun termometro BLE trovato.',
       details: 'Dettagli',
       typeLabel: 'Tipo'

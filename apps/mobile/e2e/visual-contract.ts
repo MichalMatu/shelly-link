@@ -29,7 +29,8 @@ export const visualScreenNames = [
   '24-climate-pulse-setup',
   '25-time-pulse-setup',
   '26-standalone-pulse-setup',
-  '27-standalone-pulse-dashboard'
+  '27-standalone-pulse-dashboard',
+  '28-thermometer-settings'
 ] as const;
 
 export type VisualScreenName = (typeof visualScreenNames)[number];

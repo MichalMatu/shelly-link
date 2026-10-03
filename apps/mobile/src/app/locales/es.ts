@@ -480,6 +480,9 @@ export const es = {
       settings: 'Ajustes del termómetro',
       settingsAria: 'Ajustes del termómetro {name}',
       settingsTitle: 'Ajustes del termómetro',
+      identitySection: 'Identidad',
+      liveReadingsSection: 'Lecturas en vivo',
+      deviceActionsSection: 'Acciones del dispositivo',
       noBleFound: 'No se encontraron termómetros BLE.',
       details: 'Detalles',
       typeLabel: 'Tipo'

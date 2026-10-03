@@ -6,6 +6,8 @@ export {
 } from './components/SensorRemovalBlockedModal.js';
 export { SavedSensorCard } from './components/SavedSensorCard.js';
 export { SavedSensorList } from './components/SavedSensorList.js';
+export { ThermometerSettingsPage } from './components/ThermometerSettingsPage.js';
+export { ThermometerSettingsRoute } from './components/ThermometerSettingsRoute.js';
 export {
   formatSensorMetric,
   sensorProfileDisplayLabels,

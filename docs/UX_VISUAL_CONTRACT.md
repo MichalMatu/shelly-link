@@ -65,7 +65,7 @@ Managed Climate Button Mode is read-only while Climate owns the relay; do not sh
 
 ### Thermometers
 
-Dashboard cards prioritize identity, live readings and compact telemetry. Rename, PVVX time sync, delete and technical identity belong in nested Thermometer settings, not as a cluster of permanent dashboard actions.
+Dashboard cards prioritize identity, live readings and compact telemetry. Rename, PVVX time sync, delete and technical identity belong in nested Thermometer settings, not as a cluster of permanent dashboard actions. The nested page groups Identity, Live readings and Device actions; its canonical state is `28-thermometer-settings`.
 
 ### Add Plug
 

@@ -4,7 +4,9 @@ import { useTranslation } from '../../app/i18n.js';
 import { pulseCycleCopy } from '../../app/locales/pulseCycle.js';
 import { AppPageBack } from '../../components/AppPageBack.js';
 import { Pulse } from '../../features/automations/index.js';
+import { ThermometerSettingsRoute } from '../../features/thermometers/index.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
+import { useSavedSensorLiveScanLifecycle } from '../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
 import {
   defaultRulePresetForSetupIntent,
   rulePresetsForSetupIntent,
@@ -56,6 +58,10 @@ export const HardwareSetupScreen = ({
   const { locale, t } = useTranslation();
   const pulseLabels = pulseCycleCopy[locale];
   const flow = useHardwareSetupFlow();
+  useSavedSensorLiveScanLifecycle({
+    flow,
+    enabled: Boolean(sensorSettingsOnlyId) && !flow.setPvvxTimeMutation.isPending
+  });
   const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
   const availableTabs = useMemo(
     () => availableTabsForIntent(setupIntent, fixedShellyId, plugAddOnly, sensorAddOnly),
@@ -142,14 +148,13 @@ export const HardwareSetupScreen = ({
 
   if (sensorSettingsOnlyId) {
     const normalizedSensorId = sensorSettingsOnlyId.toUpperCase();
-    const sensorSettingsFlow = {
-      ...flow,
-      sensorDevices: flow.sensorDevices.filter(
-        (device) =>
-          device.id.toUpperCase() === normalizedSensorId ||
-          device.runtimeAddress.toUpperCase() === normalizedSensorId
-      )
-    };
+    const device =
+      flow.sensorDevices.find(
+        (candidate) =>
+          candidate.id.toUpperCase() === normalizedSensorId ||
+          candidate.runtimeAddress.toUpperCase() === normalizedSensorId
+      ) ?? null;
+    const pvvxFeedback = flow.setPvvxTimeMutation;
     return (
       <main
         className="demo-shell hardware-shell"
@@ -158,12 +163,28 @@ export const HardwareSetupScreen = ({
         <header className="demo-header app-page-header">
           <h1>{t('hardware.sensor.settingsTitle')}</h1>
         </header>
-        <SensorSetupPage
-          flow={sensorSettingsFlow}
-          hideAddAction
-          {...(onSensorSettingsRemoved
-            ? { onSensorRemoved: onSensorSettingsRemoved }
-            : {})}
+        <ThermometerSettingsRoute
+          device={device}
+          samples={device ? (flow.sensorSamplesById[device.id.toUpperCase()] ?? []) : []}
+          pvvxTimePending={pvvxFeedback.isPending}
+          pvvxFeedback={{
+            isSuccess: pvvxFeedback.isSuccess,
+            acknowledged: pvvxFeedback.data?.acknowledged,
+            isError: pvvxFeedback.isError,
+            error: pvvxFeedback.error,
+            reset: pvvxFeedback.reset
+          }}
+          resolveRemovalUsage={() =>
+            device ? (flow.sensorRemovalUsage(device.id)[0] ?? null) : null
+          }
+          onNameChange={(value) => {
+            if (device) flow.setSensorDeviceName(device.id, value);
+          }}
+          onPvvxSetTime={() => {
+            if (device) pvvxFeedback.mutate(device);
+          }}
+          onRemove={() => (device ? flow.removeSensorDevice(device.id) : false)}
+          onRemoved={() => onSensorSettingsRemoved?.()}
         />
       </main>
     );
