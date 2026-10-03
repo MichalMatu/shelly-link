@@ -259,6 +259,16 @@ Rules:
 
 Refactor only to fix ownership, remove a concrete blocker or enable an agreed feature. File length alone is not a reason for mechanical splitting.
 
+## Deterministic product matrix hardening
+
+The canonical repository gate includes a deterministic seeded product matrix over the supported automation composition space. `scripts/analysis/product-matrix-fuzzer.ts` generates replayable valid and invalid cases with seed `1337`; structural dimensions are deliberately cycled so coverage cannot accidentally miss a supported mode, while boundary values inside each case remain seed-driven.
+
+The matrix currently exercises Climate, steady Time, Time + Pulse, Standalone Pulse and the shared Pulse core. Its invariants include config validation/rejection, generated-script determinism and size ceilings, encode/decode round-trips, Climate sensor identity/aggregation, safe-OFF boot/stale behavior, daily/overnight schedule boundaries, Pulse initial-delay/start-phase behavior, bounded completion and final OFF. The coverage report must prove all Climate modes, one-to-four sensors, Xiaomi/TP357/mixed sensor sets, all aggregations, VPD on/off, steady/window/Pulse/Pulse+window composition, daily/overnight windows, all Pulse execution modes and both start phases.
+
+Generated cases are ephemeral. `test/fixtures/product-matrix/` is the persistent replay corpus: any generated case that exposes a real bug or important boundary is promoted there and remains part of every future gate. Tests consume existing `automation-core` and `script-generator` APIs; they do not duplicate runtime ownership or create a second product implementation.
+
+This is the fast deterministic logic/configuration layer only. Responsive Playwright remains the presentation/geometry layer, and dated real-device evidence in `docs/testing/hardware-matrix.md` remains the authority for Shelly firmware, BLE reception, schedules, relay behavior and Android acceptance. Passing the product matrix never substitutes for hardware qualification.
+
 ## Evidence and acceptance
 
 Architecture documents contain durable contracts, not chronological test history.

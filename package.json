@@ -36,11 +36,12 @@
     "sandbox:build": "bash tools/sandbox/run-sandbox-check.sh build",
     "sandbox:check": "bash tools/sandbox/run-sandbox-check.sh check",
     "sandbox:full": "bash tools/sandbox/run-sandbox-check.sh full",
-    "check": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && pnpm test && pnpm test:coverage:core && pnpm build",
+    "check": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && pnpm test && pnpm test:product-matrix && pnpm test:coverage:core && pnpm build",
     "check:full": "pnpm check && pnpm e2e:responsive",
     "quality:repo": "node scripts/quality/brand-gate.mjs && node scripts/quality/script-lifecycle-gate.mjs && node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs && pnpm quality:selftest",
     "e2e:visual": "node scripts/quality/require-canonical-visual-platform.mjs && LCL_VISUAL_CONTRACT=1 playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts --grep \"installed automation dashboard shows Shelly runtime on phone-large|daily time automation installs and renders on phone-large|current Plug setup routes have no horizontal overflow on phone-large|standalone Pulse setup is responsive on phone-large|plain saved Plug exposes the same LED settings without an installed automation\"",
-    "e2e:visual:update": "node scripts/quality/require-canonical-visual-platform.mjs && LCL_VISUAL_CONTRACT=1 playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts --grep \"installed automation dashboard shows Shelly runtime on phone-large|daily time automation installs and renders on phone-large|current Plug setup routes have no horizontal overflow on phone-large|standalone Pulse setup is responsive on phone-large|plain saved Plug exposes the same LED settings without an installed automation\" --update-snapshots"
+    "e2e:visual:update": "node scripts/quality/require-canonical-visual-platform.mjs && LCL_VISUAL_CONTRACT=1 playwright test -c apps/mobile/playwright.config.ts apps/mobile/e2e/responsive.spec.ts apps/mobile/e2e/led-settings.spec.ts --grep \"installed automation dashboard shows Shelly runtime on phone-large|daily time automation installs and renders on phone-large|current Plug setup routes have no horizontal overflow on phone-large|standalone Pulse setup is responsive on phone-large|plain saved Plug exposes the same LED settings without an installed automation\" --update-snapshots",
+    "test:product-matrix": "tsx scripts/analysis/product-matrix-fuzzer.ts --self-test && tsx scripts/analysis/product-matrix-fuzzer.ts --cases 1000 --seed 1337 --mode mixed --replay-persistent test/fixtures/product-matrix"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [
