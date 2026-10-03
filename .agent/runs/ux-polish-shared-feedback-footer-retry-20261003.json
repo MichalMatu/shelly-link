@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 4,
+  "index": 5,
   "total": 10,
-  "command": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck && git diff --check",
-  "pid": 4001,
+  "command": "pnpm -r --filter '!@lcl/mobile' test",
+  "pid": 5758,
   "timeout": 900,
   "idle_timeout": 900,
   "memory_limit_mb": 3072,
-  "started_at": "2026-10-03T19:14:54.861420+00:00",
-  "stage_name": "command-4",
-  "stage_index": 4,
+  "started_at": "2026-10-03T19:15:40.506474+00:00",
+  "stage_name": "command-5",
+  "stage_index": 5,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "ux-polish-shared-feedback-footer-retry-20261003",
@@ -18,5 +18,5 @@
   "task_digest": "725ae875fe681d9b3c8462e596848bd1137f8116a53388916f75c75adf7365db",
   "daemon_version": "4.20.3",
   "daemon_pid": 3612,
-  "updated_at": "2026-10-03T19:14:54.930456+00:00"
+  "updated_at": "2026-10-03T19:15:40.635781+00:00"
 }
