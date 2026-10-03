@@ -1,3 +1,4 @@
+import { SegmentedControl } from '@lcl/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
 import { pulseCycleCopy } from '../../app/locales/pulseCycle.js';
@@ -53,6 +54,7 @@ export const HardwareSetupScreen = ({
   onSensorSettingsRemoved
 }: HardwareSetupScreenProps = {}) => {
   const { locale, t } = useTranslation();
+  const pulseLabels = pulseCycleCopy[locale];
   const flow = useHardwareSetupFlow();
   const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
   const availableTabs = useMemo(
@@ -242,7 +244,7 @@ export const HardwareSetupScreen = ({
 
   const setupContext =
     setupIntent === 'pulse'
-      ? pulseCycleCopy[locale].description
+      ? pulseLabels.description
       : setupIntent
         ? t(`intent.${setupIntent}.context`)
         : '';
@@ -258,27 +260,18 @@ export const HardwareSetupScreen = ({
       )}
 
       {!plugAddOnly && !sensorAddOnly && availableTabs.length > 1 && (
-        <nav
-          className="setup-top-nav lcl-segmented-control"
-          aria-label={t('hardware.nav.label')}
-        >
-          {availableTabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={
-                activeTab === tab.id
-                  ? 'setup-top-nav__item lcl-segmented-control__item setup-top-nav__item--active'
-                  : 'setup-top-nav__item lcl-segmented-control__item'
-              }
-              type="button"
-              aria-current={activeTab === tab.id ? 'page' : undefined}
-              title={tab.id === 'pulse' ? 'Pulse' : t(tab.titleKey)}
-              onClick={() => selectTab(tab.id)}
-            >
-              {tab.id === 'pulse' ? 'Pulse' : t(tab.labelKey)}
-            </button>
-          ))}
-        </nav>
+        <SegmentedControl
+          ariaLabel={t('hardware.nav.label')}
+          className="setup-top-nav"
+          itemClassName="setup-top-nav__item"
+          value={activeTab}
+          options={availableTabs.map((tab) => ({
+            value: tab.id,
+            label: tab.id === 'pulse' ? pulseLabels.title : t(tab.labelKey),
+            title: tab.id === 'pulse' ? pulseLabels.title : t(tab.titleKey)
+          }))}
+          onChange={selectTab}
+        />
       )}
 
       {activeTab === 'shelly' && (

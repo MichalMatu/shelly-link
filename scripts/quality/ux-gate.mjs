@@ -914,14 +914,12 @@ const checkSegmentedControlContract = async () => {
     'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
     'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
   ];
+  const setupNavigationPath =
+    'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx';
   const geometryUsageContracts = [
     [
       'apps/mobile/src/features/plugs/components/PlugDetailTabs.tsx',
       'plug-detail-tabs lcl-segmented-control'
-    ],
-    [
-      'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx',
-      'setup-top-nav lcl-segmented-control'
     ]
   ];
 
@@ -959,6 +957,20 @@ const checkSegmentedControlContract = async () => {
         'add-device segmented tabs must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
       );
     }
+  }
+
+  const setupNavigationSource = await readRepoFile(setupNavigationPath);
+  if (
+    !setupNavigationSource.includes('<SegmentedControl') ||
+    !setupNavigationSource.includes('className="setup-top-nav"') ||
+    !setupNavigationSource.includes('itemClassName="setup-top-nav__item"') ||
+    setupNavigationSource.includes('setup-top-nav lcl-segmented-control') ||
+    setupNavigationSource.includes('setup-top-nav__item lcl-segmented-control__item')
+  ) {
+    addFailure(
+      setupNavigationPath,
+      'setup segmented navigation must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
+    );
   }
 
   for (const [path, rootClass] of geometryUsageContracts) {

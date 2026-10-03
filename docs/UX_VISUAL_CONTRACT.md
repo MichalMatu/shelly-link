@@ -38,7 +38,7 @@ History cards use the existing design-token system for dark/light surfaces, bord
 
 Current shared patterns include:
 
-- `SegmentedControl` for add-device segmented navigation;
+- `SegmentedControl` for setup and add-device segmented navigation;
 - shared Plug dashboard shell and Plug controls;
 - shared Plug detail tabs and Plug Device/Info surfaces;
 - shared `Disclosure` behavior;
