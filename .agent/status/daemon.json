@@ -1,9 +1,9 @@
 {
   "version": 1,
   "daemon_version": "4.20.3",
-  "state": "idle",
-  "pid": 4391,
-  "updated_at": "2026-10-03T18:29:40.470126+00:00",
+  "state": "running",
+  "pid": 12373,
+  "updated_at": "2026-10-03T18:31:23.972530+00:00",
   "self_revision": "2ca1e2aeefbf6a9f0a4ec6b8a2a275150e42f06b",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -14,7 +14,7 @@
   "task_timeout_default": 1800,
   "task_timeout_max": 21600,
   "memory_limit_mb_default": 4096,
-  "current_task_id": null,
+  "current_task_id": "ux-polish-detail-hierarchy-final-20261003",
   "current_attempt_id": null,
   "current_task_digest": null,
   "repository_id": "shelly-link",
@@ -23,8 +23,8 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 4391,
+  "worker_pid": 12373,
   "supervisor_pid": 40654,
-  "last_task_id": "ux-polish-detail-hierarchy-retry-20261003",
+  "active_resources": [],
   "execution_variant": "parallel"
 }
