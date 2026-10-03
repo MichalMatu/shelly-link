@@ -1,12 +1,8 @@
-# Handoff — Dashboard status polish slice accepted after Pulse V1
+# Handoff — Pulse management, product matrix and diagnostic hardening merged
 
-Status: **2026-10-02 — PR #76 is merged to `main`. Pulse V1, Dashboard status polish slice 1, and the Time + Pulse boot-time clock-recovery fix are closed. Merge commit: `7a0d3612aa9562c2aa70680096b80b120643b110`; qualified PR head: `1b68491123922cd898858dc00154656e9b78d56d`; frozen Climate golden UI remains unchanged.**
+Status: **2026-10-03 — PRs #77, #78 and #79 are merged to `main`. Standalone Pulse management UX is closed, deterministic Product Matrix hardening is part of the canonical gate, and the seven-item diagnostic/release-quality tooling slice is closed.**
 
 Repository: `MichalMatu/shelly-link`
-
-## Post-merge closeout
-
-PR #76 (`dashboard-status-polish` -> `main`) merged the full qualified Pulse V1 line, Time + Pulse clock-recovery fix, Dashboard status polish slice 1 and their acceptance documentation. The merge commit is `7a0d3612aa9562c2aa70680096b80b120643b110`; the final PR head was `1b68491123922cd898858dc00154656e9b78d56d`. The final PR head passed local full `pnpm check` and GitHub CI, including the canonical repository gate and responsive smoke. Working branches were retired after merge verification.
 
 ## Source of truth
 
@@ -18,136 +14,128 @@ Read in this order:
 2. this file;
 3. `docs/ARCHITECTURE.md`;
 4. `docs/ROADMAP.md`;
-5. `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`;
-6. `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md`;
-7. `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md`;
-8. `docs/testing/pulse-v1-operational-status-read-path-audit-2026-10-02.md`;
-9. `docs/testing/pulse-v1-operational-status-acceptance-2026-10-02.md`;
-10. `docs/testing/time-pulse-clock-recovery-acceptance-2026-10-02.md`;
-11. `docs/UX_VISUAL_CONTRACT.md`.
+5. `docs/UX_VISUAL_CONTRACT.md`;
+6. `docs/testing/hardware-matrix.md`;
+7. the dated Pulse acceptance records when changing qualified runtime behavior.
 
-Then fetch fresh `main`, all active Pulse branches and `agent-control:.agent/status/daemon.json`. Verify there is no active/duplicate task or open PR before changing anything. Never copy a Local Agent binding from this document or an older chat.
+Then fetch fresh `main` and `agent-control:.agent/status/daemon.json`. Verify there is no active/duplicate Local Agent task before changing anything. Never persist or copy a Local Agent binding from a prior conversation.
 
-## Branch and qualification state
+## Merge closeout
 
-`main` now contains the completed Pulse V1 + Dashboard status polish line via PR #76. Start all new product work from fresh `main`.
+The completed stack was merged in order:
 
-- accepted pre-Pulse `main`: `a2297e3040d98916782af5327a635b45375b19e1`;
-- Climate + Pulse branch: `pulse-v1-runtime-integration`;
-- qualified Climate runtime/code: `fe50778d956906749c00f9da9b7237e6e617c970`;
-- accepted Climate parent used by Time: `c760e79493582140788be76034acea8daf3ed7fb`;
-- Time + Pulse branch: `pulse-v1-time-adapter`;
-- qualified Time runtime/code: `c62f08d252d3d86d3c23ec8f0ad630f3b611a758`;
-- Standalone Pulse branch: `pulse-v1-standalone-adapter`;
-- hardware-tested Standalone runtime/code: `bcfb01f5c6e76bcf571ed013bc650f4d847861e6`;
-- final Standalone code-only qualification candidate before durable closeout: `452b69d957dcc0f4d4efb5c777a5c186bfdbc247`.
-- Shared Pulse UI branch: `pulse-v1-shared-ui`;
-- accepted shared setup/editor + responsive visual acceptance: `99ae14745215e5d267ed2588806a1bc0d05c6420`;
-- durable shared-UI closeout baseline before the operational-status audit: `cd0a335e65ff1c0f0a58340704e7192bdee458c6`;
-- accepted operational-status implementation + responsive acceptance: `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`.
-- Dashboard status polish branch: `dashboard-status-polish`; accepted slice-1 code/acceptance head: `08a50db96f126e04dd509c246581939aabcde3d6`.
-- PR #76 review clock-recovery fix: `66ac5f75df986fe638e7c49de32f4989df92e314`; fail-safe OFF now retries the Shelly clock gate every 30 s and clears only `tm` after time becomes trustworthy.
+- PR #77 `Close standalone Pulse management UX gaps`
+  - qualified head: `6681944af5ef1dc222a51219c6a72ca2fd022b41`;
+  - merge commit: `6745b537fc1e22b638c0b9d6e52270b029d56544`.
+- PR #78 `Add deterministic product matrix hardening`
+  - qualified head: `a7505a9d99b221c8a1485278c1c15027bc79f6bc`;
+  - merge commit: `2399b53d38e1ef27c67307742e5111b790ea7d63`.
+- PR #79 `Add diagnostic and release-quality hardening`
+  - qualified head: `dbae3bf51b0f258e5c597eaeec3ec5f28a43f195`;
+  - merge commit: `3d1be85b2fa8c6e7c4d0c372499b653300c9bc3f`.
 
-The Standalone descendants after the hardware candidate add app ownership/reconciliation integration, repository-boundary cleanup, tests and durable docs; they do not change the generated Standalone Shelly runtime. The code-only candidate passed full `pnpm check` with a clean worktree, and `@lcl/script-generator` passed **229/229 tests at 100% statements/branches/functions/lines**.
+All three exact PR heads had successful GitHub CI before merge. PR #79 also passed the full local `pnpm release:qualify` on its exact final head.
 
-PR #76 was deliberately reviewed and merged on 2026-10-02. The retired Pulse/Dashboard working branches were deleted after ancestry verification. Fetch fresh `main` rather than reconstructing from historical branch SHAs.
+## Current product state
 
-Durable remote branches after the PR #76 closeout are limited to:
+Pulse V1 remains closed and uses one shared Pulse-cycle engine. Do not create separate temperature/humidity/time/standalone Pulse engines.
 
-- `main`;
-- `agent-control`;
-- `golden/climate-ui-20260928`.
+Standalone Pulse management UX is now explicit:
 
-The retired branches `dashboard-status-polish`, `pulse-v1-runtime-integration`, `pulse-v1-time-adapter`, `pulse-v1-standalone-adapter`, `pulse-v1-shared-ui` and the technical `__noop` branch were deleted after merge/ownership verification.
+- AUTO/MANUAL and MANUAL relay ON/OFF exist only on the main standalone Pulse dashboard card;
+- standalone Pulse Plug Detail is read-only for runtime control and owns status/configuration plus safe uninstall;
+- its Automation tab uses the clock icon;
+- a source-level `quality:ux` rule prevents `Pulse.Standalone.useActions()` from moving outside `StandalonePulseAutomationCard.tsx`;
+- Playwright verifies dashboard-only controls and their absence in detail across the canonical viewports;
+- return to AUTO and manual relay mutation remain physical-ID + managed-script-ID/hash gated;
+- MANUAL/pause remains fail-safe OFF even when the installed script hash changed;
+- generated standalone Pulse runtime semantics were not changed by this UX closeout.
 
-## Qualified runtime contract
+The standalone Pulse Bluetooth detail remains intentionally read-only. The existing temporary BLE discovery lifecycle is Climate-specific and must be generalized before standalone Pulse may perform active scan/restore safely.
 
-Pulse is one capability with one shared Pulse-cycle engine. Do not create separate temperature-pulse, humidity-pulse, time-pulse or standalone-pulse engines.
+Safe inline editing/replacement of an already-installed standalone Pulse cycle remains deliberately deferred. The current generic install path is destructive; editing requires an explicit backup/replacement/rollback lifecycle and real-device requalification rather than a UI-only reinstall shortcut.
 
-Pulse V1 remains bounded to ON/OFF time, Continuous/Cycles/Duration, optional initial delay, ON/OFF start phase, safe-OFF completion/cancellation and explicit input bounds.
+## Product Matrix
 
-The hard generated-script ceiling is **12000 B**. **9500 B is only a preferred optimization target.** Never remove safety/recovery, narrow supported configurations or perform risky minification only to defend 9500 B.
+`pnpm check` now includes deterministic seeded product hardening:
 
-### Climate + Pulse — closed
+- self-test: 256 deterministic cases;
+- default generated run: 1000 mixed cases, seed `1337`;
+- accepted baseline on the final hardening line: 417 valid / 583 expected-reject;
+- persistent regression corpus: `test/fixtures/product-matrix/` with six initial pinned cases;
+- structural coverage is enforced so the generator cannot silently miss a supported axis;
+- replay uses existing `automation-core` and `script-generator` APIs rather than a second runtime implementation.
 
-Climate reuses the existing parent condition and relay arbiter, supports optional Pulse/active window including overnight windows, and cancels immediately for parent inactive, window close, MANUAL, automation fault or hard safety. Minimum ON/OFF and debounce remain existing timing owners. Worst qualified mixed-parser size: **11332 B**.
+The matrix covers Climate modes, 1–4 sensors, Xiaomi/TP357/mixed sets, aggregation, VPD, active windows, Climate Pulse, Time/Time+Pulse, standalone Pulse, Continuous/Cycles/Duration, start phase, delay/boundary values and representative invalid configurations.
 
-### Time + Pulse — closed
+A future generated case that exposes a real bug or valuable boundary should be promoted into the persistent JSON corpus so it replays independently of later generator changes.
 
-Steady Time remains two native `Switch.Set` schedules and no script. Time + Pulse keeps `DailyTimeAutomationConfig` unchanged, uses one run-on-boot Pulse script plus native ON/OFF `Script.Eval` schedule boundaries, and reuses the shared engine. Lifecycle/reconciliation/identity/clock behavior is qualified. Representative sizes: **2091 / 2112 / 2130 B** for Continuous/Cycles/Duration.
+## Diagnostic and release-quality tooling
 
-### Standalone Pulse — closed
+The seven-item hardening slice is now part of the repository:
 
-Standalone has no Climate or Time parent and reuses the exact same `renderPulseCycleExecution()` engine.
+1. **Shelly Doctor** — read-only shared doctor model plus `pnpm doctor:shelly -- --base-url <url>` for identity/status/script/schedule/clock evidence.
+2. **Support evidence** — build SHA, persistence context, saved Plug/automation summaries, runtime issues and recent diagnostic events with secret/IP/MAC redaction.
+3. **Fault injection** — explicit mutation-failure tests proving no automatic mutation retry, identity gating, safe-OFF failure handling and read-back verification.
+4. **Persistence/reconciliation fuzzing** — deterministic malformed durable-state coverage, duplicate ownership rejection, changed/unavailable/conflict states and protection from foreign-runtime adoption.
+5. **Performance budgets** — production mobile total/largest JS, CSS, chunk count and a 1000 ms floor for literal production polling intervals are enforced after build in `pnpm check`.
+6. **Release qualifier** — `pnpm release:qualify` runs canonical check + full responsive Playwright + canonical visual contract and emits exact-SHA JSON/Markdown evidence with SHA-256 build-artifact hashes. `pnpm release:qualify:hardware` is the explicit real-device extension.
+7. **Diagnostic event journal** — a bounded 200-event in-memory ring for RPC method/result/latency metadata, runtime errors and reconciliation results. RPC parameters, URLs and payload bodies are not journaled; the journal is exported through Support Report and is not another product-state owner.
 
-- config: `{ relayId, pulse }`;
-- boot starts with explicit relay OFF and a fresh cycle;
-- transient phase/timer state is never persisted/resumed;
-- `rq(true)` starts and `rq(false)` cancels to OFF;
-- relay-control failure and native switch protection fail safe OFF;
-- durable ownership is existing `InstalledAutomation` with `kind: "pulse"`;
-- existing one-owner-per-relay, identity, lifecycle and script ID/hash reconciliation patterns are reused;
-- install/pause/resume/delete preserve explicit safe-OFF semantics.
+The release E2E runner allocates a free loopback port for every responsive/visual invocation. Do not return `check:full` or `release:qualify` to a fixed Playwright port.
 
-Representative generated sizes: **1783 / 1789 / 1803 B** for Continuous/Cycles/Duration. Real Plug S Gen3 acceptance verified boot/restart safe OFF, two physical cycles, cancellation, explicit final OFF, temporary-script cleanup and byte-identical production restoration. See the dated Standalone acceptance record for full evidence.
+## What the new tests found
 
-Do not reopen or further minify any qualified runtime slice without a concrete failing test, hardware issue or size regression.
+The hardening work did **not** expose a new product-runtime or relay-safety defect.
 
-### Shared Pulse setup/editor UI — closed
+It did expose and close two tooling defects while being built:
 
-The accepted shared UI head is `99ae14745215e5d267ed2588806a1bc0d05c6420` on `pulse-v1-shared-ui`. Climate and Time reuse the same `PulseCycleEditor` and pulse form model through an optional `Zachowanie wyjścia` selector; standalone Pulse uses the same editor with Pulse always enabled. The standalone intent/route is wired without creating a second runtime implementation.
+- the first Product Matrix index mapping could structurally miss the Climate `cooling` axis despite generating many cases; structural coverage now forces every required axis and fails closed if one disappears;
+- the first `release:qualify` path bypassed the shared isolated E2E runner and used fixed port `5173`, which caused a webServer startup timeout under load; responsive and visual qualification now share the ephemeral-port runner without weakening test expectations or timeouts.
 
-Responsive acceptance covers the five canonical viewports for Time, standalone Pulse and the current Plug setup flow. Canonical Darwin states are `24-climate-pulse-setup`, `25-time-pulse-setup` and `26-standalone-pulse-setup`; the intentional setup/intent deltas refreshed `08-automation-intent`, `09-time-setup` and `16-climate-setup`. Frozen Climate detail state `02-climate-automation` remains byte-for-byte protected by keeping the new Pulse editor out of the legacy inline detail form. Final pre-push canonical visual verification passed 5/5.
+Fault-injection and persistence/reconciliation fuzzing passed their intended invariants and did not reveal another production-code bug in this slice.
 
-### Operational Pulse status — closed
+## Final software qualification before merge
 
-Pulse operational status is one read-only normalized capability shared by Climate, Time and standalone Pulse. The mobile model carries availability, phase, completed cycles, next transition uptime, reason, automation-requested output, final relay output, automation fault, hard-safety state/reason and device uptime.
+Exact PR #79 head `dbae3bf51b0f258e5c597eaeec3ec5f28a43f195` passed:
 
-- Climate reuses the existing `/diag` read path and maps its Pulse diagnostics into the shared model.
-- Time + Pulse and standalone Pulse use the smallest read-only `Script.Eval` adapter over existing runtime state (`R.ps`, `R.pc`, `R.pn`, `R.rs`, requested output and automation fault) plus device uptime; `Shelly.GetStatus` remains the authority for the final physical relay state.
-- React derives remaining display time only from device-reported uptime/deadline data. React never owns or advances a Pulse timer.
-- Active phase data whose device uptime has passed the reported deadline beyond the bounded grace is marked stale; malformed/missing state becomes unavailable rather than inventing a phase.
-- Dashboard uses the compact shared status summary; detail uses the full summary and includes automation-fault and hard-safety rows. Climate, Time and standalone Pulse share the same presentation language.
-- No generated Shelly runtime, timing semantics, restart behavior, persistence, safety precedence or lifecycle behavior changed for this status slice.
+- mobile: 109 test files / 498 tests;
+- Product Matrix self-test: 256 cases;
+- Product Matrix: 1000 generated + 6 persistent cases;
+- automation-core: 157/157;
+- script-generator: 231/231;
+- responsive Playwright: 49/49;
+- canonical visual contract: 5/5;
+- performance budget: JS 1,248,116 B total, 538,803 B largest chunk, CSS 134,254 B, 11 JS chunks, minimum literal polling budget 1000 ms;
+- GitHub Actions CI run `37091978140`: canonical repository gate, Chromium install, responsive smoke and visual-audit upload all PASS.
 
-Acceptance on `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2`: focused responsive operational-status E2E passed **5/5** canonical viewports; the exact completion head passed full `pnpm check`; the complete responsive Playwright suite passed **46/46**. The dated acceptance record contains the detailed evidence.
+Software release evidence was generated for that exact head with `hardwareMatrix=false`. This was intentional because #78/#79 do not change device-side runtime behavior.
 
-Samsung S22+ / Android 16 preserving-data installation of the same application code also passed build/install/cold-start/layout smoke. The phone currently contains a non-Pulse Climate installation, so this smoke is explicitly **not** claimed as live Pulse operational-status hardware acceptance. No hardware requalification was required because generated runtime/device behavior did not change.
+## Hardware and phone state
 
-### Dashboard status polish — slice 1 accepted
+Existing dated real-Shelly Pulse runtime qualification remains authoritative. PRs #77–#79 did not modify generated Climate/Time/Pulse runtime semantics, so no new runtime hardware claim is added by this closeout.
 
-Accepted code/acceptance head: `08a50db96f126e04dd509c246581939aabcde3d6` on `dashboard-status-polish`.
+The last Android preserve-data acceptance for the standalone Pulse management UI used Samsung SM-S906B on exact head `6681944af5ef1dc222a51219c6a72ca2fd022b41`; build, `adb install -r`, cold start and process-alive checks passed. Do not claim the phone is already running the later Product Matrix/diagnostic-tooling heads unless it is explicitly rebuilt and installed again.
 
-The mobile operational-status presentation now has one shared `requested output -> final relay -> reason` language for Pulse and Steady Time. Pulse keeps the already-qualified normalized read model and timing ownership. Steady Time derives requested output only from Shelly local time plus the existing schedule-domain helper while AUTO is running; paused/MANUAL deliberately reports no automation request. Climate detail now prefers the authoritative automation-requested output diagnostic while retaining its existing fallback.
+## Next work
 
-The frozen Climate dashboard/detail visual contract remains unchanged: the Stage 7 work did not casually grow Climate card geometry, and the UX gate rejected accidental Climate golden regeneration. Only the intentional Time dashboard/detail snapshots changed. Full responsive Playwright passed **46/46** and the exact implementation line passed full `pnpm check`. See `docs/testing/dashboard-status-polish-acceptance-2026-10-02.md`.
+The application is near feature-complete. Default priority is now stabilization and UX rather than adding unrelated product capability:
 
-No generated runtime, RPC path, polling cadence, lifecycle, persistence or hardware behavior changed.
+1. remaining UX polish using the existing visual contracts and responsive gates;
+2. safe standalone Pulse inline edit/replacement lifecycle only as a separate explicitly qualified slice;
+3. generalize temporary BLE discovery restoration before enabling active standalone Pulse BLE scan;
+4. watchdog/recovery/soak stabilization and final real-hardware matrix;
+5. V1 feature freeze/release qualification.
 
-### Time + Pulse boot-time clock recovery — accepted
+Do not reopen qualified Pulse runtime behavior without a concrete failing test, hardware issue or accepted product change.
 
-PR #76 review found and closed one merge blocker: an unsynchronized Shelly clock at boot left Time + Pulse in permanent `tm` fault even after time later synchronized. Candidate `66ac5f75df986fe638e7c49de32f4989df92e314` preserves immediate safe OFF, schedules a bounded 30 s clock recheck, clears only the clock fault after trust returns, and never clears unrelated protection/relay faults. Script-generator regression coverage is 14/14 for the Time + Pulse runtime. Real Plug S Gen3 requalification observed physical Pulse ON/OFF plus cancellation and finished with the existing production Standalone Pulse source/state unchanged, schedules unchanged and final relay explicitly OFF. See `docs/testing/time-pulse-clock-recovery-acceptance-2026-10-02.md`.
+## Safety / verification reminders
 
-## Next implementation order
-
-Pulse V1 is closed. Do not reopen the qualified runtime/setup/status slices without a concrete failing test, hardware issue or accepted product change.
-
-Continue the V1 plan in this order:
-
-1. Continue Dashboard status polish with fault/hard-safety legibility using existing authoritative diagnostics and warning/detail surfaces, without casually changing frozen Climate card geometry.
-2. UX redesign round 2 after the stable History/safety/Pulse foundation.
-3. Watchdog/recovery/soak stabilization and the final hardware matrix.
-4. V1 feature freeze.
-5. Pulse/Dashboard merge closeout is complete; continue future work from fresh `main` and create new focused branches only when a new slice begins.
-
-## Safety and execution rules
-
-- Pulse never becomes a second relay owner.
-- Forced OFF, hard safety and OFF-requiring automation faults cancel Pulse immediately.
-- Parent inactive/window close cancels immediately rather than finishing a cycle.
-- MANUAL cancels/suspends Pulse; returning to AUTO starts a fresh configured cycle when the parent is active.
-- Standalone restart begins safe OFF; never resume an unknown in-flight timer.
-- React may display phase/progress but never owns Pulse timers.
-- Use direct GitHub for repo audit/changes and Local Agent for Mac/local commands, builds, tests, Playwright and hardware.
-- Any relay-mutating real-device test must end with explicit relay OFF and verification.
-- Run focused checks while iterating and one final full `pnpm check` on the exact completion HEAD. Use `pnpm check:full` when responsive E2E is part of acceptance.
+- one managed automation owner per Plug relay;
+- boot/stale-sensor/hard-safety forced-OFF behavior stays authoritative;
+- destructive/runtime mutations require physical-device identity verification;
+- mutating RPCs are not automatically retried;
+- React displays runtime state but never owns device automation timing;
+- use focused checks while iterating and one final `pnpm check` on the exact completion head;
+- use `pnpm check:full` when responsive acceptance is part of the slice;
+- use `pnpm release:qualify` for software release evidence and `pnpm release:qualify:hardware` only when real hardware acceptance is required.
