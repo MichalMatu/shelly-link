@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 8,
+  "index": 9,
   "total": 10,
-  "command": "git add apps/mobile/e2e/led-settings.spec.ts apps/mobile/e2e/visual-contract.ts package.json docs/UX_VISUAL_CONTRACT.md docs/UX_POLISH_CHECKPOINT_20261003.md apps/mobile/e2e/led-settings.spec.ts-snapshots/30-ble-only-plug-detail-darwin.png && git commit -m 'Add BLE-only Plug detail visual coverage'",
-  "pid": 40373,
+  "command": "pnpm check:full",
+  "pid": 40807,
   "timeout": 900,
   "idle_timeout": 900,
   "memory_limit_mb": 3072,
-  "started_at": "2026-10-03T18:42:05.905300+00:00",
-  "stage_name": "command-8",
-  "stage_index": 8,
+  "started_at": "2026-10-03T18:42:09.035082+00:00",
+  "stage_name": "command-9",
+  "stage_index": 9,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "ux-polish-ble-detail-visual-20261003",
@@ -18,5 +18,5 @@
   "task_digest": "87115bb2b58ca2dbb40504e16f788913ff2598c82cc4a621dbdc104343f926af",
   "daemon_version": "4.20.3",
   "daemon_pid": 38193,
-  "updated_at": "2026-10-03T18:42:05.976919+00:00"
+  "updated_at": "2026-10-03T18:42:09.055650+00:00"
 }
