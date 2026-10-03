@@ -61,7 +61,7 @@ Physical Plug detail is capability-driven. Reuse the shared tab and surface comp
 
 Time and standalone Pulse Automation detail are status-first and use the same information hierarchy: current operational state, configuration, then a visually separated destructive uninstall action. Time may edit its schedule inline inside Configuration; standalone Pulse remains read-only for runtime/configuration. Climate detail remains frozen and is not normalized into this hierarchy. Canonical states are `11-time-detail` and `29-standalone-pulse-detail`.
 
-Saved-Plug forget actions are available only when no installed automation owns that physical Plug. When ownership exists, removal is blocked with an explanation and a direct route to the owning automation. Thermometer cards keep their destructive trash action on the card itself; removal is blocked when an installed Climate automation references that thermometer.
+Saved-Plug forget actions are available only when no installed automation owns that physical Plug. When ownership exists, removal is blocked with an explanation and a direct route to the owning automation. Thermometer removal lives in nested Thermometer settings rather than on the dashboard card; removal is blocked when an installed Climate automation references that thermometer, with a direct route to the owning automation.
 
 Managed Climate Button Mode is read-only while Climate owns the relay; do not show a disabled editable form.
 
@@ -80,6 +80,12 @@ The normal flow stays simple. Technical scan range is available through the comp
 Climate and Time use the same optional Pulse editor: `Zachowanie wyjścia` stays compact in Steady mode and reveals the shared Pulse-cycle fields only after selecting Pulse. Standalone Pulse uses the exact same editor/model with Pulse always active rather than introducing a parallel form.
 
 Canonical accepted states are `24-climate-pulse-setup`, `25-time-pulse-setup` and `26-standalone-pulse-setup`. The intentional product-entry/setup deltas also update `08-automation-intent`, `09-time-setup` and `16-climate-setup`. The frozen Climate Automation detail golden remains unchanged; new setup controls must not leak into that legacy inline detail composition without an explicit product-design decision.
+
+## Accepted UX polish qualification — 2026-10-03
+
+The status-first Time/standalone Pulse hierarchy, nested Thermometer settings, capability-driven Plug detail, shared setup navigation and shared Plug dashboard feedback ownership were accepted with the complete mobile suite at 498/498, responsive Playwright at 50/50 and the canonical visual contract at 7/7. The final feedback-ownership cleanup produced no canonical PNG delta, including the frozen Climate states. A real Android WebView inspection at 412 CSS px also confirmed no horizontal overflow for the Thermometer dashboard/settings flow.
+
+Host qualification on the 8 GB development Mac uses two Vitest workers for the complete mobile suite to avoid unrelated host-load timeouts; test expectations and repository timeouts remain unchanged.
 
 ## Surface roles
 

@@ -1,7 +1,11 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-const repoRoot = new URL('../../', import.meta.url);
+const repoRoot = process.env.LCL_QUALITY_ROOT
+  ? pathToFileURL(`${resolve(process.env.LCL_QUALITY_ROOT)}/`)
+  : new URL('../../', import.meta.url);
 const failures = [];
 
 const frozenClimateVisuals = Object.freeze({
@@ -1056,28 +1060,36 @@ const checkPackageRuntimeCopy = async () => {
   }
 };
 
-await checkDeviceAddPageBoundary();
-await checkBottomNavigationShell();
-await checkSavedShellyCardFeedback();
-await checkTokenizedCssCoverage();
-await checkTokenizedCss();
-await checkFeedbackContractPatterns();
-await checkUiPackageFeedbackPatterns();
-await checkFieldValidationPatterns();
-await checkTransientFeedbackPatterns();
-await checkNativeSelectPatterns();
-await checkResponsiveCss();
-await checkModalSizingPatterns();
-await checkThemeTokenPatterns();
-await checkMobileProductionMarkupHygiene();
-await checkPageTitleTypographyContract();
-await checkPageHeaderContract();
-await checkCanonicalVisualPlatformContract();
-await checkFrozenClimateVisualContract();
-await checkDisclosureContract();
-await checkSegmentedControlContract();
-await checkStandalonePulseControlPlacement();
-await checkPackageRuntimeCopy();
+const focusedCheck = process.env.LCL_UX_GATE_FOCUS;
+if (focusedCheck === 'segmented-control') {
+  await checkSegmentedControlContract();
+} else if (focusedCheck) {
+  console.error(`Unknown LCL_UX_GATE_FOCUS: ${focusedCheck}`);
+  process.exit(2);
+} else {
+  await checkDeviceAddPageBoundary();
+  await checkBottomNavigationShell();
+  await checkSavedShellyCardFeedback();
+  await checkTokenizedCssCoverage();
+  await checkTokenizedCss();
+  await checkFeedbackContractPatterns();
+  await checkUiPackageFeedbackPatterns();
+  await checkFieldValidationPatterns();
+  await checkTransientFeedbackPatterns();
+  await checkNativeSelectPatterns();
+  await checkResponsiveCss();
+  await checkModalSizingPatterns();
+  await checkThemeTokenPatterns();
+  await checkMobileProductionMarkupHygiene();
+  await checkPageTitleTypographyContract();
+  await checkPageHeaderContract();
+  await checkCanonicalVisualPlatformContract();
+  await checkFrozenClimateVisualContract();
+  await checkDisclosureContract();
+  await checkSegmentedControlContract();
+  await checkStandalonePulseControlPlacement();
+  await checkPackageRuntimeCopy();
+}
 
 if (failures.length > 0) {
   console.error('UX quality gate failed:');

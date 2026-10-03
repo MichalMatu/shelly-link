@@ -40,6 +40,7 @@ type HardwareSetupScreenProps = {
   sensorAddMode?: 'manual' | 'phone-scan';
   sensorSettingsOnlyId?: string;
   onSensorSettingsRemoved?: () => void;
+  onOpenSensorAutomation?: (installationId: string) => void;
 };
 
 export const HardwareSetupScreen = ({
@@ -53,7 +54,8 @@ export const HardwareSetupScreen = ({
   sensorAddOnly = false,
   sensorAddMode = 'phone-scan',
   sensorSettingsOnlyId,
-  onSensorSettingsRemoved
+  onSensorSettingsRemoved,
+  onOpenSensorAutomation
 }: HardwareSetupScreenProps = {}) => {
   const { locale, t } = useTranslation();
   const pulseLabels = pulseCycleCopy[locale];
@@ -185,6 +187,9 @@ export const HardwareSetupScreen = ({
           }}
           onRemove={() => (device ? flow.removeSensorDevice(device.id) : false)}
           onRemoved={() => onSensorSettingsRemoved?.()}
+          {...(onOpenSensorAutomation
+            ? { onOpenAutomation: onOpenSensorAutomation }
+            : {})}
         />
       </main>
     );

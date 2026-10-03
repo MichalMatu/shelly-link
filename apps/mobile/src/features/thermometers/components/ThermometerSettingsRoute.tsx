@@ -36,8 +36,18 @@ type ThermometerSettingsRouteProps = {
   onOpenAutomation?: (installationId: string) => void;
 };
 
-const errorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : String(error ?? '');
+const errorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+  return String(error ?? '');
+};
 
 export const ThermometerSettingsRoute = ({
   device,
@@ -97,7 +107,6 @@ export const ThermometerSettingsRoute = ({
   const confirmRemove = () => {
     if (onRemove()) {
       setDialog({ kind: 'none' });
-      pushToast('ok', t('hardware.sensor.removed'));
       onRemoved();
       return;
     }

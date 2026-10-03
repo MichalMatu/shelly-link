@@ -366,5 +366,9 @@ describe('AppRoutes navigation shell', () => {
       'aria-current',
       'page'
     );
+
+    fireEvent.click(screen.getByRole('button', { name: 'mock-sensor-settings-remove' }));
+    expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
+    expect(await screen.findByText('Usunięto termometr z aplikacji.')).toBeVisible();
   });
 });
