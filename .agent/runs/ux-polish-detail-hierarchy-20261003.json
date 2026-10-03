@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "ux-polish-detail-hierarchy-20261003",
+  "task_digest": "ff77dab8e582b18e33af1d6a4699b3587ac390abc87f44c638963f4d8ee3f933",
+  "idle_timeout": 900,
+  "task_timeout": 7200,
+  "memory_limit_mb": 3072,
+  "started_at": "2026-10-03T18:26:22.168985+00:00",
+  "attempt_id": "f9f7bbaf5f7ff984f6deae73",
+  "daemon_version": "4.20.3",
+  "daemon_pid": 2734,
+  "updated_at": "2026-10-03T18:26:22.169185+00:00",
+  "pid": 2734
+}
