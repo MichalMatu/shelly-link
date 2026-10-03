@@ -284,7 +284,9 @@ test('standalone Pulse refuses AUTO and manual ON when the installed script hash
   await expect(turnOn).toBeEnabled();
   await expect.poll(() => rpc.calls.includes('Script.Stop')).toBe(true);
 
-  const switchSetCountAfterPause = rpc.calls.filter((method) => method === 'Switch.Set').length;
+  const switchSetCountAfterPause = rpc.calls.filter(
+    (method) => method === 'Switch.Set'
+  ).length;
   await turnOn.click();
   await expect
     .poll(() => rpc.calls.filter((method) => method === 'Switch.Set').length)
@@ -292,7 +294,9 @@ test('standalone Pulse refuses AUTO and manual ON when the installed script hash
   await expect(turnOn).not.toHaveAttribute('aria-pressed', 'true');
 
   await auto.click();
-  await expect.poll(() => rpc.calls.filter((method) => method === 'Script.Start').length).toBe(0);
+  await expect
+    .poll(() => rpc.calls.filter((method) => method === 'Script.Start').length)
+    .toBe(0);
   await expect(manual).toHaveAttribute('aria-pressed', 'true');
 });
 
