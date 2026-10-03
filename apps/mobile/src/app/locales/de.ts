@@ -483,6 +483,9 @@ export const de = {
       settings: 'Thermometereinstellungen',
       settingsAria: 'Thermometereinstellungen für {name}',
       settingsTitle: 'Thermometereinstellungen',
+      identitySection: 'Identität',
+      liveReadingsSection: 'Live-Messwerte',
+      deviceActionsSection: 'Geräteaktionen',
       noBleFound: 'Keine BLE-Thermometer gefunden.',
       details: 'Details',
       typeLabel: 'Typ'

@@ -568,18 +568,20 @@ const expectClimateDetailHierarchy = async (page: Page) => {
 };
 
 const expectTimeDetailHierarchy = async (page: Page) => {
-  const [tabsBox, surfaceBox, liveStateBox] = await Promise.all([
+  const [tabsBox, surfaceBox, hierarchyBox] = await Promise.all([
     requiredBox(page.locator('.plug-detail-tabs')),
     requiredBox(page.locator('.plug-detail-surface')),
-    requiredBox(page.locator('.installation-automation-live-state'))
+    requiredBox(page.locator('.installation-detail-hierarchy'))
   ]);
 
   expect(Math.abs(tabsBox.x - surfaceBox.x)).toBeLessThanOrEqual(2);
   expect(Math.abs(tabsBox.width - surfaceBox.width)).toBeLessThanOrEqual(2);
-  expect(liveStateBox.x).toBeGreaterThanOrEqual(surfaceBox.x - 1);
-  expect(liveStateBox.x + liveStateBox.width).toBeLessThanOrEqual(
+  expect(hierarchyBox.x).toBeGreaterThanOrEqual(surfaceBox.x - 1);
+  expect(hierarchyBox.x + hierarchyBox.width).toBeLessThanOrEqual(
     surfaceBox.x + surfaceBox.width + 1
   );
+  await expect(page.locator('.installation-detail-hierarchy__section')).toHaveCount(2);
+  await expect(page.locator('.installation-detail-danger-zone')).toHaveCount(1);
   await expect(page.locator('.installation-detail-header')).toHaveCount(0);
   await expect(page.locator('.installation-detail-live')).toHaveCount(0);
   await expect(page.locator('.app-page-back-row')).toHaveCount(0);
@@ -1151,13 +1153,42 @@ for (const viewport of viewports) {
     const thermometerCard = page
       .getByRole('heading', { name: 'Przedpokój' })
       .locator('xpath=ancestor::article[1]');
-    await expect(thermometerCard.getByText('A4:C1:38:4F:24:CD')).toBeVisible();
+    await expect(thermometerCard.getByText('A4:C1:38:4F:24:CD')).toHaveCount(0);
     await expect(
       thermometerCard.getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
+    ).toHaveCount(0);
+    await expect(
+      thermometerCard.getByRole('button', { name: 'Ustawienia termometru Przedpokój' })
     ).toBeVisible();
+
     await page.getByRole('button', { name: 'Skanuj termometry BLE telefonem' }).click();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '13-add-thermometer');
+    }
+    await page.getByRole('button', { name: 'Termometry', exact: true }).click();
+    await expect(page.getByRole('main', { name: 'Termometry' })).toBeVisible();
+
+    const settingsCard = page
+      .getByRole('heading', { name: 'Przedpokój' })
+      .locator('xpath=ancestor::article[1]');
+    await settingsCard
+      .getByRole('button', { name: 'Ustawienia termometru Przedpokój' })
+      .click();
+    await expect(
+      page.getByRole('heading', { name: 'Ustawienia termometru' })
+    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Tożsamość' })).toBeVisible();
+    await expect(page.getByLabel('Nazwa termometru')).toHaveValue('Przedpokój');
+    await expect(page.getByText('A4:C1:38:4F:24:CD')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Odczyty na żywo' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Akcje urządzenia' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Ustaw czas' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '28-thermometer-settings');
     }
     await page.getByRole('button', { name: 'Termometry', exact: true }).click();
     await expect(page.getByRole('main', { name: 'Termometry' })).toBeVisible();

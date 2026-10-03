@@ -476,6 +476,9 @@ export const en = {
       settings: 'Thermometer settings',
       settingsAria: 'Thermometer settings for {name}',
       settingsTitle: 'Thermometer settings',
+      identitySection: 'Identity',
+      liveReadingsSection: 'Live readings',
+      deviceActionsSection: 'Device actions',
       noBleFound: 'No BLE thermometers found.',
       details: 'Details',
       typeLabel: 'Type'

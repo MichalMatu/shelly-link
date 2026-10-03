@@ -54,13 +54,13 @@ export const WifiPlugDetailScreen = ({
 
   if (!device) return <PlugDetailNotFound />;
 
-  const disabledTabs: readonly PlugDetailTab[] = buttonModeLocked
-    ? ['automation', 'script']
-    : ['script'];
+  const availableTabs: readonly PlugDetailTab[] = buttonModeLocked
+    ? ['ble', 'device', 'info']
+    : ['automation', 'ble', 'device', 'info'];
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <PlugDetailTop tabs={[activeTab, setActiveTab]} disabledTabs={disabledTabs} />
+      <PlugDetailTop tabs={[activeTab, setActiveTab]} availableTabs={availableTabs} />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
         {!buttonModeLocked && activeTab === 'automation' && (

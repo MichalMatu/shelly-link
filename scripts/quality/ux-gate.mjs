@@ -1,7 +1,11 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-const repoRoot = new URL('../../', import.meta.url);
+const repoRoot = process.env.LCL_QUALITY_ROOT
+  ? pathToFileURL(`${resolve(process.env.LCL_QUALITY_ROOT)}/`)
+  : new URL('../../', import.meta.url);
 const failures = [];
 
 const frozenClimateVisuals = Object.freeze({
@@ -23,10 +27,12 @@ const cssPaths = [
   'apps/mobile/src/theme/runtimeStatus.css',
   'apps/mobile/src/app/appShell.css',
   'apps/mobile/src/screens/AutomationDashboardScreen.css',
+  'apps/mobile/src/features/automation-dashboard/components/AutomationDashboardBody.css',
   'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
   'apps/mobile/src/features/automations/components/ClimateHistorySection.css',
   'apps/mobile/src/features/automations/components/ClimateHistoryChart.css',
+  'apps/mobile/src/features/thermometers/components/ThermometerSettingsPage.css',
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
   'apps/mobile/src/features/plugs/components/PlugAddSpeedDial.css',
   'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',
@@ -914,14 +920,12 @@ const checkSegmentedControlContract = async () => {
     'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
     'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
   ];
+  const setupNavigationPath =
+    'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx';
   const geometryUsageContracts = [
     [
       'apps/mobile/src/features/plugs/components/PlugDetailTabs.tsx',
       'plug-detail-tabs lcl-segmented-control'
-    ],
-    [
-      'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx',
-      'setup-top-nav lcl-segmented-control'
     ]
   ];
 
@@ -959,6 +963,20 @@ const checkSegmentedControlContract = async () => {
         'add-device segmented tabs must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
       );
     }
+  }
+
+  const setupNavigationSource = await readRepoFile(setupNavigationPath);
+  if (
+    !setupNavigationSource.includes('<SegmentedControl') ||
+    !setupNavigationSource.includes('className="setup-top-nav"') ||
+    !setupNavigationSource.includes('itemClassName="setup-top-nav__item"') ||
+    setupNavigationSource.includes('setup-top-nav lcl-segmented-control') ||
+    setupNavigationSource.includes('setup-top-nav__item lcl-segmented-control__item')
+  ) {
+    addFailure(
+      setupNavigationPath,
+      'setup segmented navigation must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
+    );
   }
 
   for (const [path, rootClass] of geometryUsageContracts) {
@@ -1042,28 +1060,36 @@ const checkPackageRuntimeCopy = async () => {
   }
 };
 
-await checkDeviceAddPageBoundary();
-await checkBottomNavigationShell();
-await checkSavedShellyCardFeedback();
-await checkTokenizedCssCoverage();
-await checkTokenizedCss();
-await checkFeedbackContractPatterns();
-await checkUiPackageFeedbackPatterns();
-await checkFieldValidationPatterns();
-await checkTransientFeedbackPatterns();
-await checkNativeSelectPatterns();
-await checkResponsiveCss();
-await checkModalSizingPatterns();
-await checkThemeTokenPatterns();
-await checkMobileProductionMarkupHygiene();
-await checkPageTitleTypographyContract();
-await checkPageHeaderContract();
-await checkCanonicalVisualPlatformContract();
-await checkFrozenClimateVisualContract();
-await checkDisclosureContract();
-await checkSegmentedControlContract();
-await checkStandalonePulseControlPlacement();
-await checkPackageRuntimeCopy();
+const focusedCheck = process.env.LCL_UX_GATE_FOCUS;
+if (focusedCheck === 'segmented-control') {
+  await checkSegmentedControlContract();
+} else if (focusedCheck) {
+  console.error(`Unknown LCL_UX_GATE_FOCUS: ${focusedCheck}`);
+  process.exit(2);
+} else {
+  await checkDeviceAddPageBoundary();
+  await checkBottomNavigationShell();
+  await checkSavedShellyCardFeedback();
+  await checkTokenizedCssCoverage();
+  await checkTokenizedCss();
+  await checkFeedbackContractPatterns();
+  await checkUiPackageFeedbackPatterns();
+  await checkFieldValidationPatterns();
+  await checkTransientFeedbackPatterns();
+  await checkNativeSelectPatterns();
+  await checkResponsiveCss();
+  await checkModalSizingPatterns();
+  await checkThemeTokenPatterns();
+  await checkMobileProductionMarkupHygiene();
+  await checkPageTitleTypographyContract();
+  await checkPageHeaderContract();
+  await checkCanonicalVisualPlatformContract();
+  await checkFrozenClimateVisualContract();
+  await checkDisclosureContract();
+  await checkSegmentedControlContract();
+  await checkStandalonePulseControlPlacement();
+  await checkPackageRuntimeCopy();
+}
 
 if (failures.length > 0) {
   console.error('UX quality gate failed:');

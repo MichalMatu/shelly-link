@@ -76,6 +76,7 @@ export {
   BleOnlyPlugDashboardCards,
   type BleOnlyPlugDashboardCardsProps
 } from './components/BleOnlyPlugDashboardCards.js';
+export { PlugDashboardFeedbackFooter } from './components/PlugDashboardFeedbackFooter.js';
 export {
   PlugDashboardCardShell,
   type PlugDashboardAutomationAction,

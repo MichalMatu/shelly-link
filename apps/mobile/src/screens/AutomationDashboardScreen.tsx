@@ -1,7 +1,7 @@
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { calculateVpdKpa } from '@lcl/automation-core';
-import { IconAlertTriangle, IconPlug } from '@tabler/icons-react';
+import { IconPlug } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { StandalonePulseAutomationCard } from '../app/StandalonePulseAutomationCard.js';
@@ -15,6 +15,7 @@ import {
   PlugAddSpeedDial,
   PlugAutomationModeControl,
   PlugDashboardCardShell,
+  PlugDashboardFeedbackFooter,
   savedPlugToWifiDevice,
   useSavedPlugStore,
   type PlugAddTransport
@@ -254,22 +255,11 @@ const ClimateAutomationCard = ({
 
   const footer =
     warningLabel || action.isError ? (
-      <footer className="automation-card__footer">
-        {warningLabel && (
-          <div
-            className={`automation-card__status automation-card__status--${warningClass}`}
-            role="status"
-          >
-            <IconAlertTriangle aria-hidden="true" />
-            <span>{warningLabel}</span>
-          </div>
-        )}
-        {action.isError && (
-          <span className="automation-control-error" role="alert">
-            {t('detail.actionFailed')}
-          </span>
-        )}
-      </footer>
+      <PlugDashboardFeedbackFooter
+        warningLabel={warningLabel}
+        warningTone={warningClass}
+        actionErrorLabel={action.isError ? t('detail.actionFailed') : null}
+      />
     ) : undefined;
 
   return (
@@ -323,10 +313,12 @@ const AutomationCard = ({ installation, onOpen, onNameChange }: AutomationCardPr
 
 const ThermometerDashboardSection = ({
   onAdd,
-  onOpenInstallation
+  onOpenInstallation,
+  onOpenSensorSettings
 }: {
   onAdd(): void;
   onOpenInstallation(installationId: string): void;
+  onOpenSensorSettings?: (sensorId: string) => void;
 }) => {
   const flow = useSensorSetupFlow();
   return (
@@ -336,6 +328,7 @@ const ThermometerDashboardSection = ({
       embedded
       onAddRequest={onAdd}
       onOpenInstallation={onOpenInstallation}
+      {...(onOpenSensorSettings ? { onOpenSensorSettings } : {})}
     />
   );
 };
@@ -390,6 +383,7 @@ export const AutomationDashboardScreen = ({
   initialKind,
   onAddPlug,
   onAddThermometer,
+  onOpenThermometerSettings,
   onAddAutomation,
   onOpenInstallation,
   onOpenBlePlug,
@@ -472,6 +466,9 @@ export const AutomationDashboardScreen = ({
           <ThermometerDashboardSection
             onAdd={onAddThermometer}
             onOpenInstallation={onOpenInstallation}
+            {...(onOpenThermometerSettings
+              ? { onOpenSensorSettings: onOpenThermometerSettings }
+              : {})}
           />
         ) : hasPlugEntries ? (
           <>

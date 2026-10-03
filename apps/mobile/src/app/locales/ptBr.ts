@@ -477,6 +477,9 @@ export const ptBr = {
       settings: 'Configurações do termômetro',
       settingsAria: 'Configurações do termômetro {name}',
       settingsTitle: 'Configurações do termômetro',
+      identitySection: 'Identidade',
+      liveReadingsSection: 'Leituras ao vivo',
+      deviceActionsSection: 'Ações do dispositivo',
       noBleFound: 'Nenhum termômetro BLE encontrado.',
       details: 'Detalhes',
       typeLabel: 'Tipo'

@@ -343,7 +343,7 @@ const getRuleSummary = () => {
 };
 
 const addShellyThroughUi = async (name = 'Przedpokój') => {
-  fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
   const addDialog = await openShellyAddDialog();
   fireEvent.change(within(addDialog).getByLabelText('Nazwa gniazdka'), {
     target: { value: name }
@@ -379,7 +379,7 @@ const addSensorThroughUi = async ({
   name?: string;
   profile?: 'xiaomi_lywsd03mmc_bthome_v2' | 'tp357_custom_v1';
 } = {}) => {
-  fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
   const addDialog = await openSensorAddDialog();
   chooseSelectField(
     'Typ termometru',
@@ -653,14 +653,14 @@ describe('HardwareSetupScreen', () => {
 
     expect(screen.queryByText('MVP manual')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Zestaw' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Shelly' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Termometry' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reguła' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Shelly' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Termometry' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Reguła' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Diag' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Skrypt' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Shelly' })).toHaveAttribute(
-      'aria-current',
-      'page'
+    expect(screen.getByRole('tab', { name: 'Shelly' })).toHaveAttribute(
+      'aria-selected',
+      'true'
     );
     expect(screen.getByRole('region', { name: 'Gniazdka Shelly' })).toBeInTheDocument();
     expect(
@@ -704,13 +704,13 @@ describe('HardwareSetupScreen', () => {
     closeCurrentAddPage();
     expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     expect(
       screen.queryByText('Wpisz nazwę i MAC termometru, którego ma używać Shelly.')
     ).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Termometry' })).toHaveAttribute(
-      'aria-current',
-      'page'
+    expect(screen.getByRole('tab', { name: 'Termometry' })).toHaveAttribute(
+      'aria-selected',
+      'true'
     );
     expect(screen.getByRole('region', { name: 'Termometry BLE' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Termometry' })).not.toBeInTheDocument();
@@ -781,7 +781,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.queryByText('RSSI')).not.toBeInTheDocument();
     closeCurrentAddPage();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
     expect(screen.getByLabelText('Gniazdko Shelly')).toBeInTheDocument();
     expect(screen.getByLabelText('Termometr')).toBeInTheDocument();
     expect(screen.getByText('Zaawansowane', { selector: 'summary' })).toBeVisible();
@@ -810,8 +810,8 @@ describe('HardwareSetupScreen', () => {
 
     renderHardwareSetup({ setupIntent: 'temperature', fixedShellyId: shellyId });
 
-    expect(screen.queryByRole('button', { name: 'Termometry' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Reguła' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Termometry' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Reguła' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Termometr' })).toHaveAttribute(
       'aria-haspopup',
       'listbox'
@@ -845,7 +845,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.queryByRole('dialog', { name: 'Salon' })).toBeNull();
     expect(await screen.findByRole('heading', { name: 'Salon' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Wstecz: Shelly' })).toBeVisible();
-    expect(screen.queryByRole('navigation', { name: 'Menu konfiguracji' })).toBeNull();
+    expect(screen.queryByRole('tablist', { name: 'Menu konfiguracji' })).toBeNull();
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
@@ -855,7 +855,7 @@ describe('HardwareSetupScreen', () => {
       await screen.findByRole('heading', { name: 'Skanuj termometry BLE' })
     ).toBeVisible();
     expect(screen.getByRole('button', { name: 'Wstecz: Salon' })).toBeVisible();
-    expect(screen.queryByRole('navigation', { name: 'Menu konfiguracji' })).toBeNull();
+    expect(screen.queryByRole('tablist', { name: 'Menu konfiguracji' })).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Salon' }));
     await waitFor(
@@ -885,7 +885,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
-    expect(screen.getByRole('navigation', { name: 'Menu konfiguracji' })).toBeVisible();
+    expect(screen.getByRole('tablist', { name: 'Menu konfiguracji' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeVisible();
   });
 
@@ -912,14 +912,14 @@ describe('HardwareSetupScreen', () => {
   it('opens device add flows as full child pages instead of modals', async () => {
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const plugPage = await openShellyAddDialog('scan');
     expect(within(plugPage).getByRole('tab', { name: 'Skanuj sieć' })).toBeVisible();
     expect(plugPage).not.toHaveClass('automation-card');
     expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
     closeCurrentAddPage();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     const sensorPage = await openSensorAddDialog();
     expect(within(sensorPage).getByLabelText('MAC termometru')).toBeVisible();
     expect(sensorPage).not.toHaveClass('automation-card');
@@ -1002,7 +1002,7 @@ describe('HardwareSetupScreen', () => {
   it('checks Shelly through the RPC client and shows compatibility state', async () => {
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const addDialog = await openShellyAddDialog();
     fireEvent.change(within(addDialog).getByLabelText('Nazwa gniazdka'), {
       target: { value: 'Salon' }
@@ -1087,7 +1087,7 @@ describe('HardwareSetupScreen', () => {
 
     await addShellyThroughUi('Salon');
     await addSensorThroughUi({ name: 'Xiaomi salon' });
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
     fireEvent.click(screen.getByRole('button', { name: 'Wyślij' }));
 
     const relayDialog = await screen.findByRole(
@@ -1147,7 +1147,7 @@ describe('HardwareSetupScreen', () => {
 
     await addShellyThroughUi('Salon');
     await addSensorThroughUi({ name: 'Xiaomi salon' });
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
     fireEvent.click(screen.getByRole('button', { name: 'Wyślij' }));
 
     const blockDialog = await screen.findByRole('dialog', {
@@ -1197,7 +1197,7 @@ describe('HardwareSetupScreen', () => {
     );
 
     renderHardwareSetup();
-    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const addDialog = await openShellyAddDialog();
     fireEvent.change(within(addDialog).getByLabelText('Nazwa gniazdka'), {
       target: { value: 'Salon' }
@@ -1408,7 +1408,7 @@ describe('HardwareSetupScreen', () => {
     });
 
     renderHardwareSetup();
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     const card = getSavedSensorCard('Canopy');
     fireEvent.click(
       within(card).getByRole('button', { name: 'Usuń termometr tylko z aplikacji' })
@@ -1827,7 +1827,7 @@ describe('HardwareSetupScreen', () => {
     );
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const addDialog = await openShellyAddDialog();
     fireEvent.change(within(addDialog).getByLabelText('Adres IP Shelly'), {
       target: { value: '192.168.0.1' }
@@ -1904,7 +1904,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.queryByText('wybrane')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Wybierz' })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
     expect(screen.getByLabelText('Gniazdko Shelly')).toHaveAttribute(
       'value',
       'shellyplugsg3-test'
@@ -2064,7 +2064,7 @@ describe('HardwareSetupScreen', () => {
 
     await addShellyThroughUi('Salon');
     await addSensorThroughUi({ name: 'Xiaomi salon' });
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
 
     const onThresholdInput = screen.getByLabelText('Włącz poniżej °C');
     const offThresholdInput = screen.getByLabelText('Wyłącz powyżej °C');
@@ -2089,7 +2089,7 @@ describe('HardwareSetupScreen', () => {
 
     await addShellyThroughUi('Salon');
     await addSensorThroughUi({ name: 'Xiaomi salon' });
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
 
     expect(screen.queryByRole('button', { name: 'Przetestuj' })).not.toBeInTheDocument();
     expect(screen.queryByText('Gotowe — działa lokalnie')).not.toBeInTheDocument();
@@ -2222,7 +2222,7 @@ describe('HardwareSetupScreen', () => {
 
     await addShellyThroughUi('Salon');
     await addSensorThroughUi({ name: 'Xiaomi salon' });
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
     fireEvent.click(screen.getByRole('button', { name: 'Wyślij' }));
 
     await waitFor(
@@ -2284,7 +2284,7 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     await addShellyThroughUi('Salon');
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
 
     expect(screen.getByLabelText('Termometr')).toHaveAttribute('value', '');
     chooseSelectField('Tryb reguły', 'Chłodzenie');
@@ -2364,7 +2364,7 @@ describe('HardwareSetupScreen', () => {
 
     await addShellyThroughUi('Salon');
     await addSensorThroughUi({ name: 'Xiaomi salon' });
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Wyślij' }));
     const relayDialog = await screen.findByRole(
@@ -2384,12 +2384,12 @@ describe('HardwareSetupScreen', () => {
       expect(screen.queryByText('Gotowe — działa lokalnie')).not.toBeInTheDocument()
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
-    expect(screen.getByRole('button', { name: 'Termometry' })).toHaveAttribute(
-      'aria-current',
-      'page'
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
+    expect(screen.getByRole('tab', { name: 'Termometry' })).toHaveAttribute(
+      'aria-selected',
+      'true'
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
 
     expect(screen.queryByText('Gotowe — działa lokalnie')).not.toBeInTheDocument();
     expect(screen.queryByText('Usunięto skrypt Shelly.')).not.toBeInTheDocument();
@@ -2412,7 +2412,7 @@ describe('HardwareSetupScreen', () => {
       within(getSavedSensorCard('TP357 salon')).getByText('TP357')
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
 
     expect(screen.getByLabelText('Termometr')).toHaveAttribute(
       'value',
@@ -2448,7 +2448,7 @@ describe('HardwareSetupScreen', () => {
   it('uses the thermometer add child page for phone BLE scan and keeps result order stable', async () => {
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     let page = await openSensorAddDialog();
     const scanTab = within(page).getByRole('tab', { name: 'Skanuj BLE' });
     expect(scanTab).toHaveAttribute('title', 'Skanuj termometry BLE telefonem');
@@ -2530,7 +2530,7 @@ describe('HardwareSetupScreen', () => {
     });
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
 
     expect(await screen.findByText('21.3°C')).toBeInTheDocument();
     expect(screen.getByText('45.7%')).toBeInTheDocument();
@@ -2543,7 +2543,7 @@ describe('HardwareSetupScreen', () => {
 
   it('keeps rule thresholds manual and preserves the compact setup action order', () => {
     renderHardwareSetup();
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
 
     const onThreshold = screen.getByLabelText('Włącz poniżej °C');
     const offThreshold = screen.getByLabelText('Wyłącz powyżej °C');
@@ -2591,7 +2591,7 @@ describe('HardwareSetupScreen', () => {
     });
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
     await waitFor(() => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1));
 
     const thermometerSelect = screen.getByRole('button', { name: 'Termometr' });
@@ -2626,7 +2626,7 @@ describe('HardwareSetupScreen', () => {
     });
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     expect(await screen.findByText('21.3°C')).toBeInTheDocument();
     expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(1);
 
@@ -2669,7 +2669,7 @@ describe('HardwareSetupScreen', () => {
     phoneBleScannerMock.endContinuousScanCount = 1;
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     expect(await screen.findByText('21.3°C')).toBeInTheDocument();
     await waitFor(
       () => expect(phoneBleScannerMock.startCount).toBeGreaterThanOrEqual(2),
@@ -2681,7 +2681,7 @@ describe('HardwareSetupScreen', () => {
     phoneBleScannerMock.failureMessage = 'Phone BLE scan is unavailable in this runtime.';
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     const page = await openSensorAddDialog();
     fireEvent.click(within(page).getByRole('tab', { name: 'Skanuj BLE' }));
 
@@ -2707,7 +2707,7 @@ describe('HardwareSetupScreen', () => {
     phoneBleScannerMock.failureMessage = 'Permission denied.';
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     const page = await openSensorAddDialog();
     fireEvent.click(within(page).getByRole('tab', { name: 'Skanuj BLE' }));
 
@@ -2734,7 +2734,7 @@ describe('HardwareSetupScreen', () => {
       await addShellyThroughUi('Salon');
       await addSensorThroughUi({ name: 'Xiaomi salon' });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+      fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
       chooseSelectField('Tryb reguły', 'Nawilżanie');
 
       const ruleModeField = screen.getByLabelText('Tryb reguły').closest('.field');
@@ -2978,7 +2978,7 @@ describe('HardwareSetupScreen', () => {
     expect(within(dialog).getByRole('button', { name: 'Już zapisany' })).toBeDisabled();
     expect(screen.queryByText('Zapisano termometr.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     expect(
       within(getSavedSensorCard('Xiaomi salon')).getByText('A4:C1:38:4F:24:CD')
     ).toBeInTheDocument();
@@ -3081,7 +3081,7 @@ describe('HardwareSetupScreen', () => {
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
 
     await waitFor(() => {
       const rpcBodies = vi
@@ -3341,7 +3341,7 @@ describe('HardwareSetupScreen', () => {
   it('keeps unsaved add form values while saving rule changes', async () => {
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const addDialog = await openShellyAddDialog();
     fireEvent.change(within(addDialog).getByLabelText('Nazwa gniazdka'), {
       target: { value: 'Kuchnia' }
@@ -3351,12 +3351,12 @@ describe('HardwareSetupScreen', () => {
     });
     closeCurrentAddPage();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reguła' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
     fireEvent.change(screen.getByLabelText('Włącz poniżej °C'), {
       target: { value: '18' }
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const reopenedAddDialog = await openShellyAddDialog();
     expect(within(reopenedAddDialog).getByLabelText('Nazwa gniazdka')).toHaveValue(
       'Kuchnia'
@@ -3378,7 +3378,7 @@ describe('HardwareSetupScreen', () => {
     unmount();
     renderHardwareSetup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Shelly' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const addDialog = await openShellyAddDialog();
     expect(within(addDialog).getByLabelText('Nazwa gniazdka')).toHaveValue('Salon');
     expect(within(addDialog).getByLabelText('Adres IP Shelly')).toHaveValue(
@@ -3386,7 +3386,7 @@ describe('HardwareSetupScreen', () => {
     );
     closeCurrentAddPage();
     expect(screen.getByText('Salon')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Termometry' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     const addSensorDialog = await openSensorAddDialog();
     expect(within(addSensorDialog).getByLabelText('Nazwa termometru')).toHaveValue('');
     expect(within(addSensorDialog).getByLabelText('MAC termometru')).toHaveValue('');

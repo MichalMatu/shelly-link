@@ -1,9 +1,12 @@
+import { SegmentedControl } from '@lcl/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../app/i18n.js';
 import { pulseCycleCopy } from '../../app/locales/pulseCycle.js';
 import { AppPageBack } from '../../components/AppPageBack.js';
 import { Pulse } from '../../features/automations/index.js';
+import { ThermometerSettingsRoute } from '../../features/thermometers/index.js';
 import { useHardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
+import { useSavedSensorLiveScanLifecycle } from '../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
 import {
   defaultRulePresetForSetupIntent,
   rulePresetsForSetupIntent,
@@ -37,6 +40,7 @@ type HardwareSetupScreenProps = {
   sensorAddMode?: 'manual' | 'phone-scan';
   sensorSettingsOnlyId?: string;
   onSensorSettingsRemoved?: () => void;
+  onOpenSensorAutomation?: (installationId: string) => void;
 };
 
 export const HardwareSetupScreen = ({
@@ -50,10 +54,16 @@ export const HardwareSetupScreen = ({
   sensorAddOnly = false,
   sensorAddMode = 'phone-scan',
   sensorSettingsOnlyId,
-  onSensorSettingsRemoved
+  onSensorSettingsRemoved,
+  onOpenSensorAutomation
 }: HardwareSetupScreenProps = {}) => {
   const { locale, t } = useTranslation();
+  const pulseLabels = pulseCycleCopy[locale];
   const flow = useHardwareSetupFlow();
+  useSavedSensorLiveScanLifecycle({
+    flow,
+    enabled: Boolean(sensorSettingsOnlyId) && !flow.setPvvxTimeMutation.isPending
+  });
   const { rulePreset, setRulePreset, selectedShellyId, selectShellyDevice } = flow;
   const availableTabs = useMemo(
     () => availableTabsForIntent(setupIntent, fixedShellyId, plugAddOnly, sensorAddOnly),
@@ -140,14 +150,13 @@ export const HardwareSetupScreen = ({
 
   if (sensorSettingsOnlyId) {
     const normalizedSensorId = sensorSettingsOnlyId.toUpperCase();
-    const sensorSettingsFlow = {
-      ...flow,
-      sensorDevices: flow.sensorDevices.filter(
-        (device) =>
-          device.id.toUpperCase() === normalizedSensorId ||
-          device.runtimeAddress.toUpperCase() === normalizedSensorId
-      )
-    };
+    const device =
+      flow.sensorDevices.find(
+        (candidate) =>
+          candidate.id.toUpperCase() === normalizedSensorId ||
+          candidate.runtimeAddress.toUpperCase() === normalizedSensorId
+      ) ?? null;
+    const pvvxFeedback = flow.setPvvxTimeMutation;
     return (
       <main
         className="demo-shell hardware-shell"
@@ -156,11 +165,30 @@ export const HardwareSetupScreen = ({
         <header className="demo-header app-page-header">
           <h1>{t('hardware.sensor.settingsTitle')}</h1>
         </header>
-        <SensorSetupPage
-          flow={sensorSettingsFlow}
-          hideAddAction
-          {...(onSensorSettingsRemoved
-            ? { onSensorRemoved: onSensorSettingsRemoved }
+        <ThermometerSettingsRoute
+          device={device}
+          samples={device ? (flow.sensorSamplesById[device.id.toUpperCase()] ?? []) : []}
+          pvvxTimePending={pvvxFeedback.isPending}
+          pvvxFeedback={{
+            isSuccess: pvvxFeedback.isSuccess,
+            acknowledged: pvvxFeedback.data?.acknowledged,
+            isError: pvvxFeedback.isError,
+            error: pvvxFeedback.error,
+            reset: pvvxFeedback.reset
+          }}
+          resolveRemovalUsage={() =>
+            device ? (flow.sensorRemovalUsage(device.id)[0] ?? null) : null
+          }
+          onNameChange={(value) => {
+            if (device) flow.setSensorDeviceName(device.id, value);
+          }}
+          onPvvxSetTime={() => {
+            if (device) pvvxFeedback.mutate(device);
+          }}
+          onRemove={() => (device ? flow.removeSensorDevice(device.id) : false)}
+          onRemoved={() => onSensorSettingsRemoved?.()}
+          {...(onOpenSensorAutomation
+            ? { onOpenAutomation: onOpenSensorAutomation }
             : {})}
         />
       </main>
@@ -242,7 +270,7 @@ export const HardwareSetupScreen = ({
 
   const setupContext =
     setupIntent === 'pulse'
-      ? pulseCycleCopy[locale].description
+      ? pulseLabels.description
       : setupIntent
         ? t(`intent.${setupIntent}.context`)
         : '';
@@ -258,27 +286,18 @@ export const HardwareSetupScreen = ({
       )}
 
       {!plugAddOnly && !sensorAddOnly && availableTabs.length > 1 && (
-        <nav
-          className="setup-top-nav lcl-segmented-control"
-          aria-label={t('hardware.nav.label')}
-        >
-          {availableTabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={
-                activeTab === tab.id
-                  ? 'setup-top-nav__item lcl-segmented-control__item setup-top-nav__item--active'
-                  : 'setup-top-nav__item lcl-segmented-control__item'
-              }
-              type="button"
-              aria-current={activeTab === tab.id ? 'page' : undefined}
-              title={tab.id === 'pulse' ? 'Pulse' : t(tab.titleKey)}
-              onClick={() => selectTab(tab.id)}
-            >
-              {tab.id === 'pulse' ? 'Pulse' : t(tab.labelKey)}
-            </button>
-          ))}
-        </nav>
+        <SegmentedControl
+          ariaLabel={t('hardware.nav.label')}
+          className="setup-top-nav"
+          itemClassName="setup-top-nav__item"
+          value={activeTab}
+          options={availableTabs.map((tab) => ({
+            value: tab.id,
+            label: tab.id === 'pulse' ? pulseLabels.title : t(tab.labelKey),
+            title: tab.id === 'pulse' ? pulseLabels.title : t(tab.titleKey)
+          }))}
+          onChange={selectTab}
+        />
       )}
 
       {activeTab === 'shelly' && (

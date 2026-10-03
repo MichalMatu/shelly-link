@@ -1,8 +1,9 @@
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { AutomationDashboardBody } from '../features/automation-dashboard/index.js';
 import { Pulse, type InstalledAutomation } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
-  PlugDashboardCardShell
+  PlugDashboardCardShell,
+  PlugDashboardFeedbackFooter
 } from '../features/plugs/index.js';
 import { pulseCycleCopy } from './locales/pulseCycle.js';
 import { useTranslation } from './i18n.js';
@@ -43,24 +44,23 @@ export const StandalonePulseAutomationCard = ({
         ? `${labels.cycles} · ${execution.count}`
         : `${labels.duration} · ${secondsLabel(execution.durationMs)}`;
   const body = (
-    <>
-      <div className="automation-card__main" aria-label={labels.title}>
-        <div className="automation-card__primary-metric">
-          <strong>{secondsLabel(installation.config.pulse.onMs)}</strong>
-          <small>
-            <span>{labels.onSeconds}</span>
-          </small>
-        </div>
-        <div className="automation-card__secondary-metrics">
-          <div>
-            <span>{labels.offSeconds}</span>
-            <strong>{secondsLabel(installation.config.pulse.offMs)}</strong>
-          </div>
-          <div>
-            <span>{labels.execution}</span>
-            <strong>{executionLabel}</strong>
-          </div>
-        </div>
+    <AutomationDashboardBody
+      ariaLabel={labels.title}
+      status={<Pulse.Operational.StatusSummary status={pulseQuery.data} compact />}
+      configuration={[
+        {
+          id: 'on',
+          label: labels.onSeconds,
+          value: secondsLabel(installation.config.pulse.onMs)
+        },
+        {
+          id: 'off',
+          label: labels.offSeconds,
+          value: secondsLabel(installation.config.pulse.offMs)
+        },
+        { id: 'execution', label: labels.execution, value: executionLabel }
+      ]}
+      controls={
         <PlugAutomationModeControl
           autoActive={automationRunning}
           manualActive={manualControl}
@@ -72,9 +72,8 @@ export const StandalonePulseAutomationCard = ({
             if (!manualControl) action.mutate('manual');
           }}
         />
-      </div>
-      <Pulse.Operational.StatusSummary status={pulseQuery.data} compact />
-    </>
+      }
+    />
   );
   const warning =
     pulseQuery.isError ||
@@ -82,20 +81,10 @@ export const StandalonePulseAutomationCard = ({
     (runtimeQuery.data !== undefined && !runtimeMatches) ||
     action.isError;
   const footer = warning ? (
-    <footer className="automation-card__footer">
-      <div
-        className="automation-card__status automation-card__status--attention"
-        role="status"
-      >
-        <IconAlertTriangle aria-hidden="true" />
-        <span>{t('dashboard.health.attention')}</span>
-      </div>
-      {action.isError && (
-        <span className="automation-control-error" role="alert">
-          {t('detail.actionFailed')}
-        </span>
-      )}
-    </footer>
+    <PlugDashboardFeedbackFooter
+      warningLabel={t('dashboard.health.attention')}
+      actionErrorLabel={action.isError ? t('detail.actionFailed') : null}
+    />
   ) : undefined;
 
   return (

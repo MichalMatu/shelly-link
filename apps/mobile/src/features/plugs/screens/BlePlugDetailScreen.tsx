@@ -23,7 +23,7 @@ export type BlePlugDetailScreenProps = {
   onOpenBlockingAutomation?: (installationId: string) => void;
 };
 
-const disabledBleDetailTabs: readonly PlugDetailTab[] = ['automation', 'ble', 'script'];
+const BLE_DETAIL_TABS = ['device', 'info'] as const satisfies readonly PlugDetailTab[];
 
 export const BlePlugDetailScreen = ({
   physicalId,
@@ -52,10 +52,7 @@ export const BlePlugDetailScreen = ({
     : undefined;
   return (
     <main className="demo-shell installation-detail-shell">
-      <PlugDetailTop
-        tabs={[activeTab, setActiveTab]}
-        disabledTabs={disabledBleDetailTabs}
-      />
+      <PlugDetailTop tabs={[activeTab, setActiveTab]} availableTabs={BLE_DETAIL_TABS} />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
         {activeTab === 'device' && (

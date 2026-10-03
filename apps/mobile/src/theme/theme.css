@@ -947,7 +947,7 @@ select {
   white-space: nowrap;
 }
 
-.setup-top-nav__item--active {
+.setup-top-nav__item[aria-selected='true'] {
   background: var(--lcl-color-surface-muted);
   border-color: var(--lcl-color-border);
   color: var(--lcl-color-text);

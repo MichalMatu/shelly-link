@@ -110,6 +110,29 @@ const seedSavedPlug = async (page: Page) => {
   }, savedPlugDraft);
 };
 
+const seedBleOnlySavedPlug = async (page: Page) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      'lcl.savedPlugs.v1',
+      JSON.stringify({
+        version: 1,
+        plugs: [
+          {
+            physicalId: 'shellyplugsg3-ble-e2e',
+            name: 'Magazyn BLE',
+            bleDeviceId: '02:00:00:00:00:02',
+            advertisementName: 'shellyplugsg3-ble-e2e',
+            model: 'S3PL-00112EU',
+            generation: 3,
+            firmwareId: '20260311-095902/1.7.5-g9979d16',
+            matterEnabled: false
+          }
+        ]
+      })
+    );
+  });
+};
+
 const seedInstallation = async (page: Page, kind: InstallationKind) => {
   await page.addInitScript(
     (installation) => {
@@ -487,6 +510,32 @@ test('plain saved Plug exposes the same LED settings without an installed automa
   await expectVisualScreen(page, '17-plain-plug-settings');
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
+});
+
+test('BLE-only Plug detail exposes only supported capabilities', async ({ page }) => {
+  const problems = consoleProblems(page);
+  await page.setViewportSize(canonicalVisualViewport);
+  await seedBleOnlySavedPlug(page);
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Szczegóły: Magazyn BLE · Bluetooth' }).click();
+
+  const tabs = page.getByRole('navigation', { name: 'Akcje gniazdka' });
+  await expect(tabs).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Informacje' })).toHaveAttribute(
+    'aria-current',
+    'page'
+  );
+  await expect(page.getByRole('button', { name: 'Automatyka' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Bluetooth' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Skrypt' })).toHaveCount(0);
+  await expect(page.getByText('Brak połączenia z Shelly.')).toBeVisible({
+    timeout: 15_000
+  });
+  await expectNoHorizontalOverflow(page);
+  await expectVisualScreen(page, '30-ble-only-plug-detail');
+  expect(problems.filter((entry) => !entry.includes('Bluetooth'))).toEqual([]);
 });
 
 test('unsupported PLUGS_UI is a stable non-error device state', async ({ page }) => {

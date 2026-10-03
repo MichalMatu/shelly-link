@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { expectVisualScreen } from './visual-contract.js';
 
 const viewports = [
   { name: 'phone-small', width: 360, height: 800 },
@@ -211,6 +212,9 @@ for (const viewport of viewports) {
     expect(compactBox!.x + compactBox!.width).toBeLessThanOrEqual(
       cardBox!.x + cardBox!.width + 1
     );
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '27-standalone-pulse-dashboard');
+    }
 
     await page.getByRole('button', { name: 'Szczegóły: Pompa Pulse · Wi-Fi' }).click();
 
@@ -244,6 +248,9 @@ for (const viewport of viewports) {
     expect(fullBox!.x + fullBox!.width).toBeLessThanOrEqual(
       surfaceBox!.x + surfaceBox!.width + 1
     );
+    if (viewport.name === 'phone-large') {
+      await expectVisualScreen(page, '29-standalone-pulse-detail');
+    }
   });
 }
 

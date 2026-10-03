@@ -1,9 +1,10 @@
-import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslation } from '../app/i18n.js';
+import { AutomationDashboardBody } from '../features/automation-dashboard/index.js';
 import { OperationalStatus, Pulse } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
-  PlugDashboardCardShell
+  PlugDashboardCardShell,
+  PlugDashboardFeedbackFooter
 } from '../features/plugs/index.js';
 import type { TimeInstalledAutomation } from '../flows/installations/model.js';
 import {
@@ -37,24 +38,26 @@ export const TimeAutomationCard = ({
   const runtimeControllable = automationRunning || manualControl;
 
   const body = (
-    <>
-      <div className="automation-card__main" aria-label={t('time.scheduleSummary')}>
-        <div className="automation-card__primary-metric">
-          <strong aria-label={`${t('time.onTime')}: ${installation.config.onTime}`}>
-            {installation.config.onTime}
-          </strong>
-          <small>
-            <span>{t('time.onTime')}</span>
-          </small>
-        </div>
-
-        <div className="automation-card__secondary-metrics">
-          <div>
-            <span>{t('time.offTime')}</span>
-            <strong>{installation.config.offTime}</strong>
-          </div>
-        </div>
-
+    <AutomationDashboardBody
+      ariaLabel={t('time.scheduleSummary')}
+      status={
+        pulseInstallation ? (
+          <Pulse.Operational.StatusSummary status={pulseQuery.data} compact />
+        ) : (
+          <OperationalStatus.TimeSummary
+            config={installation.config}
+            localTime={query.data?.clock.localTime}
+            relayOn={query.data?.relayOn}
+            state={runtimeState}
+            compact
+          />
+        )
+      }
+      configuration={[
+        { id: 'on', label: t('time.onTime'), value: installation.config.onTime },
+        { id: 'off', label: t('time.offTime'), value: installation.config.offTime }
+      ]}
+      controls={
         <PlugAutomationModeControl
           autoActive={automationRunning}
           manualActive={manualControl}
@@ -66,19 +69,8 @@ export const TimeAutomationCard = ({
             if (!manualControl) action.mutate('manual');
           }}
         />
-      </div>
-      {pulseInstallation ? (
-        <Pulse.Operational.StatusSummary status={pulseQuery.data} compact />
-      ) : (
-        <OperationalStatus.TimeSummary
-          config={installation.config}
-          localTime={query.data?.clock.localTime}
-          relayOn={query.data?.relayOn}
-          state={runtimeState}
-          compact
-        />
-      )}
-    </>
+      }
+    />
   );
 
   const warningLabel =
@@ -89,24 +81,11 @@ export const TimeAutomationCard = ({
         : null;
   const footer =
     warningLabel || action.isError ? (
-      <footer className="automation-card__footer">
-        {warningLabel && (
-          <div
-            className={`automation-card__status automation-card__status--${
-              runtimeState === 'offline' ? 'offline' : 'attention'
-            }`}
-            role="status"
-          >
-            <IconAlertTriangle aria-hidden="true" />
-            <span>{warningLabel}</span>
-          </div>
-        )}
-        {action.isError && (
-          <span className="automation-control-error" role="alert">
-            {t('detail.actionFailed')}
-          </span>
-        )}
-      </footer>
+      <PlugDashboardFeedbackFooter
+        warningLabel={warningLabel}
+        warningTone={runtimeState === 'offline' ? 'offline' : 'attention'}
+        actionErrorLabel={action.isError ? t('detail.actionFailed') : null}
+      />
     ) : undefined;
 
   return (

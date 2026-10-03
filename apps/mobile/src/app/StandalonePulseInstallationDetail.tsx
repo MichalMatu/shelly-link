@@ -1,6 +1,7 @@
-import { FeedbackPanel, Modal } from '@lcl/ui';
+import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   ClimateScriptDetailSection,
   Pulse,
@@ -48,6 +49,18 @@ export const StandalonePulseInstallationDetail = ({
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const toastIdRef = useRef(0);
+  const pushToast = useCallback((tone: ToastTone, title: string) => {
+    toastIdRef.current += 1;
+    setToasts((current) => [
+      ...current.slice(-2),
+      { id: `pulse-detail-toast-${toastIdRef.current}`, tone, title }
+    ]);
+  }, []);
+  const dismissToast = useCallback((id: string) => {
+    setToasts((current) => current.filter((toast) => toast.id !== id));
+  }, []);
   const pulseLabels = pulseCycleCopy[locale];
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
@@ -93,9 +106,14 @@ export const StandalonePulseInstallationDetail = ({
     (runtimeQuery.data !== undefined && !runtimeMatches);
 
   const copyScript = () => {
-    if (!scriptQuery.data || typeof navigator === 'undefined' || !navigator.clipboard)
+    if (!scriptQuery.data || typeof navigator === 'undefined' || !navigator.clipboard) {
+      pushToast('warning', scriptLabels.copyFailed);
       return;
-    void navigator.clipboard.writeText(scriptQuery.data);
+    }
+    void navigator.clipboard
+      .writeText(scriptQuery.data)
+      .then(() => pushToast('ok', scriptLabels.copyDone))
+      .catch(() => pushToast('warning', scriptLabels.copyFailed));
   };
 
   return (
@@ -120,45 +138,59 @@ export const StandalonePulseInstallationDetail = ({
               </FeedbackPanel>
             )}
 
-            <section className="installation-automation-live-state plug-detail-section">
-              <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-              <dl className="automation-summary installation-detail-summary">
-                <div>
-                  <dt>{pulseLabels.onSeconds}</dt>
-                  <dd>{secondsLabel(installation.config.pulse.onMs)}</dd>
-                </div>
-                <div>
-                  <dt>{pulseLabels.offSeconds}</dt>
-                  <dd>{secondsLabel(installation.config.pulse.offMs)}</dd>
-                </div>
-                <div>
-                  <dt>{pulseLabels.initialDelaySeconds}</dt>
-                  <dd>{secondsLabel(installation.config.pulse.initialDelayMs)}</dd>
-                </div>
-                <div>
-                  <dt>{pulseLabels.startPhase}</dt>
-                  <dd>
-                    {installation.config.pulse.startPhase === 'on'
-                      ? pulseLabels.startOn
-                      : pulseLabels.startOff}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{pulseLabels.execution}</dt>
-                  <dd>{executionLabel}</dd>
-                </div>
-              </dl>
-            </section>
+            <div className="installation-detail-hierarchy">
+              <section className="installation-detail-hierarchy__section">
+                <h3 className="installation-detail-hierarchy__title">
+                  {t('detail.currentState')}
+                </h3>
+                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
+              </section>
 
-            <div className="installation-detail-delete-action">
-              <button
-                className="secondary-action secondary-action--danger"
-                type="button"
-                disabled={deleteMutation.isPending}
-                onClick={() => setDeleteOpen(true)}
-              >
-                {managementLabels.deleteAction}
-              </button>
+              <section className="installation-detail-hierarchy__section">
+                <h3 className="installation-detail-hierarchy__title">
+                  {t('detail.configuration')}
+                </h3>
+                <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
+                  <div>
+                    <dt>{pulseLabels.onSeconds}</dt>
+                    <dd>{secondsLabel(installation.config.pulse.onMs)}</dd>
+                  </div>
+                  <div>
+                    <dt>{pulseLabels.offSeconds}</dt>
+                    <dd>{secondsLabel(installation.config.pulse.offMs)}</dd>
+                  </div>
+                  <div>
+                    <dt>{pulseLabels.initialDelaySeconds}</dt>
+                    <dd>{secondsLabel(installation.config.pulse.initialDelayMs)}</dd>
+                  </div>
+                  <div>
+                    <dt>{pulseLabels.startPhase}</dt>
+                    <dd>
+                      {installation.config.pulse.startPhase === 'on'
+                        ? pulseLabels.startOn
+                        : pulseLabels.startOff}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{pulseLabels.execution}</dt>
+                    <dd>{executionLabel}</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section className="installation-detail-danger-zone">
+                <h3 className="installation-detail-hierarchy__title">
+                  {managementLabels.deleteAction}
+                </h3>
+                <button
+                  className="secondary-action secondary-action--danger"
+                  type="button"
+                  disabled={deleteMutation.isPending}
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  {managementLabels.deleteAction}
+                </button>
+              </section>
             </div>
           </>
         )}
@@ -251,6 +283,13 @@ export const StandalonePulseInstallationDetail = ({
         deviceName={forgetOpen && savedDevice ? savedDevice.name : null}
         automationName={forgetOpen ? installation.shelly.name : null}
         onClose={() => setForgetOpen(false)}
+      />
+
+      <AppToastViewport
+        dismissLabel={t('toast.dismiss')}
+        label={t('toast.regionLabel')}
+        toasts={toasts}
+        onDismiss={dismissToast}
       />
     </main>
   );

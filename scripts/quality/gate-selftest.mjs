@@ -14,6 +14,7 @@ import {
 const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
 const repositoryGate = join(repositoryRoot, 'scripts/quality/repository-gate.mjs');
 const featureGate = join(repositoryRoot, 'scripts/quality/feature-boundary-gate.mjs');
+const uxGate = join(repositoryRoot, 'scripts/quality/ux-gate.mjs');
 const failures = [];
 let passed = 0;
 
@@ -25,18 +26,18 @@ const writeFixture = async (root, relativePath, content = '') => {
 
 const json = (value) => `${JSON.stringify(value, null, 2)}\n`;
 
-const runGate = (gatePath, fixtureRoot) =>
+const runGate = (gatePath, fixtureRoot, extraEnv = {}) =>
   spawnSync(process.execPath, [gatePath], {
     cwd: repositoryRoot,
-    env: { ...process.env, LCL_QUALITY_ROOT: fixtureRoot },
+    env: { ...process.env, LCL_QUALITY_ROOT: fixtureRoot, ...extraEnv },
     encoding: 'utf8'
   });
 
-const executeCase = async ({ name, gatePath, setup, expectedFailure }) => {
+const executeCase = async ({ name, gatePath, setup, expectedFailure, env = {} }) => {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'lcl-quality-'));
   try {
     await setup(fixtureRoot);
-    const result = runGate(gatePath, fixtureRoot);
+    const result = runGate(gatePath, fixtureRoot, env);
     const output = `${result.stdout ?? ''}${result.stderr ?? ''}`;
 
     if (expectedFailure) {
@@ -195,6 +196,62 @@ const setupRepositoryFixture = async (root) => {
     );
   }
 };
+
+const setupUxSegmentedControlFixture = async (root) => {
+  await writeFixture(
+    root,
+    'packages/ui/src/primitives/SegmentedControl.tsx',
+    'export const SegmentedControl = () => <div className="lcl-segmented-control" role="tablist"><button className="lcl-segmented-control__item" role="tab" /></div>;\n'
+  );
+  await writeFixture(
+    root,
+    'packages/ui/src/index.ts',
+    "export * from './primitives/SegmentedControl.js';\n"
+  );
+  for (const relativePath of [
+    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
+  ]) {
+    await writeFixture(
+      root,
+      relativePath,
+      'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
+    );
+  }
+  await writeFixture(
+    root,
+    'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx',
+    'export const Fixture = () => <SegmentedControl className="setup-top-nav" itemClassName="setup-top-nav__item" />;\n'
+  );
+  await writeFixture(
+    root,
+    'apps/mobile/src/features/plugs/components/PlugDetailTabs.tsx',
+    'export const Fixture = () => <div className="plug-detail-tabs lcl-segmented-control"><button className="lcl-segmented-control__item" /></div>;\n'
+  );
+};
+
+await executeCase({
+  name: 'ux/setup navigation uses shared segmented control',
+  gatePath: uxGate,
+  setup: setupUxSegmentedControlFixture,
+  env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
+});
+
+await executeCase({
+  name: 'ux/setup navigation rejects rebuilt markup',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxSegmentedControlFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx',
+      'export const Fixture = () => <nav className="setup-top-nav"><button className="setup-top-nav__item" /></nav>;\n'
+    );
+  },
+  expectedFailure:
+    'setup segmented navigation must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup',
+  env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
+});
 
 await executeCase({
   name: 'feature/legal feature',

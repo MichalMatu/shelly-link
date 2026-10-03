@@ -14,6 +14,7 @@ import { useTranslation } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
 import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
 import { useInstalledAutomationStore } from '../features/automations/index.js';
+import { SensorRemovedToast } from '../features/thermometers/index.js';
 import {
   BlePlugDetailScreen,
   PlugBluetoothAddPage,
@@ -75,6 +76,7 @@ export const AppRoutes = () => {
   const installations = useInstalledAutomationStore((state) => state.installations);
   const removeShellyDevice = useSavedPlugStore((state) => state.removePlug);
   const [route, setRoute] = useState<AppRoute>({ type: 'dashboard' });
+  const [sensorRemovalToastVisible, setSensorRemovalToastVisible] = useState(false);
   const routeRef = useRef(route);
   const navigate = useCallback((nextRoute: AppRoute) => {
     routeRef.current = nextRoute;
@@ -191,7 +193,11 @@ export const AppRoutes = () => {
       <Suspense fallback={<RouteFallback />}>
         <HardwareSetupScreen
           sensorSettingsOnlyId={route.sensorId}
-          onSensorSettingsRemoved={() => navigate({ type: 'dashboard', kind: 'time' })}
+          onOpenSensorAutomation={openInstalledAutomation}
+          onSensorSettingsRemoved={() => {
+            setSensorRemovalToastVisible(true);
+            navigate({ type: 'dashboard', kind: 'time' });
+          }}
         />
       </Suspense>
     );
@@ -328,6 +334,10 @@ export const AppRoutes = () => {
       onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
       onOpenSettings={openSettings}
     >
+      <SensorRemovedToast
+        open={sensorRemovalToastVisible}
+        onClose={() => setSensorRemovalToastVisible(false)}
+      />
       {content}
     </AppShell>
   );
