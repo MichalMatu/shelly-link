@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import './AutomationDashboardBody.css';
 
 export type AutomationDashboardConfigurationItem = {
   id: string;
