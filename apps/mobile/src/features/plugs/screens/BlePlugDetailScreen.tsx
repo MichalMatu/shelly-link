@@ -23,7 +23,10 @@ export type BlePlugDetailScreenProps = {
   onOpenBlockingAutomation?: (installationId: string) => void;
 };
 
-const BLE_DETAIL_TABS = ['device', 'info'] as const satisfies readonly PlugDetailTab[];
+const BLE_DETAIL_TABS = [
+  'device',
+  'info'
+] as const satisfies readonly PlugDetailTab[];
 
 export const BlePlugDetailScreen = ({
   physicalId,
