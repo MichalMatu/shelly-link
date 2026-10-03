@@ -7,7 +7,9 @@
     "clientWidth": 412,
     "scrollHeight": 891
   },
-  "headings": ["Przedpokój"],
+  "headings": [
+    "Przedpokój"
+  ],
   "buttons": [
     "Skanuj termometry BLE telefonem",
     "Ustawienia termometru Przedpokój",
