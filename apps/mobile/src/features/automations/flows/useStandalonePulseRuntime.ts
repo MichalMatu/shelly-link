@@ -40,6 +40,8 @@ export const useStandalonePulseActions = (
   installation: StandalonePulseInstalledAutomation
 ) => {
   const queryClient = useQueryClient();
+  const runtimeQueryKey = standalonePulseRuntimeQueryKey(installation);
+  const pulseStatusQueryKey = pulseOperationalStatusQueryKey(installation);
 
   return useMutation({
     mutationFn: async (action: StandalonePulseAction) => {
@@ -57,10 +59,11 @@ export const useStandalonePulseActions = (
       }
     },
     onSuccess: (runtime) => {
-      queryClient.setQueryData(standalonePulseRuntimeQueryKey(installation), runtime);
-      void queryClient.invalidateQueries({
-        queryKey: pulseOperationalStatusQueryKey(installation)
-      });
+      queryClient.setQueryData(runtimeQueryKey, runtime);
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: runtimeQueryKey });
+      void queryClient.invalidateQueries({ queryKey: pulseStatusQueryKey });
     }
   });
 };
