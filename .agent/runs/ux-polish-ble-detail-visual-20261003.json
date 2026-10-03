@@ -1,16 +1,16 @@
 {
   "event": "command_started",
   "phase": "commands",
-  "index": 6,
+  "index": 7,
   "total": 10,
-  "command": "python3 -c \"import subprocess; rows=subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],text=True).splitlines(); got=sorted(row[3:] for row in rows if row[3:].endswith('.png')); expected=['apps/mobile/e2e/led-settings.spec.ts-snapshots/30-ble-only-plug-detail-darwin.png']; print('visual snapshot delta:', got); assert got == expected, (got, expected)\"",
-  "pid": 39861,
+  "command": "PORT=$(python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()\"); LCL_E2E_PORT=$PORT pnpm e2e:visual",
+  "pid": 39890,
   "timeout": 900,
   "idle_timeout": 900,
   "memory_limit_mb": 3072,
-  "started_at": "2026-10-03T18:41:50.158857+00:00",
-  "stage_name": "command-6",
-  "stage_index": 6,
+  "started_at": "2026-10-03T18:41:50.655848+00:00",
+  "stage_name": "command-7",
+  "stage_index": 7,
   "stage_total": 10,
   "stage_phase": "commands",
   "task_id": "ux-polish-ble-detail-visual-20261003",
@@ -18,5 +18,5 @@
   "task_digest": "87115bb2b58ca2dbb40504e16f788913ff2598c82cc4a621dbdc104343f926af",
   "daemon_version": "4.20.3",
   "daemon_pid": 38193,
-  "updated_at": "2026-10-03T18:41:50.174434+00:00"
+  "updated_at": "2026-10-03T18:41:50.727212+00:00"
 }
