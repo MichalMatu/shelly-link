@@ -1,4 +1,5 @@
 import { IconAlertTriangle } from '@tabler/icons-react';
+import { AutomationDashboardBody } from '../features/automation-dashboard/index.js';
 import { Pulse, type InstalledAutomation } from '../features/automations/index.js';
 import {
   PlugAutomationModeControl,
@@ -43,24 +44,23 @@ export const StandalonePulseAutomationCard = ({
         ? `${labels.cycles} · ${execution.count}`
         : `${labels.duration} · ${secondsLabel(execution.durationMs)}`;
   const body = (
-    <>
-      <div className="automation-card__main" aria-label={labels.title}>
-        <div className="automation-card__primary-metric">
-          <strong>{secondsLabel(installation.config.pulse.onMs)}</strong>
-          <small>
-            <span>{labels.onSeconds}</span>
-          </small>
-        </div>
-        <div className="automation-card__secondary-metrics">
-          <div>
-            <span>{labels.offSeconds}</span>
-            <strong>{secondsLabel(installation.config.pulse.offMs)}</strong>
-          </div>
-          <div>
-            <span>{labels.execution}</span>
-            <strong>{executionLabel}</strong>
-          </div>
-        </div>
+    <AutomationDashboardBody
+      ariaLabel={labels.title}
+      status={<Pulse.Operational.StatusSummary status={pulseQuery.data} compact />}
+      configuration={[
+        {
+          id: 'on',
+          label: labels.onSeconds,
+          value: secondsLabel(installation.config.pulse.onMs)
+        },
+        {
+          id: 'off',
+          label: labels.offSeconds,
+          value: secondsLabel(installation.config.pulse.offMs)
+        },
+        { id: 'execution', label: labels.execution, value: executionLabel }
+      ]}
+      controls={
         <PlugAutomationModeControl
           autoActive={automationRunning}
           manualActive={manualControl}
@@ -72,9 +72,8 @@ export const StandalonePulseAutomationCard = ({
             if (!manualControl) action.mutate('manual');
           }}
         />
-      </div>
-      <Pulse.Operational.StatusSummary status={pulseQuery.data} compact />
-    </>
+      }
+    />
   );
   const warning =
     pulseQuery.isError ||

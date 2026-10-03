@@ -53,6 +53,8 @@ Climate is the visual reference. Time uses the same card structure and control l
 
 Time must not reintroduce legacy `Working`, `Daily schedule` badges, a separate `Details` footer or a parallel card layout. AUTO/MANUAL, ON/OFF, telemetry and the detail affordance follow the shared Plug pattern.
 
+Time and standalone Pulse dashboard cards are status-first: current operational status appears before a compact schedule/cycle configuration summary. Configuration remains visible but secondary. Climate keeps its frozen live-metric composition. Canonical dashboard states are `10-time-dashboard` and `27-standalone-pulse-dashboard`.
+
 ### Plug detail
 
 Physical Plug detail is capability-driven. Reuse the shared tab and surface components. Time and Climate may expose different capabilities, but must not own separate detail chrome.

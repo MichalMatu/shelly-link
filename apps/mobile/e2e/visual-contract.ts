@@ -28,7 +28,8 @@ export const visualScreenNames = [
   '23-climate-history',
   '24-climate-pulse-setup',
   '25-time-pulse-setup',
-  '26-standalone-pulse-setup'
+  '26-standalone-pulse-setup',
+  '27-standalone-pulse-dashboard'
 ] as const;
 
 export type VisualScreenName = (typeof visualScreenNames)[number];
