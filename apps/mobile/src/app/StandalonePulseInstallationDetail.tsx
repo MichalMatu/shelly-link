@@ -8,12 +8,10 @@ import {
   type InstalledAutomation
 } from '../features/automations/index.js';
 import {
-  PlugAutomationModeControl,
   PlugBleDetailSurface,
   PlugDeviceSettingsSurface,
   PlugDetailTop,
   PlugInfoPanel,
-  PlugRelayControls,
   PlugRemovalBlockedModal,
   isSameShellyDevice,
   usePlugInformationFlow,
@@ -57,9 +55,7 @@ export const StandalonePulseInstallationDetail = ({
   const runtimeMatches = runtimeQuery.data?.automationScriptId === installation.script.id;
   const automationRunning =
     runtimeMatches && runtimeQuery.data?.automationMode === 'auto';
-  const manualControl = runtimeMatches && runtimeQuery.data?.automationMode === 'manual';
   const pulseQuery = Pulse.Operational.useStatus(automationRunning ? installation : null);
-  const action = Pulse.Standalone.useActions(installation);
   const scriptQuery = Pulse.Standalone.useScriptSource(
     installation,
     activeTab === 'script'
@@ -74,10 +70,6 @@ export const StandalonePulseInstallationDetail = ({
   const savedDevice = savedPlugs.find((device) =>
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
-  const runtimeControllable =
-    runtimeMatches &&
-    (runtimeQuery.data?.automationMode === 'auto' ||
-      runtimeQuery.data?.automationMode === 'manual');
   const execution = installation.config.pulse.execution;
 
   const deleteMutation = useMutation({
@@ -111,6 +103,7 @@ export const StandalonePulseInstallationDetail = ({
       <PlugDetailTop
         tabs={[activeTab, setActiveTab]}
         availableTabs={STANDALONE_PULSE_DETAIL_TABS}
+        automationIcon="clock"
       />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
@@ -119,11 +112,6 @@ export const StandalonePulseInstallationDetail = ({
             {runtimeNeedsAttention && (
               <FeedbackPanel tone="warning" title={t('dashboard.health.attention')}>
                 {managementLabels.runtimeAttention}
-              </FeedbackPanel>
-            )}
-            {action.isError && (
-              <FeedbackPanel tone="warning" title={t('common.operationFailed')}>
-                {t('detail.actionFailed')}
               </FeedbackPanel>
             )}
             {deleteMutation.isError && (
@@ -160,32 +148,13 @@ export const StandalonePulseInstallationDetail = ({
                   <dd>{executionLabel}</dd>
                 </div>
               </dl>
-
-              <PlugAutomationModeControl
-                autoActive={automationRunning}
-                manualActive={manualControl}
-                disabled={action.isPending || !runtimeControllable}
-                onAuto={() => {
-                  if (!automationRunning) action.mutate('auto');
-                }}
-                onManual={() => {
-                  if (!manualControl) action.mutate('manual');
-                }}
-              />
-              <PlugRelayControls
-                relayState={runtimeQuery.data?.relayOn}
-                busy={action.isPending}
-                disabled={!manualControl}
-                onTurnOn={() => action.mutate('on')}
-                onTurnOff={() => action.mutate('off')}
-              />
             </section>
 
             <div className="installation-detail-delete-action">
               <button
                 className="secondary-action secondary-action--danger"
                 type="button"
-                disabled={deleteMutation.isPending || action.isPending}
+                disabled={deleteMutation.isPending}
                 onClick={() => setDeleteOpen(true)}
               >
                 {managementLabels.deleteAction}
