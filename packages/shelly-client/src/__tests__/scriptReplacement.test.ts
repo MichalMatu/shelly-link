@@ -29,6 +29,7 @@ const failure = (message: string): Result<never> => ({
 class ReplacementTransport implements ShellyRpcTransport {
   readonly requests: ShellyRpcRequest[] = [];
   failNextPut = false;
+  failNextStatusVerification = false;
   relayOn = true;
 
   constructor(readonly script: ScriptState) {}
@@ -111,6 +112,8 @@ class ReplacementTransport implements ShellyRpcTransport {
     }
 
     if (request.method === RPC_METHODS.ScriptGetStatus) {
+      const errors = this.failNextStatusVerification ? ['verification failed'] : [];
+      this.failNextStatusVerification = false;
       return {
         ok: true,
         value: {
@@ -118,7 +121,7 @@ class ReplacementTransport implements ShellyRpcTransport {
           running: this.script.running,
           mem_used: 12,
           mem_free: 34,
-          errors: []
+          errors
         } as TResponse
       };
     }
@@ -235,7 +238,7 @@ describe('transactional script replacement', () => {
     );
   });
 
-  it('restores exact source and running state when replacement fails', async () => {
+  it('restores exact source and running state when upload fails', async () => {
     const transport = new ReplacementTransport({
       id: 9,
       name: 'Pulse',
@@ -259,5 +262,31 @@ describe('transactional script replacement', () => {
       (request) => request.method === RPC_METHODS.ScriptStart
     );
     expect(startCalls).toHaveLength(1);
+  });
+
+  it('restores exact source and running state when post-upload verification fails', async () => {
+    const transport = new ReplacementTransport({
+      id: 12,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'verified-old-source'
+    });
+    transport.failNextStatusVerification = true;
+
+    const result = await createClient(transport).replaceScript(12, 'new-source');
+
+    expect(result.ok).toBe(false);
+    expect(transport.script).toEqual({
+      id: 12,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'verified-old-source'
+    });
+    const putCalls = transport.requests.filter(
+      (request) => request.method === RPC_METHODS.ScriptPutCode
+    );
+    expect(putCalls).toHaveLength(2);
   });
 });
