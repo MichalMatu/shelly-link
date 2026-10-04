@@ -187,6 +187,8 @@ After History/safety/Pulse/rules stabilize, make the dashboard more status-first
 
 Verify heartbeat/watchdog, reboot/power-cycle recovery, Wi-Fi/BLE loss, AUTO/MANUAL interaction matrix, automation-fault and hard-safety recovery, Pulse recovery/cancellation semantics, long soak, script-memory headroom, final hardware matrix and final UX acceptance. Then declare v1 feature freeze.
 
+The 2026-10-04 short soak/liveness-observability slice is qualified without adding a new runtime heartbeat: a post-processor derives device reboot evidence from uptime regression, endpoint and `/diag` outage windows, stopped-script streaks and first/last uptime from the existing soak JSONL. Real Plug S Gen3 smoke passed 12/12 read-only samples over about 55 s with zero reboot/outage/stopped-script findings and `mem_free` staying at or above 19334 B. This closes the observability/tooling gap only; deliberate reboot/power-cycle recovery, Wi-Fi/BLE loss/recovery, the full AUTO/MANUAL + automation-fault + hard-safety matrix, a materially longer soak and the final real-hardware matrix remain before feature freeze. Detailed evidence is in `docs/testing/soak-liveness-stabilization-acceptance-2026-10-04.md`.
+
 ## V1 completion target
 
 Feature-complete v1 requires:
