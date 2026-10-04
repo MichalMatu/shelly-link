@@ -6,10 +6,7 @@ import { pulseCycleCopy } from '../../../app/locales/pulseCycle.js';
 import { pulseManagementCopy } from '../../../app/locales/pulseManagement.js';
 import { PulseCycleEditor } from './PulseCycleEditor.js';
 import type { StandalonePulseInstalledAutomation } from '../data/installedAutomation.js';
-import {
-  parsePulseCycleForm,
-  pulseCycleFormFromConfig
-} from '../data/pulseCycleForm.js';
+import { parsePulseCycleForm, pulseCycleFormFromConfig } from '../data/pulseCycleForm.js';
 import { replaceStandalonePulseAutomation } from '../data/standalonePulseAutomationRuntime.js';
 import { useInstalledAutomationStore } from '../state/installedAutomationStore.js';
 
