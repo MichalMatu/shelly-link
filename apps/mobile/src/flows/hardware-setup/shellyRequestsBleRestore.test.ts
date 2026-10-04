@@ -23,10 +23,7 @@ vi.mock('../installations/runtimeModeTransport.js', async (importOriginal) => {
   };
 });
 
-import {
-  prepareShellyBleDiscovery,
-  stopShellyBleDiscovery
-} from './shellyRequests.js';
+import { prepareShellyBleDiscovery, stopShellyBleDiscovery } from './shellyRequests.js';
 
 const pulseAutoState = {
   kind: 'standalone-pulse' as const,

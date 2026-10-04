@@ -188,7 +188,9 @@ export const captureManagedAutomationDiscoveryRestoreState = async (
   }
 
   if (script.running) {
-    throw new Error('Managed automation runtime does not support safe state preservation.');
+    throw new Error(
+      'Managed automation runtime does not support safe state preservation.'
+    );
   }
   return { kind: 'none', scriptId: null, wasRunning: false, relayId: 0 };
 };
@@ -219,7 +221,9 @@ export const restoreManagedAutomationDiscoveryState = async (
     return;
   }
   if (state.manualRelayOn === null) {
-    throw new Error('Standalone Pulse manual relay state was not captured before BLE discovery.');
+    throw new Error(
+      'Standalone Pulse manual relay state was not captured before BLE discovery.'
+    );
   }
 
   unwrapShellyResult(

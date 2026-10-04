@@ -140,7 +140,10 @@ describe('runtime control Script.Eval transport', () => {
   });
 
   it('resets a lockout through the centralized protocol helper', async () => {
-    mocks.call.mockResolvedValueOnce({ ok: true, value: { result: '[1,0,null,0,null]' } });
+    mocks.call.mockResolvedValueOnce({
+      ok: true,
+      value: { result: '[1,0,null,0,null]' }
+    });
 
     await expect(resetInstalledAutomationSafetyLockout(installation)).resolves.toEqual({
       mode: 'manual',
