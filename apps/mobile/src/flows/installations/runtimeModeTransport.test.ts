@@ -6,7 +6,7 @@ import {
   generateShellyStandalonePulseScript,
   generateShellyThermostatScript
 } from '@lcl/script-generator';
-import type { FetchShellyRpcTransport, ShellyRpcRequest } from '@lcl/shelly-client';
+import type { ShellyRpcRequest, ShellyRpcTransport } from '@lcl/shelly-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createInstalledAutomation } from './model.js';
 
@@ -34,7 +34,7 @@ const installation = createInstalledAutomation({
   nowMs: 1000
 });
 
-const transport = (): FetchShellyRpcTransport => ({ call: mocks.call });
+const transport = (): ShellyRpcTransport => ({ call: mocks.call });
 
 const mockManagedScript = ({
   code,
