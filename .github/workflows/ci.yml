@@ -7,8 +7,12 @@ on:
       - main
       # `work` is a legacy integration branch. CI is kept temporarily for transition.
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  checks:
+  static:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,8 +33,77 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Canonical repository gate
-        run: pnpm check
+      - name: Static repository gate
+        run: pnpm check:static
+
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.12.4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Test gate
+        run: pnpm check:tests
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.12.4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and performance gate
+        run: pnpm check:build
+
+  responsive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.12.4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
@@ -45,3 +118,20 @@ jobs:
           name: responsive-visual-audit
           path: test-results/visual-audit
           if-no-files-found: ignore
+
+  checks:
+    if: always()
+    needs:
+      - static
+      - tests
+      - build
+      - responsive
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify all CI gates passed
+        run: |
+          test "${{ needs.static.result }}" = "success"
+          test "${{ needs.tests.result }}" = "success"
+          test "${{ needs.build.result }}" = "success"
+          test "${{ needs.responsive.result }}" = "success"

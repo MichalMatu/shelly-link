@@ -856,11 +856,11 @@ const checkCanonicalVisualPlatformContract = async () => {
       );
     }
   }
-  if (
-    packageJson.scripts?.prepush !==
-    'pnpm check && node scripts/quality/run-prepush-e2e.mjs'
-  ) {
-    addFailure(packagePath, 'prepush must use the platform-aware E2E runner');
+  if (packageJson.scripts?.prepush !== 'pnpm quality:ux && pnpm quality:repo') {
+    addFailure(
+      packagePath,
+      'prepush must stay a fast policy gate; full verification belongs to check/check:full and CI'
+    );
   }
   if (
     !guardSource.includes("const canonicalPlatform = 'darwin';") ||
