@@ -29,6 +29,7 @@ const failure = (message: string): Result<never> => ({
 class ReplacementTransport implements ShellyRpcTransport {
   readonly requests: ShellyRpcRequest[] = [];
   failNextPut = false;
+  relayOn = true;
 
   constructor(readonly script: ScriptState) {}
 
@@ -70,6 +71,19 @@ class ReplacementTransport implements ShellyRpcTransport {
     if (request.method === RPC_METHODS.ScriptStop) {
       this.script.running = false;
       return { ok: true, value: null as TResponse };
+    }
+
+    if (request.method === RPC_METHODS.SwitchSet) {
+      const params = request.params as { on: boolean };
+      this.relayOn = params.on;
+      return { ok: true, value: null as TResponse };
+    }
+
+    if (request.method === RPC_METHODS.SwitchGetStatus) {
+      return {
+        ok: true,
+        value: { id: 2, output: this.relayOn } as TResponse
+      };
     }
 
     if (request.method === RPC_METHODS.ScriptPutCode) {
@@ -164,6 +178,56 @@ describe('transactional script replacement', () => {
     expect(
       transport.requests.some((request) => request.method === RPC_METHODS.ScriptStart)
     ).toBe(false);
+  });
+
+  it('rejects source drift before the first mutation', async () => {
+    const transport = new ReplacementTransport({
+      id: 10,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'externally-modified-source'
+    });
+
+    const result = await createClient(transport).replaceScript(10, 'new-source', {
+      expectedCurrentHash: 'stale-recorded-hash',
+      relayId: 2
+    });
+
+    expect(result.ok).toBe(false);
+    expect(transport.script.running).toBe(true);
+    expect(transport.relayOn).toBe(true);
+    expect(
+      transport.requests.some((request) =>
+        [RPC_METHODS.ScriptStop, RPC_METHODS.SwitchSet, RPC_METHODS.ScriptPutCode].includes(
+          request.method as never
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('stops the running script before forcing the relay OFF and uploading code', async () => {
+    const transport = new ReplacementTransport({
+      id: 11,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'old-source'
+    });
+
+    const result = await createClient(transport).replaceScript(11, 'new-source', {
+      relayId: 2
+    });
+
+    expect(result.ok).toBe(true);
+    expect(transport.relayOn).toBe(false);
+    const methods = transport.requests.map((request) => request.method);
+    expect(methods.indexOf(RPC_METHODS.ScriptStop)).toBeLessThan(
+      methods.indexOf(RPC_METHODS.SwitchSet)
+    );
+    expect(methods.indexOf(RPC_METHODS.SwitchSet)).toBeLessThan(
+      methods.indexOf(RPC_METHODS.ScriptPutCode)
+    );
   });
 
   it('restores exact source and running state when replacement fails', async () => {
