@@ -166,6 +166,8 @@ describe('runtime control Script.Eval transport', () => {
 });
 
 describe('temporary BLE discovery managed runtime preservation', () => {
+  beforeEach(() => vi.clearAllMocks());
+
   it('captures the existing Climate control protocol without changing semantics', async () => {
     const code = generateShellyThermostatScript(createDefaultShellyThermostatConfig());
     mockManagedScript({
