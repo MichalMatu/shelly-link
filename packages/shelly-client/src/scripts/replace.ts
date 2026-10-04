@@ -30,10 +30,16 @@ export const replaceShellyScript = async (
   chunkSizeBytes = DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES
 ): Promise<Result<ShellyInstallResult>> => {
   if (!Number.isInteger(scriptId) || scriptId < 0) {
-    return { ok: false, error: validationError(`Invalid Shelly script id: ${scriptId}.`) };
+    return {
+      ok: false,
+      error: validationError(`Invalid Shelly script id: ${scriptId}.`)
+    };
   }
   if (code.length === 0) {
-    return { ok: false, error: validationError('Replacement script code must not be empty.') };
+    return {
+      ok: false,
+      error: validationError('Replacement script code must not be empty.')
+    };
   }
   if (!Number.isInteger(chunkSizeBytes) || chunkSizeBytes <= 0) {
     return {
@@ -61,7 +67,9 @@ export const replaceShellyScript = async (
     };
   }
 
-  const source = await readShellyScriptCode(lifecycle.transport, scriptId, { chunkSizeBytes });
+  const source = await readShellyScriptCode(lifecycle.transport, scriptId, {
+    chunkSizeBytes
+  });
   if (!source.ok) return source;
   const sourceHash = hashScriptCode(source.value);
   if (

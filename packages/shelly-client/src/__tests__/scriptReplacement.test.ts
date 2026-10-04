@@ -89,7 +89,10 @@ class ReplacementTransport implements ShellyRpcTransport {
     if (request.method === RPC_METHODS.ScriptPutCode) {
       if (this.failNextPut) {
         this.failNextPut = false;
-        return failure('replacement upload failed') as Result<TResponse, ShellyClientError>;
+        return failure('replacement upload failed') as Result<
+          TResponse,
+          ShellyClientError
+        >;
       }
       const params = request.params as { code: string; append?: boolean };
       this.script.code = params.append ? this.script.code + params.code : params.code;
@@ -199,9 +202,11 @@ describe('transactional script replacement', () => {
     expect(transport.relayOn).toBe(true);
     expect(
       transport.requests.some((request) =>
-        [RPC_METHODS.ScriptStop, RPC_METHODS.SwitchSet, RPC_METHODS.ScriptPutCode].includes(
-          request.method as never
-        )
+        [
+          RPC_METHODS.ScriptStop,
+          RPC_METHODS.SwitchSet,
+          RPC_METHODS.ScriptPutCode
+        ].includes(request.method as never)
       )
     ).toBe(false);
   });

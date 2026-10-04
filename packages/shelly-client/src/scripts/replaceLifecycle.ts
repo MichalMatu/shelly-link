@@ -125,7 +125,9 @@ export const verifyReplacementScript = async (
   if (status.value.running !== expectedRunning) {
     return {
       ok: false,
-      error: scriptReplacementError('Script.GetStatus returned an unexpected running state.')
+      error: scriptReplacementError(
+        'Script.GetStatus returned an unexpected running state.'
+      )
     };
   }
 
@@ -135,7 +137,9 @@ export const verifyReplacementScript = async (
   ) {
     return {
       ok: false,
-      error: scriptReplacementError('Script.GetStatus reported an error after replacement.')
+      error: scriptReplacementError(
+        'Script.GetStatus reported an error after replacement.'
+      )
     };
   }
 
@@ -180,7 +184,9 @@ export const restoreScriptBackup = async (
   if (backup.code === undefined) {
     return {
       ok: false,
-      error: scriptReplacementError('Rollback backup does not contain the original script source.')
+      error: scriptReplacementError(
+        'Rollback backup does not contain the original script source.'
+      )
     };
   }
 

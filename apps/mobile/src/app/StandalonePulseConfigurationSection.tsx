@@ -83,7 +83,9 @@ export const StandalonePulseConfigurationSection = ({
 
   return (
     <section className="installation-detail-hierarchy__section">
-      <h3 className="installation-detail-hierarchy__title">{t('detail.configuration')}</h3>
+      <h3 className="installation-detail-hierarchy__title">
+        {t('detail.configuration')}
+      </h3>
       {mutation.isError && (
         <FeedbackPanel tone="danger" title={t('common.operationFailed')}>
           {managementLabels.saveFailed}
@@ -118,7 +120,9 @@ export const StandalonePulseConfigurationSection = ({
               disabled={mutation.isPending || !validation.ok || !changed}
               onClick={() => mutation.mutate()}
             >
-              {mutation.isPending ? managementLabels.saveBusy : managementLabels.saveAction}
+              {mutation.isPending
+                ? managementLabels.saveBusy
+                : managementLabels.saveAction}
             </button>
           </div>
         </>
