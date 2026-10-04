@@ -308,6 +308,95 @@ describe('generated runtime control arbitration', () => {
     expect(runtime.physicalRelayOn()).toBe(true);
   });
 
+  it('preserves an automation fault across MANUAL hard-safety recovery', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const runtime = createHeatingRuntime();
+      runtime.scan(23.5, 50);
+      runtime.runtime.enterManual();
+      expect(runtime.runtime.manualOn()).toBe(1);
+      expect(runtime.physicalRelayOn()).toBe(true);
+
+      nowMs += 700_000;
+      runtime.runtime.stale();
+      expect(runtime.controlState()).toMatchObject({
+        mode: 'manual',
+        manualRequestOn: true,
+        automationFault: 'st',
+        safetyLockout: false
+      });
+      expect(runtime.physicalRelayOn()).toBe(true);
+
+      runtime.runtime.hardLock();
+      expect(runtime.controlState()).toMatchObject({
+        mode: 'manual',
+        manualRequestOn: true,
+        automationFault: 'st',
+        safetyLockout: true,
+        safetyReason: 'mx'
+      });
+      expect(runtime.physicalRelayOn()).toBe(false);
+
+      expect(
+        decodeClimateRuntimeControlState(runtime.runtime.resetSafety())
+      ).toMatchObject({
+        mode: 'manual',
+        manualRequestOn: false,
+        automationFault: 'st',
+        safetyLockout: false,
+        safetyReason: null
+      });
+      expect(runtime.physicalRelayOn()).toBe(false);
+
+      expect(runtime.runtime.manualOn()).toBe(1);
+      expect(runtime.physicalRelayOn()).toBe(true);
+      expect(runtime.controlState().automationFault).toBe('st');
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('keeps AUTO safe OFF after hard-safety recovery until fresh input clears the fault', () => {
+    let nowMs = 1_000_000;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    try {
+      const runtime = createHeatingRuntime();
+      runtime.scan(23.5, 50);
+      expect(runtime.controlState().automationFault).toBeNull();
+
+      nowMs += 700_000;
+      runtime.runtime.stale();
+      runtime.runtime.hardLock();
+      expect(runtime.controlState()).toMatchObject({
+        mode: 'auto',
+        manualRequestOn: false,
+        automationFault: 'st',
+        safetyLockout: true,
+        safetyReason: 'mx'
+      });
+      expect(runtime.physicalRelayOn()).toBe(false);
+
+      expect(
+        decodeClimateRuntimeControlState(runtime.runtime.resetSafety())
+      ).toMatchObject({
+        mode: 'auto',
+        manualRequestOn: false,
+        automationFault: 'st',
+        safetyLockout: false,
+        safetyReason: null
+      });
+      expect(runtime.physicalRelayOn()).toBe(false);
+
+      nowMs += 1_000;
+      runtime.scan(18, 50);
+      expect(runtime.controlState().automationFault).toBeNull();
+      expect(runtime.physicalRelayOn()).toBe(true);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
   it('latches native Shelly protection errors immediately and preserves the first cause', () => {
     const runtime = createHeatingRuntime();
     runtime.scan(23.5, 50);
