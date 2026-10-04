@@ -1,6 +1,6 @@
 # Handoff — Stage 9 stabilization in progress
 
-Status: **2026-10-04 — Stage 9 soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and controlled real-device `Shelly.Reboot` recovery are qualified. Physical mains power-cycle plus Wi-Fi/BLE loss/recovery remain before the long-soak/final-hardware closeout.**
+Status: **2026-10-04 — Stage 9 soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and controlled real-device `Shelly.Reboot` recovery are qualified on `main`. Draft PR #89 contains an unmerged BLE scanner watchdog recovery fix and still requires its real-hardware RF-loss/recovery gate. Physical mains power-cycle, remaining Wi-Fi/BLE loss/recovery, long soak and final hardware closeout remain.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -20,17 +20,24 @@ Read in this order:
 
 Then fetch fresh `main` and `agent-control:.agent/status/daemon.json`. Verify there is no active or duplicate Local Agent task before changing anything.
 
-## Latest merge closeout
+## Recent merge closeout
 
-PR #83 `Add safe inline Standalone Pulse replacement` is merged:
+The current stabilization baseline on `main` includes:
 
-- qualified head: `a740386e4e131fc326e428a7164aa73488cc411d`;
-- merge commit: `d05ab56036b97874fa07cd73b18779844c8b1fb7`;
-- GitHub CI run `37175270558`: PASS.
+- PR #84 — generalized temporary BLE discovery runtime restoration;
+- PR #85 — soak liveness/stabilization reporting;
+- PR #86 — deterministic runtime recovery interaction matrix;
+- PR #88 — controlled real-device `Shelly.Reboot` recovery evidence.
 
-The slice added guarded in-place script replacement with exact source/runtime backup, expected-hash drift rejection before mutation, verified relay OFF, rollback on replacement failure and inline Standalone Pulse cycle editing that persists only after successful verification. Existing installation ID, script ID and `installedAtMs` are preserved.
+Safe inline Standalone Pulse replacement from PR #83 remains part of the accepted baseline. The earlier PR #81 UX hierarchy closeout remains authoritative for accepted Plug/Thermometer navigation and visual hierarchy; do not reopen that generic UX-polish round without a concrete regression or accepted product change.
 
-The earlier PR #81 UX hierarchy closeout remains authoritative for the accepted Plug/Thermometer navigation and visual hierarchy; do not reopen that generic UX-polish round without a concrete regression or accepted product change.
+## Active unmerged work
+
+Draft PR #89 `Fix BLE scanner watchdog recovery after sensor loss` is **not part of `main` yet**. Its candidate branch is `fix/scanner-watchdog-sensor-loss-20261004`.
+
+The candidate changes the Climate runtime scanner watchdog so prolonged sensor silence alone does not restart a healthy scanner. Scanner recovery instead checks scanner liveness and starts the scanner only when it is actually stopped. Deterministic generator/runtime checks and GitHub CI are green, but the PR must remain unmerged until the exact candidate is requalified on the configured Plug with real sensor RF loss -> stale/fail-safe OFF -> sensor return -> fresh BLE AUTO recovery.
+
+Do not replace that candidate with the abandoned `fix/scanner-restart-delay-20261004` alternative; that branch is superseded by PR #89.
 
 ## Current product / UX contract
 
@@ -91,13 +98,16 @@ Do not infer what a physical phone is running from this document. A phone claim 
 
 ## Next work
 
-The application is near feature-complete. Three Stage 9 slices are now qualified: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and a deliberate real-device software reboot. The configured Plug recorded boot-safe OFF at uptime 4 s, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim. Default order is now:
+The application is near feature-complete. Three Stage 9 slices are qualified on `main`: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and a deliberate real-device software reboot. The configured Plug recorded boot-safe OFF at uptime 4 s, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim.
 
-1. physical mains power-cycle plus Wi-Fi/BLE loss/recovery;
-2. a materially longer soak and the final real-hardware matrix;
-3. V1 feature freeze and release qualification.
+Default order is now:
 
-Detailed recovery evidence: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md` and `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.
+1. finish the real-hardware gate for draft PR #89 and merge it only if RF-loss -> stale/OFF -> fresh-BLE AUTO recovery passes on the exact candidate;
+2. qualify physical mains power-cycle plus remaining Wi-Fi/BLE loss/recovery;
+3. run a materially longer soak and close the final real-hardware matrix;
+4. declare V1 feature freeze and run release qualification.
+
+Detailed recovery evidence already on `main`: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md` and `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.
 
 Enabling active Standalone Pulse BLE scan is now technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into restoration plumbing.
 
