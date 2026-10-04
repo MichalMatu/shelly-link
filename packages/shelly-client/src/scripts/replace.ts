@@ -201,6 +201,7 @@ export const replaceShellyScript = async (
   lifecycle: ReplacementLifecycle,
   scriptId: number,
   code: string,
+  expectedCurrentHash?: string,
   chunkSizeBytes = DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES
 ): Promise<Result<ShellyInstallResult>> => {
   if (!Number.isInteger(scriptId) || scriptId < 0) {
@@ -228,13 +229,23 @@ export const replaceShellyScript = async (
 
   const source = await readShellyScriptCode(lifecycle.transport, scriptId, { chunkSizeBytes });
   if (!source.ok) return source;
+  const sourceHash = hashScriptCode(source.value);
+  if (expectedCurrentHash !== undefined && sourceHash !== expectedCurrentHash) {
+    return {
+      ok: false,
+      error: scriptReplacementError(
+        'Shelly script source changed since the installed automation was recorded.'
+      )
+    };
+  }
+
   const backup: ShellyScriptBackup = {
     scriptId,
     name: target.name,
     enable: target.enable,
     running: target.running,
     code: source.value,
-    codeHash: hashScriptCode(source.value)
+    codeHash: sourceHash
   };
 
   let mutationStarted = false;
