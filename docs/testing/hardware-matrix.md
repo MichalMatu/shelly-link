@@ -78,6 +78,7 @@ Note: `android:phone-alpha` performs a clean uninstall. For presentation accepta
 | 2026-10-01 | Stacked History mini-chart acceptance | PASS | Samsung SM-S906B / Android 16 ran exact product candidate `a60bfa41388fe3825af20ed2803992756f0e6997`, built and installed with `adb install -r`, preserving app data. The real WebView was 411x848 CSS px at DPR 2.625 with no horizontal overflow. History rendered five fixed stacked panels (Temperature, Humidity, Output, Power, Current) in about 746 CSS px total; continuous cards were about 138 px high and Output about 130 px. Continuous series used the new calm per-metric scales and smoothed presentation; the interactive legend/tooltip was absent. Output remained a strict square H/V step path with `fill: none`. Presentation-only acceptance: no Shelly runtime, KVS, schedule or relay mutation was performed. |
 
 | 2026-10-02 | Pulse operational-status Android install/cold-start smoke | PASS | Samsung SM-S906B / Android 16 built and installed exact Pulse status implementation `6a6f07cc21f8c56927ef7ffb277bd3ae05bfcdd2` with preserving-data `adb install -r`; APK SHA-256 `da7f8204aa2be550f583297646a8072055a04b2c27d83fea70e362fea1c554c5`. `firstInstallTime` stayed `2026-09-28 04:57:23`, cold starts returned OK, WebView reached `readyState: complete`, and the real 411 CSS px dashboard had `scrollWidth == clientWidth`. The preserved installation is steady Climate rather than Pulse, so this is explicitly not live Pulse status hardware acceptance. An intermittent Capacitor/WebView `triggerEvent` console warning appeared 1/2/0 times across three successful cold starts and did not block rendering. No Shelly runtime, schedule or relay mutation was performed. |
+| 2026-10-04 | Short soak liveness + memory-headroom smoke | PASS | Configured Plug S Gen3 `shellyplugsg3-e4b063d7f530`, firmware 1.7.5, exact tooling candidate `ef2fc6303dc8cde981fe4191b782c307edad18e9`: 12/12 read-only samples over about 55 s passed with uptime `204425 -> 204496`, 0 detected reboots, 0 endpoint or `/diag` outage, 0 stopped-script samples/streaks, `mem_used` max 5782 B, `mem_peak` max 10066 B and `mem_free` min 19334 B. Pre/postflight verified the same canonical identity, production script 1 still running and relay OFF. No mutating RPC was issued. Detailed evidence: `docs/testing/soak-liveness-stabilization-acceptance-2026-10-04.md`. |
 
 Install/observe a generated Shelly climate runtime:
 
@@ -105,6 +106,12 @@ Run a longer soak when runtime stability matters:
 
 ```bash
 SHELLY_URL=http://<shelly-ip> SCRIPT_ID=1 make shelly-soak-run
+```
+
+Post-process an existing soak JSONL for reboot/liveness/outage evidence:
+
+```bash
+pnpm exec tsx scripts/hardware/shelly-soak-liveness-report.ts <soak.jsonl>
 ```
 
 Use `SOAK_CYCLE_RELAY=1` only for supervised/endurance tests intended to exercise real rule-driven ON/OFF transitions. Hardware helpers must finish with an explicit safe final relay state.
