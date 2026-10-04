@@ -91,9 +91,9 @@ Do not infer what a physical phone is running from this document. A phone claim 
 
 ## Next work
 
-The application is near feature-complete. The first Stage 9 stabilization slice is qualified: soak JSONL can now be post-processed for reboot/liveness/outage/stopped-script evidence, and a short read-only Plug S Gen3 smoke passed 12/12 samples with zero liveness faults and `mem_free` minimum 19334 B. This is observability evidence, not completion of stabilization. Default order is now:
+The application is near feature-complete. Two Stage 9 stabilization slices are now qualified: soak JSONL liveness/outage/reboot observability with a short read-only Plug S Gen3 smoke, and the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix. The latter closed the two missing reset intersections without changing production runtime behavior. Default order is now:
 
-1. deliberate reboot/power-cycle plus Wi-Fi/BLE loss/recovery and the AUTO/MANUAL + automation-fault + hard-safety interaction matrix;
+1. deliberate real-device reboot/power-cycle plus Wi-Fi/BLE loss and recovery;
 2. a materially longer soak and the final real-hardware matrix;
 3. V1 feature freeze and release qualification.
 
