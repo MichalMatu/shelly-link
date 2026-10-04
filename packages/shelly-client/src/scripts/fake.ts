@@ -5,7 +5,6 @@ import type {
   ShellyDeviceInfo,
   ShellyInstallPlan,
   ShellyInstallResult,
-  ShellyScriptReplacementOptions,
   ShellyScriptStorageItem,
   ShellyStatus
 } from '../model.js';
@@ -100,8 +99,7 @@ export class FakeShellyClient implements ShellyClient {
 
   async replaceScript(
     scriptId: number,
-    code: string,
-    _options?: ShellyScriptReplacementOptions
+    code: string
   ): Promise<Result<ShellyInstallResult>> {
     return {
       ok: true,
