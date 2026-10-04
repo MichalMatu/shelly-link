@@ -101,10 +101,12 @@ const createWatchdogRuntime = () => {
   const watchdog = timers.find(
     (timer) => timer.durationMs === 30_000 && timer.repeat === true
   );
-  if (!bootScanner || !watchdog)
+  if (!bootScanner || !watchdog) {
     throw new Error('Generated scanner timers are missing.');
-  if (!scanCallback)
+  }
+  if (!scanCallback) {
     throw new Error('Generated runtime did not subscribe to BLE scanner.');
+  }
 
   return {
     bootScanner,
@@ -150,7 +152,7 @@ describe('Climate BLE scanner watchdog', () => {
     expect(runtime.scannerStops()).toBe(0);
   });
 
-  it('recovers from sensor stale on the same healthy scanner when packets return', () => {
+  it('recovers stale sensor data without restarting the scanner', () => {
     const runtime = createWatchdogRuntime();
     runtime.setNowMs(1_000);
     runtime.bootScanner.callback();
