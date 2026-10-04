@@ -5,6 +5,7 @@ import type {
   ShellyDeviceInfo,
   ShellyInstallPlan,
   ShellyInstallResult,
+  ShellyScriptReplacementOptions,
   ShellyScriptStorageItem,
   ShellyStatus
 } from '../model.js';
@@ -93,6 +94,23 @@ export class FakeShellyClient implements ShellyClient {
         memUsed: 18_000,
         memFree: 92_000,
         scriptHash: hashScriptCode(plan.code)
+      }
+    };
+  }
+
+  async replaceScript(
+    scriptId: number,
+    code: string,
+    _options?: ShellyScriptReplacementOptions
+  ): Promise<Result<ShellyInstallResult>> {
+    return {
+      ok: true,
+      value: {
+        scriptId,
+        running: this.scriptUploaded,
+        memUsed: 18_000,
+        memFree: 92_000,
+        scriptHash: hashScriptCode(code)
       }
     };
   }
