@@ -105,13 +105,14 @@ export const replaceStandalonePulseAutomation = async ({
   }
 
   await requireStoredIdentity(installation, client);
-  await forceOff(client, config.relayId, installation.script.id);
-
   const replaced = unwrapShellyResult(
     await client.replaceScript(
       installation.script.id,
       generateShellyStandalonePulseScript(config),
-      installation.script.hash
+      {
+        expectedCurrentHash: installation.script.hash,
+        relayId: config.relayId
+      }
     )
   );
   if (replaced.scriptId !== installation.script.id) {
