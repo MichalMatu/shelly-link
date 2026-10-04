@@ -1,6 +1,11 @@
 import type { Locale } from '../i18n.js';
 
 type PulseManagementCopy = {
+  editAction: string;
+  saveAction: string;
+  saveBusy: string;
+  saveFailed: string;
+  saveDone: string;
   deleteAction: string;
   deleteBusy: string;
   deleteTitle: string;
@@ -11,6 +16,11 @@ type PulseManagementCopy = {
 
 export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
   pl: {
+    editAction: 'Edytuj cykl',
+    saveAction: 'Zapisz zmiany',
+    saveBusy: 'Zapisuję zmiany…',
+    saveFailed: 'Nie udało się bezpiecznie zaktualizować Pulse.',
+    saveDone: 'Cykl Pulse został zaktualizowany.',
     deleteAction: 'Usuń automatykę',
     deleteBusy: 'Usuwam automatykę…',
     deleteTitle: 'Usunąć automatykę Pulse?',
@@ -20,6 +30,11 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'Zarządzany runtime Pulse wymaga uwagi.'
   },
   en: {
+    editAction: 'Edit cycle',
+    saveAction: 'Save changes',
+    saveBusy: 'Saving changes…',
+    saveFailed: 'The Pulse cycle could not be updated safely.',
+    saveDone: 'The Pulse cycle was updated.',
     deleteAction: 'Delete automation',
     deleteBusy: 'Deleting automation…',
     deleteTitle: 'Delete Pulse automation?',
@@ -29,6 +44,11 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'The managed Pulse runtime needs attention.'
   },
   de: {
+    editAction: 'Zyklus bearbeiten',
+    saveAction: 'Änderungen speichern',
+    saveBusy: 'Änderungen werden gespeichert…',
+    saveFailed: 'Der Pulse-Zyklus konnte nicht sicher aktualisiert werden.',
+    saveDone: 'Der Pulse-Zyklus wurde aktualisiert.',
     deleteAction: 'Automatisierung löschen',
     deleteBusy: 'Automatisierung wird gelöscht…',
     deleteTitle: 'Pulse-Automatisierung löschen?',
@@ -38,6 +58,11 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'Die verwaltete Pulse-Laufzeit erfordert Aufmerksamkeit.'
   },
   es: {
+    editAction: 'Editar ciclo',
+    saveAction: 'Guardar cambios',
+    saveBusy: 'Guardando cambios…',
+    saveFailed: 'No se pudo actualizar de forma segura el ciclo Pulse.',
+    saveDone: 'El ciclo Pulse se actualizó.',
     deleteAction: 'Eliminar automatización',
     deleteBusy: 'Eliminando automatización…',
     deleteTitle: '¿Eliminar la automatización Pulse?',
@@ -47,6 +72,11 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'El runtime Pulse administrado requiere atención.'
   },
   fr: {
+    editAction: 'Modifier le cycle',
+    saveAction: 'Enregistrer',
+    saveBusy: 'Enregistrement…',
+    saveFailed: 'Le cycle Pulse n’a pas pu être mis à jour en toute sécurité.',
+    saveDone: 'Le cycle Pulse a été mis à jour.',
     deleteAction: 'Supprimer l’automatisation',
     deleteBusy: 'Suppression de l’automatisation…',
     deleteTitle: 'Supprimer l’automatisation Pulse ?',
@@ -56,6 +86,11 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'Le runtime Pulse géré nécessite votre attention.'
   },
   it: {
+    editAction: 'Modifica ciclo',
+    saveAction: 'Salva modifiche',
+    saveBusy: 'Salvataggio modifiche…',
+    saveFailed: 'Non è stato possibile aggiornare in sicurezza il ciclo Pulse.',
+    saveDone: 'Il ciclo Pulse è stato aggiornato.',
     deleteAction: 'Elimina automazione',
     deleteBusy: 'Eliminazione automazione…',
     deleteTitle: 'Eliminare l’automazione Pulse?',
@@ -65,6 +100,11 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'Il runtime Pulse gestito richiede attenzione.'
   },
   'pt-BR': {
+    editAction: 'Editar ciclo',
+    saveAction: 'Salvar alterações',
+    saveBusy: 'Salvando alterações…',
+    saveFailed: 'Não foi possível atualizar o ciclo Pulse com segurança.',
+    saveDone: 'O ciclo Pulse foi atualizado.',
     deleteAction: 'Excluir automação',
     deleteBusy: 'Excluindo automação…',
     deleteTitle: 'Excluir a automação Pulse?',
