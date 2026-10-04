@@ -16,7 +16,7 @@ import {
   readShellyScriptCode,
   readShellyScriptList,
   switchStatusSchema,
-  type FetchShellyRpcTransport,
+  type ShellyRpcTransport,
   type ShellyScriptListEntry
 } from '@lcl/shelly-client';
 import { z } from 'zod';
@@ -65,7 +65,7 @@ const unsupportedRuntimeState = (): InstalledAutomationRuntimeModeState => ({
 });
 
 const evaluateRuntimeTransport = async (
-  transport: FetchShellyRpcTransport,
+  transport: ShellyRpcTransport,
   scriptId: number,
   code: string
 ): Promise<string> => {
@@ -96,7 +96,7 @@ const findManagedScript = (
 };
 
 const readRelayOutput = async (
-  transport: FetchShellyRpcTransport,
+  transport: ShellyRpcTransport,
   relayId: number
 ): Promise<boolean> => {
   const result = unwrapShellyResult(
@@ -109,7 +109,7 @@ const readRelayOutput = async (
 };
 
 export const readClimateRuntimeControlState = async (
-  transport: FetchShellyRpcTransport,
+  transport: ShellyRpcTransport,
   scriptId: number
 ): Promise<ClimateRuntimeControlState> => {
   const state = decodeClimateRuntimeControlState(
@@ -128,7 +128,7 @@ export const readClimateRuntimeControlState = async (
 };
 
 export const restoreClimateRuntimeControlState = async (
-  transport: FetchShellyRpcTransport,
+  transport: ShellyRpcTransport,
   scriptId: number,
   expected: ClimateRuntimeControlState
 ): Promise<void> => {
@@ -152,7 +152,7 @@ export const restoreClimateRuntimeControlState = async (
 };
 
 export const captureManagedAutomationDiscoveryRestoreState = async (
-  transport: FetchShellyRpcTransport
+  transport: ShellyRpcTransport
 ): Promise<ManagedAutomationDiscoveryRestoreState> => {
   const scripts = unwrapShellyResult(await readShellyScriptList(transport));
   const script = findManagedScript(scripts);
@@ -194,7 +194,7 @@ export const captureManagedAutomationDiscoveryRestoreState = async (
 };
 
 export const restoreManagedAutomationDiscoveryState = async (
-  transport: FetchShellyRpcTransport,
+  transport: ShellyRpcTransport,
   state: ManagedAutomationDiscoveryRestoreState
 ): Promise<void> => {
   if (state.kind === 'none') return;
