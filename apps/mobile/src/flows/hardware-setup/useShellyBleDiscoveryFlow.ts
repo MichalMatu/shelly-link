@@ -1,8 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import {
-  generateShellyBleDiscoveryScript,
-  type ClimateRuntimeControlState
-} from '@lcl/script-generator';
+import { generateShellyBleDiscoveryScript } from '@lcl/script-generator';
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../../app/i18n.js';
 import type { BleDiscoverySnapshot } from './schemas.js';
@@ -11,7 +8,8 @@ import {
   prepareShellyBleDiscovery,
   readShellyBleDiscoverySnapshot,
   restartShellyBleDiscoveryScan,
-  stopShellyBleDiscovery
+  stopShellyBleDiscovery,
+  type ShellyBleDiscoveryPreparation
 } from './shellyRequests.js';
 import type { ShellyDraftDevice } from './setupDraftStore.js';
 
@@ -19,9 +17,7 @@ export type BleDiscoverySession = {
   shellyId: string;
   baseUrl: string;
   discoveryScriptId: number;
-  automationScriptId: number | null;
-  automationWasRunning: boolean;
-  automationControlState: ClimateRuntimeControlState | null;
+  automationRestoreState: ShellyBleDiscoveryPreparation['automationRestoreState'];
 };
 
 type StartBleDiscoveryResult = {
@@ -32,9 +28,7 @@ type StartBleDiscoveryResult = {
 const stopBleDiscoverySession = (session: BleDiscoverySession): Promise<void> =>
   stopShellyBleDiscovery(session.baseUrl, {
     discoveryScriptId: session.discoveryScriptId,
-    automationScriptId: session.automationScriptId,
-    restartAutomation: session.automationWasRunning,
-    automationControlState: session.automationControlState
+    automationRestoreState: session.automationRestoreState
   });
 
 export const useShellyBleDiscoveryFlow = () => {
@@ -77,9 +71,7 @@ export const useShellyBleDiscoveryFlow = () => {
           shellyId: device.id,
           baseUrl: device.baseUrl,
           discoveryScriptId: installResult.scriptId,
-          automationScriptId: preparation.automationScriptId,
-          automationWasRunning: preparation.automationWasRunning,
-          automationControlState: preparation.automationControlState
+          automationRestoreState: preparation.automationRestoreState
         };
         const snapshot = await readShellyBleDiscoverySnapshot(
           device.baseUrl,
@@ -92,9 +84,7 @@ export const useShellyBleDiscoveryFlow = () => {
           try {
             await stopShellyBleDiscovery(device.baseUrl, {
               discoveryScriptId,
-              automationScriptId: preparation.automationScriptId,
-              restartAutomation: preparation.automationWasRunning,
-              automationControlState: preparation.automationControlState
+              automationRestoreState: preparation.automationRestoreState
             });
           } catch (cleanupError) {
             const message =
