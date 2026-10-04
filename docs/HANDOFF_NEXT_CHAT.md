@@ -1,6 +1,6 @@
 # Handoff — Stage 9 stabilization in progress
 
-Status: **2026-10-04 — Stage 9 soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and controlled real-device `Shelly.Reboot` recovery are qualified on `main`. Draft PR #89 contains an unmerged BLE scanner watchdog recovery fix and still requires its real-hardware RF-loss/recovery gate. Physical mains power-cycle, remaining Wi-Fi/BLE loss/recovery, long soak and final hardware closeout remain.**
+Status: **2026-10-04 — Stage 9 soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and controlled real-device `Shelly.Reboot` recovery are qualified on `main`. Draft PR #89 BLE scanner watchdog recovery has now passed its exact-candidate real-hardware sensor-silence/stale/recovery gate and is ready for final CI/diff review and merge. Physical mains power-cycle, remaining Wi-Fi/BLE loss/recovery, long soak and final hardware closeout remain.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -35,7 +35,7 @@ Safe inline Standalone Pulse replacement from PR #83 remains part of the accepte
 
 Draft PR #89 `Fix BLE scanner watchdog recovery after sensor loss` is **not part of `main` yet**. Its candidate branch is `fix/scanner-watchdog-sensor-loss-20261004`.
 
-The candidate changes the Climate runtime scanner watchdog so prolonged sensor silence alone does not restart a healthy scanner. Scanner recovery instead checks scanner liveness and starts the scanner only when it is actually stopped. Deterministic generator/runtime checks and GitHub CI are green, but the PR must remain unmerged until the exact candidate is requalified on the configured Plug with real sensor RF loss -> stale/fail-safe OFF -> sensor return -> fresh BLE AUTO recovery.
+The candidate changes the Climate runtime scanner watchdog so prolonged sensor silence alone does not restart a healthy scanner. Scanner recovery instead checks scanner liveness and starts the scanner only when it is actually stopped. The exact product candidate `d291a42d175972d01836f2fdf0cb9d88e91792c0` passed the real Plug S Gen3 hardware gate with deployed runtime SHA-256 `46446a0405aa310979fd65d0d4a3fff4479b8efba2b799d8528e264a13ceb0ef`: 145 s of accepted-target-frame silence crossed the legacy 90 s restart threshold and the configured 120 s stale timeout while `BLE.Scanner.isRunning()` stayed true, `R.sa` and `R.l` remained unchanged, stale forced the physical relay OFF, and restoring the configured sensor address produced fresh BLE data and automatic AUTO recovery. The post-gate merge from current `main` changed documentation only; all four PR implementation/test files remained byte-identical to the tested product candidate. The PR is ready for final CI/diff review and merge.
 
 Do not replace that candidate with the abandoned `fix/scanner-restart-delay-20261004` alternative; that branch is superseded by PR #89.
 
@@ -80,6 +80,8 @@ The BLE restore implementation has focused deterministic coverage for:
 
 Focused mobile tests, typecheck, repository quality gates and UX quality gates passed for the BLE restoration implementation, followed by its final canonical gate and merge. That restoration slice itself made no hardware claim. Current Stage 9 hardware evidence is recorded separately in the dated testing documents.
 
+PR #89 scanner-watchdog hardware acceptance is also complete. The real-device gate used target-address isolation to create the exact no-accepted-frame condition on the physical Plug while leaving BLE/RF scanning live; it is not a claim that the sensor was physically RF-shielded. Detailed evidence: `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md`.
+
 ## Runtime / safety boundaries
 
 Keep these invariants:
@@ -98,16 +100,16 @@ Do not infer what a physical phone is running from this document. A phone claim 
 
 ## Next work
 
-The application is near feature-complete. Three Stage 9 slices are qualified on `main`: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and a deliberate real-device software reboot. The configured Plug recorded boot-safe OFF at uptime 4 s, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim.
+The application is near feature-complete. Three Stage 9 slices are qualified on `main`: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and a deliberate real-device software reboot. PR #89 adds a fourth qualified hardware result and is pending merge: healthy-scanner sensor silence -> stale/OFF -> fresh-BLE AUTO recovery. The configured Plug recorded boot-safe OFF at uptime 4 s during the separate software-reboot gate, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim.
 
 Default order is now:
 
-1. finish the real-hardware gate for draft PR #89 and merge it only if RF-loss -> stale/OFF -> fresh-BLE AUTO recovery passes on the exact candidate;
+1. finish final CI/diff review for hardware-qualified PR #89 and merge it without changing the tested executable candidate;
 2. qualify physical mains power-cycle plus remaining Wi-Fi/BLE loss/recovery;
 3. run a materially longer soak and close the final real-hardware matrix;
 4. declare V1 feature freeze and run release qualification.
 
-Detailed recovery evidence already on `main`: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md` and `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.
+Detailed recovery evidence already on `main`: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md` and `docs/testing/reboot-recovery-acceptance-2026-10-04.md`. PR #89 hardware evidence is in `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md`.
 
 Enabling active Standalone Pulse BLE scan is now technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into restoration plumbing.
 

@@ -399,7 +399,8 @@ describe('generateShellyThermostatScript', () => {
     expect(script).toContain('function nw(){return L.getUptimeMs()}');
     expect(script).toContain('BLE.Scanner.start||BLE.Scanner.Start');
     expect(script).toContain('interval_ms:241,window_ms:61,rssi_thr:0');
-    expect(script).toContain('nw()-(R.l||R.sa)>9e4');
+    expect(script).toContain('BLE.Scanner.isRunning');
+    expect(script).not.toContain('nw()-(R.l||R.sa)>9e4');
     expect(script).not.toContain('Date.now()');
     expect(script).toContain('"st"');
     expect(script).toContain('"mx"');
@@ -781,7 +782,7 @@ describe('generateShellyThermostatScript', () => {
     }
   });
 
-  it('uses target packet freshness for the BLE scanner watchdog', () => {
+  it('does not treat target packet silence as scanner failure', () => {
     let nowMs = 100_000;
     const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
     try {
@@ -816,7 +817,7 @@ describe('generateShellyThermostatScript', () => {
 
       nowMs += 91_000;
       watchdog?.callback();
-      expect(startCalls).toHaveLength(2);
+      expect(startCalls).toHaveLength(1);
     } finally {
       nowSpy.mockRestore();
     }
