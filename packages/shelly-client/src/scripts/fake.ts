@@ -97,6 +97,22 @@ export class FakeShellyClient implements ShellyClient {
     };
   }
 
+  async replaceScript(
+    scriptId: number,
+    code: string
+  ): Promise<Result<ShellyInstallResult>> {
+    return {
+      ok: true,
+      value: {
+        scriptId,
+        running: this.scriptUploaded,
+        memUsed: 18_000,
+        memFree: 92_000,
+        scriptHash: hashScriptCode(code)
+      }
+    };
+  }
+
   async stopScript(): Promise<Result<null>> {
     this.scriptUploaded = false;
     return { ok: true, value: null };

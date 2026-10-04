@@ -1,6 +1,7 @@
 import { ClimatePulseOperationalStatusSummary } from './components/ClimatePulseOperationalStatusSummary.js';
 import { PulseCycleEditor } from './components/PulseCycleEditor.js';
 import { PulseOperationalStatusSummary } from './components/PulseOperationalStatusSummary.js';
+import { StandalonePulseConfigurationSection } from './components/StandalonePulseConfigurationSection.js';
 import { StandalonePulseSetupPage } from './components/StandalonePulseSetupPage.js';
 import {
   DEFAULT_PULSE_CYCLE_FORM,
@@ -15,6 +16,7 @@ import { normalizePulseOperationalStatus } from './data/pulseOperationalStatus.j
 import {
   deleteStandalonePulseAutomation,
   pauseStandalonePulseAutomation,
+  replaceStandalonePulseAutomation,
   resumeStandalonePulseAutomation
 } from './data/standalonePulseAutomationRuntime.js';
 import { installTimePulseAutomation } from './data/timePulseAutomationRuntime.js';
@@ -39,11 +41,13 @@ export const Pulse = {
   },
   Standalone: {
     SetupPage: StandalonePulseSetupPage,
+    ConfigurationSection: StandalonePulseConfigurationSection,
     useRuntime: useStandalonePulseRuntime,
     useActions: useStandalonePulseActions,
     useScriptSource: useStandalonePulseScriptSource,
     pause: pauseStandalonePulseAutomation,
     resume: resumeStandalonePulseAutomation,
+    replace: replaceStandalonePulseAutomation,
     delete: deleteStandalonePulseAutomation
   },
   Operational: {

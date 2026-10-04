@@ -3,7 +3,8 @@ import type {
   Result,
   ShellyDeviceInfo,
   ShellyInstallPlan,
-  ShellyInstallResult
+  ShellyInstallResult,
+  ShellyScriptReplacementOptions
 } from '@lcl/shelly-client';
 import { describe, expect, it } from 'vitest';
 import { createStandalonePulseInstalledAutomation } from './installedAutomation.js';
@@ -11,6 +12,7 @@ import {
   deleteStandalonePulseAutomation,
   installStandalonePulseAutomation,
   pauseStandalonePulseAutomation,
+  replaceStandalonePulseAutomation,
   resumeStandalonePulseAutomation,
   type StandalonePulseAutomationClient
 } from './standalonePulseAutomationRuntime.js';
@@ -46,6 +48,8 @@ class FakeStandalonePulseClient {
   failDelete = false;
   calls: string[] = [];
   installedPlan: ShellyInstallPlan | null = null;
+  replacementCode: string | null = null;
+  replacementOptions: ShellyScriptReplacementOptions | null = null;
 
   readonly client: StandalonePulseAutomationClient = {
     getDeviceInfo: async () =>
@@ -59,6 +63,16 @@ class FakeStandalonePulseClient {
         scriptId: this.nextScriptId,
         running: true,
         scriptHash: 'standalone-pulse-hash'
+      } satisfies ShellyInstallResult);
+    },
+    replaceScript: async (scriptId, code, options) => {
+      this.calls.push(`script:replace:${scriptId}`);
+      this.replacementCode = code;
+      this.replacementOptions = options ?? null;
+      return ok({
+        scriptId,
+        running: true,
+        scriptHash: 'replacement-hash'
       } satisfies ShellyInstallResult);
     },
     startScript: async (scriptId) => {
@@ -125,6 +139,56 @@ describe('Standalone Pulse runtime lifecycle', () => {
 
     expect(fake.calls[0]).toBe('relay:off:2');
     expect(fake.calls.at(-1)).toBe('relay:off:2');
+  });
+
+  it('replaces Pulse in place without changing installation or script identity', async () => {
+    const fake = new FakeStandalonePulseClient();
+    const installation = installationFor(
+      await installStandalonePulseAutomation({ client: fake.client, config })
+    );
+    const nextConfig: StandalonePulseAutomationConfig = {
+      ...config,
+      pulse: { ...config.pulse, onMs: 4_000, startPhase: 'off' }
+    };
+    fake.calls = [];
+
+    const replaced = await replaceStandalonePulseAutomation({
+      installation,
+      config: nextConfig,
+      client: fake.client,
+      nowMs: 2_000
+    });
+
+    expect(fake.calls).toEqual(['script:replace:7']);
+    expect(fake.replacementOptions).toEqual({
+      expectedCurrentHash: 'standalone-pulse-hash',
+      relayId: 2
+    });
+    expect(fake.replacementCode).toContain('"e":[4000,2000,0,1,0]');
+    expect(replaced.id).toBe(installation.id);
+    expect(replaced.script).toEqual({ id: 7, hash: 'replacement-hash' });
+    expect(replaced.installedAtMs).toBe(1_000);
+    expect(replaced.updatedAtMs).toBe(2_000);
+    expect(replaced.config).toEqual(nextConfig);
+  });
+
+  it('refuses replacement against a different physical Shelly before mutation', async () => {
+    const fake = new FakeStandalonePulseClient();
+    const installation = installationFor(
+      await installStandalonePulseAutomation({ client: fake.client, config })
+    );
+    fake.deviceId = 'another-shelly';
+    fake.calls = [];
+
+    await expect(
+      replaceStandalonePulseAutomation({
+        installation,
+        config,
+        client: fake.client
+      })
+    ).rejects.toThrow('identity does not match');
+
+    expect(fake.calls).toEqual([]);
   });
 
   it('pause cancels the cycle, stops the script and finishes OFF', async () => {

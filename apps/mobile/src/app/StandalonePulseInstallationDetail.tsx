@@ -20,7 +20,6 @@ import {
   type PlugDetailTab
 } from '../features/plugs/index.js';
 import { installationScriptPreviewCopy } from './locales/installationScriptPreview.js';
-import { pulseCycleCopy } from './locales/pulseCycle.js';
 import { pulseManagementCopy } from './locales/pulseManagement.js';
 import { useTranslation } from './i18n.js';
 
@@ -39,8 +38,6 @@ type StandalonePulseInstallationDetailProps = {
   onBack?: () => void;
 };
 
-const secondsLabel = (milliseconds: number): string => `${milliseconds / 1_000} s`;
-
 export const StandalonePulseInstallationDetail = ({
   installation,
   onBack
@@ -48,6 +45,7 @@ export const StandalonePulseInstallationDetail = ({
   const { locale, t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editPending, setEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
@@ -61,7 +59,6 @@ export const StandalonePulseInstallationDetail = ({
   const dismissToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
-  const pulseLabels = pulseCycleCopy[locale];
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
   const runtimeQuery = Pulse.Standalone.useRuntime(installation);
@@ -83,7 +80,6 @@ export const StandalonePulseInstallationDetail = ({
   const savedDevice = savedPlugs.find((device) =>
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
-  const execution = installation.config.pulse.execution;
 
   const deleteMutation = useMutation({
     mutationFn: () => Pulse.Standalone.delete(installation),
@@ -94,12 +90,6 @@ export const StandalonePulseInstallationDetail = ({
     }
   });
 
-  const executionLabel =
-    execution.mode === 'continuous'
-      ? pulseLabels.continuous
-      : execution.mode === 'cycles'
-        ? `${pulseLabels.cycles} · ${execution.count}`
-        : `${pulseLabels.duration} · ${secondsLabel(execution.durationMs)}`;
   const runtimeNeedsAttention =
     pulseQuery.isError ||
     runtimeQuery.isError ||
@@ -146,37 +136,16 @@ export const StandalonePulseInstallationDetail = ({
                 <Pulse.Operational.StatusSummary status={pulseQuery.data} />
               </section>
 
-              <section className="installation-detail-hierarchy__section">
-                <h3 className="installation-detail-hierarchy__title">
-                  {t('detail.configuration')}
-                </h3>
-                <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
-                  <div>
-                    <dt>{pulseLabels.onSeconds}</dt>
-                    <dd>{secondsLabel(installation.config.pulse.onMs)}</dd>
-                  </div>
-                  <div>
-                    <dt>{pulseLabels.offSeconds}</dt>
-                    <dd>{secondsLabel(installation.config.pulse.offMs)}</dd>
-                  </div>
-                  <div>
-                    <dt>{pulseLabels.initialDelaySeconds}</dt>
-                    <dd>{secondsLabel(installation.config.pulse.initialDelayMs)}</dd>
-                  </div>
-                  <div>
-                    <dt>{pulseLabels.startPhase}</dt>
-                    <dd>
-                      {installation.config.pulse.startPhase === 'on'
-                        ? pulseLabels.startOn
-                        : pulseLabels.startOff}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>{pulseLabels.execution}</dt>
-                    <dd>{executionLabel}</dd>
-                  </div>
-                </dl>
-              </section>
+              <Pulse.Standalone.ConfigurationSection
+                installation={installation}
+                onPendingChange={setEditPending}
+                onSaved={() => {
+                  pushToast('ok', managementLabels.saveDone);
+                  void runtimeQuery.refetch();
+                  if (automationRunning) void pulseQuery.refetch();
+                }}
+                onSaveError={() => pushToast('warning', managementLabels.saveFailed)}
+              />
 
               <section className="installation-detail-danger-zone">
                 <h3 className="installation-detail-hierarchy__title">
@@ -185,7 +154,7 @@ export const StandalonePulseInstallationDetail = ({
                 <button
                   className="secondary-action secondary-action--danger"
                   type="button"
-                  disabled={deleteMutation.isPending}
+                  disabled={deleteMutation.isPending || editPending}
                   onClick={() => setDeleteOpen(true)}
                 >
                   {managementLabels.deleteAction}
@@ -258,7 +227,7 @@ export const StandalonePulseInstallationDetail = ({
           <button
             className="secondary-action secondary-action--danger"
             type="button"
-            disabled={deleteMutation.isPending}
+            disabled={deleteMutation.isPending || editPending}
             onClick={() => deleteMutation.mutate()}
           >
             {deleteMutation.isPending

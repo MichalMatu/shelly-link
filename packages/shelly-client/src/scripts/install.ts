@@ -10,6 +10,7 @@ import {
   type ShellyInstallResult,
   type ShellyRpcRequest,
   type ShellyRpcTransport,
+  type ShellyScriptReplacementOptions,
   type ShellyScriptStorageItem,
   type ShellyStatus
 } from '../model.js';
@@ -23,6 +24,7 @@ import {
   DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES,
   installShellyScript
 } from './installLifecycle.js';
+import { replaceShellyScript } from './replace.js';
 
 const DEFAULT_SCRIPT_MUTATION_DELAY_MS = 100;
 
@@ -141,6 +143,22 @@ export class RpcShellyClient implements ShellyClient {
         getStatus: () => this.getStatus()
       },
       plan
+    );
+  }
+
+  async replaceScript(
+    scriptId: number,
+    code: string,
+    options?: ShellyScriptReplacementOptions
+  ): Promise<Result<ShellyInstallResult>> {
+    return replaceShellyScript(
+      {
+        transport: this.transport,
+        callMutation: (request) => this.callMutation<unknown>(request)
+      },
+      scriptId,
+      code,
+      options
     );
   }
 
