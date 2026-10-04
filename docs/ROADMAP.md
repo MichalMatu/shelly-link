@@ -227,6 +227,8 @@ Environment Profiles must reuse the existing Climate/VPD/Pulse engines, relay ow
 
 The product UX should present this as an environment schedule/profile (for example `Day 06:00–22:00` and `Night 22:00–06:00`) rather than as a collection of low-level smart-home scenes.
 
+A lightweight follow-up candidate is **Dew Point / condensation risk**, derived from the Temperature and Humidity data already available. Prefer calculating and presenting it in the app/History first so it adds no generated Shelly runtime bytes. A local Dew Point automation trigger should only be added later if a runtime-size/headroom audit shows that it fits without weakening existing safety/recovery capability or raising the accepted script ceiling.
+
 ## Post-stabilization growth track — Pulse Advanced
 
 After V1 stabilization / feature freeze, Pulse is the first planned growth area. These capabilities are intentionally recorded now so they are not lost, but they must not expand Pulse V1 scope or delay stabilization.
