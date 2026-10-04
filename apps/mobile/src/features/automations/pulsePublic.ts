@@ -15,6 +15,7 @@ import { normalizePulseOperationalStatus } from './data/pulseOperationalStatus.j
 import {
   deleteStandalonePulseAutomation,
   pauseStandalonePulseAutomation,
+  replaceStandalonePulseAutomation,
   resumeStandalonePulseAutomation
 } from './data/standalonePulseAutomationRuntime.js';
 import { installTimePulseAutomation } from './data/timePulseAutomationRuntime.js';
@@ -44,6 +45,7 @@ export const Pulse = {
     useScriptSource: useStandalonePulseScriptSource,
     pause: pauseStandalonePulseAutomation,
     resume: resumeStandalonePulseAutomation,
+    replace: replaceStandalonePulseAutomation,
     delete: deleteStandalonePulseAutomation
   },
   Operational: {
