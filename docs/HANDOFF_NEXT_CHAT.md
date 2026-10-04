@@ -1,6 +1,6 @@
-# Handoff — BLE restore generalized; stabilization is next
+# Handoff — Stage 9 stabilization in progress
 
-Status: **2026-10-04 — PR #83 is merged to `main`. Safe standalone Pulse inline replacement is closed. Temporary Plug BLE discovery runtime preservation is generalized in the current completion slice; active standalone Pulse BLE scan UI remains intentionally disabled until it is accepted as a separate product/UX slice.**
+Status: **2026-10-04 — PR #85 soak/liveness observability is merged. Controlled real-device `Shelly.Reboot` recovery is now qualified: boot-safe OFF was recorded in History, the same Climate runtime/source restarted without rewrite, and AUTO recovered only after fresh BLE input. Physical mains power-cycle and loss/recovery matrix work remain.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -71,7 +71,7 @@ The BLE restore implementation has focused deterministic coverage for:
 - restoration failure falling back to relay OFF + managed script stop;
 - late/unmounted discovery cleanup carrying the opaque restore state unchanged.
 
-Focused mobile tests, typecheck, repository quality gates and UX quality gates pass on the formatted implementation branch. The completion head still requires the canonical final `pnpm check` before merge. No real-hardware acceptance is claimed by this handoff unless a dated hardware record is added separately.
+Focused mobile tests, typecheck, repository quality gates and UX quality gates passed for the BLE restoration implementation, followed by its final canonical gate and merge. That restoration slice itself made no hardware claim. Current Stage 9 hardware evidence is recorded separately in the dated testing documents.
 
 ## Runtime / safety boundaries
 
@@ -91,11 +91,13 @@ Do not infer what a physical phone is running from this document. A phone claim 
 
 ## Next work
 
-The application is near feature-complete. The first Stage 9 stabilization slice is qualified: soak JSONL can now be post-processed for reboot/liveness/outage/stopped-script evidence, and a short read-only Plug S Gen3 smoke passed 12/12 samples with zero liveness faults and `mem_free` minimum 19334 B. This is observability evidence, not completion of stabilization. Default order is now:
+The application is near feature-complete. Two Stage 9 slices are now qualified: soak/liveness observability, and a deliberate real-device software reboot. The configured Plug recorded boot-safe OFF at uptime 4 s, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim. Default order is now:
 
-1. deliberate reboot/power-cycle plus Wi-Fi/BLE loss/recovery and the AUTO/MANUAL + automation-fault + hard-safety interaction matrix;
+1. physical mains power-cycle plus Wi-Fi/BLE loss/recovery and the AUTO/MANUAL + automation-fault + hard-safety interaction matrix;
 2. a materially longer soak and the final real-hardware matrix;
 3. V1 feature freeze and release qualification.
+
+Detailed reboot evidence: `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.
 
 Enabling active Standalone Pulse BLE scan is now technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into restoration plumbing.
 
