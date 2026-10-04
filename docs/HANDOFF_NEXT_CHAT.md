@@ -1,6 +1,6 @@
 # Handoff — Stage 9 stabilization in progress
 
-Status: **2026-10-04 — PR #85 soak/liveness observability is merged. Controlled real-device `Shelly.Reboot` recovery is now qualified: boot-safe OFF was recorded in History, the same Climate runtime/source restarted without rewrite, and AUTO recovered only after fresh BLE input. Physical mains power-cycle and loss/recovery matrix work remain.**
+Status: **2026-10-04 — Stage 9 soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and controlled real-device `Shelly.Reboot` recovery are qualified. Physical mains power-cycle plus Wi-Fi/BLE loss/recovery remain before the long-soak/final-hardware closeout.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -91,13 +91,13 @@ Do not infer what a physical phone is running from this document. A phone claim 
 
 ## Next work
 
-The application is near feature-complete. Two Stage 9 slices are now qualified: soak/liveness observability, and a deliberate real-device software reboot. The configured Plug recorded boot-safe OFF at uptime 4 s, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim. Default order is now:
+The application is near feature-complete. Three Stage 9 slices are now qualified: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and a deliberate real-device software reboot. The configured Plug recorded boot-safe OFF at uptime 4 s, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim. Default order is now:
 
-1. physical mains power-cycle plus Wi-Fi/BLE loss/recovery and the AUTO/MANUAL + automation-fault + hard-safety interaction matrix;
+1. physical mains power-cycle plus Wi-Fi/BLE loss/recovery;
 2. a materially longer soak and the final real-hardware matrix;
 3. V1 feature freeze and release qualification.
 
-Detailed reboot evidence: `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.
+Detailed recovery evidence: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md` and `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.
 
 Enabling active Standalone Pulse BLE scan is now technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into restoration plumbing.
 
