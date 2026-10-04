@@ -77,7 +77,10 @@ const createWatchdogRuntime = () => {
     }
   };
 
-  const base = createDefaultShellyThermostatConfig('tp357_custom_v1', 'humidifying');
+  const base = createDefaultShellyThermostatConfig(
+    'tp357_custom_v1',
+    'humidifying'
+  );
   const script = generateShellyThermostatScript({
     ...base,
     sensor: { ...base.sensor, runtimeAddress: SENSOR_ADDRESS },
@@ -96,8 +99,10 @@ const createWatchdogRuntime = () => {
   const watchdog = timers.find(
     (timer) => timer.durationMs === 30_000 && timer.repeat === true
   );
-  if (!bootScanner || !watchdog) throw new Error('Generated scanner timers are missing.');
-  if (!scanCallback) throw new Error('Generated runtime did not subscribe to BLE scanner.');
+  if (!bootScanner || !watchdog)
+    throw new Error('Generated scanner timers are missing.');
+  if (!scanCallback)
+    throw new Error('Generated runtime did not subscribe to BLE scanner.');
 
   return {
     bootScanner,
@@ -150,7 +155,9 @@ describe('Climate BLE scanner watchdog', () => {
 
     const packet = {
       addr: SENSOR_ADDRESS,
-      advData: manufacturerAdvertisement([0xc2, 0xdc, 0x00, 0x32, 0x02, 0x2c]),
+      advData: manufacturerAdvertisement([
+        0xc2, 0xdc, 0x00, 0x32, 0x02, 0x2c
+      ]),
       rssi: -50
     };
     runtime.scan('scan-result', packet);
