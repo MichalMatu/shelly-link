@@ -48,6 +48,10 @@ export const StandalonePulseInstallationDetail = ({
   const { locale, t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [pulseDraft, setPulseDraft] = useState(() =>
+    Pulse.Cycle.fromConfig(installation.config.pulse)
+  );
   const [forgetOpen, setForgetOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
@@ -79,11 +83,19 @@ export const StandalonePulseInstallationDetail = ({
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
+  const upsertInstallation = useInstalledAutomationStore(
+    (state) => state.upsertInstallation
+  );
   const savedPlugs = useSavedPlugStore((state) => state.plugs);
   const savedDevice = savedPlugs.find((device) =>
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
   const execution = installation.config.pulse.execution;
+  const pulseEditValidation = Pulse.Cycle.parseForm({ ...pulseDraft, enabled: true });
+  const nextPulseConfig = pulseEditValidation.ok ? pulseEditValidation.config : null;
+  const pulseEditChanged =
+    nextPulseConfig !== null &&
+    JSON.stringify(nextPulseConfig) !== JSON.stringify(installation.config.pulse);
 
   const deleteMutation = useMutation({
     mutationFn: () => Pulse.Standalone.delete(installation),
@@ -92,6 +104,30 @@ export const StandalonePulseInstallationDetail = ({
       setDeleteOpen(false);
       onBack?.();
     }
+  });
+
+  const editMutation = useMutation({
+    mutationFn: async () => {
+      if (!pulseEditValidation.ok || !pulseEditValidation.config) {
+        throw new Error('Pulse configuration is invalid.');
+      }
+      return Pulse.Standalone.replace({
+        installation,
+        config: {
+          relayId: installation.config.relayId,
+          pulse: pulseEditValidation.config
+        }
+      });
+    },
+    onSuccess: (updatedInstallation) => {
+      upsertInstallation(updatedInstallation);
+      setPulseDraft(Pulse.Cycle.fromConfig(updatedInstallation.config.pulse));
+      setEditOpen(false);
+      pushToast('ok', managementLabels.saveDone);
+      void runtimeQuery.refetch();
+      if (automationRunning) void pulseQuery.refetch();
+    },
+    onError: () => pushToast('warning', managementLabels.saveFailed)
   });
 
   const executionLabel =
@@ -116,6 +152,11 @@ export const StandalonePulseInstallationDetail = ({
       .catch(() => pushToast('warning', scriptLabels.copyFailed));
   };
 
+  const cancelEdit = () => {
+    setPulseDraft(Pulse.Cycle.fromConfig(installation.config.pulse));
+    setEditOpen(false);
+  };
+
   return (
     <main className="demo-shell installation-detail-shell">
       <PlugDetailTop
@@ -130,6 +171,11 @@ export const StandalonePulseInstallationDetail = ({
             {runtimeNeedsAttention && (
               <FeedbackPanel tone="warning" title={t('dashboard.health.attention')}>
                 {managementLabels.runtimeAttention}
+              </FeedbackPanel>
+            )}
+            {editMutation.isError && (
+              <FeedbackPanel tone="danger" title={t('common.operationFailed')}>
+                {managementLabels.saveFailed}
               </FeedbackPanel>
             )}
             {deleteMutation.isError && (
@@ -150,32 +196,85 @@ export const StandalonePulseInstallationDetail = ({
                 <h3 className="installation-detail-hierarchy__title">
                   {t('detail.configuration')}
                 </h3>
-                <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
-                  <div>
-                    <dt>{pulseLabels.onSeconds}</dt>
-                    <dd>{secondsLabel(installation.config.pulse.onMs)}</dd>
-                  </div>
-                  <div>
-                    <dt>{pulseLabels.offSeconds}</dt>
-                    <dd>{secondsLabel(installation.config.pulse.offMs)}</dd>
-                  </div>
-                  <div>
-                    <dt>{pulseLabels.initialDelaySeconds}</dt>
-                    <dd>{secondsLabel(installation.config.pulse.initialDelayMs)}</dd>
-                  </div>
-                  <div>
-                    <dt>{pulseLabels.startPhase}</dt>
-                    <dd>
-                      {installation.config.pulse.startPhase === 'on'
-                        ? pulseLabels.startOn
-                        : pulseLabels.startOff}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>{pulseLabels.execution}</dt>
-                    <dd>{executionLabel}</dd>
-                  </div>
-                </dl>
+                {editOpen ? (
+                  <>
+                    <Pulse.Cycle.Editor
+                      draft={pulseDraft}
+                      validation={pulseEditValidation}
+                      optional={false}
+                      onChange={(patch) =>
+                        setPulseDraft((current) => ({
+                          ...current,
+                          ...patch,
+                          enabled: true
+                        }))
+                      }
+                    />
+                    <div className="plug-settings-actions">
+                      <button
+                        className="secondary-action"
+                        type="button"
+                        disabled={editMutation.isPending}
+                        onClick={cancelEdit}
+                      >
+                        {t('common.cancel')}
+                      </button>
+                      <button
+                        className="primary-action"
+                        type="button"
+                        disabled={
+                          editMutation.isPending ||
+                          !pulseEditValidation.ok ||
+                          !pulseEditChanged
+                        }
+                        onClick={() => editMutation.mutate()}
+                      >
+                        {editMutation.isPending
+                          ? managementLabels.saveBusy
+                          : managementLabels.saveAction}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
+                      <div>
+                        <dt>{pulseLabels.onSeconds}</dt>
+                        <dd>{secondsLabel(installation.config.pulse.onMs)}</dd>
+                      </div>
+                      <div>
+                        <dt>{pulseLabels.offSeconds}</dt>
+                        <dd>{secondsLabel(installation.config.pulse.offMs)}</dd>
+                      </div>
+                      <div>
+                        <dt>{pulseLabels.initialDelaySeconds}</dt>
+                        <dd>{secondsLabel(installation.config.pulse.initialDelayMs)}</dd>
+                      </div>
+                      <div>
+                        <dt>{pulseLabels.startPhase}</dt>
+                        <dd>
+                          {installation.config.pulse.startPhase === 'on'
+                            ? pulseLabels.startOn
+                            : pulseLabels.startOff}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>{pulseLabels.execution}</dt>
+                        <dd>{executionLabel}</dd>
+                      </div>
+                    </dl>
+                    <div className="plug-settings-actions">
+                      <button
+                        className="secondary-action"
+                        type="button"
+                        disabled={deleteMutation.isPending}
+                        onClick={() => setEditOpen(true)}
+                      >
+                        {managementLabels.editAction}
+                      </button>
+                    </div>
+                  </>
+                )}
               </section>
 
               <section className="installation-detail-danger-zone">
@@ -185,7 +284,7 @@ export const StandalonePulseInstallationDetail = ({
                 <button
                   className="secondary-action secondary-action--danger"
                   type="button"
-                  disabled={deleteMutation.isPending}
+                  disabled={deleteMutation.isPending || editMutation.isPending}
                   onClick={() => setDeleteOpen(true)}
                 >
                   {managementLabels.deleteAction}
@@ -258,7 +357,7 @@ export const StandalonePulseInstallationDetail = ({
           <button
             className="secondary-action secondary-action--danger"
             type="button"
-            disabled={deleteMutation.isPending}
+            disabled={deleteMutation.isPending || editMutation.isPending}
             onClick={() => deleteMutation.mutate()}
           >
             {deleteMutation.isPending
