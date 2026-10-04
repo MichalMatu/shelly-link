@@ -110,7 +110,8 @@ export const replaceStandalonePulseAutomation = async ({
   const replaced = unwrapShellyResult(
     await client.replaceScript(
       installation.script.id,
-      generateShellyStandalonePulseScript(config)
+      generateShellyStandalonePulseScript(config),
+      installation.script.hash
     )
   );
   if (replaced.scriptId !== installation.script.id) {
