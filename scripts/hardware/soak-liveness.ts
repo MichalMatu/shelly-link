@@ -123,7 +123,7 @@ export const updateSoakLiveness = (
       state.scriptNotRunningStartedAtMs,
       sampledAtMs
     );
-  } else {
+  } else if (sample.scriptRunning === true) {
     summary.maxScriptNotRunningMs = updateOpenWindow(
       summary.maxScriptNotRunningMs,
       state.scriptNotRunningStartedAtMs,
