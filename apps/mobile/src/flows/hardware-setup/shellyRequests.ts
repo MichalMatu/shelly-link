@@ -1,10 +1,11 @@
-import type { ClimateRuntimeControlState } from '@lcl/script-generator';
 import {
+  RPC_METHODS,
   SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME,
   type FetchShellyRpcTransport,
   RpcShellyClient,
   createBleDiscoveryInstallPlan,
   readShellyScriptList as readShellyScriptListResult,
+  switchStatusSchema,
   type ShellyInstallResult
 } from '@lcl/shelly-client';
 import {
@@ -24,8 +25,9 @@ import {
   unwrapShellyResult
 } from '../../platform/shellyResult.js';
 import {
-  readClimateRuntimeControlState,
-  restoreClimateRuntimeControlState
+  captureManagedAutomationDiscoveryRestoreState,
+  restoreManagedAutomationDiscoveryState,
+  type ManagedAutomationDiscoveryRestoreState
 } from '../installations/runtimeModeTransport.js';
 
 const shellyOutOfMemoryMessage = (): string => t('hardware.shelly.outOfMemory');
@@ -39,9 +41,7 @@ export type ShellySetupScanResult = {
 };
 
 export type ShellyBleDiscoveryPreparation = {
-  automationScriptId: number | null;
-  automationWasRunning: boolean;
-  automationControlState: ClimateRuntimeControlState | null;
+  automationRestoreState: ManagedAutomationDiscoveryRestoreState;
 };
 
 export type ShellyRuntimeStatus = {
@@ -100,11 +100,6 @@ const readScriptList = async (
 ): Promise<HardwareSetupStatus['scripts']> =>
   unwrapShellyResult(await readShellyScriptListResult(transport));
 
-const findAutomationScript = (scripts: ScriptListEntry[]): ScriptListEntry | null => {
-  const enabledScripts = scripts.filter((script) => script.enable);
-  return enabledScripts.length === 1 ? enabledScripts[0]! : null;
-};
-
 const findBleDiscoveryScripts = (scripts: ScriptListEntry[]): ScriptListEntry[] =>
   scripts.filter((script) => script.name === SHELLY_LINK_BLE_DISCOVERY_SCRIPT_NAME);
 
@@ -156,6 +151,30 @@ const deleteBleDiscoveryScripts = async (
   return deletedCount;
 };
 
+const relayOutput = async (
+  transport: FetchShellyRpcTransport,
+  relayId: number
+): Promise<boolean> => {
+  const status = unwrapShellyResult(
+    await transport.call<unknown>({
+      method: RPC_METHODS.SwitchGetStatus,
+      params: { id: relayId }
+    })
+  );
+  return switchStatusSchema.parse(status).output;
+};
+
+const forceRelayOff = async (
+  client: RpcShellyClient,
+  transport: FetchShellyRpcTransport,
+  relayId: number
+): Promise<void> => {
+  unwrapShellyResult(await client.setRelayOff({ relayId }));
+  if (await relayOutput(transport, relayId)) {
+    throw new Error('Shelly relay did not confirm OFF before BLE discovery.');
+  }
+};
+
 export const readShellySetupStatus = async (
   baseUrl: string
 ): Promise<HardwareSetupStatus> => {
@@ -201,23 +220,16 @@ export const prepareShellyBleDiscovery = async (
   const client = new RpcShellyClient(transport);
   const initialScripts = await readScriptList(transport);
   await deleteBleDiscoveryScripts(client, initialScripts);
-  const scripts = await readScriptList(transport);
-  const automationScript = findAutomationScript(scripts);
-  const automationControlState = automationScript?.running
-    ? await readClimateRuntimeControlState(transport, automationScript.id)
-    : null;
-  unwrapShellyResult(await client.setRelayOff());
-  if (automationScript?.running)
-    unwrapShellyResult(await client.stopScript(automationScript.id));
-  unwrapShellyResult(await client.setRelayOff());
-  const status = unwrapShellyResult(await client.getStatus());
-  if (status.relayOn)
-    throw new Error('Shelly relay did not confirm OFF before BLE discovery.');
-  return {
-    automationScriptId: automationScript?.id ?? null,
-    automationWasRunning: automationScript?.running ?? false,
-    automationControlState
-  };
+  const automationRestoreState =
+    await captureManagedAutomationDiscoveryRestoreState(transport);
+
+  await forceRelayOff(client, transport, automationRestoreState.relayId);
+  if (automationRestoreState.wasRunning && automationRestoreState.scriptId !== null) {
+    unwrapShellyResult(await client.stopScript(automationRestoreState.scriptId));
+  }
+  await forceRelayOff(client, transport, automationRestoreState.relayId);
+
+  return { automationRestoreState };
 };
 
 export const cleanupStaleShellyBleDiscoveryScripts = async (
@@ -264,9 +276,7 @@ export const stopShellyBleDiscovery = async (
   baseUrl: string,
   options: {
     discoveryScriptId: number | null;
-    automationScriptId: number | null;
-    restartAutomation: boolean;
-    automationControlState: ClimateRuntimeControlState | null;
+    automationRestoreState: ManagedAutomationDiscoveryRestoreState;
   }
 ): Promise<void> => {
   const transport = createShellyTransport(baseUrl);
@@ -285,26 +295,22 @@ export const stopShellyBleDiscovery = async (
           : new Error(t('hardware.shelly.deleteScannerFailed'));
     }
   }
-  if (
-    options.restartAutomation &&
-    options.automationScriptId !== null &&
-    discoveryStopped
-  ) {
+
+  if (discoveryStopped) {
     try {
-      if (!options.automationControlState)
-        throw new Error(
-          'Managed automation state was not captured before BLE discovery.'
-        );
-      unwrapShellyResult(await client.startScript(options.automationScriptId));
-      await restoreClimateRuntimeControlState(
+      await restoreManagedAutomationDiscoveryState(
         transport,
-        options.automationScriptId,
-        options.automationControlState
+        options.automationRestoreState
       );
     } catch (error) {
+      const automationState = options.automationRestoreState;
       try {
-        unwrapShellyResult(await client.setRelayOff());
-        unwrapShellyResult(await client.stopScript(options.automationScriptId));
+        unwrapShellyResult(
+          await client.setRelayOff({ relayId: automationState.relayId })
+        );
+        if (automationState.scriptId !== null) {
+          unwrapShellyResult(await client.stopScript(automationState.scriptId));
+        }
       } catch {
         // Preserve the original restore failure while cleanup remains best effort.
       }
