@@ -5,7 +5,6 @@ import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   ClimateScriptDetailSection,
   Pulse,
-  StandalonePulseConfigurationSection,
   useInstalledAutomationStore,
   type InstalledAutomation
 } from '../features/automations/index.js';
@@ -137,7 +136,7 @@ export const StandalonePulseInstallationDetail = ({
                 <Pulse.Operational.StatusSummary status={pulseQuery.data} />
               </section>
 
-              <StandalonePulseConfigurationSection
+              <Pulse.Standalone.ConfigurationSection
                 installation={installation}
                 onPendingChange={setEditPending}
                 onSaved={() => {
