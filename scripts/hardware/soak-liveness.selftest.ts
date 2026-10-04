@@ -161,10 +161,7 @@ const sample = (input: {
   assert.equal(summary.maxDiagOutageMs, 10_000);
 }
 
-assert.throws(
-  () => summarizeSoakJsonl('{not-json}\n'),
-  /Invalid soak JSONL at line 1/
-);
+assert.throws(() => summarizeSoakJsonl('{not-json}\n'), /Invalid soak JSONL at line 1/);
 assert.throws(
   () =>
     summarizeSoakJsonl(
