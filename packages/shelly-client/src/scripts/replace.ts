@@ -5,10 +5,11 @@ import {
   type ShellyInstallResult,
   type ShellyRpcRequest,
   type ShellyRpcTransport,
-  type ShellyScriptBackup
+  type ShellyScriptBackup,
+  type ShellyScriptReplacementOptions
 } from '../model.js';
 import { validationError } from '../rpc/errors.js';
-import { scriptStatusSchema } from '../rpc/validators.js';
+import { scriptStatusSchema, switchStatusSchema } from '../rpc/validators.js';
 import { hashScriptCode } from './hash.js';
 import { DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES } from './installLifecycle.js';
 import { readShellyScriptCode, readShellyScriptList } from './read.js';
@@ -146,6 +147,36 @@ const verifyScript = async (
   return status;
 };
 
+const confirmRelayOff = async (
+  lifecycle: ReplacementLifecycle,
+  relayId: number
+): Promise<Result<null>> => {
+  const off = await lifecycle.callMutation({
+    method: RPC_METHODS.SwitchSet,
+    params: { id: relayId, on: false }
+  });
+  if (!off.ok) return off;
+
+  const status = await lifecycle.transport.call<unknown>({
+    method: RPC_METHODS.SwitchGetStatus,
+    params: { id: relayId }
+  });
+  if (!status.ok) return status;
+  const parsed = switchStatusSchema.safeParse(status.value);
+  if (!parsed.success) {
+    return { ok: false, error: validationError(parsed.error.message) };
+  }
+  if (parsed.data.output) {
+    return {
+      ok: false,
+      error: scriptReplacementError(
+        'Shelly relay did not confirm OFF before script replacement.'
+      )
+    };
+  }
+  return { ok: true, value: null };
+};
+
 const restoreBackup = async (
   lifecycle: ReplacementLifecycle,
   backup: ShellyScriptBackup,
@@ -201,7 +232,7 @@ export const replaceShellyScript = async (
   lifecycle: ReplacementLifecycle,
   scriptId: number,
   code: string,
-  expectedCurrentHash?: string,
+  options: ShellyScriptReplacementOptions = {},
   chunkSizeBytes = DEFAULT_PUT_CODE_CHUNK_SIZE_BYTES
 ): Promise<Result<ShellyInstallResult>> => {
   if (!Number.isInteger(scriptId) || scriptId < 0) {
@@ -214,6 +245,15 @@ export const replaceShellyScript = async (
     return {
       ok: false,
       error: validationError(`Invalid Shelly script chunk size: ${chunkSizeBytes}.`)
+    };
+  }
+  if (
+    options.relayId !== undefined &&
+    (!Number.isInteger(options.relayId) || options.relayId < 0)
+  ) {
+    return {
+      ok: false,
+      error: validationError(`Invalid Shelly relay id: ${options.relayId}.`)
     };
   }
 
@@ -230,7 +270,10 @@ export const replaceShellyScript = async (
   const source = await readShellyScriptCode(lifecycle.transport, scriptId, { chunkSizeBytes });
   if (!source.ok) return source;
   const sourceHash = hashScriptCode(source.value);
-  if (expectedCurrentHash !== undefined && sourceHash !== expectedCurrentHash) {
+  if (
+    options.expectedCurrentHash !== undefined &&
+    sourceHash !== options.expectedCurrentHash
+  ) {
     return {
       ok: false,
       error: scriptReplacementError(
@@ -270,6 +313,12 @@ export const replaceShellyScript = async (
       params: { id: scriptId }
     });
     if (!stop.ok) return stop;
+    mutationStarted = true;
+  }
+
+  if (options.relayId !== undefined) {
+    const relayOff = await confirmRelayOff(lifecycle, options.relayId);
+    if (!relayOff.ok) return fail(relayOff.error);
     mutationStarted = true;
   }
 
