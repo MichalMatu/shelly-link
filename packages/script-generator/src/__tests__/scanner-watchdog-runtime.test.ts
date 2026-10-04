@@ -16,6 +16,8 @@ type ScanResult = {
   rssi: number;
 };
 
+type ScanCallback = (event: string, result: ScanResult) => void;
+
 const SENSOR_ADDRESS = 'AA:BB:CC:DD:EE:01';
 
 const manufacturerAdvertisement = (payload: number[]): number[] => [
@@ -30,7 +32,7 @@ const createWatchdogRuntime = () => {
   let scannerStarts = 0;
   let scannerStops = 0;
   let relayOn = false;
-  let scanCallback: ((event: string, result: ScanResult) => void) | undefined;
+  let scanCallback: ScanCallback | undefined;
   const timers: TimerEntry[] = [];
 
   const Shelly = {
@@ -55,7 +57,7 @@ const createWatchdogRuntime = () => {
   const BLE = {
     Scanner: {
       SCAN_RESULT: 'scan-result',
-      subscribe: (callback: (event: string, result: ScanResult) => void) => {
+      subscribe: (callback: ScanCallback) => {
         scanCallback = callback;
       },
       isRunning: () => scannerRunning,
