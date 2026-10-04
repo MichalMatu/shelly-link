@@ -5,6 +5,7 @@ import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
   ClimateScriptDetailSection,
   Pulse,
+  StandalonePulseConfigurationSection,
   useInstalledAutomationStore,
   type InstalledAutomation
 } from '../features/automations/index.js';
@@ -22,7 +23,6 @@ import {
 import { installationScriptPreviewCopy } from './locales/installationScriptPreview.js';
 import { pulseManagementCopy } from './locales/pulseManagement.js';
 import { useTranslation } from './i18n.js';
-import { StandalonePulseConfigurationSection } from './StandalonePulseConfigurationSection.js';
 
 type StandalonePulseInstalledAutomation = Extract<InstalledAutomation, { kind: 'pulse' }>;
 
