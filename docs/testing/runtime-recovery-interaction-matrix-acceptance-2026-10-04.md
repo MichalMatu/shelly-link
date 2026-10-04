@@ -17,16 +17,16 @@ Hard-safety reset is deliberately safe OFF. It clears the manual request and saf
 
 ## Qualified interaction matrix
 
-| Mode | Automation fault | Hard safety | Expected relay/control behavior | Evidence |
-| --- | --- | --- | --- | --- |
-| AUTO | no | no | automation request owns output | existing generated-runtime control tests |
-| AUTO | yes | no | forced OFF until fresh usable input | stale/fault AUTO coverage |
-| AUTO | no/yes | yes | hard safety wins and forces OFF | hard-safety and native-protection coverage |
-| AUTO | yes | reset | remains OFF with `st`; fresh usable input is required before AUTO can energize | new cross-axis recovery test |
-| MANUAL | no | no | explicit manual OFF/ON request owns output | MANUAL control coverage |
-| MANUAL | yes | no | automation fault remains visible but does not revoke explicit MANUAL control | sensor-fault-in-MANUAL coverage |
-| MANUAL | no/yes | yes | hard safety wins, relay OFF, manual ON rejected | hard-safety MANUAL coverage |
-| MANUAL | yes | reset | reset clears manual request and safety, preserves automation fault, stays OFF; later explicit MANUAL ON is allowed | new cross-axis recovery test |
+| Mode   | Automation fault | Hard safety | Expected relay/control behavior                                                                                    | Evidence                                   |
+| ------ | ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
+| AUTO   | no               | no          | automation request owns output                                                                                     | existing generated-runtime control tests   |
+| AUTO   | yes              | no          | forced OFF until fresh usable input                                                                                | stale/fault AUTO coverage                  |
+| AUTO   | no/yes           | yes         | hard safety wins and forces OFF                                                                                    | hard-safety and native-protection coverage |
+| AUTO   | yes              | reset       | remains OFF with `st`; fresh usable input is required before AUTO can energize                                     | new cross-axis recovery test               |
+| MANUAL | no               | no          | explicit manual OFF/ON request owns output                                                                         | MANUAL control coverage                    |
+| MANUAL | yes              | no          | automation fault remains visible but does not revoke explicit MANUAL control                                       | sensor-fault-in-MANUAL coverage            |
+| MANUAL | no/yes           | yes         | hard safety wins, relay OFF, manual ON rejected                                                                    | hard-safety MANUAL coverage                |
+| MANUAL | yes              | reset       | reset clears manual request and safety, preserves automation fault, stays OFF; later explicit MANUAL ON is allowed | new cross-axis recovery test               |
 
 The two new tests close the only uncovered intersections found by the Stage 9 audit:
 
