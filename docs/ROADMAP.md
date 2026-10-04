@@ -206,6 +206,27 @@ Feature-complete v1 requires:
 
 History charts are complete and reuse the existing History runtime/data foundation rather than becoming a second history subsystem.
 
+## Post-stabilization growth track — Environment Profiles
+
+Environment Profiles are the planned grow/greenhouse/terrarium-specific layer above the existing Climate, Time and Pulse primitives. They should model the desired environment directly instead of forcing users to duplicate independent automations for different parts of the day.
+
+The first slice is **Day / Night**:
+
+- configurable day and night boundaries, including schedules that cross midnight;
+- separate Temperature targets/thresholds for day and night;
+- separate Humidity targets/thresholds for day and night;
+- separate VPD targets for day and night;
+- optional phase-specific Pulse configuration where useful;
+- optional phase-specific minimum ON/OFF timing where a real device/use case requires it;
+- local phase switching on Shelly without requiring the phone or cloud to remain available;
+- safe behavior when wall-clock time is unavailable or untrusted, reusing the existing synchronized-clock and forced-OFF principles rather than inventing a second time owner.
+
+The configuration model should be extensible from Day/Night to **Dawn / Day / Dusk / Night** without replacing the runtime architecture. Later phases may support gradual ramps/transitions rather than instantaneous target changes when this materially improves plant, greenhouse or terrarium control.
+
+Environment Profiles must reuse the existing Climate/VPD/Pulse engines, relay ownership, diagnostics, History, MANUAL behavior, automation-fault handling and hard-safety precedence. A profile selects the active parameter set; it must not become another relay owner.
+
+The product UX should present this as an environment schedule/profile (for example `Day 06:00–22:00` and `Night 22:00–06:00`) rather than as a collection of low-level smart-home scenes.
+
 ## Post-stabilization growth track — Pulse Advanced
 
 After V1 stabilization / feature freeze, Pulse is the first planned growth area. These capabilities are intentionally recorded now so they are not lost, but they must not expand Pulse V1 scope or delay stabilization.
