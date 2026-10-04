@@ -17,6 +17,7 @@ export type StandalonePulseAutomationClient = Pick<
   ShellyClient,
   | 'getDeviceInfo'
   | 'installScript'
+  | 'replaceScript'
   | 'startScript'
   | 'stopScript'
   | 'deleteScript'
@@ -86,6 +87,45 @@ export const installStandalonePulseAutomation = async ({
     await client.setRelayOff({ relayId: config.relayId }).catch(() => undefined);
     throw error;
   }
+};
+
+export const replaceStandalonePulseAutomation = async ({
+  installation,
+  config,
+  client = createStandalonePulseAutomationClient(installation.shelly.baseUrl),
+  nowMs = Date.now()
+}: {
+  installation: StandalonePulseInstalledAutomation;
+  config: StandalonePulseAutomationConfig;
+  client?: StandalonePulseAutomationClient;
+  nowMs?: number;
+}): Promise<StandalonePulseInstalledAutomation> => {
+  if (config.relayId !== installation.config.relayId) {
+    throw new Error('Pulse relay cannot change during inline editing.');
+  }
+
+  await requireStoredIdentity(installation, client);
+  await forceOff(client, config.relayId, installation.script.id);
+
+  const replaced = unwrapShellyResult(
+    await client.replaceScript(
+      installation.script.id,
+      generateShellyStandalonePulseScript(config)
+    )
+  );
+  if (replaced.scriptId !== installation.script.id) {
+    throw new Error('Shelly changed the managed Pulse script id during replacement.');
+  }
+
+  return {
+    ...installation,
+    config,
+    script: {
+      id: installation.script.id,
+      hash: replaced.scriptHash
+    },
+    updatedAtMs: Math.max(nowMs, installation.updatedAtMs + 1)
+  };
 };
 
 export const pauseStandalonePulseAutomation = async (
