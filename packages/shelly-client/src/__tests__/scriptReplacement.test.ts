@@ -1,0 +1,194 @@
+import { describe, expect, it } from 'vitest';
+import {
+  RPC_METHODS,
+  RpcShellyClient,
+  type Result,
+  type ShellyClientError,
+  type ShellyRpcRequest,
+  type ShellyRpcTransport
+} from '../index.js';
+
+type ScriptState = {
+  id: number;
+  name: string;
+  enable: boolean;
+  running: boolean;
+  code: string;
+};
+
+const failure = (message: string): Result<never> => ({
+  ok: false,
+  error: {
+    kind: 'script-upload-failed',
+    userMessageKey: 'errors.scriptUploadFailed',
+    technicalMessage: message,
+    retryable: true
+  }
+});
+
+class ReplacementTransport implements ShellyRpcTransport {
+  readonly requests: ShellyRpcRequest[] = [];
+  failNextPut = false;
+
+  constructor(readonly script: ScriptState) {}
+
+  async call<TResponse>(
+    request: ShellyRpcRequest
+  ): Promise<Result<TResponse, ShellyClientError>> {
+    this.requests.push(request);
+
+    if (request.method === RPC_METHODS.ScriptList) {
+      return {
+        ok: true,
+        value: {
+          scripts: [
+            {
+              id: this.script.id,
+              name: this.script.name,
+              enable: this.script.enable,
+              running: this.script.running
+            }
+          ]
+        } as TResponse
+      };
+    }
+
+    if (request.method === RPC_METHODS.ScriptGetCode) {
+      const params = request.params as { offset?: number; len?: number };
+      const offset = params.offset ?? 0;
+      const len = params.len ?? 1024;
+      const data = this.script.code.slice(offset, offset + len);
+      return {
+        ok: true,
+        value: {
+          data,
+          left: Math.max(this.script.code.length - offset - data.length, 0)
+        } as TResponse
+      };
+    }
+
+    if (request.method === RPC_METHODS.ScriptStop) {
+      this.script.running = false;
+      return { ok: true, value: null as TResponse };
+    }
+
+    if (request.method === RPC_METHODS.ScriptPutCode) {
+      if (this.failNextPut) {
+        this.failNextPut = false;
+        return failure('replacement upload failed') as Result<TResponse, ShellyClientError>;
+      }
+      const params = request.params as { code: string; append?: boolean };
+      this.script.code = params.append ? this.script.code + params.code : params.code;
+      return { ok: true, value: null as TResponse };
+    }
+
+    if (request.method === RPC_METHODS.ScriptSetConfig) {
+      const params = request.params as { config: { enable: boolean } };
+      this.script.enable = params.config.enable;
+      return { ok: true, value: null as TResponse };
+    }
+
+    if (request.method === RPC_METHODS.ScriptStart) {
+      this.script.running = true;
+      return { ok: true, value: null as TResponse };
+    }
+
+    if (request.method === RPC_METHODS.ScriptGetStatus) {
+      return {
+        ok: true,
+        value: {
+          id: this.script.id,
+          running: this.script.running,
+          mem_used: 12,
+          mem_free: 34,
+          errors: []
+        } as TResponse
+      };
+    }
+
+    throw new Error(`Unexpected RPC method: ${request.method}`);
+  }
+}
+
+const createClient = (transport: ShellyRpcTransport) =>
+  new RpcShellyClient(transport, { mutationDelayMs: 0 });
+
+describe('transactional script replacement', () => {
+  it('replaces a running script in place and preserves its runtime state', async () => {
+    const transport = new ReplacementTransport({
+      id: 7,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'old-source'
+    });
+
+    const result = await createClient(transport).replaceScript(7, 'new-source');
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.scriptId).toBe(7);
+    expect(result.value.running).toBe(true);
+    expect(result.value.backup).toMatchObject({
+      scriptId: 7,
+      enable: true,
+      running: true,
+      code: 'old-source'
+    });
+    expect(transport.script).toMatchObject({
+      id: 7,
+      enable: true,
+      running: true,
+      code: 'new-source'
+    });
+  });
+
+  it('keeps a paused script paused without starting it for verification', async () => {
+    const transport = new ReplacementTransport({
+      id: 8,
+      name: 'Pulse',
+      enable: true,
+      running: false,
+      code: 'paused-old'
+    });
+
+    const result = await createClient(transport).replaceScript(8, 'paused-new');
+
+    expect(result.ok).toBe(true);
+    expect(transport.script).toMatchObject({
+      id: 8,
+      enable: true,
+      running: false,
+      code: 'paused-new'
+    });
+    expect(
+      transport.requests.some((request) => request.method === RPC_METHODS.ScriptStart)
+    ).toBe(false);
+  });
+
+  it('restores exact source and running state when replacement fails', async () => {
+    const transport = new ReplacementTransport({
+      id: 9,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'exact-old-source'
+    });
+    transport.failNextPut = true;
+
+    const result = await createClient(transport).replaceScript(9, 'broken-new-source');
+
+    expect(result.ok).toBe(false);
+    expect(transport.script).toEqual({
+      id: 9,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'exact-old-source'
+    });
+    const startCalls = transport.requests.filter(
+      (request) => request.method === RPC_METHODS.ScriptStart
+    );
+    expect(startCalls).toHaveLength(1);
+  });
+});
