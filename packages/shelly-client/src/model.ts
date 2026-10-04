@@ -111,7 +111,11 @@ export interface ShellyClient {
   getDeviceInfo(): Promise<Result<ShellyDeviceInfo>>;
   getStatus(): Promise<Result<ShellyStatus>>;
   installScript(plan: ShellyInstallPlan): Promise<Result<ShellyInstallResult>>;
-  replaceScript(scriptId: number, code: string): Promise<Result<ShellyInstallResult>>;
+  replaceScript(
+    scriptId: number,
+    code: string,
+    expectedCurrentHash?: string
+  ): Promise<Result<ShellyInstallResult>>;
   stopScript(scriptId: number): Promise<Result<null>>;
   startScript(scriptId: number): Promise<Result<null>>;
   deleteScript(scriptId: number): Promise<Result<null>>;
