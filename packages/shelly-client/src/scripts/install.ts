@@ -145,14 +145,19 @@ export class RpcShellyClient implements ShellyClient {
     );
   }
 
-  async replaceScript(scriptId: number, code: string): Promise<Result<ShellyInstallResult>> {
+  async replaceScript(
+    scriptId: number,
+    code: string,
+    expectedCurrentHash?: string
+  ): Promise<Result<ShellyInstallResult>> {
     return replaceShellyScript(
       {
         transport: this.transport,
         callMutation: (request) => this.callMutation<unknown>(request)
       },
       scriptId,
-      code
+      code,
+      expectedCurrentHash
     );
   }
 
