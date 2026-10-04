@@ -1,6 +1,6 @@
-# Handoff — UX polish merged; stabilization is next
+# Handoff — BLE restore generalized; stabilization is next
 
-Status: **2026-10-03 — PR #81 is merged to `main`. The current UX polish round is closed and qualified; do not reopen it without a concrete regression or accepted product change.**
+Status: **2026-10-04 — PR #83 is merged to `main`. Safe standalone Pulse inline replacement is closed. Temporary Plug BLE discovery runtime preservation is generalized in the current completion slice; active standalone Pulse BLE scan UI remains intentionally disabled until it is accepted as a separate product/UX slice.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -22,14 +22,15 @@ Then fetch fresh `main` and `agent-control:.agent/status/daemon.json`. Verify th
 
 ## Latest merge closeout
 
-PR #81 `Polish Plug and Thermometer UX hierarchy` is merged:
+PR #83 `Add safe inline Standalone Pulse replacement` is merged:
 
-- qualified head: `a63fd85b0f195db8be2d7ec75e71a7084ca4b6f5`;
-- merge commit: `285e477014087c723ed2392601d3f44396179910`;
-- GitHub CI run `37153822424`: PASS;
-- all seven Codex review threads were addressed and resolved before merge.
+- qualified head: `a740386e4e131fc326e428a7164aa73488cc411d`;
+- merge commit: `d05ab56036b97874fa07cd73b18779844c8b1fb7`;
+- GitHub CI run `37175270558`: PASS.
 
-The final review closeout added deterministic UX-gate self-tests, preserved the direct route from blocked Thermometer removal to its owning automation, kept typed BLE error messages actionable, kept the settings page private to its feature route, moved durable UX evidence into canonical docs, reconciled the Thermometer removal contract and made removal success feedback survive navigation.
+The slice added guarded in-place script replacement with exact source/runtime backup, expected-hash drift rejection before mutation, verified relay OFF, rollback on replacement failure and inline Standalone Pulse cycle editing that persists only after successful verification. Existing installation ID, script ID and `installedAtMs` are preserved.
+
+The earlier PR #81 UX hierarchy closeout remains authoritative for the accepted Plug/Thermometer navigation and visual hierarchy; do not reopen that generic UX-polish round without a concrete regression or accepted product change.
 
 ## Current product / UX contract
 
@@ -43,7 +44,7 @@ Accepted UX state:
 - setup starts from a physical Plug;
 - Time is Plug automation;
 - standalone Pulse dashboard is the only place for AUTO/MANUAL and manual relay ON/OFF;
-- standalone Pulse Plug Detail is read-only for runtime control and owns status/configuration/safe uninstall;
+- standalone Pulse Plug Detail is read-only for runtime control and owns status, inline cycle configuration and safe uninstall;
 - Time and standalone Pulse dashboards are status-first;
 - Time Detail and standalone Pulse Detail use current state → configuration → destructive action hierarchy;
 - Thermometer dashboard cards focus on identity/live readings; rename, PVVX/device actions, technical identity and deletion live in nested Thermometer Settings;
@@ -53,39 +54,35 @@ Accepted UX state:
 - Plug dashboard feedback is owned by the shared Plug feedback primitive rather than parallel card-specific markup;
 - Climate detail/dashboard composition remains the frozen golden master unless an explicit product decision changes it.
 
-The standalone Pulse Bluetooth detail remains intentionally read-only. Temporary BLE discovery restoration is still Climate-specific and must be generalized before active standalone Pulse BLE scan/restore is enabled.
+Temporary Plug BLE discovery no longer depends on a Climate-only restore payload. The lifecycle carries one opaque managed-automation restore state and supports the existing Climate control-state protocol plus Standalone Pulse AUTO/MANUAL preservation. Pulse AUTO is restored by restarting the existing script into a fresh cycle; Pulse MANUAL keeps the script stopped and restores the verified relay state. An unknown running script fails closed before the discovery lifecycle mutates it. Restore failure leaves the managed relay OFF and stops the managed script best-effort.
 
-Safe inline editing/replacement of an installed standalone Pulse cycle remains deliberately deferred. The current generic install path is destructive; editing needs an explicit backup/replacement/rollback lifecycle and requalification.
+The standalone Pulse Bluetooth detail remains intentionally read-only in this slice. Generalizing safe restoration removes the runtime blocker but does not itself enable active Standalone Pulse BLE scan UI.
 
-## UX qualification
+## Qualification state
 
-Exact PR #81 head `a63fd85b0f195db8be2d7ec75e71a7084ca4b6f5` passed:
+The BLE restore implementation has focused deterministic coverage for:
 
-- format, lint, `quality:ux`, `quality:repo`, typecheck;
-- `quality:selftest`: 19 deterministic gate cases, including positive/negative setup-navigation coverage;
-- non-mobile workspace tests;
-- mobile Vitest: 109/109 files, 498/498 tests with `--maxWorkers=2` on the 8 GB Mac host;
-- Product Matrix, core coverage, build and performance budget;
-- responsive Playwright: 50/50;
-- canonical visual contract: 7/7;
-- final canonical PNG delta: none;
-- real Android AVD/WebView inspection at 412 CSS px confirmed no horizontal overflow for Thermometer dashboard/settings.
+- unchanged Climate control-state capture/restore semantics;
+- Standalone Pulse AUTO capture/restore;
+- Standalone Pulse MANUAL relay-state capture/restore without starting the script;
+- unknown running scripts failing before destructive discovery preparation;
+- discovery preparation ordering: capture → verified OFF → stop running automation → verified OFF;
+- scanner deletion before managed runtime restoration;
+- restoration failure falling back to relay OFF + managed script stop;
+- late/unmounted discovery cleanup carrying the opaque restore state unchanged.
 
-The two-worker mobile run is a host-load constraint, not a weakened product gate. Test expectations and repository timeouts were not relaxed.
-
-Durable visual/UX acceptance belongs in `docs/UX_VISUAL_CONTRACT.md`. Do not create another branch-specific UX checkpoint document.
+Focused mobile tests, typecheck, repository quality gates and UX quality gates pass on the formatted implementation branch. The completion head still requires the canonical final `pnpm check` before merge. No real-hardware acceptance is claimed by this handoff unless a dated hardware record is added separately.
 
 ## Runtime / safety boundaries
-
-PR #81 changes product presentation and management flow; it does not reopen generated Climate/Time/Pulse runtime semantics. Existing dated real-Shelly runtime acceptance remains authoritative.
 
 Keep these invariants:
 
 - one managed automation owner per Plug relay;
 - boot/stale-sensor/hard-safety forced-OFF behavior is authoritative;
-- destructive/runtime mutations require physical-device identity verification;
+- destructive/runtime mutations require physical-device identity verification where ownership is known;
 - mutating RPCs are not automatically retried;
 - React displays runtime state but never owns device automation timing;
+- temporary BLE discovery captures managed runtime state before mutation, forces and verifies OFF before the scanner runs, and restores only recognized managed runtime kinds;
 - frozen Climate composition is not collateral cleanup territory.
 
 ## Android deployment claims
@@ -94,12 +91,12 @@ Do not infer what a physical phone is running from this document. A phone claim 
 
 ## Next work
 
-The application is near feature-complete. Default order is now:
+The application is near feature-complete. After this restoration slice is merged, default order is:
 
-1. safe standalone Pulse inline edit/replacement lifecycle as a separately qualified slice;
-2. generalize temporary BLE discovery restoration before active standalone Pulse BLE scan;
-3. watchdog/recovery/soak stabilization and final real-hardware matrix;
-4. V1 feature freeze and release qualification.
+1. watchdog/recovery/soak stabilization and final real-hardware matrix;
+2. V1 feature freeze and release qualification.
+
+Enabling active Standalone Pulse BLE scan is now technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into restoration plumbing.
 
 Do not add another generic UX-polish round or expand Pulse with unrelated runtime modes unless a concrete defect or accepted product change requires it.
 
