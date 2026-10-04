@@ -33,17 +33,16 @@ This keeps the architecture reusable without turning the app into a general-purp
 - installs and manages a local Shelly Script runtime;
 - exposes Plug, BLE, automation, script and device diagnostics without moving runtime ownership to the phone;
 - records Climate History/Datalogger data locally on Shelly and reads it through a typed mobile path;
+- provides chart-first Climate History visualization for temperature, humidity, output, power and current;
 - provides AUTO/MANUAL control, runtime fault/safety diagnostics and safe recovery behavior;
 - supports BLE bootstrap provisioning to Wi-Fi, verified transport promotion to HTTP, firmware status/update and capability-aware device-time synchronization;
 - keeps user-triggered device mutations identity-verified and avoids automatic replay after ambiguous transport failures.
 
 ## Current status
 
-The project is pre-release/beta. Core local automation, multi-sensor Climate, canonical Plug ownership/recovery, History/Datalogger, Runtime Safety Supervisor, BLE management, BLE-to-Wi-Fi provisioning and the verified OTA/time-sync path have real-device evidence on Samsung S22+ / Android 16 and Shelly Plug S Gen3.
+The project is pre-release/beta. Core local automation, multi-sensor Climate, canonical Plug ownership/recovery, chart-first History/Datalogger, Runtime Safety Supervisor, Pulse V1, BLE management, BLE-to-Wi-Fi provisioning and the verified OTA/time-sync path have real-device evidence on Samsung S22+ / Android 16 and Shelly Plug S Gen3.
 
-The **pre-charts repository closeout is complete**: active documentation has been reduced to the current contracts, historical working refs are being retired from the Local Agent checkout, and the current ownership/dead-code/error-retry audit has no blocking cleanup finding for the next product slice.
-
-The next intended user-facing slice is a proper **History visualization page with charts** built on the existing `HistoryRecord[]` data path. The current History surface is deliberately simple/list-based; the chart slice should improve presentation first rather than redesigning the Shelly history storage/runtime without evidence that the existing data model is insufficient.
+Stage 9 stabilization is in progress. Soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety recovery matrix, and controlled real-device `Shelly.Reboot` recovery are qualified. Physical mains power-cycle recovery, remaining Wi-Fi/BLE loss/recovery qualification, a materially longer soak and the final hardware matrix remain before V1 feature freeze and release qualification.
 
 See [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), [Current handoff](docs/HANDOFF_NEXT_CHAT.md) and the [Hardware test matrix](docs/testing/hardware-matrix.md).
 
