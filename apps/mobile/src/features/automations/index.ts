@@ -1,4 +1,3 @@
-export { StandalonePulseConfigurationSection } from './components/StandalonePulseConfigurationSection.js';
 export {
   ClimateAutomationDetailSection,
   ClimateRecoverySection,
