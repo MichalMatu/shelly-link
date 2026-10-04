@@ -172,6 +172,7 @@ describe('Climate BLE scanner watchdog', () => {
     runtime.watchdog.callback();
 
     expect(runtime.diag().g[21]).toBe('st');
+    expect(runtime.diag().g[5]).toBe(false);
     expect(runtime.scannerStarts()).toBe(1);
     expect(runtime.scannerStops()).toBe(0);
 
