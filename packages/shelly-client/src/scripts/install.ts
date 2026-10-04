@@ -10,6 +10,7 @@ import {
   type ShellyInstallResult,
   type ShellyRpcRequest,
   type ShellyRpcTransport,
+  type ShellyScriptReplacementOptions,
   type ShellyScriptStorageItem,
   type ShellyStatus
 } from '../model.js';
@@ -148,7 +149,7 @@ export class RpcShellyClient implements ShellyClient {
   async replaceScript(
     scriptId: number,
     code: string,
-    expectedCurrentHash?: string
+    options?: ShellyScriptReplacementOptions
   ): Promise<Result<ShellyInstallResult>> {
     return replaceShellyScript(
       {
@@ -157,7 +158,7 @@ export class RpcShellyClient implements ShellyClient {
       },
       scriptId,
       code,
-      expectedCurrentHash
+      options
     );
   }
 
