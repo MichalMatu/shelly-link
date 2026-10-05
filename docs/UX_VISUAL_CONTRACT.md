@@ -127,4 +127,4 @@ pnpm e2e:visual:update
 pnpm e2e:visual
 ```
 
-Before pushing a completed UX slice, run the repository-required focused checks and the final full gate. On macOS, pre-push also exercises the canonical visual contract; non-macOS environments keep responsive/behavioral coverage without redefining Darwin screenshots.
+Before pushing a completed UX slice, run the repository-required focused checks and the final full gate. The pre-push hook is intentionally limited to the fast UX/repository policy gates and does not run responsive or canonical visual acceptance. Run `pnpm e2e:visual` explicitly on macOS when Darwin screenshot acceptance is required, and run `pnpm e2e:responsive` when responsive acceptance is required; CI remains authoritative for its configured responsive gate.

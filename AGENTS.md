@@ -188,13 +188,18 @@ pnpm quality:ux
 pnpm quality:repo
 pnpm typecheck
 pnpm test
+pnpm check:static
+pnpm check:mobile
 pnpm check
 pnpm check:full
 ```
 
-Run the narrowest useful checks while iterating. Before declaring a coding task complete,
-run one full `pnpm check`. Use `pnpm check:full` when responsive E2E is part of the
-acceptance surface.
+Run the narrowest useful checks while iterating. `pnpm check:mobile` covers the mobile app
+and its workspace dependencies without pulling `apps/landing` into the focused loop. Before
+declaring a coding task complete, run one full `pnpm check`. The pre-push hook intentionally
+runs only the fast UX/repository policy gates, so the final full gate is not executed a second
+time during push. Use `pnpm check:full` when responsive E2E is part of the acceptance surface;
+CI keeps the exhaustive repository/build/test/responsive gates authoritative.
 
 For UX/UI changes, automated unit tests alone are insufficient. Inspect the relevant real
 render at representative viewports and use Playwright/responsive coverage when practical.

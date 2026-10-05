@@ -857,12 +857,6 @@ const checkCanonicalVisualPlatformContract = async () => {
     }
   }
   if (
-    packageJson.scripts?.prepush !==
-    'pnpm check && node scripts/quality/run-prepush-e2e.mjs'
-  ) {
-    addFailure(packagePath, 'prepush must use the platform-aware E2E runner');
-  }
-  if (
     !guardSource.includes("const canonicalPlatform = 'darwin';") ||
     !guardSource.includes('process.platform !== canonicalPlatform')
   ) {

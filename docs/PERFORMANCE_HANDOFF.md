@@ -1,6 +1,6 @@
 # Performance handoff
 
-Status: **2026-09-30 — performance work is paused until the MacBook M1 Pro / 32 GB host is available.** Do not change concurrency or cache configuration before a fresh cross-host baseline.
+Status: **2026-10-04 — performance work resumed by explicit user request for build/test orchestration.** On the current M1 / 8 GB host, do not raise worker concurrency or change cache policy without a fresh measured baseline; remove duplicated work and reduce CI wall time first.
 
 ## Stable optimizations already merged
 
@@ -10,8 +10,10 @@ The completed tooling pass did not change product/runtime behavior:
 - BLE polling tests no longer wait on wall-clock recovery where timing is not under test;
 - non-throttling Shelly-client tests no longer contain unnecessary real sleeps;
 - a proposed duplicate-test gate reduction was measured and rejected because the saving was too small.
+- the 2026-10-04 orchestration pass keeps canonical `pnpm check` coverage unchanged, replaces the duplicate full pre-push run with fast UX/repository policy gates, adds `pnpm check:mobile` for landing-free focused iteration, and splits CI static/tests/build/responsive work into parallel jobs behind one aggregate `checks` result.
+- a two-worker mobile Vitest experiment was rejected: it reduced process pressure but took about 441 s and still had 7 failing tests, so worker concurrency remains unchanged.
 
-Keep the current configuration until new measurements justify a change.
+Keep worker-count and cache configuration unchanged until new measurements justify a change. Orchestration and path selection may be optimized separately when they preserve the canonical gates.
 
 ## Last MacBook Air M1 / 8 GB baseline
 

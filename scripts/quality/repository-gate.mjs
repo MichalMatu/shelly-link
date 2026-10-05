@@ -145,6 +145,16 @@ const checkReleaseVersionConsistency = async () => {
   }
 };
 
+const checkRepositoryWorkflowContract = async () => {
+  const rootPackage = await readJson('package.json');
+  if (rootPackage.scripts?.prepush !== 'pnpm quality:ux && pnpm quality:repo') {
+    addFailure(
+      'package.json',
+      'prepush must stay a fast policy gate; full verification belongs to check/check:full and CI'
+    );
+  }
+};
+
 const checkWorkspaceDependencyCycles = async () => {
   const packagePaths = [
     'package.json',
@@ -485,6 +495,7 @@ const checkHardwareSetupArchitecture = async () => {
 
 await checkAgentContractStructure();
 await checkReleaseVersionConsistency();
+await checkRepositoryWorkflowContract();
 await checkWorkspaceDependencyCycles();
 await checkPackageSourceDirection();
 await checkScreenBoundaries();
