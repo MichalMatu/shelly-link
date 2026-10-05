@@ -42,7 +42,7 @@ This keeps the architecture reusable without turning the app into a general-purp
 
 The project is pre-release/beta. Core local automation, multi-sensor Climate, canonical Plug ownership/recovery, chart-first History/Datalogger, Runtime Safety Supervisor, Pulse V1, BLE management, BLE-to-Wi-Fi provisioning and the verified OTA/time-sync path have real-device evidence on Samsung S22+ / Android 16 and Shelly Plug S Gen3.
 
-Stage 9 stabilization is in progress. Soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety recovery matrix, and controlled real-device `Shelly.Reboot` recovery are qualified. Physical mains power-cycle recovery, remaining Wi-Fi/BLE loss/recovery qualification, a materially longer soak and the final hardware matrix remain before V1 feature freeze and release qualification.
+Stage 9 stabilization is in progress. Soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety recovery matrix, controlled real-device `Shelly.Reboot` recovery, healthy-scanner sensor-silence handling and stopped-scanner watchdog re-subscription/event-delivery recovery are qualified. Physical mains power-cycle recovery, remaining Wi-Fi recovery qualification, a materially longer soak and the final hardware matrix remain before V1 feature freeze and release qualification.
 
 See [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), [Current handoff](docs/HANDOFF_NEXT_CHAT.md) and the [Hardware test matrix](docs/testing/hardware-matrix.md).
 
@@ -68,6 +68,7 @@ The active documentation set is intentionally small:
 - [Roadmap](docs/ROADMAP.md)
 - [Current handoff](docs/HANDOFF_NEXT_CHAT.md)
 - [Performance handoff](docs/PERFORMANCE_HANDOFF.md)
+- [Wireless Android device workflow](docs/PHONE_WIRELESS_ADB.md)
 - [Hardware test matrix](docs/testing/hardware-matrix.md)
 - [UX visual contract](docs/UX_VISUAL_CONTRACT.md)
 - [UX visual gallery](docs/UX_VISUAL_GALLERY.md)
