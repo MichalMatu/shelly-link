@@ -69,15 +69,19 @@ This falsified the assumption that `BLE.Scanner.stop()` / `start()` preserves us
 The installed production source was first read back and fingerprinted. A candidate was constructed by changing only the stopped-scanner watchdog path from:
 
 ```js
-function bw(){if(br()===false)bs()}
+function bw() {
+  if (br() === false) bs();
+}
 ```
 
 (or its compact boolean alias) to the equivalent of:
 
 ```js
-function bw(){
-  if(br()===false){
-    BLE.Scanner.subscribe(function(e,x){ev(e,x)});
+function bw() {
+  if (br() === false) {
+    BLE.Scanner.subscribe(function (e, x) {
+      ev(e, x);
+    });
     bs();
   }
 }
