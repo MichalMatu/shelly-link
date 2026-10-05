@@ -29,6 +29,7 @@ const createWatchdogRuntime = () => {
   let scannerStops = 0;
   let relayOn = false;
   let scanCallback: ((event: string, result: ScanResult) => void) | undefined;
+  let scannerSubscriptions = 0;
   const timers: TimerEntry[] = [];
   const address = 'AA:BB:CC:DD:EE:01';
 
@@ -55,6 +56,7 @@ const createWatchdogRuntime = () => {
     Scanner: {
       SCAN_RESULT: 'scan-result',
       subscribe: (callback: (event: string, result: ScanResult) => void) => {
+        scannerSubscriptions += 1;
         scanCallback = callback;
       },
       isRunning: () => scannerRunning,
@@ -66,6 +68,7 @@ const createWatchdogRuntime = () => {
       stop: () => {
         scannerStops += 1;
         scannerRunning = false;
+        scanCallback = undefined;
       }
     }
   };
@@ -113,15 +116,20 @@ const createWatchdogRuntime = () => {
     bootScanner,
     watchdog,
     diag: generatedRuntime.diag,
-    scan: scanCallback,
+    scan: (event: string, result: ScanResult) => {
+      if (!scanCallback) throw new Error('BLE scanner has no active subscription.');
+      scanCallback(event, result);
+    },
     setNowMs: (value: number) => {
       nowMs = value;
     },
     setScannerRunning: (value: boolean) => {
       scannerRunning = value;
     },
+    stopScanner: () => BLE.Scanner.stop(),
     scannerStarts: () => scannerStarts,
-    scannerStops: () => scannerStops
+    scannerStops: () => scannerStops,
+    scannerSubscriptions: () => scannerSubscriptions
   };
 };
 
@@ -139,18 +147,33 @@ describe('Climate BLE scanner watchdog', () => {
 
     expect(runtime.scannerStarts()).toBe(1);
     expect(runtime.scannerStops()).toBe(0);
+    expect(runtime.scannerSubscriptions()).toBe(1);
   });
 
   it('starts the scanner again when scanner liveness reports it stopped', () => {
     const runtime = createWatchdogRuntime();
 
     runtime.bootScanner.callback();
-    runtime.setScannerRunning(false);
+    expect(runtime.scannerSubscriptions()).toBe(1);
+
+    runtime.stopScanner();
+    expect(runtime.scannerStops()).toBe(1);
+
     runtime.setNowMs(60_000);
     runtime.watchdog.callback();
 
     expect(runtime.scannerStarts()).toBe(2);
-    expect(runtime.scannerStops()).toBe(0);
+    expect(runtime.scannerStops()).toBe(1);
+    expect(runtime.scannerSubscriptions()).toBe(2);
+
+    runtime.setNowMs(61_000);
+    runtime.scan('scan-result', {
+      addr: runtime.address,
+      advData: manufacturerAdvertisement([0xc2, 0xdc, 0x00, 0x32, 0x02, 0x2c]),
+      rssi: -50
+    });
+    expect(runtime.diag().g[1]).toBe(22);
+    expect(runtime.diag().g[2]).toBe(50);
   });
 
   it('keeps the scanner alive across stale sensor loss and clears the fault on fresh TP357 data', () => {
