@@ -155,6 +155,21 @@ exclusive: install/edit/recover may clear all existing scripts and install the c
 runtime; uninstall may clear all scripts. Temporary BLE discovery remains a separately
 orchestrated short-lived script and must restore the automation state when its flow ends.
 
+## Android physical-device workflow
+
+The canonical current Android development target is the Samsung SM-S906B / S22+ on Android 16. For normal native acceptance use **Wireless ADB**, not USB. The exact connection, preserving-data install, cold-start and log workflow is documented in `docs/PHONE_WIRELESS_ADB.md` and must be reused rather than rediscovered.
+
+Operational rules:
+
+- project source/build/test work belongs to the `shelly-link` execution target;
+- Mac-local ADB transport/live proof may use the execution-enabled `host-ops` target;
+- if `adb devices` is empty, discover the current `_adb-tls-connect._tcp` endpoint with `adb mdns services` and run `adb connect`; do not hard-code an old Wireless Debugging port;
+- verify the target is `SM-S906B`, Android 16 and authorized before installation or other mutation;
+- normal iterative installs preserve app data with `adb install -r`;
+- use the destructive `pnpm android:phone-alpha` clean uninstall/install path only when the acceptance explicitly requires fresh-store/clean-install behavior;
+- after a native install used for acceptance, force-stop, clear logcat, cold-start `app.shellylink.mobile/.MainActivity`, verify a live PID/resumed activity and inspect the app warnings/errors;
+- build success alone is not real-device acceptance; record the exact product commit, install mode, device identity, cold-start result and relevant log outcome.
+
 ## Dependencies and licensing
 
 - New production dependency requires explicit user approval.
