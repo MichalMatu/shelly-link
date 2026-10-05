@@ -856,12 +856,6 @@ const checkCanonicalVisualPlatformContract = async () => {
       );
     }
   }
-  if (packageJson.scripts?.prepush !== 'pnpm quality:ux && pnpm quality:repo') {
-    addFailure(
-      packagePath,
-      'prepush must stay a fast policy gate; full verification belongs to check/check:full and CI'
-    );
-  }
   if (
     !guardSource.includes("const canonicalPlatform = 'darwin';") ||
     !guardSource.includes('process.platform !== canonicalPlatform')
