@@ -85,7 +85,10 @@ const setupFeatureFixture = async (root) => {
   );
 };
 
-const setupRepositoryFixture = async (root) => {
+const setupRepositoryFixture = async (
+  root,
+  { prepush = 'pnpm quality:ux && pnpm quality:repo' } = {}
+) => {
   await writeFixture(
     root,
     'AGENTS.md',
@@ -117,6 +120,7 @@ const setupRepositoryFixture = async (root) => {
       name: 'fixture-root',
       version,
       scripts: {
+        prepush,
         'release:android': `fixture ${releaseOverride}`,
         'release:android:verify': `fixture ${releaseOverride}`
       }
@@ -406,6 +410,14 @@ await executeCase({
   name: 'repository/legal baseline',
   gatePath: repositoryGate,
   setup: setupRepositoryFixture
+});
+
+await executeCase({
+  name: 'repository/prepush stays fast policy gate',
+  gatePath: repositoryGate,
+  setup: (root) => setupRepositoryFixture(root, { prepush: 'pnpm check' }),
+  expectedFailure:
+    'prepush must stay a fast policy gate; full verification belongs to check/check:full and CI'
 });
 
 await executeCase({
