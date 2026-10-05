@@ -1,6 +1,6 @@
 # Handoff — Stage 9 stabilization in progress
 
-Status: **2026-10-04 — Stage 9 soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and controlled real-device `Shelly.Reboot` recovery are qualified on `main`. Draft PR #89 BLE scanner watchdog recovery has now passed its exact-candidate real-hardware sensor-silence/stale/recovery gate and is ready for final CI/diff review and merge. Physical mains power-cycle, remaining Wi-Fi/BLE loss/recovery, long soak and final hardware closeout remain.**
+Status: **2026-10-05 — PR #89 BLE scanner watchdog recovery is merged and hardware-qualified on `main`; PR #90 build/test orchestration is also merged after current-head static/tests/build/responsive/aggregate CI passed. Draft PR #91 is a hardware-blocked BLE scanner re-subscription hypothesis, not an accepted fix. Physical mains power-cycle, remaining Wi-Fi/BLE loss/recovery, long soak and final hardware closeout remain.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -27,17 +27,23 @@ The current stabilization baseline on `main` includes:
 - PR #84 — generalized temporary BLE discovery runtime restoration;
 - PR #85 — soak liveness/stabilization reporting;
 - PR #86 — deterministic runtime recovery interaction matrix;
-- PR #88 — controlled real-device `Shelly.Reboot` recovery evidence.
+- PR #88 — controlled real-device `Shelly.Reboot` recovery evidence;
+- PR #89 — hardware-qualified BLE scanner watchdog recovery after sensor loss;
+- PR #90 — tooling-only build/test orchestration split with canonical `pnpm check` scope preserved.
 
 Safe inline Standalone Pulse replacement from PR #83 remains part of the accepted baseline. The earlier PR #81 UX hierarchy closeout remains authoritative for accepted Plug/Thermometer navigation and visual hierarchy; do not reopen that generic UX-polish round without a concrete regression or accepted product change.
 
+PR #90 does not change product/runtime semantics. It splits the existing canonical repository gate into static/tests/build sub-gates, keeps the same `pnpm check` coverage, adds focused `pnpm check:mobile`, shortens pre-push to fast UX/repository policy gates and runs CI static/tests/build/responsive jobs in parallel behind one aggregate `checks` result. Worker concurrency/cache policy remains unchanged.
+
 ## Active unmerged work
 
-Draft PR #89 `Fix BLE scanner watchdog recovery after sensor loss` is **not part of `main` yet**. Its candidate branch is `fix/scanner-watchdog-sensor-loss-20261004`.
+Draft PR #91 `Fix BLE scanner re-subscription after restart` uses branch `fix/scanner-resubscribe-after-stop-20261004`, candidate `7b8b317c3cffc86695cfb1276ba8a2ea63f9d3ea`.
 
-The candidate changes the Climate runtime scanner watchdog so prolonged sensor silence alone does not restart a healthy scanner. Scanner recovery instead checks scanner liveness and starts the scanner only when it is actually stopped. The exact product candidate `d291a42d175972d01836f2fdf0cb9d88e91792c0` passed the real Plug S Gen3 hardware gate with deployed runtime SHA-256 `46446a0405aa310979fd65d0d4a3fff4479b8efba2b799d8528e264a13ceb0ef`: 145 s of accepted-target-frame silence crossed the legacy 90 s restart threshold and the configured 120 s stale timeout while `BLE.Scanner.isRunning()` stayed true, `R.sa` and `R.l` remained unchanged, stale forced the physical relay OFF, and restoring the configured sensor address produced fresh BLE data and automatic AUTO recovery. The post-gate merge from current `main` changed documentation only; all four PR implementation/test files remained byte-identical to the tested product candidate. The PR is ready for final CI/diff review and merge.
+PR #91 changes the Climate watchdog so an actually stopped scanner receives a fresh `BLE.Scanner.subscribe(...)` before `BLE.Scanner.start()`. Its repository CI is green, but this is **not yet a proven firmware fix**. The deterministic test currently models the suspected failure by making mock `BLE.Scanner.stop()` clear the scan callback. Shelly's documented scanner contract does not state that `stop()` clears the subscription, so the mock assumption cannot be treated as device evidence.
 
-Do not replace that candidate with the abandoned `fix/scanner-restart-delay-20261004` alternative; that branch is superseded by PR #89.
+Before PR #91 may merge, reproduce the stop/restart path on unmodified current `main` using the same physical Plug, firmware and Climate configuration. Stop the scanner through the existing `Script.Eval` path, verify scanner liveness becomes false, let the watchdog restart it, then verify whether configured target frames and `/diag` data resume without another subscription. Repeat the stop/restart cycle at least twice. If `main` resumes frames normally, close PR #91 as unnecessary. Only if `main` restarts scanning but loses event delivery should the identical sequence be repeated on the exact PR #91 candidate; that candidate must uniquely restore fresh data/AUTO recovery without weakening PR #89 stale/fail-safe behavior.
+
+Do not merge PR #91 from deterministic tests or CI alone.
 
 ## Current product / UX contract
 
@@ -80,7 +86,7 @@ The BLE restore implementation has focused deterministic coverage for:
 
 Focused mobile tests, typecheck, repository quality gates and UX quality gates passed for the BLE restoration implementation, followed by its final canonical gate and merge. That restoration slice itself made no hardware claim. Current Stage 9 hardware evidence is recorded separately in the dated testing documents.
 
-PR #89 scanner-watchdog hardware acceptance is also complete. The real-device gate used target-address isolation to create the exact no-accepted-frame condition on the physical Plug while leaving BLE/RF scanning live; it is not a claim that the sensor was physically RF-shielded. Detailed evidence: `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md`.
+PR #89 scanner-watchdog hardware acceptance is complete and merged. The real-device gate used target-address isolation to create the exact no-accepted-frame condition on the physical Plug while leaving BLE/RF scanning live; it is not a claim that the sensor was physically RF-shielded. Detailed evidence: `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md`.
 
 ## Runtime / safety boundaries
 
@@ -100,24 +106,25 @@ Do not infer what a physical phone is running from this document. A phone claim 
 
 ## Next work
 
-The application is near feature-complete. Three Stage 9 slices are qualified on `main`: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and a deliberate real-device software reboot. PR #89 adds a fourth qualified hardware result and is pending merge: healthy-scanner sensor silence -> stale/OFF -> fresh-BLE AUTO recovery. The configured Plug recorded boot-safe OFF at uptime 4 s during the separate software-reboot gate, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim.
+The application is near feature-complete. Four Stage 9 runtime/recovery slices are qualified on `main`: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, deliberate real-device software reboot recovery, and healthy-scanner sensor silence -> stale/OFF -> fresh-BLE AUTO recovery from PR #89. The configured Plug recorded boot-safe OFF at uptime 4 s during the software-reboot gate, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim.
 
 Default order is now:
 
-1. finish final CI/diff review for hardware-qualified PR #89 and merge it without changing the tested executable candidate;
+1. resolve PR #91 with an A/B real-device scanner stop -> watchdog restart -> event-delivery test, closing it if current `main` already recovers correctly;
 2. qualify physical mains power-cycle plus remaining Wi-Fi/BLE loss/recovery;
 3. run a materially longer soak and close the final real-hardware matrix;
 4. declare V1 feature freeze and run release qualification.
 
-Detailed recovery evidence already on `main`: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md` and `docs/testing/reboot-recovery-acceptance-2026-10-04.md`. PR #89 hardware evidence is in `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md`.
+Detailed recovery evidence already on `main`: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md`, `docs/testing/reboot-recovery-acceptance-2026-10-04.md` and `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md`.
 
-Enabling active Standalone Pulse BLE scan is now technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into restoration plumbing.
+Enabling active Standalone Pulse BLE scan is technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into stabilization work.
 
 Do not add another generic UX-polish round or expand Pulse with unrelated runtime modes unless a concrete defect or accepted product change requires it.
 
 ## Verification reminders
 
 - use focused checks while iterating and one final canonical gate on the exact completion head;
+- the pre-push hook is only the fast UX/repository policy gate; it is not a substitute for the final canonical gate;
 - use responsive/canonical visual acceptance when a slice changes those surfaces;
 - use `pnpm release:qualify` for software release evidence;
 - use `pnpm release:qualify:hardware` only when real hardware acceptance is actually being claimed.
