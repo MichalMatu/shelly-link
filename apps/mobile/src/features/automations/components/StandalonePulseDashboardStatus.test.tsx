@@ -9,6 +9,7 @@ const copy = pulseOperationalStatusCopy.pl;
 const relayRuleLabel = translate('pl', 'hardware.metrics.relayRule');
 const shellyRelayLabel = translate('pl', 'hardware.metrics.shellyRelay');
 const reasonLabel = translate('pl', 'hardware.metrics.reason');
+const relayControlFault = copy.reasons.rc ?? 'rc';
 
 const healthyStatus = (): PulseOperationalStatus => ({
   availability: 'available',
@@ -60,6 +61,6 @@ describe('StandalonePulseDashboardStatus', () => {
     expect(within(summary).getByText(shellyRelayLabel)).toBeVisible();
     expect(within(summary).getByText(reasonLabel)).toBeVisible();
     expect(within(summary).getByText(copy.automationFault)).toBeVisible();
-    expect(within(summary).getByText(copy.reasons.rc)).toBeVisible();
+    expect(within(summary).getByText(relayControlFault)).toBeVisible();
   });
 });
