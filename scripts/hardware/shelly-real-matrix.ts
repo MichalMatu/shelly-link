@@ -550,12 +550,12 @@ const readSensors = (): SensorUnderTest[] =>
     {
       profileId: 'xiaomi_lywsd03mmc_bthome_v2',
       runtimeAddress: normalizeMacAddress(readRequiredEnv('XIAOMI_MAC')),
-      displayName: 'Xiaomi/PVVX hardware matrix'
+      displayName: 'Xiaomi/PVVX matrix'
     },
     {
       profileId: 'tp357_custom_v1',
       runtimeAddress: normalizeMacAddress(readRequiredEnv('TP357_MAC')),
-      displayName: 'TP357 hardware matrix'
+      displayName: 'TP357 matrix'
     }
   ].filter(sensorMatchesFilter);
 
