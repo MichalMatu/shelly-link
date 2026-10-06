@@ -89,7 +89,6 @@ const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
   let relayOn = true;
   let runtimeMode = 0;
   const rpcMethods: string[] = [];
-  const scriptGetCodeIds: number[] = [];
 
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = input instanceof URL ? input.toString() : String(input);
@@ -266,6 +265,7 @@ const installTimeShellyFetchMock = () => {
     }
   ];
   const rpcMethods: string[] = [];
+  const scriptGetCodeIds: number[] = [];
 
   const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
     const body = JSON.parse(String(init?.body ?? '{}')) as {
