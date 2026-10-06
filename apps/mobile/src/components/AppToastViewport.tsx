@@ -9,7 +9,7 @@ import { createPortal } from 'react-dom';
 
 export const APP_TOAST_HOST_ID = 'app-toast-host';
 
-export const useAppToastQueue = (idPrefix: string) => {
+export const useToastQueue = (idPrefix: string) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const toastIdRef = useRef(0);
 
