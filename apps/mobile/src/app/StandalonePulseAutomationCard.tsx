@@ -46,17 +46,19 @@ export const StandalonePulseAutomationCard = ({
   const body = (
     <AutomationDashboardBody
       ariaLabel={labels.title}
-      status={<Pulse.Operational.StatusSummary status={pulseQuery.data} compact />}
+      status={
+        <Pulse.Standalone.DashboardStatus
+          status={pulseQuery.data}
+          manual={manualControl}
+        />
+      }
       configuration={[
         {
-          id: 'on',
-          label: labels.onSeconds,
-          value: secondsLabel(installation.config.pulse.onMs)
-        },
-        {
-          id: 'off',
-          label: labels.offSeconds,
-          value: secondsLabel(installation.config.pulse.offMs)
+          id: 'cycle',
+          label: labels.title,
+          value: `ON ${secondsLabel(installation.config.pulse.onMs)} / OFF ${secondsLabel(
+            installation.config.pulse.offMs
+          )}`
         },
         { id: 'execution', label: labels.execution, value: executionLabel }
       ]}

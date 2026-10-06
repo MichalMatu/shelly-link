@@ -2,6 +2,7 @@ import { ClimatePulseOperationalStatusSummary } from './components/ClimatePulseO
 import { PulseCycleEditor } from './components/PulseCycleEditor.js';
 import { PulseOperationalStatusSummary } from './components/PulseOperationalStatusSummary.js';
 import { StandalonePulseConfigurationSection } from './components/StandalonePulseConfigurationSection.js';
+import { StandalonePulseDashboardStatus } from './components/StandalonePulseDashboardStatus.js';
 import { StandalonePulseSetupPage } from './components/StandalonePulseSetupPage.js';
 import {
   DEFAULT_PULSE_CYCLE_FORM,
@@ -44,6 +45,7 @@ export const Pulse = {
   Standalone: {
     SetupPage: StandalonePulseSetupPage,
     ConfigurationSection: StandalonePulseConfigurationSection,
+    DashboardStatus: StandalonePulseDashboardStatus,
     useRuntime: useStandalonePulseRuntime,
     useActions: useStandalonePulseActions,
     useScriptSource: useStandalonePulseScriptSource,
