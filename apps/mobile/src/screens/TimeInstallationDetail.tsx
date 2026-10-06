@@ -2,7 +2,7 @@ import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import { AppToastViewport, useAppToastQueue } from '../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
   OperationalStatus,
@@ -66,7 +66,7 @@ export const TimeInstallationDetail = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [timeEditPending, setTimeEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
-  const { dismissToast, pushToast, toasts } = useAppToastQueue('time-toast');
+  const { dismissToast, pushToast, toasts } = useToastQueue('time-toast');
 
   const deleteMutation = useMutation({
     mutationFn: () =>
