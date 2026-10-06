@@ -15,6 +15,7 @@ import {
   PlugDetailTop,
   PlugInfoPanel,
   PlugRemovalBlockedModal,
+  automationDetailTabs,
   isSameShellyDevice,
   usePlugInformationFlow,
   useSavedPlugStore,
@@ -26,22 +27,18 @@ import { useTranslation } from './i18n.js';
 
 type StandalonePulseInstalledAutomation = Extract<InstalledAutomation, { kind: 'pulse' }>;
 
-const STANDALONE_PULSE_DETAIL_TABS = [
-  'automation',
-  'ble',
-  'device',
-  'script',
-  'info'
-] as const satisfies readonly PlugDetailTab[];
+const STANDALONE_PULSE_DETAIL_TABS = automationDetailTabs({ hasScript: true });
 
 type StandalonePulseInstallationDetailProps = {
   installation: StandalonePulseInstalledAutomation;
   onBack?: () => void;
+  onOpenBleDiscovery?: (deviceId: string) => void;
 };
 
 export const StandalonePulseInstallationDetail = ({
   installation,
-  onBack
+  onBack,
+  onOpenBleDiscovery
 }: StandalonePulseInstallationDetailProps) => {
   const { locale, t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
@@ -101,7 +98,7 @@ export const StandalonePulseInstallationDetail = ({
       <PlugDetailTop
         tabs={[activeTab, setActiveTab]}
         availableTabs={STANDALONE_PULSE_DETAIL_TABS}
-        automationIcon="clock"
+        automationIcon="pulse"
       />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
@@ -153,6 +150,9 @@ export const StandalonePulseInstallationDetail = ({
             information={informationQuery.data}
             loading={informationQuery.isPending}
             error={informationQuery.isError}
+            {...(onOpenBleDiscovery
+              ? { onScan: () => onOpenBleDiscovery(installation.shelly.deviceId) }
+              : {})}
           />
         )}
 
