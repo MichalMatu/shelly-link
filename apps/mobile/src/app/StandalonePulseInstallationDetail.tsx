@@ -3,9 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
-  AutomationDetailDangerZone,
-  AutomationDetailHierarchy,
-  AutomationDetailSection,
+  AutomationDetail,
   ClimateScriptDetailSection,
   Pulse,
   useInstalledAutomationStore,
@@ -131,10 +129,10 @@ export const StandalonePulseInstallationDetail = ({
               </FeedbackPanel>
             )}
 
-            <AutomationDetailHierarchy>
-              <AutomationDetailSection title={t('detail.currentState')}>
+            <AutomationDetail.Hierarchy>
+              <AutomationDetail.Section title={t('detail.currentState')}>
                 <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-              </AutomationDetailSection>
+              </AutomationDetail.Section>
 
               <Pulse.Standalone.ConfigurationSection
                 installation={installation}
@@ -147,7 +145,7 @@ export const StandalonePulseInstallationDetail = ({
                 onSaveError={() => pushToast('warning', managementLabels.saveFailed)}
               />
 
-              <AutomationDetailDangerZone title={managementLabels.deleteAction}>
+              <AutomationDetail.DangerZone title={managementLabels.deleteAction}>
                 <button
                   className="secondary-action secondary-action--danger"
                   type="button"
@@ -156,8 +154,8 @@ export const StandalonePulseInstallationDetail = ({
                 >
                   {managementLabels.deleteAction}
                 </button>
-              </AutomationDetailDangerZone>
-            </AutomationDetailHierarchy>
+              </AutomationDetail.DangerZone>
+            </AutomationDetail.Hierarchy>
           </>
         )}
 
