@@ -1022,8 +1022,8 @@ const checkStandalonePulseControlPlacement = async () => {
       );
     }
   }
-  if (!detailSource.includes('automationIcon="clock"')) {
-    addFailure(detailPath, 'standalone Pulse Automation tab must use the clock icon');
+  if (!detailSource.includes('automationIcon="pulse"')) {
+    addFailure(detailPath, 'standalone Pulse Automation tab must use the Pulse icon');
   }
 
   for (const path of tsxPaths) {
