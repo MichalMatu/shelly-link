@@ -1,4 +1,9 @@
 export {
+  AutomationDetailDangerZone,
+  AutomationDetailHierarchy,
+  AutomationDetailSection
+} from './components/AutomationDetailLayout.js';
+export {
   ClimateAutomationDetailSection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
