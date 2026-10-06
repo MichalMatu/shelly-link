@@ -21,7 +21,7 @@ The current V1 product foundation is established:
 - AUTO/MANUAL with automation-fault and hard-safety as separate axes;
 - safe-OFF boot, stale-sensor and destructive lifecycle behavior;
 - Runtime Safety Supervisor;
-- Climate History/Datalogger with chart-first mobile presentation;
+- Climate and standalone Pulse History/Datalogger with shared History v2 storage and chart-first mobile presentation;
 - capability-driven Plug Detail and nested Thermometer settings;
 - BLE-to-Wi-Fi provisioning, firmware maintenance and time synchronization;
 - transactional standalone Pulse script replacement;

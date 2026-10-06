@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
+  AutomationHistorySection,
   ClimateScriptDetailSection,
   Pulse,
+  useAutomationHistory,
   useInstalledAutomationStore,
   type InstalledAutomation
 } from '../features/automations/index.js';
@@ -27,7 +29,7 @@ import { useTranslation } from './i18n.js';
 
 type StandalonePulseInstalledAutomation = Extract<InstalledAutomation, { kind: 'pulse' }>;
 
-const STANDALONE_PULSE_DETAIL_TABS = automationDetailTabs({ hasScript: true });
+const STANDALONE_PULSE_DETAIL_TABS = automationDetailTabs({ hasHistory: true, hasScript: true });
 
 type StandalonePulseInstallationDetailProps = {
   installation: StandalonePulseInstalledAutomation;
@@ -48,6 +50,7 @@ export const StandalonePulseInstallationDetail = ({
   const { dismissToast, pushToast, toasts } = useToastQueue('pulse-detail-toast');
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
+  const historyQuery = useAutomationHistory(installation, { enabled: activeTab === 'history' });
   const runtimeQuery = Pulse.Standalone.useRuntime(installation);
   const runtimeMatches = runtimeQuery.data?.automationScriptId === installation.script.id;
   const automationRunning =
@@ -99,6 +102,7 @@ export const StandalonePulseInstallationDetail = ({
         tabs={[activeTab, setActiveTab]}
         availableTabs={STANDALONE_PULSE_DETAIL_TABS}
         automationIcon="pulse"
+        showHistory
       />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
@@ -143,6 +147,17 @@ export const StandalonePulseInstallationDetail = ({
               </AutomationDetail.DangerZone>
             </AutomationDetail.Hierarchy>
           </>
+        )}
+
+        {activeTab === 'history' && (
+          <AutomationHistorySection
+            profile="pulse"
+            records={historyQuery.data?.records ?? []}
+            invalidRecordCount={historyQuery.data?.invalidKeys.length ?? 0}
+            loading={historyQuery.isLoading}
+            error={historyQuery.isError}
+            onRetry={() => void historyQuery.refetch()}
+          />
         )}
 
         {activeTab === 'ble' && (

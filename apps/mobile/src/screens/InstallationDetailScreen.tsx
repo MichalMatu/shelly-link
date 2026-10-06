@@ -10,12 +10,12 @@ import { installationScriptPreviewCopy } from '../app/locales/installationScript
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
-  ClimateHistorySection,
+  AutomationHistorySection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
   ClimateScriptDetailSection,
   ClimateScriptDiagnosticsSection,
-  useClimateHistory
+  useAutomationHistory
 } from '../features/automations/index.js';
 import {
   PlugRemovalBlockedModal,
@@ -125,7 +125,7 @@ const ClimateInstallationDetail = ({
   >(null);
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
   const controlQuery = useInstalledAutomationControl(installation);
-  const historyQuery = useClimateHistory(installation, {
+  const historyQuery = useAutomationHistory(installation, {
     enabled: activeTab === 'history'
   });
   const automationAction = useInstalledAutomationActions(installation);
@@ -308,7 +308,8 @@ const ClimateInstallationDetail = ({
         )}
 
         {activeTab === 'history' && (
-          <ClimateHistorySection
+          <AutomationHistorySection
+            profile="climate"
             records={historyQuery.data?.records ?? []}
             invalidRecordCount={historyQuery.data?.invalidKeys.length ?? 0}
             loading={historyQuery.isLoading}

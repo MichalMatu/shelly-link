@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { pulseCycleConfigSchema } from './config.js';
 import { stableStringify } from './hash.js';
 import { renderPulseCycleExecution } from './runtime/execution.js';
+import { renderHistoryWriter } from './runtime/historyWriter.js';
 import { compactGeneratedShellyScript } from './scriptText.js';
 
 export const SHELLY_STANDALONE_PULSE_SCRIPT_MAX_BYTES = 12_000;
@@ -44,15 +45,15 @@ const runtimeConfig = (
 });
 
 const renderStandalonePulseRelay =
-  (): string => `function ff(){if(R.ri)Timer.clear(R.ri);Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.ri=Timer.set(1000,false,ff);return}R.ri=0;R.on=false})}
-function sw(o,q){R.a=o;R.rs=q;if(R.on===o)return;Shelly.call("Switch.Set",{id:C.i,on:o},function(x,e){if(e){R.af="rc";cx();ff();return}R.on=o})}
+  (): string => `function ff(){if(R.ri)Timer.clear(R.ri);Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.ri=Timer.set(1000,false,ff);return}R.ri=0;R.on=false;hw()})}
+function sw(o,q){R.a=o;R.rs=q;if(R.on===o){hw();return}Shelly.call("Switch.Set",{id:C.i,on:o},function(x,e){if(e){R.af="rc";cx();ff();return}R.on=o;hw()})}
 function ft(q){R.af=q||"sf";cx();R.a=false;ff()}`;
 
 const renderStandalonePulseControl = (): string =>
   `function rq(o){if(!o){var p=R.ps>0&&R.ps<4;cx();R.a=false;sw(false,p?"pp":"po");return 0}if(R.af)return-1;px();return 1}`;
 
 const renderStandalonePulseBoot =
-  (): string => `function bt(){Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.af="rc";ff();return}R.on=false;var s=Shelly.getComponentStatus("switch:"+C.i);if(s&&s.errors&&s.errors[0]){ft(s.errors[0]);return}rq(true)})}
+  (): string => `function bt(){Shelly.call("Switch.Set",{id:C.i,on:false},function(x,e){if(e){R.af="rc";ff();return}R.on=false;hi();var s=Shelly.getComponentStatus("switch:"+C.i);if(s&&s.errors&&s.errors[0]){ft(s.errors[0]);return}rq(true)})}
 if(Shelly.addEventHandler)Shelly.addEventHandler(function(e){if(e&&e.component==="switch:"+C.i&&e.delta&&e.delta.errors&&e.delta.errors[0])ft(e.delta.errors[0])});
 bt();`;
 
@@ -68,6 +69,7 @@ export const generateShellyStandalonePulseScript = (input: unknown): string => {
   const body = `var C=${compactConfig};
 var R={on:false,a:false,af:null,rs:"bt",ps:0,pc:0,pt:null,pn:null,pi:0,ri:0};
 function nw(){return Shelly.getUptimeMs()}
+${renderHistoryWriter('standalone-pulse')}
 ${renderStandalonePulseRelay()}
 ${renderPulseCycleExecution()}
 ${renderStandalonePulseControl()}

@@ -93,14 +93,14 @@ Target order:
 
 ### UX-4 — Pulse History / datalogger
 
-- [ ] Generalize the current Climate-only History read/presentation ownership where practical.
-- [ ] Add History to standalone Pulse detail.
-- [ ] Pulse History minimum panels: Output ON/OFF, Power W and Current A.
-- [ ] Consider cycle/duty/transition information only after the minimum useful history is working.
-- [ ] Reuse the existing `shellylink.history.*` record model if it remains compatible; do not invent a parallel history format without evidence.
-- [ ] Add a small shared/bounded history writer to standalone Pulse runtime because standalone Pulse currently does not persist History records.
-- [ ] Evaluate the same History capability for Time + Pulse after standalone Pulse is proven.
-- [ ] History writes remain observational/best-effort and must never affect relay arbitration or safety.
+- [x] Generalize the current Climate-only History read/presentation ownership where practical.
+- [x] Add History to standalone Pulse detail.
+- [x] Pulse History minimum panels: Output ON/OFF, Power W and Current A.
+- [x] Consider cycle/duty/transition information only after the minimum useful history is working.
+- [x] Reuse the existing `shellylink.history.*` record model if it remains compatible; do not invent a parallel history format without evidence.
+- [x] Add a small shared/bounded history writer to standalone Pulse runtime because standalone Pulse currently does not persist History records.
+- [ ] Evaluate the same History capability for Time + Pulse after standalone Pulse is proven. This remains the explicit follow-up after the standalone slice is accepted.
+- [x] History writes remain observational/best-effort and must never affect relay arbitration or safety.
 
 ### UX-5 — Standalone Pulse dashboard card
 

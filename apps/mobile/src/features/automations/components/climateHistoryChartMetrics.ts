@@ -65,9 +65,15 @@ export const OUTPUT_HISTORY_METRIC: HistoryMetricDefinition = {
   read: (record) => (record.finalRelayOn ? 1 : 0)
 };
 
-export const HISTORY_PANEL_METRICS: readonly HistoryMetricDefinition[] = [
+export const CLIMATE_HISTORY_PANEL_METRICS: readonly HistoryMetricDefinition[] = [
   CONTINUOUS_HISTORY_METRICS[0]!,
   CONTINUOUS_HISTORY_METRICS[1]!,
+  OUTPUT_HISTORY_METRIC,
+  CONTINUOUS_HISTORY_METRICS[3]!,
+  CONTINUOUS_HISTORY_METRICS[4]!
+];
+
+export const PULSE_HISTORY_PANEL_METRICS: readonly HistoryMetricDefinition[] = [
   OUTPUT_HISTORY_METRIC,
   CONTINUOUS_HISTORY_METRICS[3]!,
   CONTINUOUS_HISTORY_METRICS[4]!

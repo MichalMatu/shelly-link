@@ -15,8 +15,11 @@ export {
   type ShellyAutomationScriptState,
   type ShellyControlStatus
 } from './data/shellyManagedAutomation.js';
-export { ClimateHistorySection } from './components/ClimateHistorySection.js';
-export { climateHistoryQueryKey, useClimateHistory } from './flows/useClimateHistory.js';
+export {
+  AutomationHistorySection,
+  type AutomationHistoryProfile
+} from './components/AutomationHistorySection.js';
+export { automationHistoryQueryKey, useAutomationHistory } from './flows/useAutomationHistory.js';
 export {
   deleteTimeAutomation,
   installDailyTimeAutomation,

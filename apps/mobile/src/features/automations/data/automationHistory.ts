@@ -11,7 +11,7 @@ import {
 
 const HISTORY_KVS_MATCH = `${HISTORY_KVS_PREFIX}*`;
 
-export const readClimateHistory = async (
+export const readAutomationHistory = async (
   transport: ShellyRpcTransport
 ): Promise<Result<DecodedHistoryStore>> => {
   const response = await new ShellyKvsClient(transport).getAllMatching(HISTORY_KVS_MATCH);
