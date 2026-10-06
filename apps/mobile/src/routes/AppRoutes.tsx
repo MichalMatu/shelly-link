@@ -54,7 +54,9 @@ const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
     return { type: 'dashboard', section: route.section };
   }
   if (route.type === 'device-add') return route.returnTo;
-  if (route.type === 'sensor-settings') return { type: 'dashboard', section: 'thermometers' };
+  if (route.type === 'sensor-settings') {
+    return { type: 'dashboard', section: 'thermometers' };
+  }
   if (route.type === 'plug-ble-discovery') return route.returnTo;
   if (route.type === 'plug-settings' || route.type === 'ble-plug-detail') {
     return { type: 'dashboard', section: 'plugs' };
@@ -283,7 +285,7 @@ export const AppRoutes = () => {
     content = (
       <InstallationDetailScreen
         installationId={route.installationId}
-        onBack={() => navigate({ type: 'dashboard', kind: route.section })}
+        onBack={() => navigate({ type: 'dashboard', section: route.section })}
         onOpenBleDiscovery={(deviceId) =>
           navigate({
             type: 'plug-ble-discovery',
@@ -319,7 +321,9 @@ export const AppRoutes = () => {
           }
           onOpenPlugAdd={() => openDeviceAdd('plug')}
           onOpenSensorAdd={(mode) => openDeviceAdd('sensor', mode)}
-          onSetupComplete={() => navigate({ type: 'dashboard', section: route.sourceSection })}
+          onSetupComplete={() =>
+            navigate({ type: 'dashboard', section: route.sourceSection })
+          }
         />
       </Suspense>
     );
