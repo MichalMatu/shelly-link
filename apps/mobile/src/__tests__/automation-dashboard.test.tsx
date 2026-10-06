@@ -421,7 +421,7 @@ describe('AutomationDashboardScreen', () => {
     ).toBe(true);
 
     fireEvent.click(within(plugCard).getByRole('button', { name: 'Dodaj automatykę' }));
-    expect(onAddAutomation).toHaveBeenCalledWith('climate', 'shellyplugsg3-dashboard-30');
+    expect(onAddAutomation).toHaveBeenCalledWith('shellyplugsg3-dashboard-30');
     expect(onOpenPlugSettings).not.toHaveBeenCalled();
   });
 
