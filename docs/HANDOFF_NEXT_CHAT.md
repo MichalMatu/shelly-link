@@ -65,4 +65,4 @@ Do not use stabilization as an excuse to add new Pulse modes, Environment Profil
 
 ## Verification boundary
 
-The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Hardware claims still require fresh real-device evidence. The 8-hour soak remains intentionally deferred.
+The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Fresh real-device evidence now covers Wi-Fi loss/recovery, the 16/16 final runtime matrix and final device postflight. The 8-hour soak remains intentionally deferred.
