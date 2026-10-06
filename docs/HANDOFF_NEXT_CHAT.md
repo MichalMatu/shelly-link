@@ -104,12 +104,12 @@ Target order:
 
 ### UX-5 — Standalone Pulse dashboard card
 
-- [ ] Reduce duplicated healthy-state information such as `Stan Pulse`, requested output, physical relay output and phase all simultaneously saying ON.
-- [ ] Make the card status-first and immediately understandable: current phase/state, time to next transition and compact cycle configuration.
-- [ ] Show detailed requested-vs-final output, reason/fault and safety information primarily when they differ or require attention.
-- [ ] Keep AUTO/MANUAL and physical relay controls visually subordinate to the primary Pulse state.
-- [ ] Preserve compact telemetry at the bottom.
-- [ ] Produce a reviewed screenshot before accepting the new composition.
+- [x] Reduce duplicated healthy-state information such as `Stan Pulse`, requested output, physical relay output and phase all simultaneously saying ON.
+- [x] Make the card status-first and immediately understandable: current phase/state, time to next transition and compact cycle configuration.
+- [x] Show detailed requested-vs-final output, reason/fault and safety information primarily when they differ or require attention.
+- [x] Keep AUTO/MANUAL and physical relay controls visually subordinate to the primary Pulse state.
+- [x] Preserve compact telemetry at the bottom.
+- [x] Produce a reviewed screenshot before accepting the new composition.
 
 Preferred mental model:
 
@@ -153,6 +153,22 @@ For every slice:
 - do not refresh unrelated frozen Climate baselines;
 - run the repository-required focused checks and final gate before merge;
 - mark completed checklist items here so unfinished work remains visible.
+
+### Current handoff cut
+
+The Pulse UX correction batch is complete for UX-1, UX-2, UX-3, UX-5, UX-6 and UX-7. The next cohesive task is UX-4 — Pulse History / datalogger.
+
+Start UX-4 from the existing History v2 contract rather than designing another persistence format:
+
+- the shared History v2 record already supports nullable climate metrics plus requested/final relay state, mode, reason/fault/safety, power and current;
+- the existing `shellylink.history.*` reader/decoder is structurally reusable even though the current app naming is Climate-specific;
+- the History chart/presentation should be generalized only as far as needed to show standalone Pulse Output, Power and Current;
+- the current writer is generated only into the Climate runtime, while standalone Pulse has no History writer yet;
+- add the smallest bounded standalone Pulse writer that emits the same History v2 record shape, with temperature/humidity/VPD left null;
+- History remains observational/best-effort and must never participate in relay arbitration, fault handling or safety;
+- prove standalone Pulse History first, then decide whether the same capability should be exposed for Time + Pulse.
+
+Do not reopen completed Pulse UX slices during UX-4 unless a direct integration dependency is demonstrated.
 
 ## Verification boundary
 
