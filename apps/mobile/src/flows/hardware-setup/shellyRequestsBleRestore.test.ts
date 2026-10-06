@@ -111,9 +111,9 @@ describe('Shelly BLE discovery managed runtime orchestration', () => {
       throw new Error(`Unexpected RPC method: ${request.method}`);
     });
 
-    await expect(
-      prepareShellyBleDiscovery('http://192.168.0.20/')
-    ).rejects.toThrow('did not confirm OFF');
+    await expect(prepareShellyBleDiscovery('http://192.168.0.20/')).rejects.toThrow(
+      'did not confirm OFF'
+    );
 
     expect(mocks.restore).toHaveBeenCalledWith(expect.any(Object), pulseAutoState);
   });
@@ -139,9 +139,9 @@ describe('Shelly BLE discovery managed runtime orchestration', () => {
       throw new Error(`Unexpected RPC method: ${request.method}`);
     });
 
-    await expect(
-      prepareShellyBleDiscovery('http://192.168.0.20/')
-    ).rejects.toThrow('Rollback failed: rollback restore failed');
+    await expect(prepareShellyBleDiscovery('http://192.168.0.20/')).rejects.toThrow(
+      'Rollback failed: rollback restore failed'
+    );
 
     expect(mocks.events.slice(-2)).toEqual(['Script.Stop', 'Switch.Set']);
   });

@@ -228,26 +228,18 @@ export const prepareShellyBleDiscovery = async (
   try {
     managedRuntimeMutationAttempted = true;
     await forceRelayOff(client, transport, automationRestoreState.relayId);
-    if (
-      automationRestoreState.wasRunning &&
-      automationRestoreState.scriptId !== null
-    ) {
+    if (automationRestoreState.wasRunning && automationRestoreState.scriptId !== null) {
       unwrapShellyResult(await client.stopScript(automationRestoreState.scriptId));
     }
     await forceRelayOff(client, transport, automationRestoreState.relayId);
   } catch (error) {
     if (managedRuntimeMutationAttempted) {
       try {
-        await restoreManagedAutomationDiscoveryState(
-          transport,
-          automationRestoreState
-        );
+        await restoreManagedAutomationDiscoveryState(transport, automationRestoreState);
       } catch (restoreError) {
         await leaveManagedAutomationDiscoverySafe(transport, automationRestoreState);
         const originalMessage =
-          error instanceof Error
-            ? error.message
-            : 'BLE discovery preparation failed.';
+          error instanceof Error ? error.message : 'BLE discovery preparation failed.';
         const restoreMessage =
           restoreError instanceof Error
             ? restoreError.message

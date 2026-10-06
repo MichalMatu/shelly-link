@@ -102,15 +102,8 @@ class ReplacementTransport implements ShellyRpcTransport {
           ShellyClientError
         >;
       }
-      if (
-        this.failRollbackPut &&
-        !params.append &&
-        params.code === this.originalCode
-      ) {
-        return failure('rollback upload failed') as Result<
-          TResponse,
-          ShellyClientError
-        >;
+      if (this.failRollbackPut && !params.append && params.code === this.originalCode) {
+        return failure('rollback upload failed') as Result<TResponse, ShellyClientError>;
       }
       this.script.code = params.append ? this.script.code + params.code : params.code;
       return { ok: true, value: null as TResponse };
