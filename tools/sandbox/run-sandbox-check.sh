@@ -28,6 +28,17 @@ case "$PROFILE" in
   build)
     pnpm build
     ;;
+  screenshots)
+    SCREENSHOT_DIR=${LCL_SANDBOX_SCREENSHOT_DIR:-"$LCL_SANDBOX_ROOT/screenshots"}
+    rm -rf "$SCREENSHOT_DIR"
+    mkdir -p "$SCREENSHOT_DIR"
+    LCL_SANDBOX_SCREENSHOT_DIR="$SCREENSHOT_DIR" pnpm exec playwright test \
+      -c apps/mobile/playwright.config.ts \
+      apps/mobile/e2e/responsive.spec.ts \
+      apps/mobile/e2e/led-settings.spec.ts \
+      apps/mobile/e2e/pulse-operational-status.spec.ts
+    printf 'screenshots=%s\n' "$SCREENSHOT_DIR"
+    ;;
   mobile)
     pnpm --filter @lcl/mobile lint
     pnpm --filter @lcl/mobile typecheck
@@ -45,7 +56,7 @@ case "$PROFILE" in
     ;;
   *)
     echo "Unknown profile: $PROFILE" >&2
-    echo "Expected one of: test, core, build, mobile, landing, check, full" >&2
+    echo "Expected one of: test, core, build, screenshots, mobile, landing, check, full" >&2
     exit 2
     ;;
 esac

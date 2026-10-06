@@ -38,6 +38,18 @@ export const visualScreenNames = [
 export type VisualScreenName = (typeof visualScreenNames)[number];
 
 export const expectVisualScreen = async (page: Page, name: VisualScreenName) => {
+  const sandboxScreenshotDir = process.env.LCL_SANDBOX_SCREENSHOT_DIR;
+  if (sandboxScreenshotDir) {
+    await page.mouse.move(1, 1);
+    await page.screenshot({
+      path: `${sandboxScreenshotDir}/${name}.png`,
+      animations: 'disabled',
+      caret: 'hide',
+      fullPage: true,
+      scale: 'css'
+    });
+  }
+
   if (process.platform !== canonicalVisualPlatform) {
     if (process.env.LCL_VISUAL_CONTRACT === '1') {
       throw new Error(

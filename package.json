@@ -34,6 +34,7 @@
     "sandbox:doctor": "bash tools/sandbox/sandbox-doctor.sh",
     "sandbox:test": "bash tools/sandbox/run-sandbox-check.sh test",
     "sandbox:build": "bash tools/sandbox/run-sandbox-check.sh build",
+    "sandbox:screenshots": "bash tools/sandbox/run-sandbox-check.sh screenshots",
     "sandbox:check": "bash tools/sandbox/run-sandbox-check.sh check",
     "sandbox:full": "bash tools/sandbox/run-sandbox-check.sh full",
     "check:static": "pnpm format:check && pnpm lint && pnpm quality:ux && pnpm quality:repo && pnpm typecheck",
