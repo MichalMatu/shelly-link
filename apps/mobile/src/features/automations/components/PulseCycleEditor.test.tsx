@@ -7,10 +7,7 @@ import {
   parsePulseCycleForm,
   type PulseCycleFormDraft
 } from '../data/pulseCycleForm.js';
-import {
-  PulseCycleEditor,
-  type PulseCycleEditorContext
-} from './PulseCycleEditor.js';
+import { PulseCycleEditor, type PulseCycleEditorContext } from './PulseCycleEditor.js';
 
 const copy = pulseCycleCopy.pl;
 
