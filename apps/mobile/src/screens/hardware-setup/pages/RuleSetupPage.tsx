@@ -159,14 +159,16 @@ export const RuleSetupPage = ({
         safeRelayTestPending={flow.safeRelayTestMutation.isPending}
         install={() => flow.installMutation.mutate()}
         submitMode={flow.isEditingClimateAutomation ? 'edit' : 'install'}
+        outputBehaviorEditor={
+          !inline ? (
+            <Pulse.Cycle.Editor
+              draft={flow.pulseCycleDraft}
+              validation={flow.pulseCycleValidation}
+              onChange={flow.setPulseCycleDraft}
+            />
+          ) : undefined
+        }
       />
-      {!inline && (
-        <Pulse.Cycle.Editor
-          draft={flow.pulseCycleDraft}
-          validation={flow.pulseCycleValidation}
-          onChange={flow.setPulseCycleDraft}
-        />
-      )}
 
       <Modal
         actions={
