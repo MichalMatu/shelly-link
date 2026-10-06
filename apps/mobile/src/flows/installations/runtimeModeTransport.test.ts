@@ -48,11 +48,14 @@ const mockManagedScript = ({
   evalResult?: string;
 }) => {
   let output = relayOn;
+  let runningState = running;
   mocks.call.mockImplementation(async (request: ShellyRpcRequest) => {
     if (request.method === 'Script.List') {
       return {
         ok: true,
-        value: { scripts: [{ id: 7, name: 'Managed', enable: true, running }] }
+        value: {
+          scripts: [{ id: 7, name: 'Managed', enable: true, running: runningState }]
+        }
       };
     }
     if (request.method === 'Script.GetCode') {
@@ -69,6 +72,11 @@ const mockManagedScript = ({
       return { ok: true, value: { result: evalResult } };
     }
     if (request.method === 'Script.Start') {
+      runningState = true;
+      return { ok: true, value: null };
+    }
+    if (request.method === 'Script.Stop') {
+      runningState = false;
       return { ok: true, value: null };
     }
     if (request.method === 'Switch.Set') {
@@ -217,6 +225,23 @@ describe('temporary BLE discovery managed runtime preservation', () => {
       wasRunning: false,
       relayId: 0,
       manualRelayOn: true
+    });
+  });
+
+  it('restores a paused Climate runtime back to stopped if it is unexpectedly running', async () => {
+    mockManagedScript({ code: '', running: true });
+
+    await restoreManagedAutomationDiscoveryState(transport(), {
+      kind: 'climate',
+      scriptId: 7,
+      wasRunning: false,
+      relayId: 0,
+      controlState: null
+    });
+
+    expect(mocks.call).toHaveBeenCalledWith({
+      method: 'Script.Stop',
+      params: { id: 7 }
     });
   });
 
