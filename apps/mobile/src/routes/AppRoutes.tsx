@@ -333,9 +333,7 @@ export const AppRoutes = () => {
     <AppShell
       activeSection={activeNavigationSectionForRoute(route)}
       onOpenPlugs={() => navigate({ type: 'dashboard', section: 'plugs' })}
-      onOpenThermometers={() =>
-        navigate({ type: 'dashboard', section: 'thermometers' })
-      }
+      onOpenThermometers={() => navigate({ type: 'dashboard', section: 'thermometers' })}
       onOpenSettings={openSettings}
     >
       <SensorRemovedToast
