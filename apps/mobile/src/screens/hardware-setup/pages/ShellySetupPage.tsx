@@ -1,9 +1,6 @@
 import type { ShellySetupFlow } from '../pageContracts.js';
 import { InfoLabel } from '@lcl/ui';
-import {
-  AppToastViewport,
-  useAppToastQueue
-} from '../../../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -67,7 +64,7 @@ export const ShellySetupPage = ({
     flow.checkShellyMutation.isPending ||
     flow.recheckShellyMutation.isPending ||
     isShellyScanActive;
-  const { dismissToast, pushToast, toasts } = useAppToastQueue('shelly-toast');
+  const { dismissToast, pushToast, toasts } = useToastQueue('shelly-toast');
   const scanResults = flow.shellyScanResults;
   const shellyDevices = flow.shellyDevices;
   const isScanStopped =
