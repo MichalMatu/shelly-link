@@ -143,7 +143,7 @@ describe('Shelly BLE discovery managed runtime orchestration', () => {
       prepareShellyBleDiscovery('http://192.168.0.20/')
     ).rejects.toThrow('Rollback failed: rollback restore failed');
 
-    expect(mocks.events.slice(-2)).toEqual(['Switch.Set', 'Script.Stop']);
+    expect(mocks.events.slice(-2)).toEqual(['Script.Stop', 'Switch.Set']);
   });
 
   it('deletes the discovery script before restoring a paused Pulse MANUAL state', async () => {
