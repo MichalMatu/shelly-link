@@ -23,7 +23,7 @@ export const useRemovalNavigation = (navigate: (route: AppRoute) => void) => {
       navigate({
         type: 'installation',
         installationId,
-        kind: installation.kind === 'time' ? 'time' : 'climate'
+        section: installation.kind === 'time' ? 'thermometers' : 'plugs'
       });
     },
     [installations, navigate]
