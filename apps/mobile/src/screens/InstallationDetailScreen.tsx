@@ -8,10 +8,7 @@ import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppToastViewport,
-  useAppToastQueue
-} from '../components/AppToastViewport.js';
+import { AppToastViewport, useAppToastQueue } from '../components/AppToastViewport.js';
 import {
   ClimateHistorySection,
   ClimateRecoverySection,
@@ -113,8 +110,7 @@ const ClimateInstallationDetail = ({
   onOpenBleDiscovery
 }: ClimateInstallationDetailProps) => {
   const { locale, t } = useTranslation();
-  const { dismissToast, pushToast, toasts } =
-    useAppToastQueue('installation-toast');
+  const { dismissToast, pushToast, toasts } = useAppToastQueue('installation-toast');
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
