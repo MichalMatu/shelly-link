@@ -129,10 +129,10 @@ The UI must make this model obvious:
 
 ### UX-7 — Copy and small semantic cleanup
 
-- [ ] Standalone Pulse install action must not say `Zapisz harmonogram w Shelly`; use Pulse-specific copy.
-- [ ] Replace overly technical standalone Pulse helper text with user-oriented language.
-- [ ] Check setup/detail labels for leftover Time-specific wording reused by Pulse.
-- [ ] Do not change runtime semantics while fixing labels.
+- [x] Standalone Pulse install action must not say `Zapisz harmonogram w Shelly`; use Pulse-specific copy.
+- [x] Replace overly technical standalone Pulse helper text with user-oriented language.
+- [x] Check setup/detail labels for leftover Time-specific wording reused by Pulse.
+- [x] Do not change runtime semantics while fixing labels.
 
 ### Execution order
 

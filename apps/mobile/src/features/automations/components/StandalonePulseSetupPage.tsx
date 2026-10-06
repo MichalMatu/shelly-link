@@ -1,6 +1,7 @@
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
+import { pulseCycleCopy } from '../../../app/locales/pulseCycle.js';
 import { PulseCycleEditor } from './PulseCycleEditor.js';
 import {
   useStandalonePulseSetupFlow,
@@ -19,7 +20,8 @@ export const StandalonePulseSetupPage = ({
   selectedShelly,
   onInstalled
 }: StandalonePulseSetupPageProps) => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
+  const copy = pulseCycleCopy[locale];
   const pulseFlow = useStandalonePulseSetupFlow(selectedShelly);
   const [isInstallErrorOpen, setIsInstallErrorOpen] = useState(false);
 
@@ -41,8 +43,8 @@ export const StandalonePulseSetupPage = ({
   return (
     <section className="demo-panel">
       <div className="time-schedule-device">
-        <span>{t('time.device')}</span>
-        <strong>{selectedShelly?.name ?? t('time.noDevice')}</strong>
+        <span>{copy.device}</span>
+        <strong>{selectedShelly?.name ?? copy.noDevice}</strong>
       </div>
 
       <PulseCycleEditor
@@ -63,7 +65,7 @@ export const StandalonePulseSetupPage = ({
           }
           onClick={() => void install()}
         >
-          {pulseFlow.installMutation.isPending ? t('time.installing') : t('time.install')}
+          {pulseFlow.installMutation.isPending ? copy.installing : copy.install}
         </button>
       </div>
 
