@@ -1,141 +1,68 @@
-# Handoff — Stage 9 stabilization in progress
+# Handoff — Stage 9 stabilization
 
-Status: **2026-10-06 — PR #89 healthy-scanner sensor-silence recovery, PR #91 stopped-scanner re-subscription recovery and the true physical mains power-cycle gate are hardware-qualified. Remaining V1 blockers are real Wi-Fi loss/recovery and the 8-hour soak; final hardware matrix and release qualification follow those gates.**
+Status: **2026-10-06 — V1 feature work is effectively closed. Physical reboot/power-cycle, BLE scanner recovery, real Wi-Fi loss/recovery and the final real-hardware matrix are qualified. The only intentionally outstanding release blocker before freeze is the 8-hour soak.**
 
-Repository: `MichalMatu/shelly-link`
+Repository: MichalMatu/shelly-link
 
 ## Source of truth
 
-Do not reconstruct state from chat memory. Start from fresh repository state and Local Agent state.
+Start from fresh main and fresh Local Agent state. Read:
 
-Read in this order:
-
-1. `AGENTS.md`;
+1. AGENTS.md;
 2. this file;
-3. `docs/ARCHITECTURE.md`;
-4. `docs/ROADMAP.md`;
-5. `docs/UX_VISUAL_CONTRACT.md`;
-6. `docs/testing/hardware-matrix.md`;
-7. dated Pulse/runtime acceptance records only when changing already-qualified runtime behavior.
+3. docs/ARCHITECTURE.md;
+4. docs/ROADMAP.md;
+5. docs/UX_VISUAL_CONTRACT.md when changing presentation;
+6. docs/testing/hardware-matrix.md and only the dated acceptance records relevant to the behavior being changed.
 
-Then fetch fresh `main` and `agent-control:.agent/status/daemon.json`. Verify there is no active or duplicate Local Agent task before changing anything.
+Historical PR descriptions and chat state are not canonical.
 
-## Recent merge closeout
+## Accepted product/runtime baseline
 
-The current stabilization baseline on `main` includes:
+Keep these contracts:
 
-- PR #84 — generalized temporary BLE discovery runtime restoration;
-- PR #85 — soak liveness/stabilization reporting;
-- PR #86 — deterministic runtime recovery interaction matrix;
-- PR #88 — controlled real-device `Shelly.Reboot` recovery evidence;
-- PR #89 — hardware-qualified BLE scanner watchdog recovery after sensor loss;
-- PR #90 — tooling-only build/test orchestration split with canonical `pnpm check` scope preserved;
-- PR #91 — hardware-qualified BLE scanner re-subscription after an actually stopped scanner is restarted by the watchdog.
+- one canonical physical Plug record and one managed automation owner per relay;
+- the phone configures/manages/diagnoses; Shelly executes the automation locally;
+- Climate, Time and standalone Pulse reuse the shared timing/Pulse foundations;
+- AUTO/MANUAL, automation fault and hard safety remain separate concepts;
+- forced-OFF and hard safety always win;
+- destructive/runtime mutations require physical-device identity verification when ownership is known;
+- mutating RPCs are not automatically replayed after ambiguous failures;
+- React presents device/runtime state but does not own automation timing;
+- temporary BLE discovery must preserve only recognized managed runtime state and leave the relay safe if restoration fails;
+- Climate dashboard/detail composition remains frozen unless a deliberate product-design change replaces it.
 
-Safe inline Standalone Pulse replacement from PR #83 remains part of the accepted baseline. The earlier PR #81 UX hierarchy closeout remains authoritative for accepted Plug/Thermometer navigation and visual hierarchy; do not reopen that generic UX-polish round without a concrete regression or accepted product change.
+Current scanner contract:
 
-PR #90 does not change product/runtime semantics. It splits the existing canonical repository gate into static/tests/build sub-gates, keeps the same `pnpm check` coverage, adds focused `pnpm check:mobile`, shortens pre-push to fast UX/repository policy gates and runs CI static/tests/build/responsive jobs in parallel behind one aggregate `checks` result. Worker concurrency/cache policy remains unchanged.
+- target sensor silence while the scanner is still running does not justify a scanner restart;
+- if the scanner is actually stopped, the watchdog must subscribe again before restarting it so event delivery returns.
 
-## Scanner recovery closeout
+## Refactor-audit closeout
 
-PR #91 `Fix BLE scanner re-subscription after restart` is merged as `50fc9f083f013a0652d44011da6a6eff534fab9d`. The real-device A/B gate on Plug S Gen3 firmware 1.7.5 proved that unmodified `main` could restart a scanner after `BLE.Scanner.stop()` (`isRunning() == true` and `R.sa` advanced) while target event delivery remained dead (`R.l` did not advance for 75 s).
+The audit found no reason for another broad refactor. The three narrow hardening items are complete:
 
-The PR #91 candidate added a fresh `BLE.Scanner.subscribe(...)` before the watchdog restart. Two consecutive physical stop/restart cycles then restored fresh target frames. The temporary candidate was removed after the gate and the original installed runtime was restored byte-for-byte with final relay OFF. Fresh PR CI #659 passed the canonical repository gate and responsive smoke before merge.
+- BLE discovery preparation is internally transactional after partial mutation, with safe-OFF fallback when rollback fails;
+- ambiguous multiple enabled/running scripts fail closed;
+- script replacement has focused config/start/rollback failure coverage.
 
-Detailed evidence: `docs/testing/scanner-stop-resubscribe-acceptance-2026-10-05.md`.
+Focused lifecycle tests pass, `pnpm check` passes, and GitHub CI passes on the current PR head. The Darwin `04-plug-ble-discovery` visual mismatch is unchanged at 5036 pixels on clean `main` and is therefore a pre-existing baseline drift, not a product delta.
 
-The accepted scanner contract is now split deliberately:
+## Documentation policy
 
-- sensor silence while `BLE.Scanner.isRunning()` remains true does **not** justify a scanner restart (PR #89);
-- an actually stopped scanner must receive a fresh subscription before watchdog restart so event delivery resumes (PR #91).
+Architecture contains durable contracts. Roadmap contains current/future product stages. This handoff contains only active state and immediate work. Real-device numbers, commit hashes, logs and one-off qualification narratives belong in docs/testing/ or Git history.
 
-## Current product / UX contract
+The old September UX capture bundle under artifacts/ux-reference is not canonical; current visual truth is the committed E2E snapshots plus docs/UX_VISUAL_CONTRACT.md.
 
-Pulse V1 remains closed and uses one shared Pulse-cycle engine. Do not create separate Temperature/Humidity/Time/standalone Pulse engines.
+## Remaining V1 work
 
-Current top-level navigation is `Plugs | Thermometers | Settings`.
+1. run the 8-hour soak and leave the final relay explicitly OFF;
+2. run the final freeze/release sign-off and declare V1 feature freeze;
+3. after freeze, start the graphical frontend redesign.
 
-Accepted UX state:
+The non-soak Stage 9 hardware closeout is complete: Wi-Fi loss/recovery passed without credential changes; Xiaomi/PVVX and TP357 each passed 8/8 matrix cases; the production Plug remained on its existing enabled/running Climate runtime; and the separate test Plug was restored to Matter ON, zero scripts, zero schedules and relay OFF.
 
-- top-level Add Plug and Add Thermometer have no page-local Back;
-- setup starts from a physical Plug;
-- Time is Plug automation;
-- standalone Pulse dashboard is the only place for AUTO/MANUAL and manual relay ON/OFF;
-- standalone Pulse Plug Detail is read-only for runtime control and owns status, inline cycle configuration and safe uninstall;
-- Time and standalone Pulse dashboards are status-first;
-- Time Detail and standalone Pulse Detail use current state → configuration → destructive action hierarchy;
-- Thermometer dashboard cards focus on identity/live readings; rename, PVVX/device actions, technical identity and deletion live in nested Thermometer Settings;
-- Thermometer removal blocked by Climate ownership keeps a direct route to the owning automation;
-- Plug Detail is capability-driven; BLE-only Plug Detail exposes Device + Info only;
-- setup navigation reuses `@lcl/ui` `SegmentedControl`;
-- Plug dashboard feedback is owned by the shared Plug feedback primitive rather than parallel card-specific markup;
-- Climate detail/dashboard composition remains the frozen golden master unless an explicit product decision changes it.
+Do not use stabilization as an excuse to add new Pulse modes, Environment Profiles or another generic UX-polish round.
 
-Temporary Plug BLE discovery no longer depends on a Climate-only restore payload. The lifecycle carries one opaque managed-automation restore state and supports the existing Climate control-state protocol plus Standalone Pulse AUTO/MANUAL preservation. Pulse AUTO is restored by restarting the existing script into a fresh cycle; Pulse MANUAL keeps the script stopped and restores the verified relay state. An unknown running script fails closed before the discovery lifecycle mutates it. Restore failure leaves the managed relay OFF and stops the managed script best-effort.
+## Verification boundary
 
-The standalone Pulse Bluetooth detail remains intentionally read-only in this slice. Generalizing safe restoration removes the runtime blocker but does not itself enable active Standalone Pulse BLE scan UI.
-
-## Qualification state
-
-The BLE restore implementation has focused deterministic coverage for:
-
-- unchanged Climate control-state capture/restore semantics;
-- Standalone Pulse AUTO capture/restore;
-- Standalone Pulse MANUAL relay-state capture/restore without starting the script;
-- unknown running scripts failing before destructive discovery preparation;
-- discovery preparation ordering: capture → verified OFF → stop running automation → verified OFF;
-- scanner deletion before managed runtime restoration;
-- restoration failure falling back to relay OFF + managed script stop;
-- late/unmounted discovery cleanup carrying the opaque restore state unchanged.
-
-Focused mobile tests, typecheck, repository quality gates and UX quality gates passed for the BLE restoration implementation, followed by its final canonical gate and merge. That restoration slice itself made no hardware claim. Current Stage 9 hardware evidence is recorded separately in the dated testing documents.
-
-PR #89 scanner-watchdog sensor-silence acceptance and PR #91 stopped-scanner re-subscription acceptance are both complete and merged. PR #89 used target-address isolation while BLE scanning stayed healthy; PR #91 explicitly stopped the scanner and proved that restart without re-subscription restored scanner liveness but not event delivery. Detailed evidence: `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md` and `docs/testing/scanner-stop-resubscribe-acceptance-2026-10-05.md`.
-
-## Runtime / safety boundaries
-
-Keep these invariants:
-
-- one managed automation owner per Plug relay;
-- boot/stale-sensor/hard-safety forced-OFF behavior is authoritative;
-- destructive/runtime mutations require physical-device identity verification where ownership is known;
-- mutating RPCs are not automatically retried;
-- React displays runtime state but never owns device automation timing;
-- temporary BLE discovery captures managed runtime state before mutation, forces and verifies OFF before the scanner runs, and restores only recognized managed runtime kinds;
-- frozen Climate composition is not collateral cleanup territory.
-
-## Android deployment claims
-
-Do not infer what a physical phone is running from this document. Reuse the canonical Wireless ADB procedure in `docs/PHONE_WIRELESS_ADB.md`. A phone claim is valid only when a fresh deployment task records the exact source SHA, authorized device, preserving-data `adb install -r` result, cold start and live process. Preserve app data by default; use the destructive clean uninstall/install path only when the acceptance explicitly requires fresh-store behavior.
-
-## Next work
-
-The application is near feature-complete. Six Stage 9 runtime/recovery slices are now qualified on `main`: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, deliberate real-device software reboot recovery, healthy-scanner sensor silence -> stale/OFF -> fresh-BLE AUTO recovery from PR #89, stopped-scanner watchdog restart -> re-subscription -> event-delivery recovery from PR #91, and true physical mains power-cycle recovery.
-
-The 2026-10-06 physical power-cycle gate used a real mains OFF -> ON interruption. Device uptime reset from `163508 s` to `98 s`; History recorded safe OFF at uptime `3 s`; the same 8962 B managed source / SHA-256 `80aa315eaf88c2b977b2d92c388d5a85d50b5d331f78ccd05726e21799d9f37e` returned enabled/running; schedules remained empty; fresh BLE restored healthy AUTO; no hard-safety lockout was introduced; final relay was explicitly OFF.
-
-Physical BLE RF shielding / sensor disappearance is not a separate V1 blocker. PR #89 already qualifies the runtime contract for target-frame loss while the scanner remains healthy, and PR #91 qualifies actual scanner stop/restart/re-subscription. A literal RF/power-off proof may be added later as extra evidence.
-
-Remaining order:
-
-1. qualify real Wi-Fi loss/recovery without changing Shelly credentials;
-2. run the materially longer 8-hour soak with explicit final relay OFF;
-3. run and close the final real-hardware matrix, restoring the production runtime afterward;
-4. declare V1 feature freeze and run final release qualification;
-5. only after the runtime/backend freeze, begin the explicit new graphical frontend redesign.
-
-The Wi-Fi interruption and 8-hour soak are explicitly deferred from the 2026-10-06 checkpoint because the required network control and endurance window were not available.
-
-Detailed recovery evidence on `main`: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md`, `docs/testing/reboot-recovery-acceptance-2026-10-04.md`, `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md`, `docs/testing/scanner-stop-resubscribe-acceptance-2026-10-05.md` and `docs/testing/power-cycle-recovery-acceptance-2026-10-06.md`.
-
-Enabling active Standalone Pulse BLE scan is technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into stabilization work.
-
-Do not add another generic UX-polish round or expand Pulse with unrelated runtime modes unless a concrete defect or accepted product change requires it.
-
-## Verification reminders
-
-- use focused checks while iterating and one final canonical gate on the exact completion head;
-- the pre-push hook is only the fast UX/repository policy gate; it is not a substitute for the final canonical gate;
-- use responsive/canonical visual acceptance when a slice changes those surfaces;
-- use `pnpm release:qualify` for software release evidence;
-- use `pnpm release:qualify:hardware` only when real hardware acceptance is actually being claimed.
+The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Fresh real-device evidence now covers Wi-Fi loss/recovery, the 16/16 final runtime matrix and final device postflight. The 8-hour soak remains intentionally deferred.

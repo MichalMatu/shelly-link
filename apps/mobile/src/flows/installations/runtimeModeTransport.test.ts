@@ -48,11 +48,14 @@ const mockManagedScript = ({
   evalResult?: string;
 }) => {
   let output = relayOn;
+  let runningState = running;
   mocks.call.mockImplementation(async (request: ShellyRpcRequest) => {
     if (request.method === 'Script.List') {
       return {
         ok: true,
-        value: { scripts: [{ id: 7, name: 'Managed', enable: true, running }] }
+        value: {
+          scripts: [{ id: 7, name: 'Managed', enable: true, running: runningState }]
+        }
       };
     }
     if (request.method === 'Script.GetCode') {
@@ -69,6 +72,11 @@ const mockManagedScript = ({
       return { ok: true, value: { result: evalResult } };
     }
     if (request.method === 'Script.Start') {
+      runningState = true;
+      return { ok: true, value: null };
+    }
+    if (request.method === 'Script.Stop') {
+      runningState = false;
       return { ok: true, value: null };
     }
     if (request.method === 'Switch.Set') {
@@ -220,8 +228,25 @@ describe('temporary BLE discovery managed runtime preservation', () => {
     });
   });
 
-  it('restores standalone Pulse AUTO by starting its existing script', async () => {
+  it('restores a paused Climate runtime back to stopped if it is unexpectedly running', async () => {
     mockManagedScript({ code: '', running: true });
+
+    await restoreManagedAutomationDiscoveryState(transport(), {
+      kind: 'climate',
+      scriptId: 7,
+      wasRunning: false,
+      relayId: 0,
+      controlState: null
+    });
+
+    expect(mocks.call).toHaveBeenCalledWith({
+      method: 'Script.Stop',
+      params: { id: 7 }
+    });
+  });
+
+  it('restores standalone Pulse AUTO by starting its stopped existing script', async () => {
+    mockManagedScript({ code: '', running: false });
 
     await restoreManagedAutomationDiscoveryState(transport(), {
       kind: 'standalone-pulse',
@@ -257,6 +282,33 @@ describe('temporary BLE discovery managed runtime preservation', () => {
     });
     expect(
       mocks.call.mock.calls.some(([request]) => request.method === 'Script.Start')
+    ).toBe(false);
+  });
+
+  it('fails closed on multiple active scripts before reading or mutating either one', async () => {
+    mocks.call.mockImplementation(async (request: ShellyRpcRequest) => {
+      if (request.method === 'Script.List') {
+        return {
+          ok: true,
+          value: {
+            scripts: [
+              { id: 7, name: 'Managed A', enable: true, running: true },
+              { id: 8, name: 'Managed B', enable: false, running: true }
+            ]
+          }
+        };
+      }
+      throw new Error(`Unexpected RPC method: ${request.method}`);
+    });
+
+    await expect(
+      captureManagedAutomationDiscoveryRestoreState(transport())
+    ).rejects.toThrow('Multiple active Shelly scripts');
+
+    expect(
+      mocks.call.mock.calls.some(([request]) =>
+        ['Script.GetCode', 'Script.Stop', 'Switch.Set'].includes(request.method)
+      )
     ).toBe(false);
   });
 

@@ -91,6 +91,61 @@ describe('Shelly BLE discovery managed runtime orchestration', () => {
     ]);
   });
 
+  it('rolls back the managed runtime when preparation fails after it was stopped', async () => {
+    let statusReads = 0;
+    mocks.call.mockImplementation(async (request: ShellyRpcRequest) => {
+      mocks.events.push(request.method);
+      if (request.method === 'Script.List') {
+        return { ok: true, value: { scripts: [] } };
+      }
+      if (request.method === 'Switch.Set' || request.method === 'Script.Stop') {
+        return { ok: true, value: null };
+      }
+      if (request.method === 'Switch.GetStatus') {
+        statusReads += 1;
+        if (statusReads === 2) {
+          return { ok: true, value: { id: 0, output: true } };
+        }
+        return { ok: true, value: { id: 0, output: false } };
+      }
+      throw new Error(`Unexpected RPC method: ${request.method}`);
+    });
+
+    await expect(prepareShellyBleDiscovery('http://192.168.0.20/')).rejects.toThrow(
+      'did not confirm OFF'
+    );
+
+    expect(mocks.restore).toHaveBeenCalledWith(expect.any(Object), pulseAutoState);
+  });
+
+  it('falls back to safe OFF when preparation rollback also fails', async () => {
+    let statusReads = 0;
+    mocks.restore.mockRejectedValueOnce(new Error('rollback restore failed'));
+    mocks.call.mockImplementation(async (request: ShellyRpcRequest) => {
+      mocks.events.push(request.method);
+      if (request.method === 'Script.List') {
+        return { ok: true, value: { scripts: [] } };
+      }
+      if (request.method === 'Switch.Set' || request.method === 'Script.Stop') {
+        return { ok: true, value: null };
+      }
+      if (request.method === 'Switch.GetStatus') {
+        statusReads += 1;
+        return {
+          ok: true,
+          value: { id: 0, output: statusReads === 2 }
+        };
+      }
+      throw new Error(`Unexpected RPC method: ${request.method}`);
+    });
+
+    await expect(prepareShellyBleDiscovery('http://192.168.0.20/')).rejects.toThrow(
+      'Rollback failed: rollback restore failed'
+    );
+
+    expect(mocks.events.slice(-2)).toEqual(['Script.Stop', 'Switch.Set']);
+  });
+
   it('deletes the discovery script before restoring a paused Pulse MANUAL state', async () => {
     await stopShellyBleDiscovery('http://192.168.0.20/', {
       discoveryScriptId: 7,
@@ -118,8 +173,8 @@ describe('Shelly BLE discovery managed runtime orchestration', () => {
       'Script.Stop',
       'Script.Delete',
       'restore',
-      'Switch.Set',
-      'Script.Stop'
+      'Script.Stop',
+      'Switch.Set'
     ]);
   });
 });

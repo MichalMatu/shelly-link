@@ -29,10 +29,16 @@ const failure = (message: string): Result<never> => ({
 class ReplacementTransport implements ShellyRpcTransport {
   readonly requests: ShellyRpcRequest[] = [];
   failNextPut = false;
+  failNextSetConfig = false;
+  failNextStart = false;
   failNextStatusVerification = false;
+  failRollbackPut = false;
   relayOn = true;
+  readonly originalCode: string;
 
-  constructor(readonly script: ScriptState) {}
+  constructor(readonly script: ScriptState) {
+    this.originalCode = script.code;
+  }
 
   async call<TResponse>(
     request: ShellyRpcRequest
@@ -88,6 +94,7 @@ class ReplacementTransport implements ShellyRpcTransport {
     }
 
     if (request.method === RPC_METHODS.ScriptPutCode) {
+      const params = request.params as { code: string; append?: boolean };
       if (this.failNextPut) {
         this.failNextPut = false;
         return failure('replacement upload failed') as Result<
@@ -95,18 +102,34 @@ class ReplacementTransport implements ShellyRpcTransport {
           ShellyClientError
         >;
       }
-      const params = request.params as { code: string; append?: boolean };
+      if (this.failRollbackPut && !params.append && params.code === this.originalCode) {
+        return failure('rollback upload failed') as Result<TResponse, ShellyClientError>;
+      }
       this.script.code = params.append ? this.script.code + params.code : params.code;
       return { ok: true, value: null as TResponse };
     }
 
     if (request.method === RPC_METHODS.ScriptSetConfig) {
+      if (this.failNextSetConfig) {
+        this.failNextSetConfig = false;
+        return failure('replacement config failed') as Result<
+          TResponse,
+          ShellyClientError
+        >;
+      }
       const params = request.params as { config: { enable: boolean } };
       this.script.enable = params.config.enable;
       return { ok: true, value: null as TResponse };
     }
 
     if (request.method === RPC_METHODS.ScriptStart) {
+      if (this.failNextStart) {
+        this.failNextStart = false;
+        return failure('replacement start failed') as Result<
+          TResponse,
+          ShellyClientError
+        >;
+      }
       this.script.running = true;
       return { ok: true, value: null as TResponse };
     }
@@ -262,6 +285,71 @@ describe('transactional script replacement', () => {
       (request) => request.method === RPC_METHODS.ScriptStart
     );
     expect(startCalls).toHaveLength(1);
+  });
+
+  it('restores exact source and running state when configuration fails', async () => {
+    const transport = new ReplacementTransport({
+      id: 13,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'config-old-source'
+    });
+    transport.failNextSetConfig = true;
+
+    const result = await createClient(transport).replaceScript(13, 'config-new-source');
+
+    expect(result.ok).toBe(false);
+    expect(transport.script).toEqual({
+      id: 13,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'config-old-source'
+    });
+  });
+
+  it('restores exact source and running state when restart fails', async () => {
+    const transport = new ReplacementTransport({
+      id: 14,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'start-old-source'
+    });
+    transport.failNextStart = true;
+
+    const result = await createClient(transport).replaceScript(14, 'start-new-source');
+
+    expect(result.ok).toBe(false);
+    expect(transport.script).toEqual({
+      id: 14,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'start-old-source'
+    });
+  });
+
+  it('surfaces rollback failure instead of hiding an incomplete restore', async () => {
+    const transport = new ReplacementTransport({
+      id: 15,
+      name: 'Pulse',
+      enable: true,
+      running: true,
+      code: 'rollback-old-source'
+    });
+    transport.failNextSetConfig = true;
+    transport.failRollbackPut = true;
+
+    const result = await createClient(transport).replaceScript(15, 'rollback-new-source');
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.technicalMessage).toContain(
+      'Rollback failed: rollback upload failed'
+    );
+    expect(transport.script.running).toBe(false);
   });
 
   it('restores exact source and running state when post-upload verification fails', async () => {
