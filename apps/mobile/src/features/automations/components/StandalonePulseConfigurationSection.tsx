@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { pulseCycleCopy } from '../../../app/locales/pulseCycle.js';
 import { pulseManagementCopy } from '../../../app/locales/pulseManagement.js';
+import { AutomationDetailSection } from './AutomationDetailLayout.js';
 import { PulseCycleEditor } from './PulseCycleEditor.js';
 import type { StandalonePulseInstalledAutomation } from '../data/installedAutomation.js';
 import { parsePulseCycleForm, pulseCycleFormFromConfig } from '../data/pulseCycleForm.js';
@@ -80,10 +81,7 @@ export const StandalonePulseConfigurationSection = ({
   };
 
   return (
-    <section className="installation-detail-hierarchy__section">
-      <h3 className="installation-detail-hierarchy__title">
-        {t('detail.configuration')}
-      </h3>
+    <AutomationDetailSection title={t('detail.configuration')}>
       {mutation.isError && (
         <FeedbackPanel tone="danger" title={t('common.operationFailed')}>
           {managementLabels.saveFailed}
@@ -163,6 +161,6 @@ export const StandalonePulseConfigurationSection = ({
           </div>
         </>
       )}
-    </section>
+    </AutomationDetailSection>
   );
 };

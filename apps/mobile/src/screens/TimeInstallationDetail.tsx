@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
+  AutomationDetail,
   OperationalStatus,
   deleteTimeAutomation,
   Pulse,
@@ -138,11 +139,8 @@ export const TimeInstallationDetail = ({
               </FeedbackPanel>
             )}
 
-            <div className="installation-detail-hierarchy">
-              <section className="installation-detail-hierarchy__section">
-                <h3 className="installation-detail-hierarchy__title">
-                  {t('detail.currentState')}
-                </h3>
+            <AutomationDetail.Hierarchy>
+              <AutomationDetail.Section title={t('detail.currentState')}>
                 {pulseInstallation ? (
                   <Pulse.Operational.StatusSummary status={pulseQuery.data} />
                 ) : (
@@ -159,12 +157,9 @@ export const TimeInstallationDetail = ({
                     <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
                   </div>
                 </dl>
-              </section>
+              </AutomationDetail.Section>
 
-              <section className="installation-detail-hierarchy__section">
-                <h3 className="installation-detail-hierarchy__title">
-                  {t('detail.configuration')}
-                </h3>
+              <AutomationDetail.Section title={t('detail.configuration')}>
                 <TimeScheduleSetupPage
                   flow={{
                     selectedShelly: {
@@ -184,12 +179,9 @@ export const TimeInstallationDetail = ({
                   }}
                   onPendingChange={setTimeEditPending}
                 />
-              </section>
+              </AutomationDetail.Section>
 
-              <section className="installation-detail-danger-zone">
-                <h3 className="installation-detail-hierarchy__title">
-                  {t('time.detail.delete')}
-                </h3>
+              <AutomationDetail.DangerZone title={t('time.detail.delete')}>
                 <button
                   className="secondary-action secondary-action--danger"
                   type="button"
@@ -198,8 +190,8 @@ export const TimeInstallationDetail = ({
                 >
                   {t('time.detail.delete')}
                 </button>
-              </section>
-            </div>
+              </AutomationDetail.DangerZone>
+            </AutomationDetail.Hierarchy>
           </>
         )}
 

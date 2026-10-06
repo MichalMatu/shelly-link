@@ -174,43 +174,6 @@
   width: auto;
 }
 
-.installation-detail-hierarchy {
-  display: grid;
-  gap: var(--lcl-spacing-lg);
-  min-width: 0;
-}
-
-.installation-detail-hierarchy__section,
-.installation-detail-danger-zone {
-  display: grid;
-  gap: var(--lcl-spacing-md);
-  min-width: 0;
-}
-
-.installation-detail-hierarchy__section + .installation-detail-hierarchy__section,
-.installation-detail-danger-zone {
-  border-top: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  padding-top: var(--lcl-spacing-lg);
-}
-
-.installation-detail-hierarchy__title {
-  font-size: var(--lcl-font-size-md);
-  line-height: var(--lcl-line-height-tight);
-  margin: 0;
-}
-
-.installation-detail-danger-zone {
-  justify-items: end;
-}
-
-.installation-detail-danger-zone .installation-detail-hierarchy__title {
-  justify-self: start;
-}
-
-.installation-detail-danger-zone .secondary-action {
-  width: auto;
-}
-
 .installation-ble-card {
   border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
   border-radius: var(--lcl-radius-md);
