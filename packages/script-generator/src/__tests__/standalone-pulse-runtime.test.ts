@@ -58,7 +58,11 @@ const runGenerated = ({
     getComponentStatus: (component: string) => {
       if (component === 'sys') return { unixtime: 1_790_000_000 };
       if (component === `switch:${input.relayId}`) {
-        return { errors: switchErrors, apower: relayOn ? 18.4 : 0, current: relayOn ? 0.08 : 0 };
+        return {
+          errors: switchErrors,
+          apower: relayOn ? 18.4 : 0,
+          current: relayOn ? 0.08 : 0
+        };
       }
       return null;
     },
@@ -71,18 +75,30 @@ const runGenerated = ({
       callback?: (result: unknown, errorCode: number) => void
     ) => {
       if (method === 'KVS.Get') {
-        if (kvsError || !params.key || !kvs.has(params.key)) { callback?.({}, 1); return; }
-        callback?.({ value: kvs.get(params.key) }, 0); return;
+        if (kvsError || !params.key || !kvs.has(params.key)) {
+          callback?.({}, 1);
+          return;
+        }
+        callback?.({ value: kvs.get(params.key) }, 0);
+        return;
       }
       if (method === 'KVS.Set') {
-        if (kvsError || !params.key || typeof params.value !== 'string') { callback?.({}, 1); return; }
-        kvs.set(params.key, params.value); callback?.({ etag: 'test', rev: kvs.size }, 0); return;
+        if (kvsError || !params.key || typeof params.value !== 'string') {
+          callback?.({}, 1);
+          return;
+        }
+        kvs.set(params.key, params.value);
+        callback?.({ etag: 'test', rev: kvs.size }, 0);
+        return;
       }
       expect(method).toBe('Switch.Set');
       expect(params.id).toBe(input.relayId);
       const on = params.on === true;
       relayCalls.push(on);
-      if (on && relayOnError && callback) { Timer.set(0, false, () => callback({}, 1)); return; }
+      if (on && relayOnError && callback) {
+        Timer.set(0, false, () => callback({}, 1));
+        return;
+      }
       relayOn = on;
       callback?.({}, 0);
     }
@@ -187,12 +203,40 @@ describe('Standalone Pulse generated runtime', () => {
   it('writes standalone Pulse decisions into the shared History v2 ring', () => {
     const runtime = runGenerated();
     runtime.advance(1_000);
-    const decoded = decodeHistoryKvsItems([...runtime.kvs.entries()].map(([key, value]) => ({ key, value })));
+    const decoded = decodeHistoryKvsItems(
+      [...runtime.kvs.entries()].map(([key, value]) => ({ key, value }))
+    );
     expect(decoded.meta).toEqual({ version: 2, slots: 24, nextSlot: 3, validSlots: 3 });
     expect(decoded.records).toHaveLength(3);
-    expect(decoded.records[0]).toMatchObject({ temperatureC: null, humidityPct: null, vpdKpa: null, requestedRelayOn: false, finalRelayOn: false, controlMode: 'auto', manualRequestOn: false, safetyLockout: false, powerW: 0, currentA: 0 });
-    expect(decoded.records[1]).toMatchObject({ temperatureC: null, humidityPct: null, vpdKpa: null, requestedRelayOn: true, finalRelayOn: true, reasonCode: 'po', powerW: 18.4, currentA: 0.08 });
-    expect(decoded.records[2]).toMatchObject({ requestedRelayOn: false, finalRelayOn: false, reasonCode: 'pf', powerW: 0, currentA: 0 });
+    expect(decoded.records[0]).toMatchObject({
+      temperatureC: null,
+      humidityPct: null,
+      vpdKpa: null,
+      requestedRelayOn: false,
+      finalRelayOn: false,
+      controlMode: 'auto',
+      manualRequestOn: false,
+      safetyLockout: false,
+      powerW: 0,
+      currentA: 0
+    });
+    expect(decoded.records[1]).toMatchObject({
+      temperatureC: null,
+      humidityPct: null,
+      vpdKpa: null,
+      requestedRelayOn: true,
+      finalRelayOn: true,
+      reasonCode: 'po',
+      powerW: 18.4,
+      currentA: 0.08
+    });
+    expect(decoded.records[2]).toMatchObject({
+      requestedRelayOn: false,
+      finalRelayOn: false,
+      reasonCode: 'pf',
+      powerW: 0,
+      currentA: 0
+    });
   });
 
   it('keeps Pulse relay behavior unchanged when History KVS is unavailable', () => {

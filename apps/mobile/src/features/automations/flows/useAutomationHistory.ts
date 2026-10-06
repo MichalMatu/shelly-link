@@ -9,8 +9,7 @@ import { readAutomationHistory } from '../data/automationHistory.js';
 const HISTORY_REFRESH_MS = 30_000;
 
 type HistoryInstallation =
-  | ClimateInstalledAutomation
-  | StandalonePulseInstalledAutomation;
+  ClimateInstalledAutomation | StandalonePulseInstalledAutomation;
 
 export const automationHistoryQueryKey = (installation: HistoryInstallation) =>
   [

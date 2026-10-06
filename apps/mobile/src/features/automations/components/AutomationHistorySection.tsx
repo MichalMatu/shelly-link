@@ -3,7 +3,10 @@ import { FeedbackPanel } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import { climateHistoryCopy } from '../../../app/locales/climateHistory.js';
 import { ClimateHistoryChart } from './ClimateHistoryChart.js';
-import { CLIMATE_HISTORY_PANEL_METRICS, PULSE_HISTORY_PANEL_METRICS } from './climateHistoryChartMetrics.js';
+import {
+  CLIMATE_HISTORY_PANEL_METRICS,
+  PULSE_HISTORY_PANEL_METRICS
+} from './climateHistoryChartMetrics.js';
 import './ClimateHistorySection.css';
 
 export type AutomationHistoryProfile = 'climate' | 'pulse';
@@ -27,7 +30,8 @@ export const AutomationHistorySection = ({
 }: AutomationHistorySectionProps) => {
   const { locale, t } = useTranslation();
   const copy = climateHistoryCopy[locale];
-  const panelMetrics = profile === 'pulse' ? PULSE_HISTORY_PANEL_METRICS : CLIMATE_HISTORY_PANEL_METRICS;
+  const panelMetrics =
+    profile === 'pulse' ? PULSE_HISTORY_PANEL_METRICS : CLIMATE_HISTORY_PANEL_METRICS;
 
   if (loading) {
     return (

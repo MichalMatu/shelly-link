@@ -29,7 +29,10 @@ import { useTranslation } from './i18n.js';
 
 type StandalonePulseInstalledAutomation = Extract<InstalledAutomation, { kind: 'pulse' }>;
 
-const STANDALONE_PULSE_DETAIL_TABS = automationDetailTabs({ hasHistory: true, hasScript: true });
+const STANDALONE_PULSE_DETAIL_TABS = automationDetailTabs({
+  hasHistory: true,
+  hasScript: true
+});
 
 type StandalonePulseInstallationDetailProps = {
   installation: StandalonePulseInstalledAutomation;
@@ -50,7 +53,9 @@ export const StandalonePulseInstallationDetail = ({
   const { dismissToast, pushToast, toasts } = useToastQueue('pulse-detail-toast');
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
-  const historyQuery = useAutomationHistory(installation, { enabled: activeTab === 'history' });
+  const historyQuery = useAutomationHistory(installation, {
+    enabled: activeTab === 'history'
+  });
   const runtimeQuery = Pulse.Standalone.useRuntime(installation);
   const runtimeMatches = runtimeQuery.data?.automationScriptId === installation.script.id;
   const automationRunning =

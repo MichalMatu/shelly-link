@@ -112,12 +112,28 @@ const mockStandalonePulseRpc = async (
         result = { data: scriptCode, left: 0 };
         break;
       case 'KVS.GetMany':
-        result = { items: [
-          { key: 'shellylink.history.00', etag: 'h0', value: '[2,[[1782820000,3590,null,null,null,0,"pf",null,null,0,0]]]' },
-          { key: 'shellylink.history.01', etag: 'h1', value: '[2,[[1782820010,3600,null,null,null,3,"po",null,null,184,80]]]' },
-          { key: 'shellylink.history.02', etag: 'h2', value: '[2,[[1782820020,3610,null,null,null,0,"pf",null,null,0,0]]]' },
-          { key: 'shellylink.history.meta', etag: 'hm', value: '[2,24,3,3]' }
-        ], offset: 0, total: 4 };
+        result = {
+          items: [
+            {
+              key: 'shellylink.history.00',
+              etag: 'h0',
+              value: '[2,[[1782820000,3590,null,null,null,0,"pf",null,null,0,0]]]'
+            },
+            {
+              key: 'shellylink.history.01',
+              etag: 'h1',
+              value: '[2,[[1782820010,3600,null,null,null,3,"po",null,null,184,80]]]'
+            },
+            {
+              key: 'shellylink.history.02',
+              etag: 'h2',
+              value: '[2,[[1782820020,3610,null,null,null,0,"pf",null,null,0,0]]]'
+            },
+            { key: 'shellylink.history.meta', etag: 'hm', value: '[2,24,3,3]' }
+          ],
+          offset: 0,
+          total: 4
+        };
         break;
       case 'Script.Eval':
         if (requestBody.params?.code?.includes('R.ps,R.pc,R.pn,R.rs')) {
@@ -272,7 +288,8 @@ for (const viewport of viewports) {
     await expect(history.locator('[data-metric="humidity"]')).toHaveCount(0);
     await expect(history.locator('[data-metric="vpd"]')).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
-    if (viewport.name === 'phone-large') await expectVisualScreen(page, '31-standalone-pulse-history');
+    if (viewport.name === 'phone-large')
+      await expectVisualScreen(page, '31-standalone-pulse-history');
 
     await page.getByRole('button', { name: 'Bluetooth' }).click();
     await expect(

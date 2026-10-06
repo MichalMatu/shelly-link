@@ -82,7 +82,12 @@ describe('AutomationHistorySection', () => {
   });
 
   it('renders only Output, Power and Current for standalone Pulse', () => {
-    renderSection({ profile: 'pulse', records: [{ ...record(20, true), temperatureC: null, humidityPct: null, vpdKpa: null }] });
+    renderSection({
+      profile: 'pulse',
+      records: [
+        { ...record(20, true), temperatureC: null, humidityPct: null, vpdKpa: null }
+      ]
+    });
     expect(screen.getAllByTestId('history-chart')).toHaveLength(3);
     expect(screen.getByLabelText('Output: ON')).toBeInTheDocument();
     expect(screen.getByLabelText('Power: 12.3 W')).toBeInTheDocument();
