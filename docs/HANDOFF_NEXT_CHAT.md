@@ -1,6 +1,6 @@
 # Handoff — Stage 9 stabilization in progress
 
-Status: **2026-10-05 — PR #89 healthy-scanner sensor-silence recovery and PR #91 stopped-scanner re-subscription recovery are both merged and hardware-qualified on `main`; PR #90 build/test orchestration is merged. Physical mains power-cycle, remaining Wi-Fi/BLE loss/recovery, long soak and final hardware closeout remain.**
+Status: **2026-10-06 — PR #89 healthy-scanner sensor-silence recovery, PR #91 stopped-scanner re-subscription recovery and the true physical mains power-cycle gate are hardware-qualified. Remaining V1 blockers are real Wi-Fi loss/recovery and the 8-hour soak; final hardware matrix and release qualification follow those gates.**
 
 Repository: `MichalMatu/shelly-link`
 
@@ -110,16 +110,23 @@ Do not infer what a physical phone is running from this document. Reuse the cano
 
 ## Next work
 
-The application is near feature-complete. Four Stage 9 runtime/recovery slices are qualified on `main`: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, deliberate real-device software reboot recovery, and healthy-scanner sensor silence -> stale/OFF -> fresh-BLE AUTO recovery from PR #89. The configured Plug recorded boot-safe OFF at uptime 4 s during the software-reboot gate, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim.
+The application is near feature-complete. Six Stage 9 runtime/recovery slices are now qualified on `main`: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, deliberate real-device software reboot recovery, healthy-scanner sensor silence -> stale/OFF -> fresh-BLE AUTO recovery from PR #89, stopped-scanner watchdog restart -> re-subscription -> event-delivery recovery from PR #91, and true physical mains power-cycle recovery.
 
-Default order is now:
+The 2026-10-06 physical power-cycle gate used a real mains OFF -> ON interruption. Device uptime reset from `163508 s` to `98 s`; History recorded safe OFF at uptime `3 s`; the same 8962 B managed source / SHA-256 `80aa315eaf88c2b977b2d92c388d5a85d50b5d331f78ccd05726e21799d9f37e` returned enabled/running; schedules remained empty; fresh BLE restored healthy AUTO; no hard-safety lockout was introduced; final relay was explicitly OFF.
 
-1. qualify physical mains power-cycle plus remaining Wi-Fi/BLE loss/recovery on the current merged runtime;
-2. run a materially longer soak and close the final real-hardware matrix;
-3. declare V1 feature freeze and run release qualification;
-4. only after the runtime/backend freeze, begin the explicit new graphical frontend redesign rather than another incremental UX-polish round.
+Physical BLE RF shielding / sensor disappearance is not a separate V1 blocker. PR #89 already qualifies the runtime contract for target-frame loss while the scanner remains healthy, and PR #91 qualifies actual scanner stop/restart/re-subscription. A literal RF/power-off proof may be added later as extra evidence.
 
-Detailed recovery evidence already on `main`: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md`, `docs/testing/reboot-recovery-acceptance-2026-10-04.md`, `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md` and `docs/testing/scanner-stop-resubscribe-acceptance-2026-10-05.md`.
+Remaining order:
+
+1. qualify real Wi-Fi loss/recovery without changing Shelly credentials;
+2. run the materially longer 8-hour soak with explicit final relay OFF;
+3. run and close the final real-hardware matrix, restoring the production runtime afterward;
+4. declare V1 feature freeze and run final release qualification;
+5. only after the runtime/backend freeze, begin the explicit new graphical frontend redesign.
+
+The Wi-Fi interruption and 8-hour soak are explicitly deferred from the 2026-10-06 checkpoint because the required network control and endurance window were not available.
+
+Detailed recovery evidence on `main`: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md`, `docs/testing/reboot-recovery-acceptance-2026-10-04.md`, `docs/testing/scanner-watchdog-sensor-silence-acceptance-2026-10-04.md`, `docs/testing/scanner-stop-resubscribe-acceptance-2026-10-05.md` and `docs/testing/power-cycle-recovery-acceptance-2026-10-06.md`.
 
 Enabling active Standalone Pulse BLE scan is technically unblocked, but remains a separate explicit product/UX slice rather than being smuggled into stabilization work.
 
