@@ -80,16 +80,16 @@ Target order:
 
 ### UX-2 — Standalone Pulse detail capability parity
 
-- [ ] Restore the BLE scan action in standalone Pulse detail when the Plug supports it.
-- [ ] Add a Pulse-specific automation icon instead of reusing the clock icon.
-- [ ] Review the detail tabs as capability-driven surfaces rather than a hard-coded reduced Pulse set.
-- [ ] Keep Device, Script and Info behavior aligned with the same physical Plug capabilities used elsewhere.
+- [x] Restore the BLE scan action in standalone Pulse detail when the Plug supports it.
+- [x] Add a Pulse-specific automation icon instead of reusing the clock icon.
+- [x] Review the detail tabs as capability-driven surfaces rather than a hard-coded reduced Pulse set.
+- [x] Keep Device, Script and Info behavior aligned with the same physical Plug capabilities used elsewhere.
 
 ### UX-3 — Time + Pulse detail capability parity
 
-- [ ] Expose the Script tab when Time has Pulse runtime installed.
-- [ ] Keep plain native Time without a Script tab.
-- [ ] Derive tab availability from the installed runtime/capabilities rather than one static Time tab list.
+- [x] Expose the Script tab when Time has Pulse runtime installed.
+- [x] Keep plain native Time without a Script tab.
+- [x] Derive tab availability from the installed runtime/capabilities rather than one static Time tab list.
 
 ### UX-4 — Pulse History / datalogger
 
