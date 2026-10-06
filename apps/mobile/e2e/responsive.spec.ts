@@ -1309,9 +1309,21 @@ for (const viewport of viewports) {
       .locator('xpath=ancestor::article[1]');
     await plugCard.getByRole('button', { name: 'Dodaj automatykę' }).click();
     await expect(page.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
+    await expect(
+      page.getByText(
+        'Powtarzaj cykl ON/OFF według ustawionych czasów — bez harmonogramu godzinowego i bez czujnika.'
+      )
+    ).toBeVisible();
     await page.getByRole('button', { name: /Pulse/ }).click();
 
     await expect(page.getByRole('region', { name: 'Pulse' })).toBeVisible();
+    await expect(
+      page.getByText(
+        'Pulse działa niezależnie od godzin: ustaw czas ON, czas OFF i sposób zakończenia cyklu.'
+      )
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zapisz Pulse w Shelly' })).toBeVisible();
+    await expect(page.getByText(/harmonogram/i)).toHaveCount(0);
     await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
     await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
     await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
