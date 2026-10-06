@@ -69,10 +69,10 @@ This is an explicit user-approved UX correction batch. Keep it bounded to the it
 
 ### UX-1 — Climate + Pulse setup ordering
 
-- [ ] Move `Zachowanie wyjścia` directly below the VPD section and before advanced settings.
-- [ ] When Pulse is selected, render its cycle fields immediately below `Zachowanie wyjścia`.
-- [ ] Keep the primary `Wyślij` / `Zapisz zmiany` action at the true end of the complete form.
-- [ ] Preserve one shared `PulseCycleEditor`; do not fork Climate-specific Pulse controls.
+- [x] Move `Zachowanie wyjścia` directly below the VPD section and before advanced settings.
+- [x] When Pulse is selected, render its cycle fields immediately below `Zachowanie wyjścia`.
+- [x] Keep the primary `Wyślij` / `Zapisz zmiany` action at the true end of the complete form.
+- [x] Preserve one shared `PulseCycleEditor`; do not fork Climate-specific Pulse controls.
 
 Target order:
 
