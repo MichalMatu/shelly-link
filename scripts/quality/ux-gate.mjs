@@ -884,7 +884,7 @@ const checkFrozenClimateVisualContract = async () => {
     if (actualGitBlobSha !== expectedGitBlobSha) {
       addFailure(
         path,
-        `accepted Climate golden UI is frozen at branch golden/climate-ui-20260928 (expected ${expectedGitBlobSha}, got ${actualGitBlobSha})`
+        `accepted Climate golden UI is frozen at commit 823b51ef0d58ff731d8d25df8d54db968d97cea5 (expected ${expectedGitBlobSha}, got ${actualGitBlobSha})`
       );
     }
   }

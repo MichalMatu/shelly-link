@@ -43,6 +43,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# generated/manual artifacts
+artifacts/ux-reference/
+
 # hardware test artifacts
 artifacts/hardware/*.jsonl
 artifacts/hardware/*.summary.md

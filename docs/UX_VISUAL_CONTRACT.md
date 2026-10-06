@@ -14,7 +14,7 @@ New top-level screens or materially different full-screen states must be added t
 
 ## Frozen Climate golden master
 
-The accepted Climate/humidity Plug UI is frozen on branch `golden/climate-ui-20260928` at commit `823b51ef0d58ff731d8d25df8d54db968d97cea5`.
+The accepted Climate/humidity Plug UI is frozen at immutable commit `823b51ef0d58ff731d8d25df8d54db968d97cea5`; the deleted historical branch name is not part of the contract.
 
 Protected states include the Plugs dashboard Climate card and Climate Automation, BLE, Device, Script and Info detail surfaces. Their composition, ordering, spacing, controls and tab chrome are the target design. Refactors may change implementation only if these golden renders stay unchanged.
 
@@ -81,11 +81,9 @@ Climate and Time use the same optional Pulse editor: `Zachowanie wyjścia` stays
 
 Canonical accepted states are `24-climate-pulse-setup`, `25-time-pulse-setup` and `26-standalone-pulse-setup`. The intentional product-entry/setup deltas also update `08-automation-intent`, `09-time-setup` and `16-climate-setup`. The frozen Climate Automation detail golden remains unchanged; new setup controls must not leak into that legacy inline detail composition without an explicit product-design decision.
 
-## Accepted UX polish qualification — 2026-10-03
+## Accepted baseline
 
-The status-first Time/standalone Pulse hierarchy, nested Thermometer settings, capability-driven Plug detail, shared setup navigation and shared Plug dashboard feedback ownership were accepted with the complete mobile suite at 498/498, responsive Playwright at 50/50 and the canonical visual contract at 7/7. The final feedback-ownership cleanup produced no canonical PNG delta, including the frozen Climate states. A real Android WebView inspection at 412 CSS px also confirmed no horizontal overflow for the Thermometer dashboard/settings flow.
-
-Host qualification on the 8 GB development Mac uses two Vitest workers for the complete mobile suite to avoid unrelated host-load timeouts; test expectations and repository timeouts remain unchanged.
+The status-first Time/standalone Pulse hierarchy, nested Thermometer settings, capability-driven Plug detail, shared setup navigation and shared Plug dashboard feedback ownership are accepted product contracts. Historical test counts and host-specific qualification notes belong in Git history or dated testing evidence, not here.
 
 ## Surface roles
 
