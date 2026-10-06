@@ -26,6 +26,7 @@ import {
 } from '../../platform/shellyResult.js';
 import {
   captureManagedAutomationDiscoveryRestoreState,
+  leaveManagedAutomationDiscoverySafe,
   restoreManagedAutomationDiscoveryState,
   type ManagedAutomationDiscoveryRestoreState
 } from '../installations/runtimeModeTransport.js';
@@ -213,23 +214,6 @@ export const readShellySetupScanResult = async (
   };
 };
 
-const leaveManagedAutomationSafe = async (
-  client: RpcShellyClient,
-  state: ManagedAutomationDiscoveryRestoreState
-): Promise<void> => {
-  try {
-    unwrapShellyResult(await client.setRelayOff({ relayId: state.relayId }));
-  } catch {
-    // Best effort only; preserve the original preparation/restore failure.
-  }
-  if (state.scriptId === null) return;
-  try {
-    unwrapShellyResult(await client.stopScript(state.scriptId));
-  } catch {
-    // Best effort only; preserve the original preparation/restore failure.
-  }
-};
-
 export const prepareShellyBleDiscovery = async (
   baseUrl: string
 ): Promise<ShellyBleDiscoveryPreparation> => {
@@ -259,7 +243,7 @@ export const prepareShellyBleDiscovery = async (
           automationRestoreState
         );
       } catch (restoreError) {
-        await leaveManagedAutomationSafe(client, automationRestoreState);
+        await leaveManagedAutomationDiscoverySafe(transport, automationRestoreState);
         const originalMessage =
           error instanceof Error
             ? error.message
@@ -349,7 +333,7 @@ export const stopShellyBleDiscovery = async (
       );
     } catch (error) {
       const automationState = options.automationRestoreState;
-      await leaveManagedAutomationSafe(client, automationState);
+      await leaveManagedAutomationDiscoverySafe(transport, automationState);
       stopError =
         error instanceof Error
           ? error
