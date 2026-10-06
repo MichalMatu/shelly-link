@@ -56,7 +56,7 @@ const renderDashboard = () => {
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
         <AutomationDashboardScreen
-          initialKind="climate"
+          initialSection="plugs"
           onAddPlug={vi.fn()}
           onAddThermometer={vi.fn()}
           onAddAutomation={vi.fn()}
