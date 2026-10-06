@@ -217,14 +217,15 @@ export const leaveManagedAutomationDiscoverySafe = async (
   state: ManagedAutomationDiscoveryRestoreState
 ): Promise<void> => {
   const client = new RpcShellyClient(transport);
+  if (state.scriptId !== null) {
+    try {
+      unwrapShellyResult(await client.stopScript(state.scriptId));
+    } catch {
+      // Best effort only; preserve the original preparation/restore failure.
+    }
+  }
   try {
     unwrapShellyResult(await client.setRelayOff({ relayId: state.relayId }));
-  } catch {
-    // Best effort only; preserve the original preparation/restore failure.
-  }
-  if (state.scriptId === null) return;
-  try {
-    unwrapShellyResult(await client.stopScript(state.scriptId));
   } catch {
     // Best effort only; preserve the original preparation/restore failure.
   }
@@ -240,7 +241,12 @@ export const restoreManagedAutomationDiscoveryState = async (
   const running = await readManagedScriptRunning(transport, state.scriptId);
 
   if (state.kind === 'climate') {
-    if (!state.wasRunning) return;
+    if (!state.wasRunning) {
+      if (running) {
+        unwrapShellyResult(await client.stopScript(state.scriptId));
+      }
+      return;
+    }
     if (!state.controlState) {
       throw new Error('Managed automation state was not captured before BLE discovery.');
     }
