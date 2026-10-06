@@ -2,7 +2,10 @@ import type { RuleSetupFlow } from '../pageContracts.js';
 import type { RulePresetId } from '@lcl/automation-core';
 import { FeedbackPanel, Modal, ScriptPreview } from '@lcl/ui';
 import { useCallback, useEffect, useState } from 'react';
-import { AppToastViewport } from '../../../components/AppToastViewport.js';
+import {
+  AppToastViewport,
+  useAppToastQueue
+} from '../../../components/AppToastViewport.js';
 import { useTranslation } from '../../../app/i18n.js';
 import {
   ALL_RULE_PRESETS,
@@ -12,7 +15,6 @@ import {
 import { useRuleSensorReadings } from '../../../flows/hardware-setup/useRuleSensorReadings.js';
 import { useSavedSensorLiveScanLifecycle } from '../../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
 import { canInstallScript, mutationError, type HardwarePageProps } from '../helpers.js';
-import { useToastQueue } from '../useToastQueue.js';
 import { useRuleSetupFeedback, type RuleDialogState } from './useRuleSetupFeedback.js';
 
 const copyToClipboard = async (value: string): Promise<void> => {
@@ -38,7 +40,7 @@ export const RuleSetupPage = ({
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<RuleDialogState>('none');
-  const { dismissToast, pushToast, toasts } = useToastQueue('rule-toast');
+  const { dismissToast, pushToast, toasts } = useAppToastQueue('rule-toast');
   useSavedSensorLiveScanLifecycle({
     flow,
     enabled: flow.sensorDevices.length > 0
