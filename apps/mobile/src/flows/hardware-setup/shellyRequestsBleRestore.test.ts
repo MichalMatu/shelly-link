@@ -173,8 +173,8 @@ describe('Shelly BLE discovery managed runtime orchestration', () => {
       'Script.Stop',
       'Script.Delete',
       'restore',
-      'Switch.Set',
-      'Script.Stop'
+      'Script.Stop',
+      'Switch.Set'
     ]);
   });
 });
