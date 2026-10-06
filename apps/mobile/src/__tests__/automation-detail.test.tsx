@@ -307,6 +307,18 @@ const installTimeShellyFetchMock = () => {
           }
         };
         break;
+      case 'Script.List':
+        result = {
+          scripts: [
+            {
+              id: 9,
+              name: 'Shelly Link Time Pulse',
+              enable: true,
+              running: true
+            }
+          ]
+        };
+        break;
       case 'Script.GetCode':
         if (body.params?.id !== undefined) scriptGetCodeIds.push(body.params.id);
         result = { data: '// time pulse exact source', left: 0 };
