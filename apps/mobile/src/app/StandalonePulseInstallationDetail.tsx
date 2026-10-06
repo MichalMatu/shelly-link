@@ -1,10 +1,7 @@
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import {
-  AppToastViewport,
-  useAppToastQueue
-} from '../components/AppToastViewport.js';
+import { AppToastViewport, useAppToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
   ClimateScriptDetailSection,
@@ -51,8 +48,7 @@ export const StandalonePulseInstallationDetail = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editPending, setEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
-  const { dismissToast, pushToast, toasts } =
-    useAppToastQueue('pulse-detail-toast');
+  const { dismissToast, pushToast, toasts } = useAppToastQueue('pulse-detail-toast');
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
   const runtimeQuery = Pulse.Standalone.useRuntime(installation);
