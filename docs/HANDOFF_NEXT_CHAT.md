@@ -55,13 +55,11 @@ The old September UX capture bundle under artifacts/ux-reference is not canonica
 
 ## Remaining V1 work
 
-Order:
+1. run the 8-hour soak and leave the final relay explicitly OFF;
+2. run the final freeze/release sign-off and declare V1 feature freeze;
+3. after freeze, start the graphical frontend redesign.
 
-1. qualify real Wi-Fi loss/recovery without changing Shelly credentials;
-2. run the 8-hour soak and leave the final relay explicitly OFF;
-3. run/close the final hardware matrix and restore production state;
-4. run release qualification and declare V1 feature freeze;
-5. after freeze, start the graphical frontend redesign.
+The non-soak Stage 9 hardware closeout is complete: Wi-Fi loss/recovery passed without credential changes; Xiaomi/PVVX and TP357 each passed 8/8 matrix cases; the production Plug remained on its existing enabled/running Climate runtime; and the separate test Plug was restored to Matter ON, zero scripts, zero schedules and relay OFF.
 
 Do not use stabilization as an excuse to add new Pulse modes, Environment Profiles or another generic UX-polish round.
 
