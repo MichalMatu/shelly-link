@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { StandalonePulseAutomationCard } from '../app/StandalonePulseAutomationCard.js';
 import { useTranslation } from '../app/i18n.js';
-import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import type { AppNavigationSection } from '../components/AppBottomNavigation.js';
 import { Pulse } from '../features/automations/index.js';
 import {
   BleOnlyPlugDashboardCards,
@@ -369,18 +369,18 @@ const PlainPlugCard = ({
 };
 
 type AutomationDashboardScreenProps = {
-  initialKind?: AppNavigationKind;
+  initialSection?: AppNavigationSection;
   onAddPlug(transport: PlugAddTransport): void;
   onAddThermometer(): void;
   onOpenThermometerSettings?: (sensorId: string) => void;
-  onAddAutomation(kind: AppNavigationKind, shellyId?: string): void;
+  onAddAutomation(shellyId?: string): void;
   onOpenInstallation(installationId: string): void;
   onOpenBlePlug(physicalId: string): void;
   onOpenPlugSettings(deviceId: string): void;
 };
 
 export const AutomationDashboardScreen = ({
-  initialKind,
+  initialSection,
   onAddPlug,
   onAddThermometer,
   onOpenThermometerSettings,
@@ -409,7 +409,7 @@ export const AutomationDashboardScreen = ({
       )
   );
   const queryClient = useQueryClient();
-  const activeKind = initialKind ?? 'climate';
+  const activeSection = initialSection ?? 'plugs';
   useEffect(() => {
     if (Capacitor.getPlatform() === 'web') return;
 
@@ -458,11 +458,11 @@ export const AutomationDashboardScreen = ({
     <main
       className="demo-shell dashboard-shell"
       aria-label={
-        activeKind === 'climate' ? t('dashboard.climateTab') : t('dashboard.timeTab')
+        activeSection === 'plugs' ? t('dashboard.climateTab') : t('dashboard.timeTab')
       }
     >
       <section className="dashboard-grid" aria-label={t('dashboard.systemsLabel')}>
-        {activeKind === 'time' ? (
+        {activeSection === 'thermometers' ? (
           <ThermometerDashboardSection
             onAdd={onAddThermometer}
             onOpenInstallation={onOpenInstallation}
@@ -484,7 +484,7 @@ export const AutomationDashboardScreen = ({
                 <PlainPlugCard
                   key={`plug:${device.id}`}
                   device={device}
-                  onAddAutomation={() => onAddAutomation('climate', device.id)}
+                  onAddAutomation={() => onAddAutomation(device.id)}
                   onOpenSettings={() => onOpenPlugSettings(device.id)}
                   onNameChange={(value) => renameSavedPlug(device.id, value)}
                 />
@@ -512,7 +512,7 @@ export const AutomationDashboardScreen = ({
         )}
       </section>
 
-      {activeKind === 'climate' && <PlugAddSpeedDial onSelect={onAddPlug} />}
+      {activeSection === 'plugs' && <PlugAddSpeedDial onSelect={onAddPlug} />}
     </main>
   );
 };
