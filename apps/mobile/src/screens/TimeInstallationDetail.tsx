@@ -26,9 +26,7 @@ import {
   useSavedPlugStore,
   type PlugDetailTab
 } from '../features/plugs/index.js';
-import {
-  copyInstalledAutomationScriptSource
-} from '../flows/installations/scriptPreview.js';
+import { copyInstalledAutomationScriptSource } from '../flows/installations/scriptPreview.js';
 import {
   timeAutomationRuntimeQueryKey,
   useTimeAutomationRuntime
