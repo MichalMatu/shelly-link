@@ -50,7 +50,9 @@ const RouteFallback = () => {
 
 const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   if (route.type === 'settings') return route.returnTo;
-  if (route.type === 'installation') return { type: 'dashboard', kind: route.section };
+  if (route.type === 'installation') {
+    return { type: 'dashboard', section: route.section };
+  }
   if (route.type === 'device-add') return route.returnTo;
   if (route.type === 'sensor-settings') return { type: 'dashboard', section: 'thermometers' };
   if (route.type === 'plug-ble-discovery') return route.returnTo;
