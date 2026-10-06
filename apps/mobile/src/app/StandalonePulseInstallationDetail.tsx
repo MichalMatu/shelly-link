@@ -3,6 +3,9 @@ import { useMutation } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
+  AutomationDetailDangerZone,
+  AutomationDetailHierarchy,
+  AutomationDetailSection,
   ClimateScriptDetailSection,
   Pulse,
   useInstalledAutomationStore,
@@ -128,13 +131,10 @@ export const StandalonePulseInstallationDetail = ({
               </FeedbackPanel>
             )}
 
-            <div className="installation-detail-hierarchy">
-              <section className="installation-detail-hierarchy__section">
-                <h3 className="installation-detail-hierarchy__title">
-                  {t('detail.currentState')}
-                </h3>
+            <AutomationDetailHierarchy>
+              <AutomationDetailSection title={t('detail.currentState')}>
                 <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-              </section>
+              </AutomationDetailSection>
 
               <Pulse.Standalone.ConfigurationSection
                 installation={installation}
@@ -147,10 +147,7 @@ export const StandalonePulseInstallationDetail = ({
                 onSaveError={() => pushToast('warning', managementLabels.saveFailed)}
               />
 
-              <section className="installation-detail-danger-zone">
-                <h3 className="installation-detail-hierarchy__title">
-                  {managementLabels.deleteAction}
-                </h3>
+              <AutomationDetailDangerZone title={managementLabels.deleteAction}>
                 <button
                   className="secondary-action secondary-action--danger"
                   type="button"
@@ -159,8 +156,8 @@ export const StandalonePulseInstallationDetail = ({
                 >
                   {managementLabels.deleteAction}
                 </button>
-              </section>
-            </div>
+              </AutomationDetailDangerZone>
+            </AutomationDetailHierarchy>
           </>
         )}
 
