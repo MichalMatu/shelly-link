@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
-import { PlugDetailTabs } from './PlugDetailTabs.js';
+import { automationDetailTabs, PlugDetailTabs } from './PlugDetailTabs.js';
 
 const renderTabs = (onChange = vi.fn()) =>
   render(
@@ -36,6 +36,42 @@ describe('PlugDetailTabs', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Plug settings' }));
     expect(onChange).toHaveBeenCalledWith('device');
   });
+  it('derives optional detail capabilities without changing the base tab order', () => {
+    expect(automationDetailTabs()).toEqual(['automation', 'ble', 'device', 'info']);
+    expect(automationDetailTabs({ hasScript: true })).toEqual([
+      'automation',
+      'ble',
+      'device',
+      'script',
+      'info'
+    ]);
+    expect(automationDetailTabs({ hasHistory: true, hasScript: true })).toEqual([
+      'automation',
+      'history',
+      'ble',
+      'device',
+      'script',
+      'info'
+    ]);
+  });
+
+  it('uses a distinct Pulse automation icon', () => {
+    render(
+      <I18nProvider>
+        <PlugDetailTabs
+          activeTab="automation"
+          automationIcon="pulse"
+          availableTabs={automationDetailTabs({ hasScript: true })}
+          onChange={vi.fn()}
+        />
+      </I18nProvider>
+    );
+    expect(screen.getByRole('button', { name: 'Automation' })).toHaveAttribute(
+      'data-automation-icon',
+      'pulse'
+    );
+  });
+
   it('shows History only when the caller opts into that tab', () => {
     render(
       <I18nProvider>

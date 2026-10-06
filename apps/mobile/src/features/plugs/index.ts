@@ -4,6 +4,7 @@ export { usePlugInformationFlow } from './flows/usePlugInformationFlow.js';
 export { PlugInfoPanel } from './components/PlugInfoPanel.js';
 export { PlugDetailNotFound } from './components/PlugDetailNotFound.js';
 export { PlugDetailTop } from './components/PlugDetailTop.js';
+export { automationDetailTabs } from './components/PlugDetailTabs.js';
 export { PlugDetailTabs, type PlugDetailTab } from './components/PlugDetailTabs.js';
 export {
   BlePlugDetailScreen,

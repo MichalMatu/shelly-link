@@ -219,7 +219,7 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Szczegóły: Pompa Pulse · Wi-Fi' }).click();
 
     await expect(
-      page.locator('.plug-detail-tabs__item[data-automation-icon="clock"]')
+      page.locator('.plug-detail-tabs__item[data-automation-icon="pulse"]')
     ).toBeVisible();
     await expectPulseRuntimeControlsAbsent(page);
 
@@ -251,6 +251,12 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '29-standalone-pulse-detail');
     }
+
+    await page.getByRole('button', { name: 'Bluetooth' }).click();
+    await expect(
+      page.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
   });
 }
 

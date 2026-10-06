@@ -1,10 +1,12 @@
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
+  ClimateScriptDetailSection,
   OperationalStatus,
   deleteTimeAutomation,
   Pulse,
@@ -15,6 +17,7 @@ import {
 import {
   PlugBleDetailSurface,
   PlugRemovalBlockedModal,
+  automationDetailTabs,
   PlugDeviceSettingsSurface,
   PlugDetailTop,
   PlugInfoPanel,
@@ -23,18 +26,12 @@ import {
   useSavedPlugStore,
   type PlugDetailTab
 } from '../features/plugs/index.js';
+import { copyInstalledAutomationScriptSource } from '../flows/installations/scriptPreview.js';
 import {
   timeAutomationRuntimeQueryKey,
   useTimeAutomationRuntime
 } from '../flows/time-automation/useTimeAutomationRuntime.js';
 import { TimeScheduleSetupPage } from './hardware-setup/pages/TimeScheduleSetupPage.js';
-
-const TIME_DETAIL_TABS = [
-  'automation',
-  'ble',
-  'device',
-  'info'
-] as const satisfies readonly PlugDetailTab[];
 
 type TimeInstallationDetailProps = {
   installation: TimeInstalledAutomation;
@@ -47,12 +44,19 @@ export const TimeInstallationDetail = ({
   onBack,
   onOpenBleDiscovery
 }: TimeInstallationDetailProps) => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const runtimeQuery = useTimeAutomationRuntime(installation);
   const pulseInstallation = Pulse.Time.isInstalled(installation) ? installation : null;
   const pulseQuery = Pulse.Operational.useStatus(pulseInstallation);
+  const scriptQuery = Pulse.Time.useScriptSource(
+    pulseInstallation,
+    activeTab === 'script'
+  );
+  const availableTabs = automationDetailTabs({
+    hasScript: pulseInstallation !== null
+  });
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
   });
@@ -67,6 +71,7 @@ export const TimeInstallationDetail = ({
   const [timeEditPending, setTimeEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
   const { dismissToast, pushToast, toasts } = useToastQueue('time-toast');
+  const scriptLabels = installationScriptPreviewCopy[locale];
 
   const deleteMutation = useMutation({
     mutationFn: () =>
@@ -91,11 +96,18 @@ export const TimeInstallationDetail = ({
       ? 'offline'
       : (runtimeQuery.data?.scheduleState ?? 'attention');
   const pulseNeedsAttention = pulseInstallation !== null && pulseQuery.isError;
+  const copyScript = () =>
+    copyInstalledAutomationScriptSource(
+      scriptQuery.data,
+      () => pushToast('ok', scriptLabels.copyDone),
+      () => pushToast('warning', scriptLabels.copyFailed)
+    );
+
   return (
     <main className="demo-shell installation-detail-shell">
       <PlugDetailTop
         tabs={[activeTab, setActiveTab]}
-        availableTabs={TIME_DETAIL_TABS}
+        availableTabs={availableTabs}
         automationIcon="clock"
       />
 
@@ -195,6 +207,26 @@ export const TimeInstallationDetail = ({
 
         {activeTab === 'device' && (
           <PlugDeviceSettingsSurface target={installation.shelly} />
+        )}
+
+        {activeTab === 'script' && pulseInstallation && (
+          <ClimateScriptDetailSection
+            attentionTitle={t('dashboard.health.attention')}
+            {...(pulseNeedsAttention
+              ? { attentionMessage: t('time.detail.needsAttention') }
+              : {})}
+            copyAriaLabel={scriptLabels.copy}
+            copyLabel={scriptLabels.copy}
+            error={scriptQuery.isError}
+            errorTitle={scriptLabels.failed}
+            loading={scriptQuery.isPending}
+            loadingLabel={scriptLabels.loading}
+            previewLabel={scriptLabels.label}
+            retryLabel={scriptLabels.retry}
+            {...(scriptQuery.data !== undefined ? { source: scriptQuery.data } : {})}
+            onCopy={copyScript}
+            onRetry={() => void scriptQuery.refetch()}
+          />
         )}
 
         {activeTab === 'info' && (

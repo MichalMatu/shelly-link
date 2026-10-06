@@ -3,6 +3,7 @@ import {
   IconClock,
   IconCode,
   IconHistory,
+  IconRepeat,
   IconSettings,
   IconTemperature
 } from '@tabler/icons-react';
@@ -11,7 +12,22 @@ import './PlugDetailTabs.css';
 
 export type PlugDetailTab =
   'automation' | 'history' | 'ble' | 'device' | 'script' | 'info';
-export type PlugDetailAutomationIcon = 'temperature' | 'clock';
+export type PlugDetailAutomationIcon = 'temperature' | 'clock' | 'pulse';
+
+export const automationDetailTabs = ({
+  hasHistory = false,
+  hasScript = false
+}: {
+  hasHistory?: boolean;
+  hasScript?: boolean;
+} = {}): readonly PlugDetailTab[] => {
+  const result: PlugDetailTab[] = ['automation'];
+  if (hasHistory) result.push('history');
+  result.push('ble', 'device');
+  if (hasScript) result.push('script');
+  result.push('info');
+  return result;
+};
 
 type PlugDetailTabsProps = {
   activeTab: PlugDetailTab;
@@ -65,7 +81,13 @@ export const PlugDetailTabs = ({
       {visibleTabs.map((tab) => {
         const label = t(tab.labelKey);
         const Icon =
-          tab.id === 'automation' && automationIcon === 'clock' ? IconClock : tab.icon;
+          tab.id === 'automation'
+            ? automationIcon === 'clock'
+              ? IconClock
+              : automationIcon === 'pulse'
+                ? IconRepeat
+                : IconTemperature
+            : tab.icon;
         const disabled = disabledTabs.includes(tab.id);
         return (
           <button
