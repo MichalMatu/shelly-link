@@ -17,12 +17,12 @@ vi.mock('../screens/AutomationDashboardScreen.js', () => ({
     onAddAutomation,
     onOpenPlugSettings
   }: {
-    onAddAutomation(kind: 'climate' | 'time'): void;
+    onAddAutomation(shellyId?: string): void;
     onOpenPlugSettings(deviceId: string): void;
   }) => (
     <main>
       <h1>dashboard-test</h1>
-      <button type="button" onClick={() => onAddAutomation('climate')}>
+      <button type="button" onClick={() => onAddAutomation()}>
         add-automation-test
       </button>
       <button type="button" onClick={() => onOpenPlugSettings('plug-settings-test')}>
