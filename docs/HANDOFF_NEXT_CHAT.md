@@ -63,6 +63,99 @@ The non-soak Stage 9 hardware closeout is complete: Wi-Fi loss/recovery passed w
 
 Do not use stabilization as an excuse to add new Pulse modes, Environment Profiles or another generic UX-polish round.
 
+
+## Active UX correction plan — Pulse and combined modes
+
+This is an explicit user-approved UX correction batch. Keep it bounded to the items below; do not turn it into a generic pre-freeze redesign or backend refactor.
+
+### UX-1 — Climate + Pulse setup ordering
+
+- [ ] Move `Zachowanie wyjścia` directly below the VPD section and before advanced settings.
+- [ ] When Pulse is selected, render its cycle fields immediately below `Zachowanie wyjścia`.
+- [ ] Keep the primary `Wyślij` / `Zapisz zmiany` action at the true end of the complete form.
+- [ ] Preserve one shared `PulseCycleEditor`; do not fork Climate-specific Pulse controls.
+
+Target order:
+
+`devices -> rule mode -> thresholds -> VPD -> output behavior -> Pulse fields -> advanced -> save`
+
+### UX-2 — Standalone Pulse detail capability parity
+
+- [ ] Restore the BLE scan action in standalone Pulse detail when the Plug supports it.
+- [ ] Add a Pulse-specific automation icon instead of reusing the clock icon.
+- [ ] Review the detail tabs as capability-driven surfaces rather than a hard-coded reduced Pulse set.
+- [ ] Keep Device, Script and Info behavior aligned with the same physical Plug capabilities used elsewhere.
+
+### UX-3 — Time + Pulse detail capability parity
+
+- [ ] Expose the Script tab when Time has Pulse runtime installed.
+- [ ] Keep plain native Time without a Script tab.
+- [ ] Derive tab availability from the installed runtime/capabilities rather than one static Time tab list.
+
+### UX-4 — Pulse History / datalogger
+
+- [ ] Generalize the current Climate-only History read/presentation ownership where practical.
+- [ ] Add History to standalone Pulse detail.
+- [ ] Pulse History minimum panels: Output ON/OFF, Power W and Current A.
+- [ ] Consider cycle/duty/transition information only after the minimum useful history is working.
+- [ ] Reuse the existing `shellylink.history.*` record model if it remains compatible; do not invent a parallel history format without evidence.
+- [ ] Add a small shared/bounded history writer to standalone Pulse runtime because standalone Pulse currently does not persist History records.
+- [ ] Evaluate the same History capability for Time + Pulse after standalone Pulse is proven.
+- [ ] History writes remain observational/best-effort and must never affect relay arbitration or safety.
+
+### UX-5 — Standalone Pulse dashboard card
+
+- [ ] Reduce duplicated healthy-state information such as `Stan Pulse`, requested output, physical relay output and phase all simultaneously saying ON.
+- [ ] Make the card status-first and immediately understandable: current phase/state, time to next transition and compact cycle configuration.
+- [ ] Show detailed requested-vs-final output, reason/fault and safety information primarily when they differ or require attention.
+- [ ] Keep AUTO/MANUAL and physical relay controls visually subordinate to the primary Pulse state.
+- [ ] Preserve compact telemetry at the bottom.
+- [ ] Produce a reviewed screenshot before accepting the new composition.
+
+Preferred mental model:
+
+`Pulse state -> next transition/progress -> ON/OFF cycle -> mode/control -> telemetry`
+
+### UX-6 — Explain combined modes clearly
+
+The UI must make this model obvious:
+
+- Climate / Time decides **when** output is requested.
+- Pulse decides **how** the output behaves while that request is active.
+
+- [ ] For Climate, prefer wording equivalent to `Wyjście podczas pracy: Stałe ON / Pulse ON-OFF`.
+- [ ] For Time, prefer wording equivalent to `Wyjście w aktywnym przedziale: Stałe ON / Pulse ON-OFF`.
+- [ ] Review the standalone `Pulse` entry description so it does not read like another Time schedule.
+- [ ] Avoid presenting Climate + Pulse or Time + Pulse as two unrelated automations stacked together.
+
+### UX-7 — Copy and small semantic cleanup
+
+- [ ] Standalone Pulse install action must not say `Zapisz harmonogram w Shelly`; use Pulse-specific copy.
+- [ ] Replace overly technical standalone Pulse helper text with user-oriented language.
+- [ ] Check setup/detail labels for leftover Time-specific wording reused by Pulse.
+- [ ] Do not change runtime semantics while fixing labels.
+
+### Execution order
+
+Implement and verify in this order unless a concrete dependency requires otherwise:
+
+1. UX-1 setup ordering.
+2. UX-2 + UX-3 capability parity.
+3. UX-7 copy/semantic cleanup.
+4. UX-5 standalone Pulse dashboard card.
+5. UX-4 Pulse History/datalogger.
+6. UX-6 final combined-mode wording pass across the affected screens.
+
+For every slice:
+
+- make the smallest cohesive change;
+- add/update focused tests;
+- capture the affected real rendered screen(s);
+- do not refresh unrelated frozen Climate baselines;
+- run the repository-required focused checks and final gate before merge;
+- mark completed checklist items here so unfinished work remains visible.
+
+
 ## Verification boundary
 
 The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Fresh real-device evidence now covers Wi-Fi loss/recovery, the 16/16 final runtime matrix and final device postflight. The 8-hour soak remains intentionally deferred.
