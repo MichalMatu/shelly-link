@@ -8,6 +8,12 @@ type PulseCycleCopy = {
   noDevice: string;
   install: string;
   installing: string;
+  climateOutputBehavior: string;
+  climateHint: string;
+  timeOutputBehavior: string;
+  timeHint: string;
+  steadyOn: string;
+  pulseOnOff: string;
   outputBehavior: string;
   steady: string;
   pulse: string;
@@ -36,6 +42,14 @@ const en: PulseCycleCopy = {
   noDevice: 'Select a Shelly first',
   install: 'Save Pulse to Shelly',
   installing: 'Saving Pulse…',
+  climateOutputBehavior: 'Output while climate control is active',
+  climateHint:
+    'The climate rule decides when the output runs. Pulse defines the ON/OFF cycle while it is active.',
+  timeOutputBehavior: 'Output in the active time window',
+  timeHint:
+    'The schedule decides when the output is active. Pulse defines the ON/OFF cycle during that time.',
+  steadyOn: 'Steady ON',
+  pulseOnOff: 'Pulse ON/OFF',
   outputBehavior: 'Output behavior',
   steady: 'Steady',
   pulse: 'Pulse',
@@ -65,6 +79,14 @@ export const pulseCycleCopy: Record<Locale, PulseCycleCopy> = {
     noDevice: 'Najpierw wybierz Shelly',
     install: 'Zapisz Pulse w Shelly',
     installing: 'Zapisuję Pulse…',
+    climateOutputBehavior: 'Wyjście podczas pracy',
+    climateHint:
+      'Reguła klimatu decyduje, kiedy wyjście pracuje. Pulse określa cykl ON/OFF podczas pracy.',
+    timeOutputBehavior: 'Wyjście w aktywnym przedziale',
+    timeHint:
+      'Harmonogram decyduje, kiedy wyjście jest aktywne. Pulse określa cykl ON/OFF w tym czasie.',
+    steadyOn: 'Stałe ON',
+    pulseOnOff: 'Pulse ON/OFF',
     outputBehavior: 'Zachowanie wyjścia',
     steady: 'Stałe',
     pulse: 'Pulse',
@@ -93,6 +115,14 @@ export const pulseCycleCopy: Record<Locale, PulseCycleCopy> = {
     noDevice: 'Wähle zuerst ein Shelly',
     install: 'Pulse auf Shelly speichern',
     installing: 'Pulse wird gespeichert…',
+    climateOutputBehavior: 'Ausgang während der Klimaregelung',
+    climateHint:
+      'Die Klimaregel entscheidet, wann der Ausgang arbeitet. Pulse bestimmt den ON/OFF-Zyklus während dieser Zeit.',
+    timeOutputBehavior: 'Ausgang im aktiven Zeitfenster',
+    timeHint:
+      'Der Zeitplan entscheidet, wann der Ausgang aktiv ist. Pulse bestimmt den ON/OFF-Zyklus in diesem Zeitraum.',
+    steadyOn: 'Konstant ON',
+    pulseOnOff: 'Pulse ON/OFF',
     outputBehavior: 'Ausgangsverhalten',
     steady: 'Konstant',
     onSeconds: 'ON-Zeit (s)',
@@ -117,6 +147,14 @@ export const pulseCycleCopy: Record<Locale, PulseCycleCopy> = {
     noDevice: 'Primero selecciona un Shelly',
     install: 'Guardar Pulse en Shelly',
     installing: 'Guardando Pulse…',
+    climateOutputBehavior: 'Salida durante el control climático',
+    climateHint:
+      'La regla climática decide cuándo trabaja la salida. Pulse define el ciclo ON/OFF mientras está activa.',
+    timeOutputBehavior: 'Salida en el intervalo activo',
+    timeHint:
+      'El horario decide cuándo está activa la salida. Pulse define el ciclo ON/OFF durante ese tiempo.',
+    steadyOn: 'ON constante',
+    pulseOnOff: 'Pulse ON/OFF',
     outputBehavior: 'Comportamiento de salida',
     steady: 'Continuo',
     onSeconds: 'Tiempo ON (s)',
@@ -141,6 +179,14 @@ export const pulseCycleCopy: Record<Locale, PulseCycleCopy> = {
     noDevice: 'Sélectionnez d’abord un Shelly',
     install: 'Enregistrer Pulse sur Shelly',
     installing: 'Enregistrement de Pulse…',
+    climateOutputBehavior: 'Sortie pendant le contrôle climatique',
+    climateHint:
+      'La règle climatique décide quand la sortie fonctionne. Pulse définit le cycle ON/OFF pendant cette période.',
+    timeOutputBehavior: 'Sortie dans la plage active',
+    timeHint:
+      'Le planning décide quand la sortie est active. Pulse définit le cycle ON/OFF pendant cette période.',
+    steadyOn: 'ON continu',
+    pulseOnOff: 'Pulse ON/OFF',
     outputBehavior: 'Comportement de sortie',
     steady: 'Continu',
     onSeconds: 'Temps ON (s)',
@@ -165,6 +211,14 @@ export const pulseCycleCopy: Record<Locale, PulseCycleCopy> = {
     noDevice: 'Seleziona prima uno Shelly',
     install: 'Salva Pulse su Shelly',
     installing: 'Salvataggio Pulse…',
+    climateOutputBehavior: 'Uscita durante il controllo climatico',
+    climateHint:
+      'La regola climatica decide quando l’uscita lavora. Pulse definisce il ciclo ON/OFF durante quel periodo.',
+    timeOutputBehavior: 'Uscita nella fascia attiva',
+    timeHint:
+      'Il programma decide quando l’uscita è attiva. Pulse definisce il ciclo ON/OFF durante quel periodo.',
+    steadyOn: 'ON continuo',
+    pulseOnOff: 'Pulse ON/OFF',
     outputBehavior: 'Comportamento uscita',
     steady: 'Continuo',
     onSeconds: 'Tempo ON (s)',
@@ -189,6 +243,14 @@ export const pulseCycleCopy: Record<Locale, PulseCycleCopy> = {
     noDevice: 'Selecione primeiro um Shelly',
     install: 'Salvar Pulse no Shelly',
     installing: 'Salvando Pulse…',
+    climateOutputBehavior: 'Saída durante o controle climático',
+    climateHint:
+      'A regra climática decide quando a saída trabalha. Pulse define o ciclo ON/OFF enquanto ela está ativa.',
+    timeOutputBehavior: 'Saída no intervalo ativo',
+    timeHint:
+      'A agenda decide quando a saída está ativa. Pulse define o ciclo ON/OFF durante esse período.',
+    steadyOn: 'ON contínuo',
+    pulseOnOff: 'Pulse ON/OFF',
     outputBehavior: 'Comportamento da saída',
     steady: 'Contínuo',
     onSeconds: 'Tempo ON (s)',
