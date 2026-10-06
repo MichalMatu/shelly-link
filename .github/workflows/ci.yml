@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      # `work` is a legacy integration branch. CI is kept temporarily for transition.
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}

@@ -45,13 +45,13 @@ The audit found no reason for another broad refactor. The three narrow hardening
 - ambiguous multiple enabled/running scripts fail closed;
 - script replacement has focused config/start/rollback failure coverage.
 
-Focused lifecycle tests pass, `pnpm check` passes, and GitHub CI passes on the current PR head. The Darwin `04-plug-ble-discovery` visual mismatch is unchanged at 5036 pixels on clean `main` and is therefore a pre-existing baseline drift, not a product delta.
+Focused lifecycle tests pass, `pnpm check` passes, and GitHub CI passed for the completed audit hardening. The Darwin `04-plug-ble-discovery` visual mismatch is unchanged at 5036 pixels on clean `main` and is therefore a pre-existing baseline drift, not a product delta.
 
 ## Documentation policy
 
 Architecture contains durable contracts. Roadmap contains current/future product stages. This handoff contains only active state and immediate work. Real-device numbers, commit hashes, logs and one-off qualification narratives belong in docs/testing/ or Git history.
 
-The old September UX capture bundle under artifacts/ux-reference is not canonical; current visual truth is the committed E2E snapshots plus docs/UX_VISUAL_CONTRACT.md.
+Current visual truth is the committed E2E snapshots plus docs/UX_VISUAL_CONTRACT.md.
 
 ## Remaining V1 work
 
