@@ -212,6 +212,24 @@ const readManagedScriptRunning = async (
   return script.running;
 };
 
+export const leaveManagedAutomationDiscoverySafe = async (
+  transport: ShellyRpcTransport,
+  state: ManagedAutomationDiscoveryRestoreState
+): Promise<void> => {
+  const client = new RpcShellyClient(transport);
+  try {
+    unwrapShellyResult(await client.setRelayOff({ relayId: state.relayId }));
+  } catch {
+    // Best effort only; preserve the original preparation/restore failure.
+  }
+  if (state.scriptId === null) return;
+  try {
+    unwrapShellyResult(await client.stopScript(state.scriptId));
+  } catch {
+    // Best effort only; preserve the original preparation/restore failure.
+  }
+};
+
 export const restoreManagedAutomationDiscoveryState = async (
   transport: ShellyRpcTransport,
   state: ManagedAutomationDiscoveryRestoreState
