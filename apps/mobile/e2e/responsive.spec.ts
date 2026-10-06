@@ -1323,7 +1323,9 @@ for (const viewport of viewports) {
         'Pulse działa niezależnie od godzin: ustaw czas ON, czas OFF i sposób zakończenia cyklu.'
       )
     ).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Zapisz Pulse w Shelly' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Zapisz Pulse w Shelly' })
+    ).toBeVisible();
     await expect(page.getByText(/harmonogram/i)).toHaveCount(0);
     await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
     await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
