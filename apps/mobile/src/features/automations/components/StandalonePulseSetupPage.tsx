@@ -48,6 +48,7 @@ export const StandalonePulseSetupPage = ({
       </div>
 
       <PulseCycleEditor
+        context="standalone"
         draft={pulseFlow.pulseCycleDraft}
         optional={false}
         validation={pulseFlow.pulseCycleValidation}
