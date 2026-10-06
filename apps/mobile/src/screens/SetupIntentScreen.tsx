@@ -55,7 +55,7 @@ export const SetupIntentScreen = ({ onSelect }: SetupIntentScreenProps) => {
         <button className="intent-choice" type="button" onClick={() => onSelect('pulse')}>
           <span className="intent-choice__copy">
             <strong>{pulseCopy.title}</strong>
-            <span>{pulseCopy.description}</span>
+            <span>{pulseCopy.intentDescription}</span>
           </span>
           <IconChevronRight className="intent-choice__action" aria-hidden="true" />
         </button>
