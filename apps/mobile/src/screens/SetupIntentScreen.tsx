@@ -5,9 +5,6 @@ import type { SetupIntent } from '../flows/setup-intent.js';
 
 type SetupIntentScreenProps = {
   onSelect(intent: SetupIntent): void;
-  onOpenClimate?: () => void;
-  onOpenTime?: () => void;
-  onOpenSettings?: () => void;
 };
 
 const INTENT_CHOICES = [
