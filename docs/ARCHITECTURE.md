@@ -285,6 +285,6 @@ The canonical gate also enforces simple performance budgets after the production
 
 Architecture documents contain durable contracts, not chronological test history.
 
-Real-device claims belong in `docs/testing/hardware-matrix.md` or a focused dated acceptance record. Qualified Pulse runtime evidence is recorded in `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`, `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md` and `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md`. UI geometry belongs in the UX contract/gallery. Session-specific implementation state belongs in `docs/HANDOFF_NEXT_CHAT.md`.
+Real-device claims belong in `docs/testing/hardware-matrix.md` or a focused dated acceptance record. Qualified Pulse runtime evidence is recorded in `docs/testing/pulse-v1-climate-runtime-acceptance-2026-10-01.md`, `docs/testing/pulse-v1-time-runtime-acceptance-2026-10-01.md`, `docs/testing/pulse-v1-standalone-runtime-acceptance-2026-10-02.md` and `docs/testing/pulse-history-standalone-acceptance-2026-10-07.md`. UI geometry belongs in the UX contract/gallery. Session-specific implementation state belongs in `docs/HANDOFF_NEXT_CHAT.md`.
 
 Hardware-facing behavior requires real-device acceptance. Mutating tests must record the final relay/device state when that state matters for safety.
