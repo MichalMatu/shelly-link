@@ -2,10 +2,7 @@ import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import {
-  AppToastViewport,
-  useAppToastQueue
-} from '../components/AppToastViewport.js';
+import { AppToastViewport, useAppToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
   OperationalStatus,
