@@ -2,10 +2,7 @@ import { act, render, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
-import {
-  AppToastViewport,
-  useAppToastQueue
-} from '../components/AppToastViewport.js';
+import { AppToastViewport, useAppToastQueue } from '../components/AppToastViewport.js';
 
 const noop = vi.fn();
 
@@ -70,5 +67,4 @@ describe('AppToastViewport', () => {
       'toast-test-4'
     ]);
   });
-
 });
