@@ -2,10 +2,7 @@ import type { RuleSetupFlow } from '../pageContracts.js';
 import type { RulePresetId } from '@lcl/automation-core';
 import { FeedbackPanel, Modal, ScriptPreview } from '@lcl/ui';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  AppToastViewport,
-  useAppToastQueue
-} from '../../../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { useTranslation } from '../../../app/i18n.js';
 import {
   ALL_RULE_PRESETS,
@@ -40,7 +37,7 @@ export const RuleSetupPage = ({
 }: RuleSetupPageProps) => {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<RuleDialogState>('none');
-  const { dismissToast, pushToast, toasts } = useAppToastQueue('rule-toast');
+  const { dismissToast, pushToast, toasts } = useToastQueue('rule-toast');
   useSavedSensorLiveScanLifecycle({
     flow,
     enabled: flow.sensorDevices.length > 0
