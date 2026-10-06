@@ -77,6 +77,21 @@ if ! find "$PLAYWRIGHT_BROWSERS_PATH" -type f \( -name chrome -o -name headless_
   exit 8
 fi
 
+(
+  cd "$REPO_ROOT"
+  node --input-type=module <<'NODE'
+import { chromium } from '@playwright/test';
+
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage();
+await page.goto('data:text/html,<title>sandbox-doctor</title>');
+if ((await page.title()) !== 'sandbox-doctor') {
+  throw new Error('Playwright Chromium smoke page failed');
+}
+await browser.close();
+NODE
+)
+
 printf 'node_dependencies=ok\n'
 printf 'playwright_chromium=ok\n'
 printf 'sandbox_doctor=ok\n'
