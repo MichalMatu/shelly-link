@@ -1,13 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { createShellyTransport } from '../../../platform/shellyHttpTransport.js';
-import type { ClimateInstalledAutomation } from '../data/installedAutomation.js';
-import { readClimateHistory } from '../data/climateHistory.js';
+import type {
+  ClimateInstalledAutomation,
+  StandalonePulseInstalledAutomation
+} from '../data/installedAutomation.js';
+import { readAutomationHistory } from '../data/automationHistory.js';
 
 const HISTORY_REFRESH_MS = 30_000;
 
-export const climateHistoryQueryKey = (installation: ClimateInstalledAutomation) =>
+type HistoryInstallation =
+  ClimateInstalledAutomation | StandalonePulseInstalledAutomation;
+
+export const automationHistoryQueryKey = (installation: HistoryInstallation) =>
   [
-    'climate-history',
+    'automation-history',
     installation.id,
     installation.shelly.baseUrl,
     installation.script.id,
@@ -15,14 +21,14 @@ export const climateHistoryQueryKey = (installation: ClimateInstalledAutomation)
     installation.updatedAtMs
   ] as const;
 
-export const useClimateHistory = (
-  installation: ClimateInstalledAutomation,
+export const useAutomationHistory = (
+  installation: HistoryInstallation,
   options: { enabled?: boolean } = {}
 ) =>
   useQuery({
-    queryKey: climateHistoryQueryKey(installation),
+    queryKey: automationHistoryQueryKey(installation),
     queryFn: async () => {
-      const result = await readClimateHistory(
+      const result = await readAutomationHistory(
         createShellyTransport(installation.shelly.baseUrl)
       );
       if (!result.ok) {

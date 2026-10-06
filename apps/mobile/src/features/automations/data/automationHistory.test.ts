@@ -13,7 +13,7 @@ import {
   type ShellyRpcRequest,
   type ShellyRpcTransport
 } from '@lcl/shelly-client';
-import { readClimateHistory } from './climateHistory.js';
+import { readAutomationHistory } from './automationHistory.js';
 
 const record = (uptimeSec: number, finalRelayOn: boolean): HistoryRecord => ({
   timestampUnixSec: 1_790_000_000 + uptimeSec,
@@ -83,9 +83,9 @@ const successfulTransport = (): ShellyRpcTransport => ({
   }
 });
 
-describe('readClimateHistory', () => {
+describe('readAutomationHistory', () => {
   it('reads matching KVS values and decodes ordered History v2 records', async () => {
-    const result = await readClimateHistory(successfulTransport());
+    const result = await readAutomationHistory(successfulTransport());
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -114,6 +114,6 @@ describe('readClimateHistory', () => {
       }
     };
 
-    await expect(readClimateHistory(transport)).resolves.toEqual({ ok: false, error });
+    await expect(readAutomationHistory(transport)).resolves.toEqual({ ok: false, error });
   });
 });

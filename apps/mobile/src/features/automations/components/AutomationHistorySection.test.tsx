@@ -2,7 +2,7 @@ import type { HistoryRecord } from '@lcl/automation-core';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
-import { ClimateHistorySection } from './ClimateHistorySection.js';
+import { AutomationHistorySection } from './AutomationHistorySection.js';
 
 vi.mock('@nivo/line', () => ({
   ResponsiveLine: ({ ariaLabel }: { ariaLabel?: string }) => (
@@ -29,11 +29,12 @@ const record = (uptimeSec: number, finalRelayOn: boolean): HistoryRecord => ({
 });
 
 const renderSection = (
-  props: Partial<React.ComponentProps<typeof ClimateHistorySection>> = {}
+  props: Partial<React.ComponentProps<typeof AutomationHistorySection>> = {}
 ) =>
   render(
     <I18nProvider>
-      <ClimateHistorySection
+      <AutomationHistorySection
+        profile="climate"
         records={[]}
         invalidRecordCount={0}
         loading={false}
@@ -44,7 +45,7 @@ const renderSection = (
     </I18nProvider>
   );
 
-describe('ClimateHistorySection', () => {
+describe('AutomationHistorySection', () => {
   beforeEach(() => setLocalePreference('en'));
 
   afterEach(() => {
@@ -59,7 +60,7 @@ describe('ClimateHistorySection', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders five fixed metric panels with current values and no tooltip controls', () => {
+  it('keeps the accepted Climate profile at five panels', () => {
     renderSection({
       records: [record(10, false), record(20, true)],
       invalidRecordCount: 1
@@ -80,7 +81,23 @@ describe('ClimateHistorySection', () => {
     ).toBeInTheDocument();
   });
 
-  it('keeps panel geometry stable when electrical metrics are unavailable', () => {
+  it('renders only Output, Power and Current for standalone Pulse', () => {
+    renderSection({
+      profile: 'pulse',
+      records: [
+        { ...record(20, true), temperatureC: null, humidityPct: null, vpdKpa: null }
+      ]
+    });
+    expect(screen.getAllByTestId('history-chart')).toHaveLength(3);
+    expect(screen.getByLabelText('Output: ON')).toBeInTheDocument();
+    expect(screen.getByLabelText('Power: 12.3 W')).toBeInTheDocument();
+    expect(screen.getByLabelText('Current: 0.06 A')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Temperature:/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Humidity:/)).not.toBeInTheDocument();
+    expect(screen.queryByText('VPD')).not.toBeInTheDocument();
+  });
+
+  it('keeps Climate panel geometry stable when electrical metrics are unavailable', () => {
     const humidityOnly = {
       ...record(10, false),
       temperatureC: null,

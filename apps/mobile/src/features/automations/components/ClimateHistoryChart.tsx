@@ -8,7 +8,6 @@ import {
 } from './climateHistoryChartAxis.js';
 import { ClimateHistoryMetricPanel } from './ClimateHistoryMetricPanel.js';
 import {
-  HISTORY_PANEL_METRICS,
   historyMetricValues,
   latestHistoryMetricValue,
   type HistoryMetricDefinition
@@ -37,12 +36,14 @@ type ClimateHistoryChartProps = {
   records: readonly HistoryRecord[];
   locale: string;
   labels: ClimateHistoryChartLabels;
+  panelMetrics: readonly HistoryMetricDefinition[];
 };
 
 export const ClimateHistoryChart = ({
   records,
   locale,
-  labels
+  labels,
+  panelMetrics
 }: ClimateHistoryChartProps) => {
   const number = useMemo(
     () => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }),
@@ -106,7 +107,7 @@ export const ClimateHistoryChart = ({
 
   return (
     <div className="climate-history-chart" role="group" aria-label={labels.title}>
-      {HISTORY_PANEL_METRICS.map((metric) => {
+      {panelMetrics.map((metric) => {
         const values = historyMetricValues(records, metric);
         const domain =
           metric.id === 'output'

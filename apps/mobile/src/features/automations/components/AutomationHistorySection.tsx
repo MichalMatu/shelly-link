@@ -3,9 +3,16 @@ import { FeedbackPanel } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import { climateHistoryCopy } from '../../../app/locales/climateHistory.js';
 import { ClimateHistoryChart } from './ClimateHistoryChart.js';
+import {
+  CLIMATE_HISTORY_PANEL_METRICS,
+  PULSE_HISTORY_PANEL_METRICS
+} from './climateHistoryChartMetrics.js';
 import './ClimateHistorySection.css';
 
-type ClimateHistorySectionProps = {
+export type AutomationHistoryProfile = 'climate' | 'pulse';
+
+type AutomationHistorySectionProps = {
+  profile: AutomationHistoryProfile;
   records: readonly HistoryRecord[];
   invalidRecordCount: number;
   loading: boolean;
@@ -13,15 +20,18 @@ type ClimateHistorySectionProps = {
   onRetry(): void;
 };
 
-export const ClimateHistorySection = ({
+export const AutomationHistorySection = ({
+  profile,
   records,
   invalidRecordCount,
   loading,
   error,
   onRetry
-}: ClimateHistorySectionProps) => {
+}: AutomationHistorySectionProps) => {
   const { locale, t } = useTranslation();
   const copy = climateHistoryCopy[locale];
+  const panelMetrics =
+    profile === 'pulse' ? PULSE_HISTORY_PANEL_METRICS : CLIMATE_HISTORY_PANEL_METRICS;
 
   if (loading) {
     return (
@@ -55,6 +65,7 @@ export const ClimateHistorySection = ({
         <ClimateHistoryChart
           records={records}
           locale={locale}
+          panelMetrics={panelMetrics}
           labels={{
             title: copy.title,
             uptime: copy.uptime,

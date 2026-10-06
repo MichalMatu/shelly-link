@@ -93,14 +93,14 @@ Target order:
 
 ### UX-4 — Pulse History / datalogger
 
-- [ ] Generalize the current Climate-only History read/presentation ownership where practical.
-- [ ] Add History to standalone Pulse detail.
-- [ ] Pulse History minimum panels: Output ON/OFF, Power W and Current A.
-- [ ] Consider cycle/duty/transition information only after the minimum useful history is working.
-- [ ] Reuse the existing `shellylink.history.*` record model if it remains compatible; do not invent a parallel history format without evidence.
-- [ ] Add a small shared/bounded history writer to standalone Pulse runtime because standalone Pulse currently does not persist History records.
-- [ ] Evaluate the same History capability for Time + Pulse after standalone Pulse is proven.
-- [ ] History writes remain observational/best-effort and must never affect relay arbitration or safety.
+- [x] Generalize the current Climate-only History read/presentation ownership where practical.
+- [x] Add History to standalone Pulse detail.
+- [x] Pulse History minimum panels: Output ON/OFF, Power W and Current A.
+- [x] Consider cycle/duty/transition information only after the minimum useful history is working.
+- [x] Reuse the existing `shellylink.history.*` record model if it remains compatible; do not invent a parallel history format without evidence.
+- [x] Add a small shared/bounded history writer to standalone Pulse runtime because standalone Pulse currently does not persist History records.
+- [ ] Evaluate the same History capability for Time + Pulse after standalone Pulse is proven. This remains the explicit follow-up after the standalone slice is accepted.
+- [x] History writes remain observational/best-effort and must never affect relay arbitration or safety.
 
 ### UX-5 — Standalone Pulse dashboard card
 
@@ -156,20 +156,12 @@ For every slice:
 
 ### Current handoff cut
 
-The Pulse UX correction batch is complete for UX-1, UX-2, UX-3, UX-5, UX-6 and UX-7. The next cohesive task is UX-4 — Pulse History / datalogger.
+The bounded Pulse UX correction batch is complete through UX-4. Standalone Pulse reuses History v2 and exposes exactly three History panels: Output, Power and Current. Climate keeps its accepted five-panel History presentation unchanged.
 
-Start UX-4 from the existing History v2 contract rather than designing another persistence format:
+UX-4 passed focused runtime/mobile tests, responsive Pulse E2E, reviewed Darwin visuals, the canonical `pnpm check`, and a real Plug S Gen3 smoke of the generated History writer. Detailed evidence is in `docs/testing/pulse-history-standalone-acceptance-2026-10-07.md`.
 
-- the shared History v2 record already supports nullable climate metrics plus requested/final relay state, mode, reason/fault/safety, power and current;
-- the existing `shellylink.history.*` reader/decoder is structurally reusable even though the current app naming is Climate-specific;
-- the History chart/presentation should be generalized only as far as needed to show standalone Pulse Output, Power and Current;
-- the current writer is generated only into the Climate runtime, while standalone Pulse has no History writer yet;
-- add the smallest bounded standalone Pulse writer that emits the same History v2 record shape, with temperature/humidity/VPD left null;
-- History remains observational/best-effort and must never participate in relay arbitration, fault handling or safety;
-- prove standalone Pulse History first, then decide whether the same capability should be exposed for Time + Pulse.
-
-Do not reopen completed Pulse UX slices during UX-4 unless a direct integration dependency is demonstrated.
+Time + Pulse History remains intentionally unimplemented and is a separate product decision. Do not reopen the completed Pulse UX batch without a concrete defect or explicit new requirement.
 
 ## Verification boundary
 
-The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Fresh real-device evidence now covers Wi-Fi loss/recovery, the 16/16 final runtime matrix and final device postflight. The 8-hour soak remains intentionally deferred.
+The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Fresh real-device evidence covers Wi-Fi loss/recovery, the 16/16 final runtime matrix, final device postflight and standalone Pulse History v2. UX-4 passed the canonical `pnpm check`, responsive/visual acceptance and a real generated-runtime smoke with exact preflight restoration. The 8-hour soak remains intentionally deferred.

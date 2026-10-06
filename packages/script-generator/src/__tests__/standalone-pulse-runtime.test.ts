@@ -1,4 +1,7 @@
-import type { StandalonePulseAutomationConfig } from '@lcl/automation-core';
+import {
+  decodeHistoryKvsItems,
+  type StandalonePulseAutomationConfig
+} from '@lcl/automation-core';
 import { describe, expect, it } from 'vitest';
 import {
   decodeShellyStandalonePulseScript,
@@ -25,16 +28,20 @@ type TimerEntry = { dueMs: number; callback: () => void };
 const runGenerated = ({
   input = config,
   switchErrors = [] as string[],
-  relayOnError = false
+  relayOnError = false,
+  kvsError = false
 }: {
   input?: StandalonePulseAutomationConfig;
   switchErrors?: string[];
   relayOnError?: boolean;
+  kvsError?: boolean;
 } = {}) => {
   let nowMs = 100_000;
   let nextTimerId = 1;
   const timers = new Map<number, TimerEntry>();
   const relayCalls: boolean[] = [];
+  const kvs = new Map<string, string>();
+  let relayOn = false;
   let eventHandler: ((event: unknown) => void) | null = null;
 
   const Timer = {
@@ -48,23 +55,51 @@ const runGenerated = ({
   };
   const Shelly = {
     getUptimeMs: () => nowMs,
-    getComponentStatus: (component: string) =>
-      component === `switch:${input.relayId}` ? { errors: switchErrors } : null,
+    getComponentStatus: (component: string) => {
+      if (component === 'sys') return { unixtime: 1_790_000_000 };
+      if (component === `switch:${input.relayId}`) {
+        return {
+          errors: switchErrors,
+          apower: relayOn ? 18.4 : 0,
+          current: relayOn ? 0.08 : 0
+        };
+      }
+      return null;
+    },
     addEventHandler: (handler: (event: unknown) => void) => {
       eventHandler = handler;
     },
     call: (
       method: string,
-      params: { id: number; on: boolean },
+      params: { id?: number; on?: boolean; key?: string; value?: string },
       callback?: (result: unknown, errorCode: number) => void
     ) => {
+      if (method === 'KVS.Get') {
+        if (kvsError || !params.key || !kvs.has(params.key)) {
+          callback?.({}, 1);
+          return;
+        }
+        callback?.({ value: kvs.get(params.key) }, 0);
+        return;
+      }
+      if (method === 'KVS.Set') {
+        if (kvsError || !params.key || typeof params.value !== 'string') {
+          callback?.({}, 1);
+          return;
+        }
+        kvs.set(params.key, params.value);
+        callback?.({ etag: 'test', rev: kvs.size }, 0);
+        return;
+      }
       expect(method).toBe('Switch.Set');
       expect(params.id).toBe(input.relayId);
-      relayCalls.push(params.on);
-      if (params.on && relayOnError && callback) {
+      const on = params.on === true;
+      relayCalls.push(on);
+      if (on && relayOnError && callback) {
         Timer.set(0, false, () => callback({}, 1));
         return;
       }
+      relayOn = on;
       callback?.({}, 0);
     }
   };
@@ -95,6 +130,7 @@ const runGenerated = ({
     script,
     timers,
     relayCalls,
+    kvs,
     advance,
     emit: (event: unknown) => eventHandler?.(event)
   };
@@ -162,6 +198,55 @@ describe('Standalone Pulse generated runtime', () => {
   it('exposes only lifecycle start/cancel control around the parentless Pulse', () => {
     expect(standalonePulseControlEvalCode(true)).toBe('rq(true)');
     expect(standalonePulseControlEvalCode(false)).toBe('rq(false)');
+  });
+
+  it('writes standalone Pulse decisions into the shared History v2 ring', () => {
+    const runtime = runGenerated();
+    runtime.advance(1_000);
+    const decoded = decodeHistoryKvsItems(
+      [...runtime.kvs.entries()].map(([key, value]) => ({ key, value }))
+    );
+    expect(decoded.meta).toEqual({ version: 2, slots: 24, nextSlot: 3, validSlots: 3 });
+    expect(decoded.records).toHaveLength(3);
+    expect(decoded.records[0]).toMatchObject({
+      temperatureC: null,
+      humidityPct: null,
+      vpdKpa: null,
+      requestedRelayOn: false,
+      finalRelayOn: false,
+      controlMode: 'auto',
+      manualRequestOn: false,
+      safetyLockout: false,
+      powerW: 0,
+      currentA: 0
+    });
+    expect(decoded.records[1]).toMatchObject({
+      temperatureC: null,
+      humidityPct: null,
+      vpdKpa: null,
+      requestedRelayOn: true,
+      finalRelayOn: true,
+      reasonCode: 'po',
+      powerW: 18.4,
+      currentA: 0.08
+    });
+    expect(decoded.records[2]).toMatchObject({
+      requestedRelayOn: false,
+      finalRelayOn: false,
+      reasonCode: 'pf',
+      powerW: 0,
+      currentA: 0
+    });
+  });
+
+  it('keeps Pulse relay behavior unchanged when History KVS is unavailable', () => {
+    const healthy = runGenerated();
+    const failing = runGenerated({ kvsError: true });
+    expect(failing.relayCalls).toEqual(healthy.relayCalls);
+    failing.advance(3_000);
+    healthy.advance(3_000);
+    expect(failing.relayCalls).toEqual(healthy.relayCalls);
+    expect(failing.kvs.size).toBe(0);
   });
 
   it('boots by forcing OFF and then starts a fresh cycle from phase zero', () => {

@@ -26,7 +26,7 @@ The accepted History surface is a vertically stacked set of five compact metric 
 
 The five panels share the same elapsed-time X domain and one compact time row below the stack. The old interactive legend, crosshair and tooltip are removed from the accepted design because each metric is already continuously visible with its current value and range. VPD remains available in the typed History data/scaling layer but is not part of the accepted five-panel phone stack. Real Shelly timestamps remain preferred, monotonic uptime is the fallback, and record order is the final fallback. `@nivo/line` remains the approved production chart dependency for the continuous panels.
 
-History cards use the existing design-token system for dark/light surfaces, borders, radius and shadows; do not introduce raw parallel color systems. The target is compact enough to read the whole five-panel stack naturally on a phone while retaining no horizontal page overflow.
+History cards use the existing design-token system for dark/light surfaces, borders, radius and shadows; do not introduce raw parallel color systems. Climate keeps the accepted five-panel stack. Standalone Pulse reuses the same History surface with exactly three panels: **Output, Power and Current**; Temperature, Humidity and VPD stay absent. The canonical Pulse History state is `31-standalone-pulse-history`. Both profiles must retain no horizontal page overflow.
 
 ## Shared UI ownership
 
