@@ -1316,9 +1316,10 @@ for (const viewport of viewports) {
     ).toBeVisible();
     await page.getByRole('button', { name: /Pulse/ }).click();
 
-    await expect(page.getByRole('region', { name: 'Pulse' })).toBeVisible();
+    const pulseSetup = page.getByRole('region', { name: 'Pulse' });
+    await expect(pulseSetup).toBeVisible();
     await expect(
-      page.getByText(
+      pulseSetup.getByText(
         'Pulse działa niezależnie od godzin: ustaw czas ON, czas OFF i sposób zakończenia cyklu.'
       )
     ).toBeVisible();
