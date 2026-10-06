@@ -236,6 +236,7 @@ export const TimeScheduleSetupPage = ({
 
       {timeFlow.canConfigurePulse && (
         <Pulse.Cycle.Editor
+          context="time"
           draft={timeFlow.pulseCycleDraft}
           validation={timeFlow.pulseCycleValidation}
           onChange={timeFlow.setPulseCycleDraft}

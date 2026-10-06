@@ -122,10 +122,10 @@ The UI must make this model obvious:
 - Climate / Time decides **when** output is requested.
 - Pulse decides **how** the output behaves while that request is active.
 
-- [ ] For Climate, prefer wording equivalent to `Wyjście podczas pracy: Stałe ON / Pulse ON-OFF`.
-- [ ] For Time, prefer wording equivalent to `Wyjście w aktywnym przedziale: Stałe ON / Pulse ON-OFF`.
-- [ ] Review the standalone `Pulse` entry description so it does not read like another Time schedule.
-- [ ] Avoid presenting Climate + Pulse or Time + Pulse as two unrelated automations stacked together.
+- [x] For Climate, prefer wording equivalent to `Wyjście podczas pracy: Stałe ON / Pulse ON-OFF`.
+- [x] For Time, prefer wording equivalent to `Wyjście w aktywnym przedziale: Stałe ON / Pulse ON-OFF`.
+- [x] Review the standalone `Pulse` entry description so it does not read like another Time schedule.
+- [x] Avoid presenting Climate + Pulse or Time + Pulse as two unrelated automations stacked together.
 
 ### UX-7 — Copy and small semantic cleanup
 

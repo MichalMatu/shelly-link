@@ -8,8 +8,11 @@ import type {
   PulseCycleFormValidation
 } from '../data/pulseCycleForm.js';
 
+export type PulseCycleEditorContext = 'climate' | 'time' | 'standalone';
+
 type PulseCycleEditorProps = {
   draft: PulseCycleFormDraft;
+  context?: PulseCycleEditorContext;
   validation: PulseCycleFormValidation;
   optional?: boolean;
   onChange(patch: Partial<PulseCycleFormDraft>): void;
@@ -17,6 +20,7 @@ type PulseCycleEditorProps = {
 
 export const PulseCycleEditor = ({
   draft,
+  context = 'standalone',
   validation,
   optional = true,
   onChange
@@ -26,6 +30,27 @@ export const PulseCycleEditor = ({
   const errorIdPrefix = useId();
   const fieldErrors = validation.ok ? {} : validation.fieldErrors;
   const visible = optional ? draft.enabled : true;
+  const behaviorCopy =
+    context === 'climate'
+      ? {
+          label: copy.climateOutputBehavior,
+          hint: copy.climateHint,
+          steady: copy.steadyOn,
+          pulse: copy.pulseOnOff
+        }
+      : context === 'time'
+        ? {
+            label: copy.timeOutputBehavior,
+            hint: copy.timeHint,
+            steady: copy.steadyOn,
+            pulse: copy.pulseOnOff
+          }
+        : {
+            label: copy.outputBehavior,
+            hint: null,
+            steady: copy.steady,
+            pulse: copy.pulse
+          };
 
   const numberField = (
     field: PulseCycleFormField,
@@ -61,16 +86,17 @@ export const PulseCycleEditor = ({
     <section aria-label={copy.title}>
       {optional ? (
         <div className="field">
-          <span>{copy.outputBehavior}</span>
+          <span>{behaviorCopy.label}</span>
           <SelectField<'steady' | 'pulse'>
-            ariaLabel={copy.outputBehavior}
+            ariaLabel={behaviorCopy.label}
             value={draft.enabled ? 'pulse' : 'steady'}
             options={[
-              { value: 'steady', label: copy.steady },
-              { value: 'pulse', label: copy.pulse }
+              { value: 'steady', label: behaviorCopy.steady },
+              { value: 'pulse', label: behaviorCopy.pulse }
             ]}
             onChange={(value) => onChange({ enabled: value === 'pulse' })}
           />
+          {behaviorCopy.hint && <span className="field__hint">{behaviorCopy.hint}</span>}
         </div>
       ) : (
         <div className="field">

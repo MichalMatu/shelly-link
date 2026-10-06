@@ -941,10 +941,15 @@ for (const viewport of viewports) {
     }
     await expect(page.getByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
+    await expect(
+      page.getByText(
+        'Harmonogram decyduje, kiedy wyjście jest aktywne. Pulse określa cykl ON/OFF w tym czasie.'
+      )
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
-    await page.getByRole('button', { name: 'Zachowanie wyjścia' }).click();
-    await page.getByRole('option', { name: 'Pulse', exact: true }).click();
+    await page.getByRole('button', { name: 'Wyjście w aktywnym przedziale' }).click();
+    await page.getByRole('option', { name: 'Pulse ON/OFF', exact: true }).click();
     await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
     await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
     await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
@@ -952,8 +957,8 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '25-time-pulse-setup');
     }
-    await page.getByRole('button', { name: 'Zachowanie wyjścia' }).click();
-    await page.getByRole('option', { name: 'Stałe', exact: true }).click();
+    await page.getByRole('button', { name: 'Wyjście w aktywnym przedziale' }).click();
+    await page.getByRole('option', { name: 'Stałe ON', exact: true }).click();
 
     await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -1243,6 +1248,11 @@ for (const viewport of viewports) {
       0
     );
     await expect(page.getByLabel('VPD assist')).toBeVisible();
+    await expect(
+      page.getByText(
+        'Reguła klimatu decyduje, kiedy wyjście pracuje. Pulse określa cykl ON/OFF podczas pracy.'
+      )
+    ).toBeVisible();
     const setupOrder = await page.evaluate(() => {
       const vpd = document.querySelector('.rule-vpd-assist');
       const pulse = document.querySelector('section[aria-label="Pulse"]');
@@ -1266,8 +1276,8 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '16-climate-setup');
     }
-    await page.getByRole('button', { name: 'Zachowanie wyjścia' }).click();
-    await page.getByRole('option', { name: 'Pulse', exact: true }).click();
+    await page.getByRole('button', { name: 'Wyjście podczas pracy' }).click();
+    await page.getByRole('option', { name: 'Pulse ON/OFF', exact: true }).click();
     await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
     await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
     await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
@@ -1275,8 +1285,8 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '24-climate-pulse-setup');
     }
-    await page.getByRole('button', { name: 'Zachowanie wyjścia' }).click();
-    await page.getByRole('option', { name: 'Stałe', exact: true }).click();
+    await page.getByRole('button', { name: 'Wyjście podczas pracy' }).click();
+    await page.getByRole('option', { name: 'Stałe ON', exact: true }).click();
     await ensureRuleAdvancedOpen(page);
     await expect(advancedDisclosure.locator('.lcl-disclosure__body')).toBeVisible();
     if (viewport.name === 'phone-large') {

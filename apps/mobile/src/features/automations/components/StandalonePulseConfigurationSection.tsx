@@ -90,6 +90,7 @@ export const StandalonePulseConfigurationSection = ({
       {editOpen ? (
         <>
           <PulseCycleEditor
+            context="standalone"
             draft={pulseDraft}
             validation={validation}
             optional={false}
