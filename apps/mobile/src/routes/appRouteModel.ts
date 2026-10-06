@@ -1,18 +1,18 @@
-import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import type { AppNavigationSection } from '../components/AppBottomNavigation.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 
-type DashboardRoute = { type: 'dashboard'; kind?: AppNavigationKind };
+type DashboardRoute = { type: 'dashboard'; section?: AppNavigationSection };
 type SetupRoute = {
   type: 'setup';
   intent: SetupIntent;
-  sourceKind: AppNavigationKind;
+  sourceSection: AppNavigationSection;
   shellyId?: string;
 };
 type DeviceAddReturnRoute = DashboardRoute | SetupRoute;
 type DeviceAddRoute = {
   type: 'device-add';
   device: 'plug' | 'sensor';
-  sourceKind: AppNavigationKind;
+  sourceSection: AppNavigationSection;
   returnTo: DeviceAddReturnRoute;
   sensorMode?: 'manual' | 'phone-scan';
   plugTransport?: 'wifi' | 'bluetooth';
@@ -20,7 +20,7 @@ type DeviceAddRoute = {
 type InstallationRoute = {
   type: 'installation';
   installationId: string;
-  kind: AppNavigationKind;
+  section: AppNavigationSection;
 };
 type PlugSettingsRoute = { type: 'plug-settings'; deviceId: string };
 type SensorSettingsRoute = { type: 'sensor-settings'; sensorId: string };
@@ -38,26 +38,26 @@ type PrimaryAppRoute =
   | SensorSettingsRoute
   | BlePlugDetailRoute
   | PlugBleDiscoveryRoute
-  | { type: 'intent'; sourceKind: AppNavigationKind; shellyId?: string }
+  | { type: 'intent'; sourceSection: AppNavigationSection; shellyId?: string }
   | SetupRoute
   | InstallationRoute;
 
 export type AppRoute = PrimaryAppRoute | { type: 'settings'; returnTo: PrimaryAppRoute };
 
-export const activeNavigationForRoute = (
+export const activeNavigationSectionForRoute = (
   route: AppRoute
-): AppNavigationKind | 'settings' => {
+): AppNavigationSection | 'settings' => {
   if (route.type === 'settings') return 'settings';
-  if (route.type === 'dashboard') return route.kind ?? 'climate';
-  if (route.type === 'installation') return route.kind;
-  if (route.type === 'sensor-settings') return 'time';
+  if (route.type === 'dashboard') return route.section ?? 'plugs';
+  if (route.type === 'installation') return route.section;
+  if (route.type === 'sensor-settings') return 'thermometers';
   if (
     route.type === 'plug-settings' ||
     route.type === 'ble-plug-detail' ||
     route.type === 'plug-ble-discovery'
   ) {
-    return 'climate';
+    return 'plugs';
   }
-  if (route.type === 'device-add') return route.sourceKind;
-  return route.sourceKind;
+  if (route.type === 'device-add') return route.sourceSection;
+  return route.sourceSection;
 };
