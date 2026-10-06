@@ -11,9 +11,9 @@ describe('AppToastViewport', () => {
     render(
       <I18nProvider>
         <AppShell
-          activeKind="climate"
-          onOpenClimate={noop}
-          onOpenTime={noop}
+          activeSection="plugs"
+          onOpenPlugs={noop}
+          onOpenThermometers={noop}
           onOpenSettings={noop}
         >
           <section className="demo-panel">
