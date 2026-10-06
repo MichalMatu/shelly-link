@@ -38,14 +38,16 @@ Completed stabilization evidence includes:
 - physical mains power-cycle recovery;
 - healthy-scanner sensor-silence handling;
 - stopped-scanner restart with required BLE re-subscription;
-- short soak/liveness observability and memory-headroom reporting.
+- short soak/liveness observability and memory-headroom reporting;
+- real Wi-Fi loss/recovery without changing device credentials;
+- final 16/16 real-hardware matrix across Xiaomi/PVVX + TP357, all four control modes and VPD off/on;
+- final device postflight with the production runtime preserved and the test Plug restored.
 
-Remaining release blockers, in order:
+Remaining release blocker:
 
-1. qualify real Wi-Fi loss/recovery without changing device credentials;
-2. run the materially longer 8-hour soak and finish with an explicit relay OFF state;
-3. run the final real-hardware matrix and restore the production runtime afterward;
-4. run final release qualification and declare V1 feature freeze.
+1. run the materially longer 8-hour soak and finish with an explicit relay OFF state.
+
+After that soak passes, run the final freeze/release sign-off and declare V1 feature freeze. All other Stage 9 qualification work is closed.
 
 Detailed evidence belongs in docs/testing/hardware-matrix.md and the dated acceptance records, not in this roadmap.
 
