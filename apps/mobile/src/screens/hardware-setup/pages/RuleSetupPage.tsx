@@ -162,6 +162,7 @@ export const RuleSetupPage = ({
         outputBehaviorEditor={
           !inline ? (
             <Pulse.Cycle.Editor
+              context="climate"
               draft={flow.pulseCycleDraft}
               validation={flow.pulseCycleValidation}
               onChange={flow.setPulseCycleDraft}
