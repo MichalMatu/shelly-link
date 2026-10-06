@@ -220,8 +220,8 @@ describe('temporary BLE discovery managed runtime preservation', () => {
     });
   });
 
-  it('restores standalone Pulse AUTO by starting its existing script', async () => {
-    mockManagedScript({ code: '', running: true });
+  it('restores standalone Pulse AUTO by starting its stopped existing script', async () => {
+    mockManagedScript({ code: '', running: false });
 
     await restoreManagedAutomationDiscoveryState(transport(), {
       kind: 'standalone-pulse',
