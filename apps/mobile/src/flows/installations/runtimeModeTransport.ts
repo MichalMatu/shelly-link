@@ -91,8 +91,13 @@ const evaluateRuntime = async (
 const findManagedScript = (
   scripts: ShellyScriptListEntry[]
 ): ShellyScriptListEntry | null => {
-  const enabledScripts = scripts.filter((script) => script.enable);
-  return enabledScripts.length === 1 ? enabledScripts[0]! : null;
+  const candidates = scripts.filter((script) => script.enable || script.running);
+  if (candidates.length > 1) {
+    throw new Error(
+      'Multiple active Shelly scripts prevent safe managed automation preservation.'
+    );
+  }
+  return candidates[0] ?? null;
 };
 
 const readRelayOutput = async (
@@ -195,6 +200,18 @@ export const captureManagedAutomationDiscoveryRestoreState = async (
   return { kind: 'none', scriptId: null, wasRunning: false, relayId: 0 };
 };
 
+const readManagedScriptRunning = async (
+  transport: ShellyRpcTransport,
+  scriptId: number
+): Promise<boolean> => {
+  const scripts = unwrapShellyResult(await readShellyScriptList(transport));
+  const script = scripts.find((entry) => entry.id === scriptId);
+  if (!script) {
+    throw new Error('Managed automation script disappeared during BLE discovery.');
+  }
+  return script.running;
+};
+
 export const restoreManagedAutomationDiscoveryState = async (
   transport: ShellyRpcTransport,
   state: ManagedAutomationDiscoveryRestoreState
@@ -202,12 +219,16 @@ export const restoreManagedAutomationDiscoveryState = async (
   if (state.kind === 'none') return;
 
   const client = new RpcShellyClient(transport);
+  const running = await readManagedScriptRunning(transport, state.scriptId);
+
   if (state.kind === 'climate') {
     if (!state.wasRunning) return;
     if (!state.controlState) {
       throw new Error('Managed automation state was not captured before BLE discovery.');
     }
-    unwrapShellyResult(await client.startScript(state.scriptId));
+    if (!running) {
+      unwrapShellyResult(await client.startScript(state.scriptId));
+    }
     await restoreClimateRuntimeControlState(
       transport,
       state.scriptId,
@@ -217,13 +238,18 @@ export const restoreManagedAutomationDiscoveryState = async (
   }
 
   if (state.wasRunning) {
-    unwrapShellyResult(await client.startScript(state.scriptId));
+    if (!running) {
+      unwrapShellyResult(await client.startScript(state.scriptId));
+    }
     return;
   }
   if (state.manualRelayOn === null) {
     throw new Error(
       'Standalone Pulse manual relay state was not captured before BLE discovery.'
     );
+  }
+  if (running) {
+    unwrapShellyResult(await client.stopScript(state.scriptId));
   }
 
   unwrapShellyResult(

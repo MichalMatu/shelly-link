@@ -260,6 +260,33 @@ describe('temporary BLE discovery managed runtime preservation', () => {
     ).toBe(false);
   });
 
+  it('fails closed on multiple active scripts before reading or mutating either one', async () => {
+    mocks.call.mockImplementation(async (request: ShellyRpcRequest) => {
+      if (request.method === 'Script.List') {
+        return {
+          ok: true,
+          value: {
+            scripts: [
+              { id: 7, name: 'Managed A', enable: true, running: true },
+              { id: 8, name: 'Managed B', enable: false, running: true }
+            ]
+          }
+        };
+      }
+      throw new Error(`Unexpected RPC method: ${request.method}`);
+    });
+
+    await expect(
+      captureManagedAutomationDiscoveryRestoreState(transport())
+    ).rejects.toThrow('Multiple active Shelly scripts');
+
+    expect(
+      mocks.call.mock.calls.some(([request]) =>
+        ['Script.GetCode', 'Script.Stop', 'Switch.Set'].includes(request.method)
+      )
+    ).toBe(false);
+  });
+
   it('rejects an unknown running script before the BLE lifecycle can mutate it', async () => {
     mockManagedScript({ code: '// foreign runtime', running: true });
 

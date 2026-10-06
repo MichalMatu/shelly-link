@@ -213,6 +213,23 @@ export const readShellySetupScanResult = async (
   };
 };
 
+const leaveManagedAutomationSafe = async (
+  client: RpcShellyClient,
+  state: ManagedAutomationDiscoveryRestoreState
+): Promise<void> => {
+  try {
+    unwrapShellyResult(await client.setRelayOff({ relayId: state.relayId }));
+  } catch {
+    // Best effort only; preserve the original preparation/restore failure.
+  }
+  if (state.scriptId === null) return;
+  try {
+    unwrapShellyResult(await client.stopScript(state.scriptId));
+  } catch {
+    // Best effort only; preserve the original preparation/restore failure.
+  }
+};
+
 export const prepareShellyBleDiscovery = async (
   baseUrl: string
 ): Promise<ShellyBleDiscoveryPreparation> => {
@@ -223,11 +240,39 @@ export const prepareShellyBleDiscovery = async (
   const automationRestoreState =
     await captureManagedAutomationDiscoveryRestoreState(transport);
 
-  await forceRelayOff(client, transport, automationRestoreState.relayId);
-  if (automationRestoreState.wasRunning && automationRestoreState.scriptId !== null) {
-    unwrapShellyResult(await client.stopScript(automationRestoreState.scriptId));
+  let managedRuntimeMutationAttempted = false;
+  try {
+    managedRuntimeMutationAttempted = true;
+    await forceRelayOff(client, transport, automationRestoreState.relayId);
+    if (
+      automationRestoreState.wasRunning &&
+      automationRestoreState.scriptId !== null
+    ) {
+      unwrapShellyResult(await client.stopScript(automationRestoreState.scriptId));
+    }
+    await forceRelayOff(client, transport, automationRestoreState.relayId);
+  } catch (error) {
+    if (managedRuntimeMutationAttempted) {
+      try {
+        await restoreManagedAutomationDiscoveryState(
+          transport,
+          automationRestoreState
+        );
+      } catch (restoreError) {
+        await leaveManagedAutomationSafe(client, automationRestoreState);
+        const originalMessage =
+          error instanceof Error
+            ? error.message
+            : 'BLE discovery preparation failed.';
+        const restoreMessage =
+          restoreError instanceof Error
+            ? restoreError.message
+            : 'Managed automation rollback failed.';
+        throw new Error(`${originalMessage} Rollback failed: ${restoreMessage}`);
+      }
+    }
+    throw error;
   }
-  await forceRelayOff(client, transport, automationRestoreState.relayId);
 
   return { automationRestoreState };
 };
@@ -304,16 +349,7 @@ export const stopShellyBleDiscovery = async (
       );
     } catch (error) {
       const automationState = options.automationRestoreState;
-      try {
-        unwrapShellyResult(
-          await client.setRelayOff({ relayId: automationState.relayId })
-        );
-        if (automationState.scriptId !== null) {
-          unwrapShellyResult(await client.stopScript(automationState.scriptId));
-        }
-      } catch {
-        // Preserve the original restore failure while cleanup remains best effort.
-      }
+      await leaveManagedAutomationSafe(client, automationState);
       stopError =
         error instanceof Error
           ? error
