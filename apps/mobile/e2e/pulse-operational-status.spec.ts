@@ -188,19 +188,20 @@ for (const viewport of viewports) {
     await expect(card.getByRole('button', { name: 'MANUAL', exact: true })).toBeVisible();
     await expect(card.getByRole('button', { name: 'ON', exact: true })).toBeVisible();
     await expect(card.getByRole('button', { name: 'OFF', exact: true })).toBeVisible();
-    await expect(card).toContainText('30 s');
-    await expect(card).toContainText('60 s');
+    await expect(card).toContainText('ON 30 s / OFF 60 s');
     await expect(card).toContainText('Ciągłe');
     await expect(card).toContainText('18.4 W');
     await expect(card).toContainText('230 V');
     await expect(card).toContainText('320 Wh');
     await expect(card).toContainText('14:00');
     await expect(compactStatus).toBeVisible();
-    await expect(compactStatus).toContainText('Aktualny');
-    await expect(compactStatus).toContainText('ON');
+    await expect(compactStatus.getByText('ON', { exact: true })).toBeVisible();
     await expect(compactStatus).toContainText('3 cykli');
     await expect(compactStatus).toContainText('1m 5s');
-    await expect(compactStatus).toContainText('Faza ON');
+    await expect(compactStatus).not.toContainText('Aktualny');
+    await expect(compactStatus.getByText('Wyjście automatyzacji')).toHaveCount(0);
+    await expect(compactStatus.getByText('Stan przekaźnika')).toHaveCount(0);
+    await expect(compactStatus.getByText('Powód automatyzacji')).toHaveCount(0);
     await expect(card.getByText('Błąd automatyki')).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
