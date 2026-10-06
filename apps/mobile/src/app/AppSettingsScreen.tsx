@@ -41,11 +41,6 @@ export type SupportDiagnosticRow = {
   tone?: DiagnosticRowProps['tone'];
 };
 
-type AppSettingsScreenProps = {
-  onOpenClimate?: () => void;
-  onOpenTime?: () => void;
-};
-
 const localeLabelKeys: Record<Locale, TranslationKey> = {
   pl: 'settings.language.pl',
   en: 'settings.language.en',
@@ -72,8 +67,7 @@ const copyToClipboard = async (value: string): Promise<void> => {
   await navigator.clipboard.writeText(value);
 };
 
-export const AppSettingsScreen = (_props: AppSettingsScreenProps = {}) => {
-  void _props;
+export const AppSettingsScreen = () => {
   const { locale, t } = useTranslation();
   const platform = Capacitor.getPlatform();
   const [localePreference, setLocalePreferenceState] = useState<LocalePreference>(() =>
