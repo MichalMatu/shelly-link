@@ -1,7 +1,7 @@
 import type { RulePresetId, ThresholdDirection } from '@lcl/automation-core';
 import type { ClimateSensorAggregation } from '@lcl/script-generator';
 import { Disclosure, InfoLabel, SelectField } from '@lcl/ui';
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
@@ -75,6 +75,7 @@ export type ClimateRuleEditorProps = {
   submitMode?: 'install' | 'edit';
   showScriptActions?: boolean;
   showSaveTarget?: boolean;
+  outputBehaviorEditor?: ReactNode;
 };
 
 export const ClimateRuleEditor = ({
@@ -266,6 +267,8 @@ export const ClimateRuleEditor = ({
           <p className="rule-vpd-assist__working-range">{vpdWorkingRange}</p>
         )}
       </section>
+
+      {props.outputBehaviorEditor}
 
       <Disclosure
         className="rule-advanced-disclosure"
