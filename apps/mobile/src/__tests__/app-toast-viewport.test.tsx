@@ -2,7 +2,7 @@ import { act, render, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
-import { AppToastViewport, useAppToastQueue } from '../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 
 const noop = vi.fn();
 
@@ -43,7 +43,7 @@ describe('AppToastViewport', () => {
     ).toBeNull();
   });
   it('keeps the latest three toasts and supports dismissal', () => {
-    const { result } = renderHook(() => useAppToastQueue('toast-test'));
+    const { result } = renderHook(() => useToastQueue('toast-test'));
 
     act(() => {
       result.current.pushToast('ok', 'One');
