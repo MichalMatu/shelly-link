@@ -1,8 +1,5 @@
 import type { ReactNode } from 'react';
-import {
-  AppBottomNavigation,
-  type AppNavigationSection
-} from './AppBottomNavigation.js';
+import { AppBottomNavigation, type AppNavigationSection } from './AppBottomNavigation.js';
 import { APP_TOAST_HOST_ID } from './AppToastViewport.js';
 
 type AppShellProps = {
