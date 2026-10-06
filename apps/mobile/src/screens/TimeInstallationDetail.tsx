@@ -4,9 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport } from '../components/AppToastViewport.js';
 import {
-  AutomationDetailDangerZone,
-  AutomationDetailHierarchy,
-  AutomationDetailSection,
+  AutomationDetail,
   OperationalStatus,
   deleteTimeAutomation,
   Pulse,
@@ -141,8 +139,8 @@ export const TimeInstallationDetail = ({
               </FeedbackPanel>
             )}
 
-            <AutomationDetailHierarchy>
-              <AutomationDetailSection title={t('detail.currentState')}>
+            <AutomationDetail.Hierarchy>
+              <AutomationDetail.Section title={t('detail.currentState')}>
                 {pulseInstallation ? (
                   <Pulse.Operational.StatusSummary status={pulseQuery.data} />
                 ) : (
@@ -159,9 +157,9 @@ export const TimeInstallationDetail = ({
                     <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
                   </div>
                 </dl>
-              </AutomationDetailSection>
+              </AutomationDetail.Section>
 
-              <AutomationDetailSection title={t('detail.configuration')}>
+              <AutomationDetail.Section title={t('detail.configuration')}>
                 <TimeScheduleSetupPage
                   flow={{
                     selectedShelly: {
@@ -181,9 +179,9 @@ export const TimeInstallationDetail = ({
                   }}
                   onPendingChange={setTimeEditPending}
                 />
-              </AutomationDetailSection>
+              </AutomationDetail.Section>
 
-              <AutomationDetailDangerZone title={t('time.detail.delete')}>
+              <AutomationDetail.DangerZone title={t('time.detail.delete')}>
                 <button
                   className="secondary-action secondary-action--danger"
                   type="button"
@@ -192,8 +190,8 @@ export const TimeInstallationDetail = ({
                 >
                   {t('time.detail.delete')}
                 </button>
-              </AutomationDetailDangerZone>
-            </AutomationDetailHierarchy>
+              </AutomationDetail.DangerZone>
+            </AutomationDetail.Hierarchy>
           </>
         )}
 
