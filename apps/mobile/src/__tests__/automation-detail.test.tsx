@@ -4,6 +4,7 @@ import { createDefaultShellyThermostatConfig } from '@lcl/script-generator';
 import type { ShellyScheduleJob } from '@lcl/shelly-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
+import { Pulse } from '../features/automations/index.js';
 import {
   createInstalledAutomation,
   createTimeInstalledAutomation
@@ -88,6 +89,7 @@ const installShellyFetchMock = (options: ShellyFetchMockOptions = {}) => {
   let relayOn = true;
   let runtimeMode = 0;
   const rpcMethods: string[] = [];
+  const scriptGetCodeIds: number[] = [];
 
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = input instanceof URL ? input.toString() : String(input);
@@ -226,6 +228,26 @@ const timeInstallation = () =>
     nowMs: 1000
   });
 
+const timePulseInstallation = () =>
+  Pulse.Time.createInstalledAutomation({
+    shelly: { id: 'shellyplugsg3-time-detail', model: 'S3PL-00112EU', gen: 3 },
+    shellyName: 'Lampa',
+    baseUrl: 'http://192.168.0.21/',
+    onJobId: 7,
+    offJobId: 8,
+    scriptId: 9,
+    scriptHash: 'lcl-time-pulse',
+    config: { relayId: 0, onTime: '08:00', offTime: '20:00' },
+    pulse: {
+      onMs: 30_000,
+      offMs: 60_000,
+      initialDelayMs: 0,
+      startPhase: 'on',
+      execution: { mode: 'continuous' }
+    },
+    nowMs: 1000
+  });
+
 const installTimeShellyFetchMock = () => {
   let relayOn = true;
   let rev = 1;
@@ -285,6 +307,15 @@ const installTimeShellyFetchMock = () => {
           }
         };
         break;
+      case 'Script.GetCode':
+        if (body.params?.id !== undefined) scriptGetCodeIds.push(body.params.id);
+        result = { data: '// time pulse exact source', left: 0 };
+        break;
+      case 'Script.Eval':
+        result = {
+          result: JSON.stringify([2, 3, 3_665_000, 'po', 1, null, 3_600_000])
+        };
+        break;
       case 'Schedule.List':
         result = { jobs: structuredClone(jobs), rev };
         break;
@@ -330,7 +361,8 @@ const installTimeShellyFetchMock = () => {
     get relayOn() {
       return relayOn;
     },
-    rpcMethods
+    rpcMethods,
+    scriptGetCodeIds
   };
 };
 
@@ -574,6 +606,7 @@ describe('InstallationDetailScreen', () => {
     expect(screen.queryByRole('group', { name: 'Wyjście' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Edytuj' })).toBeNull();
     expect(screen.queryByText('Natywny Shelly Schedule')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Skrypt' })).toBeNull();
     expect(await screen.findByText('12:00')).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Usuń automatykę czasową' }));
@@ -588,5 +621,21 @@ describe('InstallationDetailScreen', () => {
     expect(useInstalledAutomationStore.getState().installations).toEqual([]);
     expect(onBack).toHaveBeenCalledTimes(1);
     expect(shelly.rpcMethods).toContain('Schedule.Delete');
+  });
+
+  it('exposes Script only for Time + Pulse and reads the owned Pulse script', async () => {
+    const saved = timePulseInstallation();
+    useInstalledAutomationStore.getState().upsertInstallation(saved);
+    const shelly = installTimeShellyFetchMock();
+
+    renderDetail(saved.id);
+
+    const scriptTab = await screen.findByRole('button', { name: 'Skrypt' });
+    expect(scriptTab).toBeVisible();
+    fireEvent.click(scriptTab);
+
+    expect(await screen.findByText('// time pulse exact source')).toBeVisible();
+    expect(shelly.rpcMethods).toContain('Script.GetCode');
+    expect(shelly.scriptGetCodeIds).toEqual([9]);
   });
 });
