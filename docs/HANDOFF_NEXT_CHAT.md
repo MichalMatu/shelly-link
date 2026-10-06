@@ -1,6 +1,6 @@
 # Handoff — Stage 9 stabilization
 
-Status: **2026-10-06 — V1 feature work is effectively closed. Physical reboot/power-cycle and BLE scanner recovery are qualified. Remaining release blockers are real Wi-Fi loss/recovery, the 8-hour soak, final hardware matrix and release qualification.**
+Status: **2026-10-06 — V1 feature work is effectively closed. Physical reboot/power-cycle, BLE scanner recovery, real Wi-Fi loss/recovery and the final real-hardware matrix are qualified. The only intentionally outstanding release blocker before freeze is the 8-hour soak.**
 
 Repository: MichalMatu/shelly-link
 
