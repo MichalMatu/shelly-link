@@ -7,22 +7,28 @@ import {
   parsePulseCycleForm,
   type PulseCycleFormDraft
 } from '../data/pulseCycleForm.js';
-import { PulseCycleEditor } from './PulseCycleEditor.js';
+import {
+  PulseCycleEditor,
+  type PulseCycleEditorContext
+} from './PulseCycleEditor.js';
 
 const copy = pulseCycleCopy.pl;
 
 const renderEditor = ({
   draft = DEFAULT_PULSE_CYCLE_FORM,
   optional = true,
+  context = 'standalone',
   onChange = vi.fn()
 }: {
   draft?: PulseCycleFormDraft;
   optional?: boolean;
+  context?: PulseCycleEditorContext;
   onChange?: (patch: Partial<PulseCycleFormDraft>) => void;
 } = {}) => {
   render(
     <I18nProvider>
       <PulseCycleEditor
+        context={context}
         draft={draft}
         optional={optional}
         validation={parsePulseCycleForm(draft)}
@@ -44,6 +50,20 @@ describe('PulseCycleEditor', () => {
     renderEditor();
     expect(screen.getByLabelText(copy.outputBehavior)).toHaveValue('steady');
     expect(screen.queryByText(copy.onSeconds)).not.toBeInTheDocument();
+  });
+
+  it('explains Climate as the parent decision and Pulse as output behavior', () => {
+    renderEditor({ context: 'climate' });
+    expect(screen.getByLabelText(copy.climateOutputBehavior)).toHaveValue('steady');
+    expect(screen.getByText(copy.climateHint)).toBeVisible();
+    selectOption(copy.climateOutputBehavior, copy.pulseOnOff);
+  });
+
+  it('explains Time as the active window and Pulse as behavior inside it', () => {
+    renderEditor({ context: 'time' });
+    expect(screen.getByLabelText(copy.timeOutputBehavior)).toHaveValue('steady');
+    expect(screen.getByText(copy.timeHint)).toBeVisible();
+    selectOption(copy.timeOutputBehavior, copy.steadyOn);
   });
 
   it('switches the shared optional editor to Pulse', () => {
