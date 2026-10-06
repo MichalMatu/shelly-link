@@ -1,7 +1,7 @@
-import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
+import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation } from '@tanstack/react-query';
-import { useCallback, useRef, useState } from 'react';
-import { AppToastViewport } from '../components/AppToastViewport.js';
+import { useState } from 'react';
+import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
   ClimateScriptDetailSection,
@@ -48,18 +48,7 @@ export const StandalonePulseInstallationDetail = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editPending, setEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const toastIdRef = useRef(0);
-  const pushToast = useCallback((tone: ToastTone, title: string) => {
-    toastIdRef.current += 1;
-    setToasts((current) => [
-      ...current.slice(-2),
-      { id: `pulse-detail-toast-${toastIdRef.current}`, tone, title }
-    ]);
-  }, []);
-  const dismissToast = useCallback((id: string) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
+  const { dismissToast, pushToast, toasts } = useToastQueue('pulse-detail-toast');
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
   const runtimeQuery = Pulse.Standalone.useRuntime(installation);

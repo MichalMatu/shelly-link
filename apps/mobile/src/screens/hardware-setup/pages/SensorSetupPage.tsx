@@ -1,7 +1,6 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
-import { useToastQueue } from '../useToastQueue.js';
 import { SegmentedControl } from '@lcl/ui';
-import { AppToastViewport } from '../../../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';

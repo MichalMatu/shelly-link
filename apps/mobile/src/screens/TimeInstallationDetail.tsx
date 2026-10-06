@@ -1,8 +1,8 @@
-import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
+import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
-import { AppToastViewport } from '../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
   OperationalStatus,
@@ -66,20 +66,7 @@ export const TimeInstallationDetail = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [timeEditPending, setTimeEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const toastIdRef = useRef(0);
-
-  const pushToast = useCallback((tone: ToastTone, title: string) => {
-    toastIdRef.current += 1;
-    setToasts((current) => [
-      ...current.slice(-2),
-      { id: `time-toast-${toastIdRef.current}`, tone, title }
-    ]);
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
+  const { dismissToast, pushToast, toasts } = useToastQueue('time-toast');
 
   const deleteMutation = useMutation({
     mutationFn: () =>

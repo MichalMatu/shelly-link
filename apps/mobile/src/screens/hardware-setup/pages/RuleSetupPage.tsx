@@ -2,7 +2,7 @@ import type { RuleSetupFlow } from '../pageContracts.js';
 import type { RulePresetId } from '@lcl/automation-core';
 import { FeedbackPanel, Modal, ScriptPreview } from '@lcl/ui';
 import { useCallback, useEffect, useState } from 'react';
-import { AppToastViewport } from '../../../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { useTranslation } from '../../../app/i18n.js';
 import {
   ALL_RULE_PRESETS,
@@ -12,7 +12,6 @@ import {
 import { useRuleSensorReadings } from '../../../flows/hardware-setup/useRuleSensorReadings.js';
 import { useSavedSensorLiveScanLifecycle } from '../../../flows/hardware-setup/useSavedSensorLiveScanLifecycle.js';
 import { canInstallScript, mutationError, type HardwarePageProps } from '../helpers.js';
-import { useToastQueue } from '../useToastQueue.js';
 import { useRuleSetupFeedback, type RuleDialogState } from './useRuleSetupFeedback.js';
 
 const copyToClipboard = async (value: string): Promise<void> => {

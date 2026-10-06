@@ -49,8 +49,7 @@ export const legacyProductionPaths = Object.freeze({
     'hardware-setup/pages/TimeScheduleSetupPage.tsx',
     'hardware-setup/pages/useRuleSetupFeedback.ts',
     'hardware-setup/pages/useSensorSetupFeedback.ts',
-    'hardware-setup/pages/useShellySetupFeedback.ts',
-    'hardware-setup/useToastQueue.ts'
+    'hardware-setup/pages/useShellySetupFeedback.ts'
   ],
   'apps/mobile/src/flows': [
     'hardware-setup/phoneBleScan.ts',

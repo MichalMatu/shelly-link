@@ -1,14 +1,14 @@
 import { climateSensorsForConfig } from '@lcl/script-generator';
-import { FeedbackPanel, Modal, type ToastMessage, type ToastTone } from '@lcl/ui';
+import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ClimateOperationalStatusSection } from '../app/ClimateOperationalStatusSection.js';
 import { StandalonePulseInstallationDetail } from '../app/StandalonePulseInstallationDetail.js';
 import { installationDeleteCopy } from '../app/locales/installationDelete.js';
 import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
-import { AppToastViewport } from '../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   ClimateHistorySection,
   ClimateRecoverySection,
@@ -72,21 +72,6 @@ export const InstallationDetailScreen = ({
   const installation = useInstalledAutomationStore((state) =>
     state.installations.find((candidate) => candidate.id === installationId)
   );
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const toastIdRef = useRef(0);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
-
-  const pushToast = useCallback((tone: ToastTone, title: string) => {
-    toastIdRef.current += 1;
-    setToasts((current) => [
-      ...current.slice(-2),
-      { id: `installation-toast-${toastIdRef.current}`, tone, title }
-    ]);
-  }, []);
-
   if (!installation) return <PlugDetailNotFound />;
   if (installation.kind === 'pulse') {
     return (
@@ -108,9 +93,6 @@ export const InstallationDetailScreen = ({
     <ClimateInstallationDetail
       installation={installation}
       onBack={onBack}
-      pushToast={pushToast}
-      dismissToast={dismissToast}
-      toasts={toasts}
       {...(onOpenBleDiscovery ? { onOpenBleDiscovery } : {})}
     />
   );
@@ -119,21 +101,16 @@ export const InstallationDetailScreen = ({
 type ClimateInstallationDetailProps = {
   installation: ClimateInstalledAutomation;
   onBack(): void;
-  pushToast(tone: ToastTone, title: string): void;
-  dismissToast(id: string): void;
-  toasts: ToastMessage[];
   onOpenBleDiscovery?: (deviceId: string) => void;
 };
 
 const ClimateInstallationDetail = ({
   installation,
   onBack,
-  pushToast,
-  dismissToast,
-  toasts,
   onOpenBleDiscovery
 }: ClimateInstallationDetailProps) => {
   const { locale, t } = useTranslation();
+  const { dismissToast, pushToast, toasts } = useToastQueue('installation-toast');
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
