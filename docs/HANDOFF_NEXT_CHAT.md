@@ -37,15 +37,15 @@ Current scanner contract:
 - target sensor silence while the scanner is still running does not justify a scanner restart;
 - if the scanner is actually stopped, the watchdog must subscribe again before restarting it so event delivery returns.
 
-## Refactor-audit follow-ups
+## Refactor-audit closeout
 
-The latest audit found no reason for another broad refactor. Three narrow hardening items remain:
+The audit found no reason for another broad refactor. The three narrow hardening items are complete:
 
-1. temporary BLE discovery preparation can mutate/stop the managed runtime before the caller receives a restoration token; make that preparation internally transactional on partial failure;
-2. multiple enabled/running scripts currently make managed-runtime detection ambiguous; fail closed instead of mapping that state to none;
-3. add focused negative-path tests for script replacement failures during config/start/rollback.
+- BLE discovery preparation is internally transactional after partial mutation, with safe-OFF fallback when rollback fails;
+- ambiguous multiple enabled/running scripts fail closed;
+- script replacement has focused config/start/rollback failure coverage.
 
-Keep these changes narrow and safety-oriented.
+Focused lifecycle tests pass, `pnpm check` passes, and GitHub CI passes on the current PR head. The Darwin `04-plug-ble-discovery` visual mismatch is unchanged at 5036 pixels on clean `main` and is therefore a pre-existing baseline drift, not a product delta.
 
 ## Documentation policy
 
@@ -57,15 +57,14 @@ The old September UX capture bundle under artifacts/ux-reference is not canonica
 
 Order:
 
-1. close the narrow BLE/script lifecycle audit hardening above;
-2. qualify real Wi-Fi loss/recovery without changing Shelly credentials;
-3. run the 8-hour soak and leave the final relay explicitly OFF;
-4. run/close the final hardware matrix and restore production state;
-5. run release qualification and declare V1 feature freeze;
-6. after freeze, start the graphical frontend redesign.
+1. qualify real Wi-Fi loss/recovery without changing Shelly credentials;
+2. run the 8-hour soak and leave the final relay explicitly OFF;
+3. run/close the final hardware matrix and restore production state;
+4. run release qualification and declare V1 feature freeze;
+5. after freeze, start the graphical frontend redesign.
 
 Do not use stabilization as an excuse to add new Pulse modes, Environment Profiles or another generic UX-polish round.
 
 ## Verification boundary
 
-For this documentation/audit cleanup no compilation is required. For later implementation slices use focused checks while iterating and the repository-required final gate on the exact completion head. Hardware claims require fresh real-device evidence.
+The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Hardware claims still require fresh real-device evidence. The 8-hour soak remains intentionally deferred.
