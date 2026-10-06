@@ -42,7 +42,7 @@ This keeps the architecture reusable without turning the app into a general-purp
 
 The project is pre-release/beta. Core local automation, multi-sensor Climate, canonical Plug ownership/recovery, chart-first History/Datalogger, Runtime Safety Supervisor, Pulse V1, BLE management, BLE-to-Wi-Fi provisioning and the verified OTA/time-sync path have real-device evidence on Samsung S22+ / Android 16 and Shelly Plug S Gen3.
 
-Stage 9 stabilization is in progress. Soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety recovery matrix, controlled real-device `Shelly.Reboot` recovery, physical mains power-cycle recovery, healthy-scanner sensor-silence handling and stopped-scanner watchdog re-subscription/event-delivery recovery are qualified. Remaining blockers before V1 feature freeze are real Wi-Fi loss/recovery qualification and the materially longer 8-hour soak, followed by the final hardware matrix and release qualification.
+Stage 9 stabilization is in its final closeout. Soak/liveness observability, deterministic AUTO/MANUAL + automation-fault + hard-safety recovery, controlled `Shelly.Reboot`, physical mains power-cycle recovery, healthy-scanner sensor-silence handling, stopped-scanner watchdog re-subscription, real Wi-Fi loss/recovery and the final 16/16 real-hardware runtime matrix are qualified. The only intentionally outstanding release blocker before V1 feature freeze is the materially longer 8-hour soak.
 
 See [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), [Current handoff](docs/HANDOFF_NEXT_CHAT.md) and the [Hardware test matrix](docs/testing/hardware-matrix.md).
 
