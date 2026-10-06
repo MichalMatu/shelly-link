@@ -1243,6 +1243,23 @@ for (const viewport of viewports) {
       0
     );
     await expect(page.getByLabel('VPD assist')).toBeVisible();
+    const setupOrder = await page.evaluate(() => {
+      const vpd = document.querySelector('.rule-vpd-assist');
+      const pulse = document.querySelector('section[aria-label="Pulse"]');
+      const advanced = document.querySelector('.rule-advanced-disclosure');
+      const submit = document.querySelector('.rule-action-row');
+      if (!vpd || !pulse || !advanced || !submit) return false;
+      return (
+        Boolean(vpd.compareDocumentPosition(pulse) & Node.DOCUMENT_POSITION_FOLLOWING) &&
+        Boolean(
+          pulse.compareDocumentPosition(advanced) & Node.DOCUMENT_POSITION_FOLLOWING
+        ) &&
+        Boolean(
+          advanced.compareDocumentPosition(submit) & Node.DOCUMENT_POSITION_FOLLOWING
+        )
+      );
+    });
+    expect(setupOrder).toBe(true);
     const advancedDisclosure = page.locator('.rule-advanced-disclosure');
     expect(await advancedDisclosure.getAttribute('open')).toBeNull();
     await expect(advancedDisclosure.locator('.lcl-disclosure__body')).toBeHidden();

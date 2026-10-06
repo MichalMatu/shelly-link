@@ -63,17 +63,16 @@ The non-soak Stage 9 hardware closeout is complete: Wi-Fi loss/recovery passed w
 
 Do not use stabilization as an excuse to add new Pulse modes, Environment Profiles or another generic UX-polish round.
 
-
 ## Active UX correction plan — Pulse and combined modes
 
 This is an explicit user-approved UX correction batch. Keep it bounded to the items below; do not turn it into a generic pre-freeze redesign or backend refactor.
 
 ### UX-1 — Climate + Pulse setup ordering
 
-- [ ] Move `Zachowanie wyjścia` directly below the VPD section and before advanced settings.
-- [ ] When Pulse is selected, render its cycle fields immediately below `Zachowanie wyjścia`.
-- [ ] Keep the primary `Wyślij` / `Zapisz zmiany` action at the true end of the complete form.
-- [ ] Preserve one shared `PulseCycleEditor`; do not fork Climate-specific Pulse controls.
+- [x] Move `Zachowanie wyjścia` directly below the VPD section and before advanced settings.
+- [x] When Pulse is selected, render its cycle fields immediately below `Zachowanie wyjścia`.
+- [x] Keep the primary `Wyślij` / `Zapisz zmiany` action at the true end of the complete form.
+- [x] Preserve one shared `PulseCycleEditor`; do not fork Climate-specific Pulse controls.
 
 Target order:
 
@@ -154,7 +153,6 @@ For every slice:
 - do not refresh unrelated frozen Climate baselines;
 - run the repository-required focused checks and final gate before merge;
 - mark completed checklist items here so unfinished work remains visible.
-
 
 ## Verification boundary
 
