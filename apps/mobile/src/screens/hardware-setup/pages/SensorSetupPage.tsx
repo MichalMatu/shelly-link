@@ -1,9 +1,6 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
 import { SegmentedControl } from '@lcl/ui';
-import {
-  AppToastViewport,
-  useAppToastQueue
-} from '../../../components/AppToastViewport.js';
+import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -60,7 +57,7 @@ export const SensorSetupPage = ({
   const autoScanStartedRef = useRef(false);
   const startPhoneBleScanRef = useRef<() => void>(() => undefined);
   const stopPhoneBleScanRef = useRef<() => void>(() => undefined);
-  const { dismissToast, pushToast, toasts } = useAppToastQueue('sensor-toast');
+  const { dismissToast, pushToast, toasts } = useToastQueue('sensor-toast');
   const sensorPendingRemoval = dialog.kind === 'remove' ? dialog.device : null;
   const blockedSensorRemoval = dialog.kind === 'blocked' ? dialog : null;
   const isPhoneBleScanPending = flow.phoneBleScanMutation.isPending;
