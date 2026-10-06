@@ -215,16 +215,16 @@ const renderDashboard = (
   onOpenPlugSettings = vi.fn(),
   onAddPlug = vi.fn(),
   onAddThermometer = vi.fn(),
-  initialKind: 'climate' | 'time' = 'climate'
+  initialSection: 'plugs' | 'thermometers' = 'plugs'
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } }
   });
-  const view = (kind: 'climate' | 'time') => (
+  const view = (kind: 'plugs' | 'thermometers') => (
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
         <AutomationDashboardScreen
-          initialKind={kind}
+          initialSection={kind}
           onAddPlug={onAddPlug}
           onAddThermometer={onAddThermometer}
           onAddAutomation={onAddAutomation}
@@ -235,7 +235,7 @@ const renderDashboard = (
       </QueryClientProvider>
     </I18nProvider>
   );
-  const rendered = render(view(initialKind));
+  const rendered = render(view(initialSection));
   return {
     onAddAutomation,
     onOpenInstallation,
@@ -244,7 +244,7 @@ const renderDashboard = (
     onAddThermometer,
     queryClient,
     ...rendered,
-    rerenderKind: (kind: 'climate' | 'time') => rendered.rerender(view(kind))
+    rerenderSection: (kind: 'plugs' | 'thermometers') => rendered.rerender(view(kind))
   };
 };
 
@@ -311,7 +311,7 @@ describe('AutomationDashboardScreen', () => {
   });
 
   it('uses the same centered empty-state treatment for Thermometers', () => {
-    renderDashboard(vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), 'time');
+    renderDashboard(vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), 'thermometers');
 
     const thermometerEmptyState = screen
       .getByText('Brak dodanych termometrów.')
@@ -526,7 +526,7 @@ describe('AutomationDashboardScreen', () => {
       vi.fn(async () => jsonResponse(diagnosticPayload()))
     );
 
-    const { rerenderKind } = renderDashboard();
+    const { rerenderSection } = renderDashboard();
 
     expect(await screen.findByText('21.4°C')).toBeVisible();
     expect(screen.getByText('55.2%')).toBeVisible();
@@ -551,7 +551,7 @@ describe('AutomationDashboardScreen', () => {
     expect(within(climateCard).queryByText('Wilgotność')).toBeNull();
     expect(within(climateCard).getByText('VPD')).toBeVisible();
     expect(screen.queryByText('Sterowanie temperaturą')).toBeNull();
-    rerenderKind('time');
+    rerenderSection('thermometers');
     expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Termometry' })).toBeNull();
     expect(document.querySelector('.sensor-setup-panel--embedded')).not.toBeNull();
@@ -559,7 +559,7 @@ describe('AutomationDashboardScreen', () => {
     expect(
       screen.getByRole('button', { name: 'Skanuj termometry BLE telefonem' })
     ).toBeVisible();
-    rerenderKind('climate');
+    rerenderSection('plugs');
     expect(
       screen.getByRole('button', { name: 'Szczegóły: Salon · Wi-Fi' })
     ).toBeVisible();
@@ -760,7 +760,7 @@ describe('AutomationDashboardScreen', () => {
     installTimeShellyFetchMock();
     const onOpenInstallation = vi.fn();
 
-    const { rerenderKind } = renderDashboard(vi.fn(), onOpenInstallation);
+    const { rerenderSection } = renderDashboard(vi.fn(), onOpenInstallation);
 
     const timeCard = (await screen.findByText('Lampa')).closest('article') as HTMLElement;
     expect(within(timeCard).getByText('08:00')).toBeVisible();
@@ -785,9 +785,9 @@ describe('AutomationDashboardScreen', () => {
     const timeLeadingIcon = timeCard.querySelector('.automation-card__leading-icon');
     expect(timeLeadingIcon?.querySelector('.tabler-icon-plug')).not.toBeNull();
     expect(timeLeadingIcon).toHaveClass('automation-card__leading-icon--active');
-    rerenderKind('time');
+    rerenderSection('thermometers');
     expect(screen.getByRole('main', { name: 'Termometry' })).toBeVisible();
-    rerenderKind('climate');
+    rerenderSection('plugs');
     expect(screen.queryByText('Harmonogram dzienny')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Szczegóły: Lampa · Wi-Fi' }));
