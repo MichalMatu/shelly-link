@@ -1,9 +1,4 @@
 export {
-  AutomationDetailDangerZone,
-  AutomationDetailHierarchy,
-  AutomationDetailSection
-} from './components/AutomationDetailLayout.js';
-export {
   ClimateAutomationDetailSection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
@@ -30,7 +25,7 @@ export {
   updateDailyTimeAutomation
 } from './data/timeAutomationRuntime.js';
 export { timePulseAutomationRuntime } from './data/timePulseAutomationPublic.js';
-export { OperationalStatus, Pulse } from './automationPublic.js';
+export { AutomationDetail, OperationalStatus, Pulse } from './automationPublic.js';
 export { ClimateSetup } from './climateSetupPublic.js';
 export { setTimeAutomationManualRelay } from './data/timeAutomationRelayControl.js';
 export { TimeAutomationRuntimeError } from './data/timeAutomationRuntimeError.js';
