@@ -2,19 +2,19 @@ import { IconPlug, IconSettings, IconTemperature } from '@tabler/icons-react';
 import { useTranslation } from '../app/i18n.js';
 import './AppBottomNavigation.css';
 
-export type AppNavigationKind = 'climate' | 'time';
+export type AppNavigationSection = 'plugs' | 'thermometers';
 
 type AppBottomNavigationProps = {
-  activeKind: AppNavigationKind | 'settings';
-  onOpenClimate(): void;
-  onOpenTime(): void;
+  activeSection: AppNavigationSection | 'settings';
+  onOpenPlugs(): void;
+  onOpenThermometers(): void;
   onOpenSettings?: () => void;
 };
 
 export const AppBottomNavigation = ({
-  activeKind,
-  onOpenClimate,
-  onOpenTime,
+  activeSection,
+  onOpenPlugs,
+  onOpenThermometers,
   onOpenSettings
 }: AppBottomNavigationProps) => {
   const { t } = useTranslation();
@@ -27,9 +27,9 @@ export const AppBottomNavigation = ({
       <button
         className="dashboard-bottom-nav__item app-bottom-nav__item"
         type="button"
-        data-dashboard-kind="climate"
-        aria-current={activeKind === 'climate' ? 'page' : undefined}
-        onClick={onOpenClimate}
+        data-dashboard-section="plugs"
+        aria-current={activeSection === 'plugs' ? 'page' : undefined}
+        onClick={onOpenPlugs}
       >
         <IconPlug
           className="dashboard-nav__icon app-bottom-nav__icon"
@@ -40,9 +40,9 @@ export const AppBottomNavigation = ({
       <button
         className="dashboard-bottom-nav__item app-bottom-nav__item"
         type="button"
-        data-dashboard-kind="time"
-        aria-current={activeKind === 'time' ? 'page' : undefined}
-        onClick={onOpenTime}
+        data-dashboard-section="thermometers"
+        aria-current={activeSection === 'thermometers' ? 'page' : undefined}
+        onClick={onOpenThermometers}
       >
         <IconTemperature
           className="dashboard-nav__icon app-bottom-nav__icon"
@@ -53,9 +53,9 @@ export const AppBottomNavigation = ({
       <button
         className="dashboard-bottom-nav__item app-bottom-nav__item"
         type="button"
-        data-dashboard-kind="settings"
-        aria-current={activeKind === 'settings' ? 'page' : undefined}
-        disabled={!onOpenSettings && activeKind !== 'settings'}
+        data-dashboard-section="settings"
+        aria-current={activeSection === 'settings' ? 'page' : undefined}
+        disabled={!onOpenSettings && activeSection !== 'settings'}
         onClick={() => onOpenSettings?.()}
       >
         <IconSettings

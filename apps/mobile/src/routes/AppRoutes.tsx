@@ -12,7 +12,7 @@ import {
 import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppShell } from '../components/AppShell.js';
-import type { AppNavigationKind } from '../components/AppBottomNavigation.js';
+import type { AppNavigationSection } from '../components/AppBottomNavigation.js';
 import { useInstalledAutomationStore } from '../features/automations/index.js';
 import { SensorRemovedToast } from '../features/thermometers/index.js';
 import {
@@ -24,7 +24,7 @@ import {
   WifiPlugDetailScreen
 } from '../features/plugs/index.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
-import { activeNavigationForRoute, type AppRoute } from './appRouteModel.js';
+import { activeNavigationSectionForRoute, type AppRoute } from './appRouteModel.js';
 import type { SetupIntent } from '../flows/setup-intent.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
@@ -50,21 +50,25 @@ const RouteFallback = () => {
 
 const resolveAndroidBackRoute = (route: AppRoute): AppRoute | null => {
   if (route.type === 'settings') return route.returnTo;
-  if (route.type === 'installation') return { type: 'dashboard', kind: route.kind };
+  if (route.type === 'installation') {
+    return { type: 'dashboard', section: route.section };
+  }
   if (route.type === 'device-add') return route.returnTo;
-  if (route.type === 'sensor-settings') return { type: 'dashboard', kind: 'time' };
+  if (route.type === 'sensor-settings') {
+    return { type: 'dashboard', section: 'thermometers' };
+  }
   if (route.type === 'plug-ble-discovery') return route.returnTo;
   if (route.type === 'plug-settings' || route.type === 'ble-plug-detail') {
-    return { type: 'dashboard', kind: 'climate' };
+    return { type: 'dashboard', section: 'plugs' };
   }
   if (route.type === 'setup') {
     return {
       type: 'intent',
-      sourceKind: route.sourceKind,
+      sourceSection: route.sourceSection,
       ...(route.shellyId ? { shellyId: route.shellyId } : {})
     };
   }
-  if (route.type === 'intent') return { type: 'dashboard', kind: route.sourceKind };
+  if (route.type === 'intent') return { type: 'dashboard', section: route.sourceSection };
   return null;
 };
 
@@ -117,14 +121,14 @@ export const AppRoutes = () => {
 
   const selectIntent = (
     intent: SetupIntent,
-    sourceKind: AppNavigationKind,
+    sourceSection: AppNavigationSection,
     shellyId?: string
   ) => {
     if (shellyId) selectShellyDevice(shellyId);
     navigate({
       type: 'setup',
       intent,
-      sourceKind,
+      sourceSection,
       ...(shellyId ? { shellyId } : {})
     });
   };
@@ -136,44 +140,40 @@ export const AppRoutes = () => {
   } else if (route.type === 'intent') {
     content = (
       <SetupIntentScreen
-        onSelect={(intent) => selectIntent(intent, route.sourceKind, route.shellyId)}
+        onSelect={(intent) => selectIntent(intent, route.sourceSection, route.shellyId)}
       />
     );
   } else if (route.type === 'dashboard') {
-    const dashboardKind = route.kind ?? 'climate';
+    const dashboardSection = route.section ?? 'plugs';
     content = (
       <AutomationDashboardScreen
-        {...(route.kind ? { initialKind: route.kind } : {})}
+        {...(route.section ? { initialSection: route.section } : {})}
         onAddPlug={(plugTransport) =>
           navigate({
             type: 'device-add',
             device: 'plug',
             plugTransport,
-            sourceKind: 'climate',
-            returnTo: { type: 'dashboard', kind: 'climate' }
+            sourceSection: 'plugs',
+            returnTo: { type: 'dashboard', section: 'plugs' }
           })
         }
         onAddThermometer={() =>
           navigate({
             type: 'device-add',
             device: 'sensor',
-            sourceKind: 'time',
-            returnTo: { type: 'dashboard', kind: 'time' },
+            sourceSection: 'thermometers',
+            returnTo: { type: 'dashboard', section: 'thermometers' },
             sensorMode: 'phone-scan'
           })
         }
         onOpenThermometerSettings={(sensorId) =>
           navigate({ type: 'sensor-settings', sensorId })
         }
-        onAddAutomation={(kind, shellyId) => {
+        onAddAutomation={(shellyId) => {
           if (shellyId) selectShellyDevice(shellyId);
-          if (kind === 'time') {
-            navigate({ type: 'setup', intent: 'time', sourceKind: dashboardKind });
-            return;
-          }
           navigate({
             type: 'intent',
-            sourceKind: dashboardKind,
+            sourceSection: dashboardSection,
             ...(shellyId ? { shellyId } : {})
           });
         }}
@@ -181,7 +181,7 @@ export const AppRoutes = () => {
           navigate({
             type: 'installation',
             installationId,
-            kind: 'climate'
+            section: 'plugs'
           })
         }
         onOpenBlePlug={(physicalId) => navigate({ type: 'ble-plug-detail', physicalId })}
@@ -196,7 +196,7 @@ export const AppRoutes = () => {
           onOpenSensorAutomation={openInstalledAutomation}
           onSensorSettingsRemoved={() => {
             setSensorRemovalToastVisible(true);
-            navigate({ type: 'dashboard', kind: 'time' });
+            navigate({ type: 'dashboard', section: 'thermometers' });
           }}
         />
       </Suspense>
@@ -206,7 +206,7 @@ export const AppRoutes = () => {
     content = (
       <BlePlugDetailScreen
         physicalId={route.physicalId}
-        onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
+        onBack={() => navigate({ type: 'dashboard', section: 'plugs' })}
         onRemove={removeShellyDevice}
         {...(removalBlock
           ? { removalBlock, onOpenBlockingAutomation: openInstalledAutomation }
@@ -240,9 +240,9 @@ export const AppRoutes = () => {
         onAddAutomation={() => {
           if (!wifiDevice) return;
           selectShellyDevice(wifiDevice.id);
-          navigate({ type: 'intent', sourceKind: 'climate', shellyId: wifiDevice.id });
+          navigate({ type: 'intent', sourceSection: 'plugs', shellyId: wifiDevice.id });
         }}
-        onBack={() => navigate({ type: 'dashboard', kind: 'climate' })}
+        onBack={() => navigate({ type: 'dashboard', section: 'plugs' })}
         onOpenBleDiscovery={(deviceId) =>
           navigate({
             type: 'plug-ble-discovery',
@@ -285,7 +285,7 @@ export const AppRoutes = () => {
     content = (
       <InstallationDetailScreen
         installationId={route.installationId}
-        onBack={() => navigate({ type: 'dashboard', kind: route.kind })}
+        onBack={() => navigate({ type: 'dashboard', section: route.section })}
         onOpenBleDiscovery={(deviceId) =>
           navigate({
             type: 'plug-ble-discovery',
@@ -303,7 +303,7 @@ export const AppRoutes = () => {
       navigate({
         type: 'device-add',
         device,
-        sourceKind: route.sourceKind,
+        sourceSection: route.sourceSection,
         returnTo: route,
         ...(sensorMode ? { sensorMode } : {})
       });
@@ -315,13 +315,15 @@ export const AppRoutes = () => {
           onBackToIntent={() =>
             navigate({
               type: 'intent',
-              sourceKind: route.sourceKind,
+              sourceSection: route.sourceSection,
               ...(route.shellyId ? { shellyId: route.shellyId } : {})
             })
           }
           onOpenPlugAdd={() => openDeviceAdd('plug')}
           onOpenSensorAdd={(mode) => openDeviceAdd('sensor', mode)}
-          onSetupComplete={() => navigate({ type: 'dashboard', kind: route.sourceKind })}
+          onSetupComplete={() =>
+            navigate({ type: 'dashboard', section: route.sourceSection })
+          }
         />
       </Suspense>
     );
@@ -329,9 +331,9 @@ export const AppRoutes = () => {
 
   return (
     <AppShell
-      activeKind={activeNavigationForRoute(route)}
-      onOpenClimate={() => navigate({ type: 'dashboard', kind: 'climate' })}
-      onOpenTime={() => navigate({ type: 'dashboard', kind: 'time' })}
+      activeSection={activeNavigationSectionForRoute(route)}
+      onOpenPlugs={() => navigate({ type: 'dashboard', section: 'plugs' })}
+      onOpenThermometers={() => navigate({ type: 'dashboard', section: 'thermometers' })}
       onOpenSettings={openSettings}
     >
       <SensorRemovedToast
