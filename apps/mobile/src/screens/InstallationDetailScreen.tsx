@@ -75,7 +75,11 @@ export const InstallationDetailScreen = ({
   if (!installation) return <PlugDetailNotFound />;
   if (installation.kind === 'pulse') {
     return (
-      <StandalonePulseInstallationDetail installation={installation} onBack={onBack} />
+      <StandalonePulseInstallationDetail
+        installation={installation}
+        onBack={onBack}
+        {...(onOpenBleDiscovery ? { onOpenBleDiscovery } : {})}
+      />
     );
   }
 
