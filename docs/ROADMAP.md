@@ -49,15 +49,15 @@ Remaining release blockers, in order:
 
 Detailed evidence belongs in docs/testing/hardware-matrix.md and the dated acceptance records, not in this roadmap.
 
-## Pre-freeze audit hardening
+## Pre-freeze audit hardening — completed 2026-10-06
 
-The refactor audit identified three small quality items worth closing before the final hardware matrix:
+The refactor audit closed three narrow quality gaps without broad architecture churn:
 
-- make temporary BLE discovery preparation transactional if a failure occurs after managed runtime state has already been captured or mutated;
-- fail closed when discovery sees an ambiguous script inventory, including multiple enabled/running candidates, instead of treating it as no managed runtime;
-- extend script-replacement negative-path coverage for configuration/start/rollback failures.
+- temporary BLE discovery preparation now rolls back internally after partial mutation and falls back to a final safe OFF state if restoration itself fails;
+- ambiguous multiple enabled/running script inventories fail closed instead of being treated as no managed runtime;
+- script replacement covers configuration, restart and rollback failure paths in addition to upload/verification failures.
 
-These are stabilization fixes, not a reason for another broad refactor.
+The focused lifecycle suites and the canonical `pnpm check` pass on the completion branch. The known Darwin `04-plug-ble-discovery` screenshot drift reproduces identically on clean `main`, so it is not a regression from this hardening.
 
 ## Freeze boundary
 
