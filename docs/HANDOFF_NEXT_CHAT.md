@@ -63,7 +63,6 @@ The non-soak Stage 9 hardware closeout is complete: Wi-Fi loss/recovery passed w
 
 Do not use stabilization as an excuse to add new Pulse modes, Environment Profiles or another generic UX-polish round.
 
-
 ## Active UX correction plan — Pulse and combined modes
 
 This is an explicit user-approved UX correction batch. Keep it bounded to the items below; do not turn it into a generic pre-freeze redesign or backend refactor.
@@ -154,7 +153,6 @@ For every slice:
 - do not refresh unrelated frozen Climate baselines;
 - run the repository-required focused checks and final gate before merge;
 - mark completed checklist items here so unfinished work remains visible.
-
 
 ## Verification boundary
 
