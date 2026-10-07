@@ -1,7 +1,6 @@
 import type { Locale } from '../i18n.js';
 
 type PulseManagementCopy = {
-  editAction: string;
   saveAction: string;
   saveBusy: string;
   saveFailed: string;
@@ -16,7 +15,6 @@ type PulseManagementCopy = {
 
 export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
   pl: {
-    editAction: 'Edytuj cykl',
     saveAction: 'Zapisz zmiany',
     saveBusy: 'Zapisuję zmiany…',
     saveFailed: 'Nie udało się bezpiecznie zaktualizować Pulse.',
@@ -30,7 +28,6 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'Zarządzany runtime Pulse wymaga uwagi.'
   },
   en: {
-    editAction: 'Edit cycle',
     saveAction: 'Save changes',
     saveBusy: 'Saving changes…',
     saveFailed: 'The Pulse cycle could not be updated safely.',
@@ -44,7 +41,6 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'The managed Pulse runtime needs attention.'
   },
   de: {
-    editAction: 'Zyklus bearbeiten',
     saveAction: 'Änderungen speichern',
     saveBusy: 'Änderungen werden gespeichert…',
     saveFailed: 'Der Pulse-Zyklus konnte nicht sicher aktualisiert werden.',
@@ -58,7 +54,6 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'Die verwaltete Pulse-Laufzeit erfordert Aufmerksamkeit.'
   },
   es: {
-    editAction: 'Editar ciclo',
     saveAction: 'Guardar cambios',
     saveBusy: 'Guardando cambios…',
     saveFailed: 'No se pudo actualizar de forma segura el ciclo Pulse.',
@@ -72,7 +67,6 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'El runtime Pulse administrado requiere atención.'
   },
   fr: {
-    editAction: 'Modifier le cycle',
     saveAction: 'Enregistrer',
     saveBusy: 'Enregistrement…',
     saveFailed: 'Le cycle Pulse n’a pas pu être mis à jour en toute sécurité.',
@@ -86,7 +80,6 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'Le runtime Pulse géré nécessite votre attention.'
   },
   it: {
-    editAction: 'Modifica ciclo',
     saveAction: 'Salva modifiche',
     saveBusy: 'Salvataggio modifiche…',
     saveFailed: 'Non è stato possibile aggiornare in sicurezza il ciclo Pulse.',
@@ -100,7 +93,6 @@ export const pulseManagementCopy: Record<Locale, PulseManagementCopy> = {
     runtimeAttention: 'Il runtime Pulse gestito richiede attenzione.'
   },
   'pt-BR': {
-    editAction: 'Editar ciclo',
     saveAction: 'Salvar alterações',
     saveBusy: 'Salvando alterações…',
     saveFailed: 'Não foi possível atualizar o ciclo Pulse com segurança.',
