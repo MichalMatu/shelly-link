@@ -988,13 +988,17 @@ const checkSegmentedControlContract = async () => {
 const checkStandalonePulseControlPlacement = async () => {
   const dashboardCardPath = 'apps/mobile/src/app/StandalonePulseAutomationCard.tsx';
   const detailPath = 'apps/mobile/src/app/StandalonePulseInstallationDetail.tsx';
+  const detailCapabilitiesPath =
+    'apps/mobile/src/features/automations/presentation/automationDetailCapabilities.ts';
   const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
     path.endsWith('.tsx')
   );
-  const [dashboardCardSource, detailSource] = await Promise.all([
-    readRepoFile(dashboardCardPath),
-    readRepoFile(detailPath)
-  ]);
+  const [dashboardCardSource, detailSource, detailCapabilitiesSource] =
+    await Promise.all([
+      readRepoFile(dashboardCardPath),
+      readRepoFile(detailPath),
+      readRepoFile(detailCapabilitiesPath)
+    ]);
 
   for (const required of [
     'Pulse.Standalone.useActions(installation)',
@@ -1022,8 +1026,16 @@ const checkStandalonePulseControlPlacement = async () => {
       );
     }
   }
-  if (!detailSource.includes('automationIcon="pulse"')) {
-    addFailure(detailPath, 'standalone Pulse Automation tab must use the Pulse icon');
+  if (
+    !detailSource.includes('automationDetailCapabilities(installation)') ||
+    !detailSource.includes('automationIcon={detailCapabilities.automationIcon}') ||
+    !detailCapabilitiesSource.includes("variant: 'pulse'") ||
+    !detailCapabilitiesSource.includes("automationIcon: 'pulse'")
+  ) {
+    addFailure(
+      detailPath,
+      'standalone Pulse Automation tab must derive the Pulse icon from the shared detail capability resolver'
+    );
   }
 
   for (const path of tsxPaths) {
