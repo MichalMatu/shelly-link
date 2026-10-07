@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { readShellyResourceDiagnostics } from '../hardware-setup/resourceDiagnostics.js';
-import type { ClimateInstalledAutomation } from './model.js';
+import type { ClimateInstalledAutomation, InstalledAutomation } from './model.js';
 import {
   enterInstalledAutomationManualMode,
   readInstalledAutomationControlStatus,
@@ -27,6 +27,21 @@ const installationQueryIdentity = (installation: ClimateInstalledAutomation) =>
     installation.updatedAtMs
   ] as const;
 
+const installedAutomationScriptId = (
+  installation: InstalledAutomation
+): number | undefined =>
+  installation.kind === 'time'
+    ? installation.pulseRuntime?.script.id
+    : installation.script.id;
+
+const resourceQueryIdentity = (installation: InstalledAutomation) =>
+  [
+    installation.id,
+    installation.shelly.baseUrl,
+    installedAutomationScriptId(installation) ?? -1,
+    installation.updatedAtMs
+  ] as const;
+
 export const installedAutomationDiagnosticsQueryKey = (
   installation: ClimateInstalledAutomation
 ) =>
@@ -36,11 +51,11 @@ export const installedAutomationDiagnosticsQueryKey = (
   ] as const;
 
 export const installedAutomationResourceDiagnosticsQueryKey = (
-  installation: ClimateInstalledAutomation
+  installation: InstalledAutomation
 ) =>
   [
     'installed-automation-resource-diagnostics',
-    ...installationQueryIdentity(installation)
+    ...resourceQueryIdentity(installation)
   ] as const;
 
 export const installedAutomationControlQueryKey = (
@@ -65,13 +80,16 @@ export const useInstalledAutomationDiagnostics = (
   });
 
 export const useInstalledAutomationResourceDiagnostics = (
-  installation: ClimateInstalledAutomation,
+  installation: InstalledAutomation,
   options: RuntimeQueryOptions = {}
 ) =>
   useQuery({
     queryKey: installedAutomationResourceDiagnosticsQueryKey(installation),
     queryFn: () =>
-      readShellyResourceDiagnostics(installation.shelly.baseUrl, installation.script.id),
+      readShellyResourceDiagnostics(
+        installation.shelly.baseUrl,
+        installedAutomationScriptId(installation)
+      ),
     enabled: options.enabled ?? true,
     retry: false,
     refetchInterval: options.refetchInterval ?? DEFAULT_RUNTIME_REFRESH_MS,
