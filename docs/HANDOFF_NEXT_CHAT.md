@@ -6,7 +6,7 @@ Repository: MichalMatu/shelly-link
 
 ## Source of truth
 
-Start from fresh main and fresh Local Agent state. Read:
+For V1 release/freeze work, start from fresh `main` and fresh Local Agent state. Read:
 
 1. AGENTS.md;
 2. docs/CHECKPOINT_2026-10-07_PRE_SOAK.md;
@@ -16,7 +16,25 @@ Start from fresh main and fresh Local Agent state. Read:
 6. docs/UX_VISUAL_CONTRACT.md when changing presentation;
 7. docs/testing/hardware-matrix.md and only the dated acceptance records relevant to the behavior being changed.
 
+For the isolated UX migration, continue only on `work/ux-evolution` and also read `docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md`. That branch is intentionally separate from the V1 `main` freeze line.
+
 Historical PR descriptions and chat state are not canonical.
+
+## UX evolution branch — 2026-10-08
+
+The active UX experiment lives on `work/ux-evolution`; it has not been merged into `main`.
+
+The first Ionic migration checkpoint is complete:
+
+- Ionic React runtime initialization is explicit;
+- Settings Appearance uses `IonSegment`;
+- Settings Language uses `IonSelect`;
+- Ionic light/dark colors are bridged from LCL tokens, including RGB companions and intermediate color steps;
+- Settings-specific Ionic controls are isolated behind a lazy-loaded module;
+- repository CI passed static, tests, build, responsive and aggregate checks on the code checkpoint;
+- the validation-only PR was closed without merge.
+
+Do not broaden this into a visual redesign yet. Continue with small non-frozen standard-control slices and keep Climate golden renders untouched. The detailed continuation state and next recommended slice live in `docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md`.
 
 ## Accepted product/runtime baseline
 
