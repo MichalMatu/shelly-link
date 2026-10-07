@@ -1036,7 +1036,9 @@ const checkStandalonePulseControlPlacement = async () => {
   if (
     !detailSource.includes('AutomationDetail.capabilities(installation)') ||
     !detailSource.includes('automationIcon={detailCapabilities.automationIcon}') ||
-    !automationPublicSource.includes('capabilities: automationDetailCapabilities') ||
+    !automationPublicSource.includes(
+      'capabilities: automationDetailCapabilities'
+    ) ||
     !detailCapabilitiesSource.includes("variant: 'pulse'") ||
     !detailCapabilitiesSource.includes("automationIcon: 'pulse'")
   ) {
