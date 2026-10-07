@@ -468,6 +468,33 @@ describe('InstallationDetailScreen', () => {
     expect(screen.queryByRole('button', { name: 'Edytuj' })).toBeNull();
   });
 
+  it('reuses the shared Pulse editor for installed Climate + Pulse', async () => {
+    const saved = installation();
+    const climatePulse = {
+      ...saved,
+      config: {
+        ...saved.config,
+        execution: {
+          ...saved.config.execution,
+          pulse: {
+            onMs: 30_000,
+            offMs: 60_000,
+            initialDelayMs: 0,
+            startPhase: 'on' as const,
+            execution: { mode: 'continuous' as const }
+          }
+        }
+      }
+    };
+    useInstalledAutomationStore.getState().upsertInstallation(climatePulse);
+    installShellyFetchMock();
+
+    renderDetail(climatePulse.id);
+
+    expect(await screen.findByText('Czas ON (s)')).toBeVisible();
+    expect(screen.getByText('Czas OFF (s)')).toBeVisible();
+  });
+
   it('uses the shared Plug detail top chrome', async () => {
     const saved = installation();
     useInstalledAutomationStore.getState().upsertInstallation(saved);
