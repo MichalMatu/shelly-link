@@ -2,7 +2,6 @@ import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
-import { automationDetailCapabilities } from '../features/automations/automationPublic.js';
 import {
   AutomationDetail,
   AutomationHistorySection,
@@ -45,7 +44,7 @@ export const StandalonePulseInstallationDetail = ({
   onOpenBleDiscovery
 }: StandalonePulseInstallationDetailProps) => {
   const { locale, t } = useTranslation();
-  const detailCapabilities = automationDetailCapabilities(installation);
+  const detailCapabilities = AutomationDetail.capabilities(installation);
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editPending, setEditPending] = useState(false);
