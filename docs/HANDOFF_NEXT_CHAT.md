@@ -1,6 +1,6 @@
 # Handoff — Stage 9 stabilization
 
-Status: **2026-10-07 — V1 feature work is effectively closed. Physical reboot/power-cycle, BLE scanner recovery, real Wi-Fi loss/recovery, the final real-hardware matrix and the automation Detail/preproduction ownership closeout are complete. The only intentionally outstanding release blocker before freeze is the 8-hour soak.**
+Status: **2026-10-07 — V1 feature work is effectively closed. Physical reboot/power-cycle, BLE scanner recovery, real Wi-Fi loss/recovery, the final real-hardware matrix and the automation Detail/preproduction ownership closeout are complete. The only intentionally outstanding release blocker before freeze is the 8-hour soak. A two-Plug real-load harness is prepared and its 5-minute preflight smoke passed on 2026-10-07.**
 
 Repository: MichalMatu/shelly-link
 
@@ -55,7 +55,7 @@ Current visual truth is the committed E2E snapshots plus docs/UX_VISUAL_CONTRACT
 
 ## Remaining V1 work
 
-1. run the 8-hour soak and leave the final relay explicitly OFF;
+1. run the prepared two-Plug 8-hour soak (humidifier Climate + fan Standalone Pulse) and accept the explicit dual-relay OFF boundary;
 2. run the final freeze/release sign-off and declare V1 feature freeze.
 
 The soak is only the last V1 release gate. It is not the complete future-development queue.
@@ -86,4 +86,4 @@ The only intentional capability gap in this area is **Time + Pulse History**. Tr
 
 ## Verification boundary
 
-The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Fresh real-device evidence covers Wi-Fi loss/recovery, the 16/16 final runtime matrix, final device postflight and standalone Pulse History v2. UX-4 passed the canonical `pnpm check`, responsive/visual acceptance and a real generated-runtime smoke with exact preflight restoration. The 8-hour soak remains intentionally deferred.
+The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Fresh real-device evidence covers Wi-Fi loss/recovery, the 16/16 final runtime matrix, final device postflight, standalone Pulse History v2 and the 5-minute two-Plug real-load soak preflight. UX-4 passed the canonical `pnpm check`, responsive/visual acceptance and a real generated-runtime smoke with exact preflight restoration. The 8-hour soak remains intentionally deferred.

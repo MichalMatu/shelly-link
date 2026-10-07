@@ -50,6 +50,7 @@ artifacts/ux-reference/
 artifacts/hardware/*.jsonl
 artifacts/hardware/*.summary.md
 artifacts/hardware/*.log
+artifacts/hardware/dual-soak-*/
 artifacts/releases/
 artifacts/release-evidence/
 

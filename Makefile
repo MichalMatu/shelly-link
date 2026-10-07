@@ -29,10 +29,16 @@ SOAK_CYCLE_MAX_ON_MS ?= 180000
 SOAK_CYCLE_CONSECUTIVE_HITS ?= 1
 SOAK_FINAL_OFF ?= 1
 SOAK_STOP_SCRIPT_ON_FINISH ?= 1
+DUAL_SOAK_SMOKE_DURATION_MS ?= 300000
+DUAL_SOAK_OVERNIGHT_DURATION_MS ?= 28800000
+DUAL_SOAK_SMOKE_CYCLE_PERIOD_MS ?= 90000
+DUAL_SOAK_OVERNIGHT_CYCLE_PERIOD_MS ?= 600000
+DUAL_SOAK_SMOKE_MAX_ON_MS ?= 150000
+DUAL_SOAK_OVERNIGHT_MAX_ON_MS ?= 660000
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install start stop restart status logs open dev test test-watch lint typecheck build check format format-check tokens diagnose shelly-status shelly-diag shelly-install shelly-off shelly-soak-start shelly-soak-overnight shelly-soak-run shelly-soak-stop shelly-soak-status shelly-soak-logs esp32-ble-status clean
+.PHONY: help install start stop restart status logs open dev test test-watch lint typecheck build check format format-check tokens diagnose shelly-status shelly-diag shelly-install shelly-off shelly-soak-start shelly-soak-overnight shelly-soak-run shelly-soak-stop shelly-soak-status shelly-soak-logs shelly-dual-soak-smoke shelly-dual-soak-overnight esp32-ble-status clean
 
 help: ## Show available make targets.
 	@awk 'BEGIN {FS = ":.*## "; printf "\nShelly Link shortcuts\n\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-24s %s\n", $$1, $$2} END {printf "\nEnv examples:\n  SHELLY_URL=http://<shelly-ip> SENSOR_MAC=<aa:bb:cc:dd:ee:ff> make shelly-install\n  SHELLY_URL=http://<shelly-ip> make shelly-diag\n  SHELLY_URL=http://<shelly-ip> SOAK_CYCLE_RELAY=1 make shelly-soak-start\n  SHELLY_URL=http://<shelly-ip> make shelly-soak-overnight\n  make shelly-soak-stop\n  ESP32_URL=http://<esp32-ip> make esp32-ble-status\n\n"}' $(MAKEFILE_LIST)
@@ -343,6 +349,20 @@ shelly-soak-logs: ## Follow the background Shelly soak logger stdout log.
 		echo "No Shelly soak run file at $(SOAK_RUN_FILE)"; \
 		exit 1; \
 	fi
+
+shelly-dual-soak-smoke: ## Run the 5m two-Plug humidifier + fan smoke. Requires URLs and canonical device ids.
+	@: ${HUMIDIFIER_URL:?Set HUMIDIFIER_URL=http://<humidifier-ip>}
+	@: ${FAN_URL:?Set FAN_URL=http://<fan-ip>}
+	@: ${HUMIDIFIER_DEVICE_ID:?Set HUMIDIFIER_DEVICE_ID=<canonical-id>}
+	@: ${FAN_DEVICE_ID:?Set FAN_DEVICE_ID=<canonical-id>}
+	@SOAK_DURATION_MS="$(DUAL_SOAK_SMOKE_DURATION_MS)" HUMIDIFIER_CYCLE_PERIOD_MS="$(DUAL_SOAK_SMOKE_CYCLE_PERIOD_MS)" HUMIDIFIER_MAX_ON_MS="$(DUAL_SOAK_SMOKE_MAX_ON_MS)" RESTORE_HUMIDIFIER_RUNNING=1 bash scripts/hardware/shelly-dual-soak.sh
+
+shelly-dual-soak-overnight: ## Run the qualified 8h two-Plug soak with real humidifier + fan loads. Requires URLs and canonical device ids.
+	@: ${HUMIDIFIER_URL:?Set HUMIDIFIER_URL=http://<humidifier-ip>}
+	@: ${FAN_URL:?Set FAN_URL=http://<fan-ip>}
+	@: ${HUMIDIFIER_DEVICE_ID:?Set HUMIDIFIER_DEVICE_ID=<canonical-id>}
+	@: ${FAN_DEVICE_ID:?Set FAN_DEVICE_ID=<canonical-id>}
+	@SOAK_DURATION_MS="$(DUAL_SOAK_OVERNIGHT_DURATION_MS)" HUMIDIFIER_CYCLE_PERIOD_MS="$(DUAL_SOAK_OVERNIGHT_CYCLE_PERIOD_MS)" HUMIDIFIER_MAX_ON_MS="$(DUAL_SOAK_OVERNIGHT_MAX_ON_MS)" RESTORE_HUMIDIFIER_RUNNING=1 bash scripts/hardware/shelly-dual-soak.sh
 
 esp32-ble-status: ## Read ESP32 BLE scanner status. Requires ESP32_URL.
 	@: $${ESP32_URL:?Set ESP32_URL=http://<esp32-ip>}
