@@ -1,12 +1,5 @@
 import { Capacitor } from '@capacitor/core';
 import {
-  IonLabel,
-  IonSegment,
-  IonSegmentButton,
-  IonSelect,
-  IonSelectOption
-} from '@ionic/react';
-import {
   INSTALLED_AUTOMATION_VERSION,
   useInstalledAutomationStore
 } from '../features/automations/index.js';
@@ -17,16 +10,13 @@ import {
   getDiagnosticEvents
 } from '../platform/diagnosticJournal.js';
 import { Disclosure, DiagnosticRow, type DiagnosticRowProps } from '@lcl/ui';
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import {
   getLocalePreference,
   localePreferenceChangeEvent,
-  localePreferences,
   setLocalePreference,
   useTranslation,
-  type Locale,
-  type LocalePreference,
-  type TranslationKey
+  type LocalePreference
 } from './i18n.js';
 import {
   clearRuntimeIssues,
@@ -38,7 +28,6 @@ import {
   getThemeMode,
   setThemeMode,
   themeModeChangeEvent,
-  themeModes,
   type ThemeMode
 } from './themeMode.js';
 
@@ -48,21 +37,14 @@ export type SupportDiagnosticRow = {
   tone?: DiagnosticRowProps['tone'];
 };
 
-const localeLabelKeys: Record<Locale, TranslationKey> = {
-  pl: 'settings.language.pl',
-  en: 'settings.language.en',
-  de: 'settings.language.de',
-  es: 'settings.language.es',
-  fr: 'settings.language.fr',
-  it: 'settings.language.it',
-  'pt-BR': 'settings.language.ptBr'
-};
+const IonicSettingsControl = lazy(async () => {
+  const module = await import('./IonicSettingsControl.js');
+  return { default: module.IonicSettingsControl };
+});
 
-const themeModeLabelKeys: Record<ThemeMode, TranslationKey> = {
-  system: 'settings.appearance.system',
-  light: 'settings.appearance.light',
-  dark: 'settings.appearance.dark'
-};
+const SettingsControlFallback = () => (
+  <div className="app-settings__control-loading" aria-hidden="true" />
+);
 
 const formatIssue = (kind: string, message: string): string => `${kind}: ${message}`;
 
@@ -176,59 +158,26 @@ export const AppSettingsScreen = () => {
           <div className="app-settings__section-header">
             <h2>{t('settings.language.title')}</h2>
           </div>
-          <IonSelect
-            aria-label={t('settings.language.title')}
-            className="app-settings__language-select"
-            fill="outline"
-            interface="alert"
-            interfaceOptions={{ cssClass: 'app-settings__language-alert' }}
-            cancelText={t('common.cancel')}
-            okText={t('common.select')}
-            value={localePreference}
-            onIonChange={(event) => {
-              const value = event.detail.value;
-              if (
-                typeof value === 'string' &&
-                localePreferences.some((preference) => preference === value)
-              ) {
-                chooseLocale(value as LocalePreference);
-              }
-            }}
-          >
-            {localePreferences.map((preference) => (
-              <IonSelectOption key={preference} value={preference}>
-                {preference === 'system'
-                  ? t('settings.system')
-                  : t(localeLabelKeys[preference])}
-              </IonSelectOption>
-            ))}
-          </IonSelect>
+          <Suspense fallback={<SettingsControlFallback />}>
+            <IonicSettingsControl
+              kind="language"
+              value={localePreference}
+              onChange={chooseLocale}
+            />
+          </Suspense>
         </section>
 
         <section className="app-settings__section">
           <div className="app-settings__section-header">
             <h2>{t('settings.appearance.title')}</h2>
           </div>
-          <IonSegment
-            aria-label={t('settings.appearance.title')}
-            className="app-settings__appearance-segment"
-            value={themeMode}
-            onIonChange={(event) => {
-              const value = event.detail.value;
-              if (
-                typeof value === 'string' &&
-                themeModes.some((mode) => mode === value)
-              ) {
-                chooseTheme(value as ThemeMode);
-              }
-            }}
-          >
-            {themeModes.map((mode) => (
-              <IonSegmentButton key={mode} value={mode}>
-                <IonLabel>{t(themeModeLabelKeys[mode])}</IonLabel>
-              </IonSegmentButton>
-            ))}
-          </IonSegment>
+          <Suspense fallback={<SettingsControlFallback />}>
+            <IonicSettingsControl
+              kind="appearance"
+              value={themeMode}
+              onChange={chooseTheme}
+            />
+          </Suspense>
         </section>
 
         <Disclosure
