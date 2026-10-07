@@ -980,7 +980,7 @@ for (const viewport of viewports) {
     await expect(manual).toHaveAttribute('aria-pressed', 'false');
     await expect(on).toBeDisabled();
     await expect(off).toBeDisabled();
-    const timeLiveStatus = card.locator('.automation-card__live-status');
+    const timeLiveStatus = timeCard.locator('.automation-card__live-status');
     await expect
       .poll(() =>
         timeLiveStatus.evaluate((element) => getComputedStyle(element).borderTopWidth)
