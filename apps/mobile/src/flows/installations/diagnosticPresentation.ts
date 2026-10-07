@@ -241,6 +241,19 @@ type ClimateDetailDiagnosticResources = {
   } | null;
 };
 
+export const formatDiagnosticSnapshotAge = (
+  dataUpdatedAt: number,
+  nowMs: number,
+  missing: string
+): string => {
+  const snapshotAgeMs = dataUpdatedAt ? Math.max(0, nowMs - dataUpdatedAt) : null;
+  return snapshotAgeMs == null
+    ? missing
+    : snapshotAgeMs < 60_000
+      ? `${Math.floor(snapshotAgeMs / 1000)} s`
+      : `${Math.floor(snapshotAgeMs / 60_000)} min`;
+};
+
 export const formatClimateDetailDiagnostics = ({
   sensors,
   snapshot,
@@ -258,13 +271,7 @@ export const formatClimateDetailDiagnostics = ({
   missing: string;
   t: Translate;
 }) => {
-  const snapshotAgeMs = dataUpdatedAt ? Math.max(0, nowMs - dataUpdatedAt) : null;
-  const snapshotAge =
-    snapshotAgeMs == null
-      ? missing
-      : snapshotAgeMs < 60_000
-        ? `${Math.floor(snapshotAgeMs / 1000)} s`
-        : `${Math.floor(snapshotAgeMs / 60_000)} min`;
+  const snapshotAge = formatDiagnosticSnapshotAge(dataUpdatedAt, nowMs, missing);
 
   return {
     bleSensors: formatClimateBleSensorPresentations(sensors, snapshot, missing, t),
