@@ -72,6 +72,25 @@ describe('RpcShellyPlugsUiClient', () => {
     ]);
   });
 
+  it('accepts firmware 2.x lowercase plugs_ui method names', async () => {
+    const transport = new RecordingTransport([
+      {
+        ok: true,
+        value: { methods: ['plugs_ui.GetConfig', 'plugs_ui.SetConfig'] }
+      },
+      { ok: true, value: fullConfig }
+    ]);
+
+    await expect(new RpcShellyPlugsUiClient(transport).read()).resolves.toMatchObject({
+      ok: true,
+      value: { supported: true, config: fullConfig }
+    });
+    expect(transport.requests).toEqual([
+      { method: 'Shelly.ListMethods' },
+      { method: 'PLUGS_UI.GetConfig' }
+    ]);
+  });
+
   it('accepts the real disabled night-mode shape with an empty active window', async () => {
     const transport = new RecordingTransport([
       {
