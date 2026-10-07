@@ -73,7 +73,11 @@ Dashboard cards prioritize identity, live readings and compact telemetry. Rename
 
 ### Settings
 
-Language is a compact single-value selector rather than a permanent grid of every locale. Appearance uses the framework segmented control for the three theme modes. Both controls keep the existing preference owners and remain inside the established `app-settings__section` surface role; Diagnostics remains the shared Disclosure pattern.
+Language is a compact single-value selector implemented with Ionic `IonSelect`; Appearance uses Ionic `IonSegment` for the three theme modes. Both controls keep the existing preference owners and remain inside the established `app-settings__section` surface role; Diagnostics remains the shared Disclosure pattern.
+
+Ionic controls do not own Shelly Link colors. Their background/text/primary variables, RGB companions and intermediate color-step scale are derived from LCL design tokens for both light and dark themes. Settings-specific selected/focus states may use a scoped contrast-corrected accent, but must not introduce a parallel raw color palette.
+
+The heavier Settings Ionic controls may be lazy-loaded behind the Settings presentation boundary. Async loading must not change preference ownership, navigation behavior or the accepted screen geometry. Framework migration is not permission to restyle frozen Climate surfaces.
 
 ### Add Plug
 
