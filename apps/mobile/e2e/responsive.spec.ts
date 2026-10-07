@@ -1012,6 +1012,13 @@ for (const viewport of viewports) {
     await expect(page.getByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    await expect(page.getByText('Stan bieżący', { exact: true })).toHaveCount(0);
+    await expect(
+      page.getByRole('heading', { name: 'Usuń automatykę czasową' })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole('button', { name: 'Usuń automatykę czasową' })
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(
       0
@@ -1032,6 +1039,10 @@ for (const viewport of viewports) {
     await expectTimeDetailHierarchy(page);
 
     await page.getByRole('button', { name: 'Informacje', exact: true }).click();
+    await expect(page.getByText('RAM Shelly wolny')).toBeVisible();
+    await expect(page.getByText('62.5 KiB')).toBeVisible();
+    await expect(page.getByText('RAM Shelly razem')).toBeVisible();
+    await expect(page.getByText('256.0 KiB')).toBeVisible();
     const forgetPlugButton = page.getByRole('button', {
       name: 'Usuń gniazdko tylko z aplikacji'
     });
