@@ -308,15 +308,18 @@ const endpoint = (baseUrl: URL, path: string): URL => new URL(path, baseUrl);
 const collectResponses = async (
   baseUrl: URL,
   scriptId: number,
-  timeoutMs: number
+  timeoutMs: number,
+  requireDiag: boolean
 ): Promise<Record<string, EndpointResult>> => {
-  const requests = {
+  const requests: Record<string, URL> = {
     deviceInfo: endpoint(baseUrl, '/rpc/Shelly.GetDeviceInfo'),
     shellyStatus: endpoint(baseUrl, '/rpc/Shelly.GetStatus'),
     scriptStatus: endpoint(baseUrl, `/rpc/Script.GetStatus?id=${scriptId}`),
-    switchStatus: endpoint(baseUrl, '/rpc/Switch.GetStatus?id=0'),
-    diag: endpoint(baseUrl, `/script/${scriptId}/diag`)
+    switchStatus: endpoint(baseUrl, '/rpc/Switch.GetStatus?id=0')
   };
+  if (requireDiag) {
+    requests.diag = endpoint(baseUrl, `/script/${scriptId}/diag`);
+  }
 
   const entries = await Promise.all(
     Object.entries(requests).map(async ([key, url]) => [
@@ -640,7 +643,11 @@ const cleanupCycleRuntime = async (options: {
 }): Promise<void> => {
   const { shellyUrl, scriptId, timeoutMs, outFile, cycleOptions, cycleState, summary } =
     options;
-  if (!cycleOptions.enabled) {
+  if (
+    !cycleOptions.enabled &&
+    !cycleOptions.stopScriptOnFinish &&
+    !cycleOptions.finalOff
+  ) {
     return;
   }
 
@@ -993,6 +1000,7 @@ const createSummaryMarkdown = (options: {
   summaryFile: string;
   intervalMs: number;
   cycleOptions: CycleOptions;
+  requireDiag: boolean;
 }): string => {
   const { summary } = options;
   const startedAtMs = Date.parse(summary.startedAtIso);
@@ -1008,6 +1016,7 @@ const createSummaryMarkdown = (options: {
     ['Shelly URL', options.shellyUrl],
     ['Script ID', options.scriptId],
     ['Interwał próbkowania', `${options.intervalMs} ms`],
+    ['Wymagany /diag', options.requireDiag ? 'tak' : 'nie'],
     ['Cykliczne progi ON/OFF', options.cycleOptions.enabled ? 'włączone' : 'wyłączone'],
     ['Okres zmiany progów', `${options.cycleOptions.periodMs} ms`],
     ['Margines progów', options.cycleOptions.margin],
@@ -1073,6 +1082,7 @@ const main = async (): Promise<void> => {
   const timeoutMs = readIntegerEnv('SOAK_RPC_TIMEOUT_MS', 4000, 500, 60000);
   const durationMs = readIntegerEnv('SOAK_DURATION_MS', 0, 0, 7 * 24 * 60 * 60 * 1000);
   const cycleEnabled = readBooleanEnv('SOAK_CYCLE_RELAY', false);
+  const requireDiag = readBooleanEnv('SOAK_REQUIRE_DIAG', true);
   const cyclePeriodMs = readIntegerEnv(
     'SOAK_CYCLE_PERIOD_MS',
     120000,
@@ -1157,7 +1167,8 @@ const main = async (): Promise<void> => {
     intervalMs,
     timeoutMs,
     durationMs: durationMs || null,
-    cycleOptions
+    cycleOptions,
+    requireDiag
   });
 
   console.log(`Shelly soak logger started`);
@@ -1186,7 +1197,12 @@ const main = async (): Promise<void> => {
     ) {
       sequence += 1;
       const sampledAtMs = Date.now();
-      const responses = await collectResponses(shellyUrl, scriptId, timeoutMs);
+      const responses = await collectResponses(
+        shellyUrl,
+        scriptId,
+        timeoutMs,
+        requireDiag
+      );
       const parsed = parseSample(responses, scriptId);
       const sampleOk = Object.values(responses).every((response) => response.ok);
       updateSummary(summary, sampledAtMs, sampleOk, responses, parsed);
@@ -1267,7 +1283,8 @@ const main = async (): Promise<void> => {
       outFile,
       summaryFile,
       intervalMs,
-      cycleOptions
+      cycleOptions,
+      requireDiag
     });
     await writeFile(summaryFile, summaryMarkdown, 'utf8');
     await writeJsonLine(outFile, {
