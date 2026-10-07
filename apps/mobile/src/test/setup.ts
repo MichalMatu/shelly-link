@@ -1,5 +1,8 @@
 import '@testing-library/jest-dom/vitest';
+import { setupIonicReact } from '@ionic/react';
 import { timeoutManager } from '@tanstack/react-query';
+
+setupIonicReact();
 
 const unrefTimeout = (callback: () => void, delay: number) => {
   const handle = setTimeout(callback, delay);
