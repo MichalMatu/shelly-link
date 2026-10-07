@@ -6,8 +6,8 @@ import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
-  ClimateScriptDetailSection,
-  ClimateScriptDiagnosticsSection,
+  AutomationScriptDetailSection,
+  AutomationScriptDiagnosticsSection,
   deleteTimeAutomation,
   Pulse,
   timePulseAutomationRuntime,
@@ -196,7 +196,7 @@ export const TimeInstallationDetail = ({
         )}
 
         {activeTab === 'script' && pulseInstallation && (
-          <ClimateScriptDetailSection
+          <AutomationScriptDetailSection
             attentionTitle={t('dashboard.health.attention')}
             {...(pulseNeedsAttention
               ? { attentionMessage: t('time.detail.needsAttention') }
@@ -229,7 +229,7 @@ export const TimeInstallationDetail = ({
               deviceRamTotalBytes={resourcesQuery.data?.system?.ramSizeBytes}
             />
             {pulseInstallation && (
-              <ClimateScriptDiagnosticsSection
+              <AutomationScriptDiagnosticsSection
                 title={t('common.diagnostics')}
                 rows={formatAutomationResourceDiagnosticRows({
                   resources: resourcesQuery.data,
