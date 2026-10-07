@@ -210,6 +210,8 @@ Persistent BLE pairing/bonding and offline OTA remain separate research/feature 
 
 Plug Detail is one physical-device surface with capability-driven local sections. The shared capability vocabulary is:
 
+Installed automation variants derive their Detail presentation from one automation capability resolver. Tabs/icons/history/script availability must not be re-derived independently inside Climate, Time or Pulse screens. Shared Device/Info/resource surfaces stay reusable across variants; automation-specific screens own only their domain-specific Automation body and truly specialized BLE content.
+
 ```text
 Automation | History | BLE | Device | Script | Info
 ```
