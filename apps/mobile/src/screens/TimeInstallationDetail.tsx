@@ -6,7 +6,9 @@ import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
+  automationDetailCapabilities,
   ClimateScriptDetailSection,
+  ClimateScriptDiagnosticsSection,
   OperationalStatus,
   deleteTimeAutomation,
   Pulse,
@@ -27,6 +29,8 @@ import {
   type PlugDetailTab
 } from '../features/plugs/index.js';
 import { copyInstalledAutomationScriptSource } from '../flows/installations/scriptPreview.js';
+import { formatAutomationResourceDiagnosticRows } from '../flows/installations/diagnosticPresentation.js';
+import { useAutomationResourceDiagnostics } from '../flows/installations/useInstalledAutomationRuntime.js';
 import {
   timeAutomationRuntimeQueryKey,
   useTimeAutomationRuntime
@@ -47,6 +51,7 @@ export const TimeInstallationDetail = ({
   const { locale, t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
+  const detailCapabilities = automationDetailCapabilities(installation);
   const runtimeQuery = useTimeAutomationRuntime(installation);
   const pulseInstallation = Pulse.Time.isInstalled(installation) ? installation : null;
   const pulseQuery = Pulse.Operational.useStatus(pulseInstallation);
@@ -54,11 +59,13 @@ export const TimeInstallationDetail = ({
     pulseInstallation,
     activeTab === 'script'
   );
-  const availableTabs = automationDetailTabs({
-    hasScript: pulseInstallation !== null
-  });
+  const availableTabs = automationDetailTabs(detailCapabilities);
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
+  });
+  const resourcesQuery = useAutomationResourceDiagnostics(installation, {
+    enabled: activeTab === 'info',
+    refetchInterval: 3_000
   });
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
@@ -108,7 +115,7 @@ export const TimeInstallationDetail = ({
       <PlugDetailTop
         tabs={[activeTab, setActiveTab]}
         availableTabs={availableTabs}
-        automationIcon="clock"
+        automationIcon={detailCapabilities.automationIcon}
       />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
@@ -239,7 +246,21 @@ export const TimeInstallationDetail = ({
               information={informationQuery.data}
               loading={informationQuery.isPending}
               error={informationQuery.isError}
+              deviceRamFreeBytes={resourcesQuery.data?.system?.ramFreeBytes}
+              deviceRamTotalBytes={resourcesQuery.data?.system?.ramSizeBytes}
             />
+            {pulseInstallation && (
+              <ClimateScriptDiagnosticsSection
+                title={t('common.diagnostics')}
+                rows={formatAutomationResourceDiagnosticRows({
+                  resources: resourcesQuery.data,
+                  dataUpdatedAt: resourcesQuery.dataUpdatedAt,
+                  nowMs: Date.now(),
+                  missing: t('common.missing'),
+                  t
+                })}
+              />
+            )}
             {savedDevice && (
               <div className="installation-detail-delete-action">
                 <button
