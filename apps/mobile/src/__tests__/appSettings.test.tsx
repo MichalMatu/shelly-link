@@ -55,8 +55,19 @@ describe('app settings screen', () => {
     fireEvent.click(diagnostics.querySelector('summary')!);
     expect(within(settings).getByText(/client saw a blank screen/)).toBeInTheDocument();
 
+    const languageSelect = settings.querySelector('ion-select');
+    if (!languageSelect) throw new Error('language select missing');
+    expect(languageSelect).toHaveAttribute('fill', 'outline');
+    expect(languageSelect).toHaveAttribute('interface', 'alert');
+    expect(languageSelect).toHaveAttribute('color', 'primary');
     act(() => {
-      fireEvent.click(within(settings).getByRole('button', { name: 'Deutsch' }));
+      fireEvent(
+        languageSelect,
+        new CustomEvent('ionChange', {
+          bubbles: true,
+          detail: { value: 'de' }
+        })
+      );
     });
     expect(getLocalePreference()).toBe('de');
     expect(document.documentElement.lang).toBe('de');

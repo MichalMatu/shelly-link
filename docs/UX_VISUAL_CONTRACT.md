@@ -71,6 +71,10 @@ BLE-only Plug Detail exposes only the Device and Info capabilities; unsupported 
 
 Dashboard cards prioritize identity, live readings and compact telemetry. Rename, PVVX time sync, delete and technical identity belong in nested Thermometer settings, not as a cluster of permanent dashboard actions. The nested page groups Identity, Live readings and Device actions; its canonical state is `28-thermometer-settings`.
 
+### Settings
+
+Language is a compact single-value selector rather than a permanent grid of every locale. Appearance uses the framework segmented control for the three theme modes. Both controls keep the existing preference owners and remain inside the established `app-settings__section` surface role; Diagnostics remains the shared Disclosure pattern.
+
 ### Add Plug
 
 The normal flow stays simple. Technical scan range is available through the compact `Zakres skanowania` disclosure and remains visible in its collapsed summary.

@@ -1,5 +1,11 @@
 import { Capacitor } from '@capacitor/core';
-import { IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
+import {
+  IonLabel,
+  IonSegment,
+  IonSegmentButton,
+  IonSelect,
+  IonSelectOption
+} from '@ionic/react';
 import {
   INSTALLED_AUTOMATION_VERSION,
   useInstalledAutomationStore
@@ -170,25 +176,33 @@ export const AppSettingsScreen = () => {
           <div className="app-settings__section-header">
             <h2>{t('settings.language.title')}</h2>
           </div>
-          <div className="app-settings__choice-grid">
+          <IonSelect
+            aria-label={t('settings.language.title')}
+            className="app-settings__language-select"
+            color="primary"
+            fill="outline"
+            interface="alert"
+            cancelText={t('common.cancel')}
+            okText={t('common.select')}
+            value={localePreference}
+            onIonChange={(event) => {
+              const value = event.detail.value;
+              if (
+                typeof value === 'string' &&
+                localePreferences.some((preference) => preference === value)
+              ) {
+                chooseLocale(value as LocalePreference);
+              }
+            }}
+          >
             {localePreferences.map((preference) => (
-              <button
-                key={preference}
-                className={
-                  localePreference === preference
-                    ? 'app-settings__choice app-settings__choice--active'
-                    : 'app-settings__choice'
-                }
-                type="button"
-                aria-pressed={localePreference === preference}
-                onClick={() => chooseLocale(preference)}
-              >
+              <IonSelectOption key={preference} value={preference}>
                 {preference === 'system'
                   ? t('settings.system')
                   : t(localeLabelKeys[preference])}
-              </button>
+              </IonSelectOption>
             ))}
-          </div>
+          </IonSelect>
         </section>
 
         <section className="app-settings__section">
