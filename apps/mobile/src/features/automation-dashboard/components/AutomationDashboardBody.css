@@ -10,6 +10,7 @@
   padding-top: var(--lcl-spacing-sm);
 }
 
+.dashboard-shell .automation-card--time .automation-card__live-status,
 .dashboard-shell .automation-card--pulse .automation-card__live-status {
   border-top: 0;
   padding-top: 0;
