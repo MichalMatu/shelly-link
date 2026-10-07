@@ -42,9 +42,7 @@ const IonicSettingsControl = lazy(async () => {
   return { default: module.IonicSettingsControl };
 });
 
-const SettingsControlFallback = () => (
-  <div className="app-settings__control-loading" aria-hidden="true" />
-);
+const SettingsControlFallback = () => null;
 
 const formatIssue = (kind: string, message: string): string => `${kind}: ${message}`;
 
