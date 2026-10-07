@@ -56,8 +56,19 @@ Current visual truth is the committed E2E snapshots plus docs/UX_VISUAL_CONTRACT
 ## Remaining V1 work
 
 1. run the 8-hour soak and leave the final relay explicitly OFF;
-2. run the final freeze/release sign-off and declare V1 feature freeze;
-3. after freeze, start the graphical frontend redesign.
+2. run the final freeze/release sign-off and declare V1 feature freeze.
+
+The soak is only the last V1 release gate. It is not the complete future-development queue.
+
+## Post-freeze continuation
+
+Continue from `docs/ROADMAP.md` in this order:
+
+1. complete the remaining Shelly-management parity over BLE, especially the current BLE-only mutation/automation-lifecycle gaps;
+2. add **Shelly Power Strip 4 Gen4** as the first multi-output device, preserving one physical device with four separately owned outputs rather than four duplicate Plug records/screens;
+3. start the large graphical frontend redesign against that generalized transport/device/output model.
+
+Do not collapse these tracks back into a vague “Gen4 support” or hide them behind the soak/release checklist.
 
 The non-soak Stage 9 hardware closeout is complete: Wi-Fi loss/recovery passed without credential changes; Xiaomi/PVVX and TP357 each passed 8/8 matrix cases; the production Plug remained on its existing enabled/running Climate runtime; and the separate test Plug was restored to Matter ON, zero scripts, zero schedules and relay OFF.
 
