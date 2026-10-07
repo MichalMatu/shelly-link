@@ -1,8 +1,5 @@
-import { App as CapacitorApp } from '@capacitor/app';
-import { Capacitor } from '@capacitor/core';
 import { calculateVpdKpa } from '@lcl/automation-core';
 import { IconPlug } from '@tabler/icons-react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { StandalonePulseAutomationCard } from '../app/StandalonePulseAutomationCard.js';
 import { useTranslation } from '../app/i18n.js';
@@ -20,7 +17,7 @@ import {
   useSavedPlugStore,
   type PlugAddTransport
 } from '../features/plugs/index.js';
-import { isDashboardRuntimeQuery } from '../features/dashboard/index.js';
+import { useDashboardRuntimeResumeRefresh } from '../features/dashboard/index.js';
 import { type ShellyDraftDevice } from '../flows/hardware-setup/setupDraftStore.js';
 import type {
   ClimateInstalledAutomation,
@@ -408,30 +405,8 @@ export const AutomationDashboardScreen = ({
         isSameShellyDevice(installation.shelly.deviceId, plug.physicalId)
       )
   );
-  const queryClient = useQueryClient();
   const activeSection = initialSection ?? 'plugs';
-  useEffect(() => {
-    if (Capacitor.getPlatform() === 'web') return;
-
-    let active = true;
-    let removeListener: (() => Promise<void>) | undefined;
-    void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-      if (isActive) {
-        void queryClient.refetchQueries({ predicate: isDashboardRuntimeQuery });
-      }
-    }).then((handle) => {
-      if (!active) {
-        void handle.remove();
-        return;
-      }
-      removeListener = () => handle.remove();
-    });
-
-    return () => {
-      active = false;
-      if (removeListener) void removeListener();
-    };
-  }, [queryClient]);
+  useDashboardRuntimeResumeRefresh();
 
   const renameInstalledPlug = (installation: InstalledAutomation, value: string) => {
     renameShellyDevice(installation.shelly.deviceId, value);
