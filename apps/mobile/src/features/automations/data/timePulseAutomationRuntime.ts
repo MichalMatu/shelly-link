@@ -62,7 +62,9 @@ export const createTimePulseAutomationClients = (
   };
 };
 
-const requireSyncedClock = async (clients: TimePulseAutomationClients): Promise<void> => {
+const requireSyncedClock = async (
+  clients: TimePulseAutomationClients
+): Promise<void> => {
   const status = unwrapShellyResult(await clients.device.getStatus());
   if (!status.clock.timeSynced || !status.clock.localTime) {
     throw runtimeError('clock-unsynced', 'Shelly clock is not synchronized.');
@@ -283,7 +285,9 @@ export const replaceTimePulseAutomation = async ({
   );
   if (replaced.scriptId !== scriptId) {
     await restoreTimePulseRuntime(installation, clients, enabled);
-    throw new Error('Shelly changed the managed Time + Pulse script id during replacement.');
+    throw new Error(
+      'Shelly changed the managed Time + Pulse script id during replacement.'
+    );
   }
 
   try {
