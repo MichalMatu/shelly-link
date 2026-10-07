@@ -160,7 +160,7 @@ export const RuleSetupPage = ({
         install={() => flow.installMutation.mutate()}
         submitMode={flow.isEditingClimateAutomation ? 'edit' : 'install'}
         outputBehaviorEditor={
-          !inline ? (
+          !inline || flow.pulseCycleDraft.enabled ? (
             <Pulse.Cycle.Editor
               context="climate"
               draft={flow.pulseCycleDraft}

@@ -20,6 +20,7 @@ import {
   replaceStandalonePulseAutomation,
   resumeStandalonePulseAutomation
 } from './data/standalonePulseAutomationRuntime.js';
+import { replaceTimePulseAutomation } from './data/timePulseAutomationReplacement.js';
 import { installTimePulseAutomation } from './data/timePulseAutomationRuntime.js';
 import { usePulseOperationalStatus } from './flows/usePulseOperationalStatus.js';
 import { useTimePulseScriptSource } from './flows/useTimePulseScriptSource.js';
@@ -39,6 +40,7 @@ export const Pulse = {
   Time: {
     createInstalledAutomation: createTimePulseInstalledAutomation,
     install: installTimePulseAutomation,
+    replace: replaceTimePulseAutomation,
     isInstalled: isTimePulseInstalledAutomation,
     useScriptSource: useTimePulseScriptSource
   },

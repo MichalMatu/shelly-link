@@ -1022,8 +1022,14 @@ const checkStandalonePulseControlPlacement = async () => {
       );
     }
   }
-  if (!detailSource.includes('automationIcon="pulse"')) {
-    addFailure(detailPath, 'standalone Pulse Automation tab must use the Pulse icon');
+  if (
+    !detailSource.includes('AutomationDetail.capabilities(installation)') ||
+    !detailSource.includes('automationIcon={detailCapabilities.automationIcon}')
+  ) {
+    addFailure(
+      detailPath,
+      'standalone Pulse Automation tab must use shared Detail capabilities'
+    );
   }
 
   for (const path of tsxPaths) {

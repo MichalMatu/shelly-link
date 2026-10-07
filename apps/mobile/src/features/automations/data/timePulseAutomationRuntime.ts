@@ -3,37 +3,22 @@ import type {
   PulseCycleConfig,
   TimePulseAutomationConfig
 } from '@lcl/automation-core';
-import {
-  createInstallPlan,
-  normalizeShellyDeviceId,
-  RpcShellyClient,
-  RpcShellyScheduleClient,
-  type ShellyClient
-} from '@lcl/shelly-client';
+import { createInstallPlan } from '@lcl/shelly-client';
 import { generateShellyTimePulseScript } from '@lcl/script-generator';
 import { unwrapShellyResult } from '../../../platform/shellyResult.js';
-import { createShellyTransport } from '../../../platform/shellyHttpTransport.js';
 import {
   createTimePulseScheduleJob,
   findScheduleRelayConflict,
   timePulseSchedulePairState
 } from './timeAutomationSchedule.js';
 import { timeAutomationRuntimeError as runtimeError } from './timeAutomationRuntimeError.js';
-
-export type TimePulseAutomationClients = {
-  device: Pick<
-    ShellyClient,
-    | 'getDeviceInfo'
-    | 'getStatus'
-    | 'installScript'
-    | 'startScript'
-    | 'stopScript'
-    | 'deleteScript'
-    | 'evaluateScript'
-    | 'setRelayOff'
-  >;
-  schedules: Pick<RpcShellyScheduleClient, 'list' | 'create' | 'update' | 'delete'>;
-};
+import {
+  createTimePulseAutomationClients,
+  forceTimePulseOff,
+  requireTimePulseStoredIdentity,
+  requireTimePulseSyncedClock,
+  type TimePulseAutomationClients
+} from './timePulseAutomationRuntimeSupport.js';
 
 export type InstalledTimePulseRuntime = {
   script: { id: number; hash: string };
@@ -50,38 +35,6 @@ export type OwnedTimePulseRuntimeInstallation = {
   };
 };
 
-export const createTimePulseAutomationClients = (
-  baseUrl: string
-): TimePulseAutomationClients => {
-  const transport = createShellyTransport(baseUrl);
-  return {
-    device: new RpcShellyClient(transport),
-    schedules: new RpcShellyScheduleClient(transport)
-  };
-};
-
-const requireSyncedClock = async (clients: TimePulseAutomationClients): Promise<void> => {
-  const status = unwrapShellyResult(await clients.device.getStatus());
-  if (!status.clock.timeSynced || !status.clock.localTime) {
-    throw runtimeError('clock-unsynced', 'Shelly clock is not synchronized.');
-  }
-};
-
-const requireStoredIdentity = async (
-  installation: OwnedTimePulseRuntimeInstallation,
-  clients: TimePulseAutomationClients
-): Promise<void> => {
-  const info = unwrapShellyResult(await clients.device.getDeviceInfo());
-  const remoteDeviceId = info.id?.trim();
-  if (
-    !remoteDeviceId ||
-    normalizeShellyDeviceId(remoteDeviceId) !==
-      normalizeShellyDeviceId(installation.shelly.deviceId)
-  ) {
-    throw new Error('Shelly identity does not match the installed automation.');
-  }
-};
-
 const deleteScheduleIfPresent = async (
   clients: TimePulseAutomationClients,
   jobId: number
@@ -92,28 +45,20 @@ const deleteScheduleIfPresent = async (
   }
 };
 
-const forceOff = async (
-  clients: TimePulseAutomationClients,
-  scriptId?: number
-): Promise<void> => {
-  if (scriptId !== undefined) {
-    await clients.device.evaluateScript(scriptId, 'rq(false)').catch(() => undefined);
-  }
-  unwrapShellyResult(await clients.device.setRelayOff());
-};
-
 const cleanupFailedInstall = async (
   clients: TimePulseAutomationClients,
   scriptId: number | null,
   onJobId: number | null,
   offJobId: number | null
 ): Promise<void> => {
-  if (onJobId !== null)
+  if (onJobId !== null) {
     await deleteScheduleIfPresent(clients, onJobId).catch(() => undefined);
-  if (offJobId !== null)
+  }
+  if (offJobId !== null) {
     await deleteScheduleIfPresent(clients, offJobId).catch(() => undefined);
+  }
   if (scriptId !== null) {
-    await forceOff(clients, scriptId).catch(() => undefined);
+    await forceTimePulseOff(clients, scriptId).catch(() => undefined);
     await clients.device.stopScript(scriptId).catch(() => undefined);
     await clients.device.deleteScript(scriptId).catch(() => undefined);
   }
@@ -127,7 +72,7 @@ export const installTimePulseAutomation = async ({
   clients: TimePulseAutomationClients;
   config: TimePulseAutomationConfig;
 }): Promise<InstalledTimePulseRuntime> => {
-  await requireSyncedClock(clients);
+  await requireTimePulseSyncedClock(clients);
   const scheduleList = unwrapShellyResult(await clients.schedules.list());
   if (scheduleList.jobs.length > 18) {
     throw runtimeError('schedule-slots', 'Shelly does not have two free schedule slots.');
@@ -206,8 +151,8 @@ export const pauseTimePulseAutomation = async (
   installation: OwnedTimePulseRuntimeInstallation,
   clients = createTimePulseAutomationClients(installation.shelly.baseUrl)
 ): Promise<void> => {
-  await requireStoredIdentity(installation, clients);
-  await forceOff(clients, installation.pulseRuntime.script.id);
+  await requireTimePulseStoredIdentity(installation, clients);
+  await forceTimePulseOff(clients, installation.pulseRuntime.script.id);
   await updatePairEnabled(installation, clients, false);
   try {
     unwrapShellyResult(
@@ -222,8 +167,8 @@ export const resumeTimePulseAutomation = async (
   installation: OwnedTimePulseRuntimeInstallation,
   clients = createTimePulseAutomationClients(installation.shelly.baseUrl)
 ): Promise<void> => {
-  await requireStoredIdentity(installation, clients);
-  await requireSyncedClock(clients);
+  await requireTimePulseStoredIdentity(installation, clients);
+  await requireTimePulseSyncedClock(clients);
   unwrapShellyResult(await clients.device.setRelayOff());
   await updatePairEnabled(installation, clients, true);
   try {
@@ -231,7 +176,9 @@ export const resumeTimePulseAutomation = async (
       await clients.device.startScript(installation.pulseRuntime.script.id)
     );
   } catch (error) {
-    await forceOff(clients, installation.pulseRuntime.script.id).catch(() => undefined);
+    await forceTimePulseOff(clients, installation.pulseRuntime.script.id).catch(
+      () => undefined
+    );
     await updatePairEnabled(installation, clients, false).catch(() => undefined);
     await clients.device
       .stopScript(installation.pulseRuntime.script.id)
@@ -245,8 +192,8 @@ export const deleteTimePulseAutomation = async (
   installation: OwnedTimePulseRuntimeInstallation,
   clients = createTimePulseAutomationClients(installation.shelly.baseUrl)
 ): Promise<void> => {
-  await requireStoredIdentity(installation, clients);
-  await forceOff(clients, installation.pulseRuntime.script.id);
+  await requireTimePulseStoredIdentity(installation, clients);
+  await forceTimePulseOff(clients, installation.pulseRuntime.script.id);
   try {
     await updatePairEnabled(installation, clients, false).catch(() => undefined);
     await deleteScheduleIfPresent(clients, installation.schedule.onJobId);

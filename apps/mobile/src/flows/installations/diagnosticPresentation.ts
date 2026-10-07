@@ -211,7 +211,9 @@ export const formatScriptDiagnosticRows = (
           ? 'STOPPED'
           : missing
   },
-  { label: t('hardware.metrics.configHash'), value: input.configHash ?? missing },
+  ...(input.configHash === undefined
+    ? []
+    : [{ label: t('hardware.metrics.configHash'), value: input.configHash ?? missing }]),
   {
     label: t('hardware.diagnostics.scriptCpu'),
     value: formatDiagnosticNumber(input.cpuPercent, '%', missing, 1)
@@ -230,6 +232,57 @@ export const formatScriptDiagnosticRows = (
   },
   { label: t('hardware.metrics.snapshotAge'), value: input.snapshotAge }
 ];
+
+export type AutomationResourceDiagnosticResources = {
+  script?: {
+    running?: boolean | null;
+    cpuPercent?: number | null;
+    memUsedBytes?: number | null;
+    memPeakBytes?: number | null;
+    memFreeBytes?: number | null;
+  } | null;
+};
+
+const formatResourceSnapshotAge = (
+  dataUpdatedAt: number,
+  nowMs: number,
+  missing: string
+): string => {
+  if (!dataUpdatedAt) return missing;
+  const snapshotAgeMs = Math.max(0, nowMs - dataUpdatedAt);
+  return snapshotAgeMs < 60_000
+    ? `${Math.floor(snapshotAgeMs / 1000)} s`
+    : `${Math.floor(snapshotAgeMs / 60_000)} min`;
+};
+
+export const formatAutomationResourceDiagnosticRows = ({
+  resources,
+  configHash,
+  dataUpdatedAt,
+  nowMs,
+  missing,
+  t
+}: {
+  resources: AutomationResourceDiagnosticResources | undefined;
+  configHash?: string | null;
+  dataUpdatedAt: number;
+  nowMs: number;
+  missing: string;
+  t: Translate;
+}): ScriptDiagnosticPresentationRow[] =>
+  formatScriptDiagnosticRows(
+    {
+      rpcRunning: resources?.script?.running,
+      configHash,
+      cpuPercent: resources?.script?.cpuPercent,
+      memUsedBytes: resources?.script?.memUsedBytes,
+      memPeakBytes: resources?.script?.memPeakBytes,
+      memFreeBytes: resources?.script?.memFreeBytes,
+      snapshotAge: formatResourceSnapshotAge(dataUpdatedAt, nowMs, missing)
+    },
+    missing,
+    t
+  );
 
 type ClimateDetailDiagnosticResources = {
   script?: {
@@ -258,28 +311,15 @@ export const formatClimateDetailDiagnostics = ({
   missing: string;
   t: Translate;
 }) => {
-  const snapshotAgeMs = dataUpdatedAt ? Math.max(0, nowMs - dataUpdatedAt) : null;
-  const snapshotAge =
-    snapshotAgeMs == null
-      ? missing
-      : snapshotAgeMs < 60_000
-        ? `${Math.floor(snapshotAgeMs / 1000)} s`
-        : `${Math.floor(snapshotAgeMs / 60_000)} min`;
-
   return {
     bleSensors: formatClimateBleSensorPresentations(sensors, snapshot, missing, t),
-    scriptRows: formatScriptDiagnosticRows(
-      {
-        rpcRunning: resources?.script?.running,
-        configHash: snapshot?.script?.configHash,
-        cpuPercent: resources?.script?.cpuPercent,
-        memUsedBytes: resources?.script?.memUsedBytes,
-        memPeakBytes: resources?.script?.memPeakBytes,
-        memFreeBytes: resources?.script?.memFreeBytes,
-        snapshotAge
-      },
+    scriptRows: formatAutomationResourceDiagnosticRows({
+      resources,
+      configHash: snapshot?.script?.configHash ?? null,
+      dataUpdatedAt,
+      nowMs,
       missing,
       t
-    )
+    })
   };
 };
