@@ -10,6 +10,12 @@
   padding-top: var(--lcl-spacing-sm);
 }
 
+.dashboard-shell .automation-card--time .automation-card__live-status,
+.dashboard-shell .automation-card--pulse .automation-card__live-status {
+  border-top: 0;
+  padding-top: 0;
+}
+
 .dashboard-shell .automation-card__live-status .automation-summary {
   gap: var(--lcl-spacing-xs) var(--lcl-spacing-md);
   grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
