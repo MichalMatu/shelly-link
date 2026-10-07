@@ -35,7 +35,6 @@ type PlugDetailTabsProps = {
   availableTabs?: readonly PlugDetailTab[];
   disabledTabs?: readonly PlugDetailTab[];
   automationIcon?: PlugDetailAutomationIcon;
-  showHistory?: boolean;
 };
 
 const tabs: readonly {
@@ -62,14 +61,13 @@ export const PlugDetailTabs = ({
   onChange,
   availableTabs,
   disabledTabs = [],
-  automationIcon = 'temperature',
-  showHistory = false
+  automationIcon = 'temperature'
 }: PlugDetailTabsProps) => {
   const { t } = useTranslation();
-  const visibleTabs = tabs.filter(
-    (tab) =>
-      (showHistory || tab.id !== 'history') &&
-      (availableTabs === undefined || availableTabs.includes(tab.id))
+  const visibleTabs = tabs.filter((tab) =>
+    availableTabs === undefined
+      ? tab.id !== 'history'
+      : availableTabs.includes(tab.id)
   );
 
   return (
