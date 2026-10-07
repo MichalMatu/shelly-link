@@ -993,12 +993,13 @@ const checkStandalonePulseControlPlacement = async () => {
   const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
     path.endsWith('.tsx')
   );
-  const [dashboardCardSource, detailSource, detailCapabilitiesSource] =
-    await Promise.all([
+  const [dashboardCardSource, detailSource, detailCapabilitiesSource] = await Promise.all(
+    [
       readRepoFile(dashboardCardPath),
       readRepoFile(detailPath),
       readRepoFile(detailCapabilitiesPath)
-    ]);
+    ]
+  );
 
   for (const required of [
     'Pulse.Standalone.useActions(installation)',
