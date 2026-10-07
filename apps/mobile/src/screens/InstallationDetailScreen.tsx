@@ -9,9 +9,9 @@ import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
+import { automationDetailCapabilities } from '../features/automations/automationPublic.js';
 import {
   AutomationHistorySection,
-  automationDetailCapabilities,
   ClimateRecoverySection,
   ClimateBleDetailSection,
   ClimateScriptDetailSection,
