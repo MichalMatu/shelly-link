@@ -61,6 +61,12 @@ The refactor audit closed three narrow quality gaps without broad architecture c
 
 The focused lifecycle suites and the canonical `pnpm check` pass on the completion branch. The known Darwin `04-plug-ble-discovery` screenshot drift reproduces identically on clean `main`, so it is not a regression from this hardening.
 
+## Pre-freeze automation Detail closeout — completed 2026-10-07
+
+Installed Climate, Time and standalone Pulse details now share one capability model for tab/icon/history/script availability while preserving intentional automation-body differences. The accepted Time and standalone Pulse detail surfaces are configuration-focused, reuse shared physical Plug Device/Info/BLE surfaces and shared script presentation, and avoid duplicated healthy dashboard state or nested destructive-action cards. The superseded parallel Pulse-detail branch has no remaining product authority.
+
+Time + Pulse History is intentionally not part of this closeout; adding it requires a real History writer/storage capability for that runtime composition rather than a UI-only tab.
+
 ## Freeze boundary
 
 Until V1 freeze:

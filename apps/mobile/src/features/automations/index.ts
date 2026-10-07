@@ -2,10 +2,7 @@ export {
   ClimateAutomationDetailSection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
-  ClimateScriptDetailSection,
-  ClimateScriptDiagnosticsSection,
-  type ClimateBleSensorView,
-  type ClimateScriptDiagnosticRow
+  type ClimateBleSensorView
 } from './components/ClimateInstallationDetailSections.js';
 export {
   readShellyAutomationScriptState,
