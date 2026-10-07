@@ -5,7 +5,9 @@ import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.
 import {
   AutomationDetail,
   AutomationHistorySection,
+  automationDetailCapabilities,
   ClimateScriptDetailSection,
+  ClimateScriptDiagnosticsSection,
   Pulse,
   useAutomationHistory,
   useInstalledAutomationStore,
@@ -23,16 +25,13 @@ import {
   useSavedPlugStore,
   type PlugDetailTab
 } from '../features/plugs/index.js';
+import { formatAutomationResourceDiagnosticRows } from '../flows/installations/diagnosticPresentation.js';
+import { useAutomationResourceDiagnostics } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { installationScriptPreviewCopy } from './locales/installationScriptPreview.js';
 import { pulseManagementCopy } from './locales/pulseManagement.js';
 import { useTranslation } from './i18n.js';
 
 type StandalonePulseInstalledAutomation = Extract<InstalledAutomation, { kind: 'pulse' }>;
-
-const STANDALONE_PULSE_DETAIL_TABS = automationDetailTabs({
-  hasHistory: true,
-  hasScript: true
-});
 
 type StandalonePulseInstallationDetailProps = {
   installation: StandalonePulseInstalledAutomation;
@@ -46,6 +45,7 @@ export const StandalonePulseInstallationDetail = ({
   onOpenBleDiscovery
 }: StandalonePulseInstallationDetailProps) => {
   const { locale, t } = useTranslation();
+  const detailCapabilities = automationDetailCapabilities(installation);
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editPending, setEditPending] = useState(false);
@@ -67,6 +67,10 @@ export const StandalonePulseInstallationDetail = ({
   );
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
+  });
+  const resourcesQuery = useAutomationResourceDiagnostics(installation, {
+    enabled: activeTab === 'info',
+    refetchInterval: 3_000
   });
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
@@ -105,9 +109,8 @@ export const StandalonePulseInstallationDetail = ({
     <main className="demo-shell installation-detail-shell">
       <PlugDetailTop
         tabs={[activeTab, setActiveTab]}
-        availableTabs={STANDALONE_PULSE_DETAIL_TABS}
-        automationIcon="pulse"
-        showHistory
+        availableTabs={automationDetailTabs(detailCapabilities)}
+        automationIcon={detailCapabilities.automationIcon}
       />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
@@ -210,6 +213,18 @@ export const StandalonePulseInstallationDetail = ({
               information={informationQuery.data}
               loading={informationQuery.isPending}
               error={informationQuery.isError}
+              deviceRamFreeBytes={resourcesQuery.data?.system?.ramFreeBytes}
+              deviceRamTotalBytes={resourcesQuery.data?.system?.ramSizeBytes}
+            />
+            <ClimateScriptDiagnosticsSection
+              title={t('common.diagnostics')}
+              rows={formatAutomationResourceDiagnosticRows({
+                resources: resourcesQuery.data,
+                dataUpdatedAt: resourcesQuery.dataUpdatedAt,
+                nowMs: Date.now(),
+                missing: t('common.missing'),
+                t
+              })}
             />
             {savedDevice && (
               <div className="installation-detail-delete-action">
