@@ -42,6 +42,11 @@ const IonicSettingsControl = lazy(async () => {
   return { default: module.IonicSettingsControl };
 });
 
+const IonicSettingsAction = lazy(async () => {
+  const module = await import('./IonicSettingsControl.js');
+  return { default: module.IonicSettingsAction };
+});
+
 const SettingsControlFallback = () => null;
 
 const formatIssue = (kind: string, message: string): string => `${kind}: ${message}`;
@@ -208,17 +213,19 @@ export const AppSettingsScreen = () => {
             )}
 
             <div className="settings-action-stack">
-              <button className="secondary-action" type="button" onClick={copyReport}>
-                {t('settings.support.copyReport')}
-              </button>
+              <Suspense fallback={<SettingsControlFallback />}>
+                <IonicSettingsAction
+                  label={t('settings.support.copyReport')}
+                  onClick={copyReport}
+                />
+              </Suspense>
               {runtimeIssues.length > 0 && (
-                <button
-                  className="secondary-action"
-                  type="button"
-                  onClick={clearDiagnostics}
-                >
-                  {t('settings.support.clearDiagnostics')}
-                </button>
+                <Suspense fallback={<SettingsControlFallback />}>
+                  <IonicSettingsAction
+                    label={t('settings.support.clearDiagnostics')}
+                    onClick={clearDiagnostics}
+                  />
+                </Suspense>
               )}
             </div>
             {copyState === 'done' && (
