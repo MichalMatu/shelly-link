@@ -36,7 +36,7 @@ rpc_get() {
 verify_identity() {
   local label="$1" base="$2" expected="$3" actual
   actual="$(rpc_get "$base" '/rpc/Shelly.GetDeviceInfo' | json_get id)"
-  if [[ "${actual,,}" != "${expected,,}" ]]; then
+  if [[ "$actual" != "$expected" ]]; then
     echo "$label identity mismatch: expected=$expected actual=$actual" >&2
     exit 1
   fi
