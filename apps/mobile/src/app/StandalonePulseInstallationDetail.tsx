@@ -1,11 +1,13 @@
+import { configHash } from '@lcl/script-generator';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
   AutomationHistorySection,
   ClimateScriptDetailSection,
+  ClimateScriptDiagnosticsSection,
   Pulse,
   useAutomationHistory,
   useInstalledAutomationStore,
@@ -23,11 +25,18 @@ import {
   useSavedPlugStore,
   type PlugDetailTab
 } from '../features/plugs/index.js';
+import {
+  formatDiagnosticSnapshotAge,
+  formatScriptDiagnosticRows
+} from '../flows/installations/diagnosticPresentation.js';
+import { useInstalledAutomationResourceDiagnostics } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { installationScriptPreviewCopy } from './locales/installationScriptPreview.js';
 import { pulseManagementCopy } from './locales/pulseManagement.js';
 import { useTranslation } from './i18n.js';
 
 type StandalonePulseInstalledAutomation = Extract<InstalledAutomation, { kind: 'pulse' }>;
+
+const TECHNICAL_DIAGNOSTICS_REFRESH_MS = 3_000;
 
 const STANDALONE_PULSE_DETAIL_TABS = automationDetailTabs({
   hasHistory: true,
@@ -50,6 +59,7 @@ export const StandalonePulseInstallationDetail = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editPending, setEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const { dismissToast, pushToast, toasts } = useToastQueue('pulse-detail-toast');
   const managementLabels = pulseManagementCopy[locale];
   const scriptLabels = installationScriptPreviewCopy[locale];
@@ -68,6 +78,10 @@ export const StandalonePulseInstallationDetail = ({
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
   });
+  const resourcesQuery = useInstalledAutomationResourceDiagnostics(installation, {
+    enabled: activeTab === 'info',
+    refetchInterval: TECHNICAL_DIAGNOSTICS_REFRESH_MS
+  });
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
@@ -75,6 +89,13 @@ export const StandalonePulseInstallationDetail = ({
   const savedDevice = savedPlugs.find((device) =>
     isSameShellyDevice(device.physicalId, installation.shelly.deviceId)
   );
+
+  useEffect(() => {
+    if (activeTab !== 'info') return undefined;
+    setNowMs(Date.now());
+    const timer = window.setInterval(() => setNowMs(Date.now()), 1_000);
+    return () => window.clearInterval(timer);
+  }, [activeTab]);
 
   const deleteMutation = useMutation({
     mutationFn: () => Pulse.Standalone.delete(installation),
@@ -89,6 +110,26 @@ export const StandalonePulseInstallationDetail = ({
     pulseQuery.isError ||
     runtimeQuery.isError ||
     (runtimeQuery.data !== undefined && !runtimeMatches);
+
+  const missing = t('common.missing');
+  const resources = resourcesQuery.data;
+  const scriptRows = formatScriptDiagnosticRows(
+    {
+      rpcRunning: resources?.script?.running,
+      configHash: configHash(installation.config),
+      cpuPercent: resources?.script?.cpuPercent,
+      memUsedBytes: resources?.script?.memUsedBytes,
+      memPeakBytes: resources?.script?.memPeakBytes,
+      memFreeBytes: resources?.script?.memFreeBytes,
+      snapshotAge: formatDiagnosticSnapshotAge(
+        resourcesQuery.dataUpdatedAt,
+        nowMs,
+        missing
+      )
+    },
+    missing,
+    t
+  );
 
   const copyScript = () => {
     if (!scriptQuery.data || typeof navigator === 'undefined' || !navigator.clipboard) {
@@ -125,10 +166,6 @@ export const StandalonePulseInstallationDetail = ({
             )}
 
             <AutomationDetail.Hierarchy>
-              <AutomationDetail.Section title={t('detail.currentState')}>
-                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-              </AutomationDetail.Section>
-
               <Pulse.Standalone.ConfigurationSection
                 installation={installation}
                 onPendingChange={setEditPending}
@@ -139,18 +176,18 @@ export const StandalonePulseInstallationDetail = ({
                 }}
                 onSaveError={() => pushToast('warning', managementLabels.saveFailed)}
               />
-
-              <AutomationDetail.DangerZone title={managementLabels.deleteAction}>
-                <button
-                  className="secondary-action secondary-action--danger"
-                  type="button"
-                  disabled={deleteMutation.isPending || editPending}
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  {managementLabels.deleteAction}
-                </button>
-              </AutomationDetail.DangerZone>
             </AutomationDetail.Hierarchy>
+
+            <div className="installation-detail-delete-action">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={deleteMutation.isPending || editPending}
+                onClick={() => setDeleteOpen(true)}
+              >
+                {managementLabels.deleteAction}
+              </button>
+            </div>
           </>
         )}
 
@@ -210,6 +247,12 @@ export const StandalonePulseInstallationDetail = ({
               information={informationQuery.data}
               loading={informationQuery.isPending}
               error={informationQuery.isError}
+              deviceRamFreeBytes={resources?.system?.ramFreeBytes}
+              deviceRamTotalBytes={resources?.system?.ramSizeBytes}
+            />
+            <ClimateScriptDiagnosticsSection
+              title={t('common.diagnostics')}
+              rows={scriptRows}
             />
             {savedDevice && (
               <div className="installation-detail-delete-action">
