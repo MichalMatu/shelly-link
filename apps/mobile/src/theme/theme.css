@@ -1021,8 +1021,37 @@ ion-alert.app-settings__language-alert {
   padding-top: var(--lcl-spacing-md);
 }
 
-.settings-action-stack .secondary-action {
-  width: 100%;
+.app-settings__secondary-action {
+  --background: var(--lcl-color-surface-muted);
+  --background-activated: color-mix(
+    in srgb,
+    var(--lcl-color-text) 8%,
+    var(--lcl-color-surface-muted)
+  );
+  --background-focused: color-mix(
+    in srgb,
+    var(--lcl-color-text) 6%,
+    var(--lcl-color-surface-muted)
+  );
+  --background-hover: color-mix(
+    in srgb,
+    var(--lcl-color-text) 4%,
+    var(--lcl-color-surface-muted)
+  );
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --box-shadow: none;
+  --color: var(--lcl-color-text);
+  --padding-end: var(--lcl-spacing-lg);
+  --padding-start: var(--lcl-spacing-lg);
+
+  font-size: var(--lcl-font-size-lg);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
 }
 
 .setup-top-nav {
