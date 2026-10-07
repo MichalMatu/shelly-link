@@ -402,6 +402,9 @@ const mockTimeShellyRpc = async (page: Page) => {
           }
         };
         break;
+      case 'Sys.GetStatus':
+        result = { ram_free: 64_000, ram_size: 262_144 };
+        break;
       case 'Script.List':
         result = { scripts: [] };
         break;
