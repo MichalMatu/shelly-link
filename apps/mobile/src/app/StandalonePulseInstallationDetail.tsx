@@ -5,8 +5,8 @@ import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.
 import {
   AutomationDetail,
   AutomationHistorySection,
-  ClimateScriptDetailSection,
-  ClimateScriptDiagnosticsSection,
+  AutomationScriptDetailSection,
+  AutomationScriptDiagnosticsSection,
   Pulse,
   useAutomationHistory,
   useInstalledAutomationStore,
@@ -179,7 +179,7 @@ export const StandalonePulseInstallationDetail = ({
         )}
 
         {activeTab === 'script' && (
-          <ClimateScriptDetailSection
+          <AutomationScriptDetailSection
             attentionTitle={t('dashboard.health.attention')}
             {...(!runtimeMatches && runtimeQuery.data !== undefined
               ? { attentionMessage: managementLabels.runtimeAttention }
@@ -211,7 +211,7 @@ export const StandalonePulseInstallationDetail = ({
               deviceRamFreeBytes={resourcesQuery.data?.system?.ramFreeBytes}
               deviceRamTotalBytes={resourcesQuery.data?.system?.ramSizeBytes}
             />
-            <ClimateScriptDiagnosticsSection
+            <AutomationScriptDiagnosticsSection
               title={t('common.diagnostics')}
               rows={formatAutomationResourceDiagnosticRows({
                 resources: resourcesQuery.data,
