@@ -11,6 +11,7 @@ import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationHistorySection,
+  automationDetailCapabilities,
   ClimateRecoverySection,
   ClimateBleDetailSection,
   ClimateScriptDetailSection,
@@ -20,6 +21,7 @@ import {
 import {
   PlugRemovalBlockedModal,
   PlugDeviceSettingsSurface,
+  automationDetailTabs,
   PlugDetailNotFound,
   PlugDetailTop,
   PlugInfoPanel,
@@ -45,11 +47,11 @@ import { useInstalledAutomationStore } from '../flows/installations/store.js';
 import {
   installedAutomationControlQueryKey,
   installedAutomationDiagnosticsQueryKey,
-  installedAutomationResourceDiagnosticsQueryKey,
+  automationResourceDiagnosticsQueryKey,
+  useAutomationResourceDiagnostics,
   useInstalledAutomationActions,
   useInstalledAutomationControl,
-  useInstalledAutomationDiagnostics,
-  useInstalledAutomationResourceDiagnostics
+  useInstalledAutomationDiagnostics
 } from '../flows/installations/useInstalledAutomationRuntime.js';
 import { useHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { useHardwareSetupFlow } from '../flows/hardware-setup/useHardwareSetupFlow.js';
@@ -123,13 +125,14 @@ const ClimateInstallationDetail = ({
   const [preparedAutomationDraftId, setPreparedAutomationDraftId] = useState<
     string | null
   >(null);
+  const detailCapabilities = automationDetailCapabilities(installation);
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
   const controlQuery = useInstalledAutomationControl(installation);
   const historyQuery = useAutomationHistory(installation, {
     enabled: activeTab === 'history'
   });
   const automationAction = useInstalledAutomationActions(installation);
-  const resourcesQuery = useInstalledAutomationResourceDiagnostics(installation, {
+  const resourcesQuery = useAutomationResourceDiagnostics(installation, {
     enabled: activeTab === 'info',
     refetchInterval: TECHNICAL_DIAGNOSTICS_REFRESH_MS
   });
@@ -197,7 +200,7 @@ const ClimateInstallationDetail = ({
         exact: true
       });
       queryClient.removeQueries({
-        queryKey: installedAutomationResourceDiagnosticsQueryKey(installation),
+        queryKey: automationResourceDiagnosticsQueryKey(installation),
         exact: true
       });
       queryClient.removeQueries({ queryKey: scriptQueryKey, exact: true });
@@ -234,7 +237,11 @@ const ClimateInstallationDetail = ({
 
   return (
     <main className="demo-shell installation-detail-shell">
-      <PlugDetailTop tabs={[activeTab, setActiveTab]} showHistory />
+      <PlugDetailTop
+        tabs={[activeTab, setActiveTab]}
+        availableTabs={automationDetailTabs(detailCapabilities)}
+        automationIcon={detailCapabilities.automationIcon}
+      />
 
       <section className="plug-detail-surface" aria-label={t('detail.currentState')}>
         {activeTab === 'automation' && (
