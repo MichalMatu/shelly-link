@@ -1,13 +1,14 @@
+import { configHash } from '@lcl/script-generator';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
 import {
   AutomationDetail,
   ClimateScriptDetailSection,
-  OperationalStatus,
+  ClimateScriptDiagnosticsSection,
   deleteTimeAutomation,
   Pulse,
   timePulseAutomationRuntime,
@@ -26,12 +27,19 @@ import {
   useSavedPlugStore,
   type PlugDetailTab
 } from '../features/plugs/index.js';
+import {
+  formatDiagnosticSnapshotAge,
+  formatScriptDiagnosticRows
+} from '../flows/installations/diagnosticPresentation.js';
 import { copyInstalledAutomationScriptSource } from '../flows/installations/scriptPreview.js';
+import { useInstalledAutomationResourceDiagnostics } from '../flows/installations/useInstalledAutomationRuntime.js';
 import {
   timeAutomationRuntimeQueryKey,
   useTimeAutomationRuntime
 } from '../flows/time-automation/useTimeAutomationRuntime.js';
 import { TimeScheduleSetupPage } from './hardware-setup/pages/TimeScheduleSetupPage.js';
+
+const TECHNICAL_DIAGNOSTICS_REFRESH_MS = 3_000;
 
 type TimeInstallationDetailProps = {
   installation: TimeInstalledAutomation;
@@ -60,6 +68,10 @@ export const TimeInstallationDetail = ({
   const informationQuery = usePlugInformationFlow(installation.shelly, {
     enabled: activeTab === 'ble' || activeTab === 'info'
   });
+  const resourcesQuery = useInstalledAutomationResourceDiagnostics(installation, {
+    enabled: activeTab === 'info',
+    refetchInterval: TECHNICAL_DIAGNOSTICS_REFRESH_MS
+  });
   const removeInstallation = useInstalledAutomationStore(
     (state) => state.removeInstallation
   );
@@ -70,8 +82,16 @@ export const TimeInstallationDetail = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [timeEditPending, setTimeEditPending] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const { dismissToast, pushToast, toasts } = useToastQueue('time-toast');
   const scriptLabels = installationScriptPreviewCopy[locale];
+
+  useEffect(() => {
+    if (activeTab !== 'info') return undefined;
+    setNowMs(Date.now());
+    const timer = window.setInterval(() => setNowMs(Date.now()), 1_000);
+    return () => window.clearInterval(timer);
+  }, [activeTab]);
 
   const deleteMutation = useMutation({
     mutationFn: () =>
@@ -96,6 +116,32 @@ export const TimeInstallationDetail = ({
       ? 'offline'
       : (runtimeQuery.data?.scheduleState ?? 'attention');
   const pulseNeedsAttention = pulseInstallation !== null && pulseQuery.isError;
+  const missing = t('common.missing');
+  const resources = resourcesQuery.data;
+  const scriptRows =
+    pulseInstallation && installation.pulseRuntime
+      ? formatScriptDiagnosticRows(
+          {
+            rpcRunning: resources?.script?.running,
+            configHash: configHash({
+              schedule: installation.config,
+              pulse: installation.pulseRuntime.pulse
+            }),
+            cpuPercent: resources?.script?.cpuPercent,
+            memUsedBytes: resources?.script?.memUsedBytes,
+            memPeakBytes: resources?.script?.memPeakBytes,
+            memFreeBytes: resources?.script?.memFreeBytes,
+            snapshotAge: formatDiagnosticSnapshotAge(
+              resourcesQuery.dataUpdatedAt,
+              nowMs,
+              missing
+            )
+          },
+          missing,
+          t
+        )
+      : [];
+
   const copyScript = () =>
     copyInstalledAutomationScriptSource(
       scriptQuery.data,
@@ -139,25 +185,6 @@ export const TimeInstallationDetail = ({
             )}
 
             <AutomationDetail.Hierarchy>
-              <AutomationDetail.Section title={t('detail.currentState')}>
-                {pulseInstallation ? (
-                  <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-                ) : (
-                  <OperationalStatus.TimeSummary
-                    config={installation.config}
-                    localTime={runtimeQuery.data?.clock.localTime}
-                    relayOn={runtimeQuery.data?.relayOn}
-                    state={runtimeState}
-                  />
-                )}
-                <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
-                  <div>
-                    <dt>{t('time.clock')}</dt>
-                    <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
-                  </div>
-                </dl>
-              </AutomationDetail.Section>
-
               <AutomationDetail.Section title={t('detail.configuration')}>
                 <TimeScheduleSetupPage
                   flow={{
@@ -180,17 +207,18 @@ export const TimeInstallationDetail = ({
                 />
               </AutomationDetail.Section>
 
-              <AutomationDetail.DangerZone title={t('time.detail.delete')}>
-                <button
-                  className="secondary-action secondary-action--danger"
-                  type="button"
-                  disabled={deleteMutation.isPending || timeEditPending}
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  {t('time.detail.delete')}
-                </button>
-              </AutomationDetail.DangerZone>
             </AutomationDetail.Hierarchy>
+
+            <div className="installation-detail-delete-action">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={deleteMutation.isPending || timeEditPending}
+                onClick={() => setDeleteOpen(true)}
+              >
+                {t('time.detail.delete')}
+              </button>
+            </div>
           </>
         )}
 
@@ -239,7 +267,15 @@ export const TimeInstallationDetail = ({
               information={informationQuery.data}
               loading={informationQuery.isPending}
               error={informationQuery.isError}
+              deviceRamFreeBytes={resources?.system?.ramFreeBytes}
+              deviceRamTotalBytes={resources?.system?.ramSizeBytes}
             />
+            {pulseInstallation && (
+              <ClimateScriptDiagnosticsSection
+                title={t('common.diagnostics')}
+                rows={scriptRows}
+              />
+            )}
             {savedDevice && (
               <div className="installation-detail-delete-action">
                 <button
