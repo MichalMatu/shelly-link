@@ -216,6 +216,10 @@ runs only the fast UX/repository policy gates, so the final full gate is not exe
 time during push. Use `pnpm check:full` when responsive E2E is part of the acceptance surface;
 CI keeps the exhaustive repository/build/test/responsive gates authoritative.
 
+Optimize duplicated orchestration before increasing worker counts/concurrency or changing cache
+policy; benchmark such changes against a fresh baseline. On memory-constrained hosts, run one
+heavy local workload at a time.
+
 For UX/UI changes, automated unit tests alone are insufficient. Inspect the relevant real
 render at representative viewports and use Playwright/responsive coverage when practical.
 Canonical geometry-sensitive viewports are documented in `apps/mobile/AGENTS.md`.

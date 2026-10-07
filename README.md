@@ -67,7 +67,6 @@ The active documentation set is intentionally small:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Development plan](docs/DEVELOPMENT_PLAN.md)
 - [Current handoff](docs/HANDOFF_NEXT_CHAT.md)
-- [Performance handoff](docs/PERFORMANCE_HANDOFF.md)
 - [Wireless Android device workflow](docs/PHONE_WIRELESS_ADB.md)
 - [Hardware test matrix](docs/testing/hardware-matrix.md)
 - [UX visual contract](docs/UX_VISUAL_CONTRACT.md)
