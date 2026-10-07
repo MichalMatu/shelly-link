@@ -15,6 +15,7 @@ const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
 const repositoryGate = join(repositoryRoot, 'scripts/quality/repository-gate.mjs');
 const featureGate = join(repositoryRoot, 'scripts/quality/feature-boundary-gate.mjs');
 const uxGate = join(repositoryRoot, 'scripts/quality/ux-gate.mjs');
+const performanceGate = join(repositoryRoot, 'scripts/quality/performance-budget.mjs');
 const failures = [];
 let passed = 0;
 
@@ -33,7 +34,14 @@ const runGate = (gatePath, fixtureRoot, extraEnv = {}) =>
     encoding: 'utf8'
   });
 
-const executeCase = async ({ name, gatePath, setup, expectedFailure, env = {} }) => {
+const executeCase = async ({
+  name,
+  gatePath,
+  setup,
+  expectedFailure,
+  expectedOutput,
+  env = {}
+}) => {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'lcl-quality-'));
   try {
     await setup(fixtureRoot);
@@ -53,6 +61,13 @@ const executeCase = async ({ name, gatePath, setup, expectedFailure, env = {} })
       }
     } else if (result.status !== 0) {
       failures.push(`${name}: gate unexpectedly failed\n${output}`);
+      return;
+    }
+
+    if (expectedOutput && !output.includes(expectedOutput)) {
+      failures.push(
+        `${name}: gate output missing ${JSON.stringify(expectedOutput)}\n${output}`
+      );
       return;
     }
 
@@ -233,6 +248,59 @@ const setupUxSegmentedControlFixture = async (root) => {
     'export const Fixture = () => <div className="plug-detail-tabs lcl-segmented-control"><button className="lcl-segmented-control__item" /></div>;\n'
   );
 };
+
+const setupPerformanceFixture = async (root, { jsBytes }) => {
+  await writeFixture(
+    root,
+    'scripts/quality/performance-budgets.json',
+    json({
+      version: 2,
+      mobileDist: {
+        baseline: {
+          gitSha: 'fixture-baseline',
+          totalJsBytes: 100,
+          largestJsBytes: 100,
+          totalCssBytes: 10,
+          jsFileCount: 1
+        },
+        reviewGrowth: {
+          totalJsBytes: 20,
+          largestJsBytes: 20,
+          totalCssBytes: 20,
+          jsFileCount: 1
+        },
+        hardLimit: {
+          totalJsBytes: 200,
+          largestJsBytes: 200,
+          totalCssBytes: 100,
+          maxJsFiles: 4
+        }
+      },
+      source: { minPollingIntervalMs: 1000 }
+    })
+  );
+  await writeFixture(root, 'apps/mobile/dist/assets/app.js', 'x'.repeat(jsBytes));
+  await writeFixture(root, 'apps/mobile/dist/assets/app.css', 'x'.repeat(10));
+  await writeFixture(
+    root,
+    'apps/mobile/src/fixture.ts',
+    'export const fixture = true;\n'
+  );
+};
+
+await executeCase({
+  name: 'performance/review threshold stays advisory',
+  gatePath: performanceGate,
+  setup: (root) => setupPerformanceFixture(root, { jsBytes: 150 }),
+  expectedOutput: 'Performance review threshold exceeded:'
+});
+
+await executeCase({
+  name: 'performance/hard ceiling fails closed',
+  gatePath: performanceGate,
+  setup: (root) => setupPerformanceFixture(root, { jsBytes: 201 }),
+  expectedFailure: 'total JS 201 B exceeds hard limit 200 B'
+});
 
 await executeCase({
   name: 'ux/setup navigation uses shared segmented control',
