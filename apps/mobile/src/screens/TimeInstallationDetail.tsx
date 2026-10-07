@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
-import { automationDetailCapabilities } from '../features/automations/automationPublic.js';
 import {
   AutomationDetail,
   ClimateScriptDetailSection,
@@ -51,7 +50,7 @@ export const TimeInstallationDetail = ({
   const { locale, t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<PlugDetailTab>('automation');
-  const detailCapabilities = automationDetailCapabilities(installation);
+  const detailCapabilities = AutomationDetail.capabilities(installation);
   const runtimeQuery = useTimeAutomationRuntime(installation);
   const pulseInstallation = Pulse.Time.isInstalled(installation) ? installation : null;
   const pulseQuery = Pulse.Operational.useStatus(pulseInstallation);
