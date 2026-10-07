@@ -219,9 +219,10 @@ for (const viewport of viewports) {
     await expect(card).toContainText('320 Wh');
     await expect(card).toContainText('14:00');
     await expect(compactStatus).toBeVisible();
+    const pulseLiveStatus = card.locator('.automation-card__live-status');
     await expect
       .poll(() =>
-        compactStatus.evaluate((element) => getComputedStyle(element).borderTopWidth)
+        pulseLiveStatus.evaluate((element) => getComputedStyle(element).borderTopWidth)
       )
       .toBe('0px');
     await expect(compactStatus.getByText('ON', { exact: true })).toBeVisible();
