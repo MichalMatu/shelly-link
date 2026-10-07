@@ -82,9 +82,7 @@ describe('Shelly resource diagnostics', () => {
       value: { ram_size: 270_676, ram_free: 140_152 }
     });
 
-    await expect(
-      readShellyResourceDiagnostics('http://192.168.0.20/')
-    ).resolves.toEqual({
+    await expect(readShellyResourceDiagnostics('http://192.168.0.20/')).resolves.toEqual({
       script: null,
       system: { ramSizeBytes: 270_676, ramFreeBytes: 140_152 }
     });
