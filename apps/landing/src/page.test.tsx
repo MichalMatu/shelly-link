@@ -32,7 +32,7 @@ describe('LandingPage', () => {
     render(<LandingPage initialLocale="en" />);
 
     expect(document.documentElement.style.getPropertyValue('--landing-hero-image')).toBe(
-      'url("/assets/local-climate-hero.webp")'
+      'url("/assets/shelly-link-hero.webp")'
     );
   });
 

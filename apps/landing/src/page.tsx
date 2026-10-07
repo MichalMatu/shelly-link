@@ -46,7 +46,7 @@ export const LandingPage = ({
   useEffect(() => {
     document.documentElement.style.setProperty(
       '--landing-hero-image',
-      `url("${import.meta.env.BASE_URL}assets/local-climate-hero.webp")`
+      `url("${import.meta.env.BASE_URL}assets/shelly-link-hero.webp")`
     );
   }, []);
 
