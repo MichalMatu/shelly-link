@@ -990,16 +990,22 @@ const checkStandalonePulseControlPlacement = async () => {
   const detailPath = 'apps/mobile/src/app/StandalonePulseInstallationDetail.tsx';
   const detailCapabilitiesPath =
     'apps/mobile/src/features/automations/presentation/automationDetailCapabilities.ts';
+  const automationPublicPath =
+    'apps/mobile/src/features/automations/automationPublic.ts';
   const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter((path) =>
     path.endsWith('.tsx')
   );
-  const [dashboardCardSource, detailSource, detailCapabilitiesSource] = await Promise.all(
-    [
-      readRepoFile(dashboardCardPath),
-      readRepoFile(detailPath),
-      readRepoFile(detailCapabilitiesPath)
-    ]
-  );
+  const [
+    dashboardCardSource,
+    detailSource,
+    detailCapabilitiesSource,
+    automationPublicSource
+  ] = await Promise.all([
+    readRepoFile(dashboardCardPath),
+    readRepoFile(detailPath),
+    readRepoFile(detailCapabilitiesPath),
+    readRepoFile(automationPublicPath)
+  ]);
 
   for (const required of [
     'Pulse.Standalone.useActions(installation)',
@@ -1028,8 +1034,9 @@ const checkStandalonePulseControlPlacement = async () => {
     }
   }
   if (
-    !detailSource.includes('automationDetailCapabilities(installation)') ||
+    !detailSource.includes('AutomationDetail.capabilities(installation)') ||
     !detailSource.includes('automationIcon={detailCapabilities.automationIcon}') ||
+    !automationPublicSource.includes('capabilities: automationDetailCapabilities') ||
     !detailCapabilitiesSource.includes("variant: 'pulse'") ||
     !detailCapabilitiesSource.includes("automationIcon: 'pulse'")
   ) {
