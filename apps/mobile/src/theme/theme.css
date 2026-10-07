@@ -13,9 +13,15 @@
   --app-glass-blur: calc(var(--lcl-spacing-lg) + var(--lcl-spacing-sm));
   --ion-font-family: var(--lcl-font-family);
   --ion-background-color: var(--lcl-color-background);
+  --ion-background-color-rgb: var(--lcl-color-background-rgb);
   --ion-text-color: var(--lcl-color-text);
+  --ion-text-color-rgb: var(--lcl-color-text-rgb);
   --ion-color-primary: var(--lcl-color-accent);
+  --ion-color-primary-rgb: var(--lcl-color-accent-rgb);
   --ion-color-primary-contrast: var(--lcl-color-accent-contrast);
+  --ion-color-primary-contrast-rgb: var(--lcl-color-accent-contrast-rgb);
+  --ion-color-primary-shade: var(--lcl-color-accent-strong);
+  --ion-color-primary-tint: color-mix(in srgb, var(--lcl-color-accent) 90%, white);
 }
 
 html:root,

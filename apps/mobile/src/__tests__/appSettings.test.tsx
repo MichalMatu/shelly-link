@@ -63,6 +63,7 @@ describe('app settings screen', () => {
 
     const appearanceSegment = settings.querySelector('ion-segment');
     if (!appearanceSegment) throw new Error('appearance segment missing');
+    expect(appearanceSegment).toHaveAttribute('color', 'primary');
     act(() => {
       fireEvent(
         appearanceSegment,

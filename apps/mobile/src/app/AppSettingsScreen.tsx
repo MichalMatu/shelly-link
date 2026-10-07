@@ -197,6 +197,7 @@ export const AppSettingsScreen = () => {
           </div>
           <IonSegment
             aria-label={t('settings.appearance.title')}
+            color="primary"
             value={themeMode}
             onIonChange={(event) => {
               const value = event.detail.value;
