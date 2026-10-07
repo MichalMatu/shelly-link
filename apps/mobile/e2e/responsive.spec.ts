@@ -580,8 +580,9 @@ const expectTimeDetailHierarchy = async (page: Page) => {
   expect(hierarchyBox.x + hierarchyBox.width).toBeLessThanOrEqual(
     surfaceBox.x + surfaceBox.width + 1
   );
-  await expect(page.locator('.installation-detail-hierarchy__section')).toHaveCount(2);
-  await expect(page.locator('.installation-detail-danger-zone')).toHaveCount(1);
+  await expect(page.locator('.installation-detail-hierarchy__section')).toHaveCount(1);
+  await expect(page.locator('.installation-detail-danger-zone')).toHaveCount(0);
+  await expect(page.locator('.installation-detail-delete-action')).toHaveCount(1);
   await expect(page.locator('.installation-detail-header')).toHaveCount(0);
   await expect(page.locator('.installation-detail-live')).toHaveCount(0);
   await expect(page.locator('.app-page-back-row')).toHaveCount(0);
