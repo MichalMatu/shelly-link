@@ -1,4 +1,5 @@
 import {
+  IonButton,
   IonLabel,
   IonSegment,
   IonSegmentButton,
@@ -97,3 +98,23 @@ export const IonicSettingsControl = (props: IonicSettingsControlProps) => {
     </IonSegment>
   );
 };
+
+export type IonicSettingsActionProps = {
+  label: string;
+  onClick(): void;
+};
+
+export const IonicSettingsAction = ({
+  label,
+  onClick
+}: IonicSettingsActionProps) => (
+  <IonButton
+    className="app-settings__secondary-action"
+    expand="block"
+    fill="outline"
+    type="button"
+    onClick={onClick}
+  >
+    {label}
+  </IonButton>
+);
