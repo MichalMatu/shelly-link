@@ -100,15 +100,28 @@ export const useTimeAutomationSetupFlow = (
           throw new Error(t('detail.notFoundTitle'));
         }
         try {
-          const edited = await updateTimeInstalledAutomation({
-            installation: {
-              ...editingInstallation,
-              shelly: {
-                ...editingInstallation.shelly,
-                name: selectedShelly.name,
-                baseUrl: selectedShelly.baseUrl
+          const preparedInstallation = {
+            ...editingInstallation,
+            shelly: {
+              ...editingInstallation.shelly,
+              name: selectedShelly.name,
+              baseUrl: selectedShelly.baseUrl
+            }
+          };
+          if (Pulse.Time.isInstalled(preparedInstallation)) {
+            if (!pulseCycleValidation.config) {
+              throw new Error(t('hardware.flow.configInvalid'));
+            }
+            return await Pulse.Time.replace({
+              installation: preparedInstallation,
+              config: {
+                schedule: configState.config,
+                pulse: pulseCycleValidation.config
               }
-            },
+            });
+          }
+          const edited = await updateTimeInstalledAutomation({
+            installation: preparedInstallation,
             config: configState.config,
             installations
           });
@@ -196,7 +209,8 @@ export const useTimeAutomationSetupFlow = (
     setPulseCycleDraft,
     pulseCycleValidation,
     isEditingTimeAutomation: editInstallationId !== undefined,
-    canConfigurePulse: editInstallationId === undefined,
+    canConfigurePulse:
+      editInstallationId === undefined || editingInstallation?.pulseRuntime !== undefined,
     installMutation
   };
 };
