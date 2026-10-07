@@ -1,9 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { readShellyResourceDiagnostics } from '../hardware-setup/resourceDiagnostics.js';
-import type {
-  ClimateInstalledAutomation,
-  InstalledAutomation
-} from './model.js';
+import type { ClimateInstalledAutomation, InstalledAutomation } from './model.js';
 import {
   enterInstalledAutomationManualMode,
   readInstalledAutomationControlStatus,
@@ -90,8 +87,7 @@ export const useAutomationResourceDiagnostics = (
   const script = automationScriptIdentity(installation);
   return useQuery({
     queryKey: automationResourceDiagnosticsQueryKey(installation),
-    queryFn: () =>
-      readShellyResourceDiagnostics(installation.shelly.baseUrl, script?.id),
+    queryFn: () => readShellyResourceDiagnostics(installation.shelly.baseUrl, script?.id),
     enabled: options.enabled ?? true,
     retry: false,
     refetchInterval: options.refetchInterval ?? DEFAULT_RUNTIME_REFRESH_MS,
