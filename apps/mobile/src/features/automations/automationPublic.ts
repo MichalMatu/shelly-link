@@ -1,5 +1,4 @@
 import {
-  AutomationDetailDangerZone,
   AutomationDetailHierarchy,
   AutomationDetailSection
 } from './components/AutomationDetailLayout.js';
@@ -12,7 +11,6 @@ export { Pulse };
 
 export const AutomationDetail = {
   capabilities: automationDetailCapabilities,
-  DangerZone: AutomationDetailDangerZone,
   Hierarchy: AutomationDetailHierarchy,
   Section: AutomationDetailSection
 } as const;
