@@ -219,6 +219,11 @@ for (const viewport of viewports) {
     await expect(card).toContainText('320 Wh');
     await expect(card).toContainText('14:00');
     await expect(compactStatus).toBeVisible();
+    await expect
+      .poll(() =>
+        compactStatus.evaluate((element) => getComputedStyle(element).borderTopWidth)
+      )
+      .toBe('0px');
     await expect(compactStatus.getByText('ON', { exact: true })).toBeVisible();
     await expect(compactStatus).toContainText('3 cykli');
     await expect(compactStatus).toContainText('1m 5s');
@@ -258,8 +263,11 @@ for (const viewport of viewports) {
     await expect(fullStatus).toContainText('Błąd automatyki');
     await expect(fullStatus).toContainText('Brak');
     await expect(fullStatus).toContainText('Twarde bezpieczeństwo');
-    await expect(detailSurface).toContainText('30 s');
-    await expect(detailSurface).toContainText('60 s');
+    await expect(page.getByLabel('Czas ON (s)')).toHaveValue('30');
+    await expect(page.getByLabel('Czas OFF (s)')).toHaveValue('60');
+    await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Edytuj cykl' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Usuń automatykę' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Bluetooth' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Skrypt' })).toBeVisible();
