@@ -29,10 +29,7 @@ export {
   AutomationDetail,
   OperationalStatus,
   Pulse,
-  automationDetailCapabilities,
-  type AutomationDetailCapabilities,
-  type AutomationDetailVariant,
-  type AutomationHistoryProfile
+  automationDetailCapabilities
 } from './automationPublic.js';
 export { ClimateSetup } from './climateSetupPublic.js';
 export { setTimeAutomationManualRelay } from './data/timeAutomationRelayControl.js';
