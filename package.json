@@ -16,7 +16,7 @@
     "test:coverage:core": "pnpm --filter @lcl/automation-core test:coverage && pnpm --filter @lcl/script-generator test:coverage",
     "test:watch": "pnpm -r test -- --watch",
     "format": "prettier --write .",
-    "format:check": "prettier --write apps/mobile/src/features/automations/data/timePulseAutomationReplacement.ts apps/mobile/src/features/automations/presentation/automationDetailCapabilities.ts apps/mobile/src/features/plugs/components/PlugDetailTabs.tsx apps/mobile/src/flows/hardware-setup/resourceDiagnostics.test.ts apps/mobile/src/flows/installations/useInstalledAutomationRuntime.ts && git diff --no-ext-diff -- apps/mobile/src/features/automations/data/timePulseAutomationReplacement.ts apps/mobile/src/features/automations/presentation/automationDetailCapabilities.ts apps/mobile/src/features/plugs/components/PlugDetailTabs.tsx apps/mobile/src/flows/hardware-setup/resourceDiagnostics.test.ts apps/mobile/src/flows/installations/useInstalledAutomationRuntime.ts && false",
+    "format:check": "prettier --check .",
     "precommit": "lint-staged && pnpm quality:ux",
     "prepush": "pnpm quality:ux && pnpm quality:repo",
     "prepare": "husky",
