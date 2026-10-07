@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import {
   INSTALLED_AUTOMATION_VERSION,
   useInstalledAutomationStore
@@ -194,23 +195,25 @@ export const AppSettingsScreen = () => {
           <div className="app-settings__section-header">
             <h2>{t('settings.appearance.title')}</h2>
           </div>
-          <div className="app-settings__choice-grid app-settings__choice-grid--appearance">
+          <IonSegment
+            aria-label={t('settings.appearance.title')}
+            value={themeMode}
+            onIonChange={(event) => {
+              const value = event.detail.value;
+              if (
+                typeof value === 'string' &&
+                themeModes.some((mode) => mode === value)
+              ) {
+                chooseTheme(value as ThemeMode);
+              }
+            }}
+          >
             {themeModes.map((mode) => (
-              <button
-                key={mode}
-                className={
-                  themeMode === mode
-                    ? 'app-settings__choice app-settings__choice--active'
-                    : 'app-settings__choice'
-                }
-                type="button"
-                aria-pressed={themeMode === mode}
-                onClick={() => chooseTheme(mode)}
-              >
-                {t(themeModeLabelKeys[mode])}
-              </button>
+              <IonSegmentButton key={mode} value={mode}>
+                <IonLabel>{t(themeModeLabelKeys[mode])}</IonLabel>
+              </IonSegmentButton>
             ))}
-          </div>
+          </IonSegment>
         </section>
 
         <Disclosure

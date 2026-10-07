@@ -61,8 +61,16 @@ describe('app settings screen', () => {
     expect(getLocalePreference()).toBe('de');
     expect(document.documentElement.lang).toBe('de');
 
+    const appearanceSegment = settings.querySelector('ion-segment');
+    if (!appearanceSegment) throw new Error('appearance segment missing');
     act(() => {
-      fireEvent.click(within(settings).getByRole('button', { name: 'Dunkel' }));
+      fireEvent(
+        appearanceSegment,
+        new CustomEvent('ionChange', {
+          bubbles: true,
+          detail: { value: 'dark' }
+        })
+      );
     });
     expect(getThemeMode()).toBe('dark');
     expect(document.documentElement.getAttribute('data-lcl-theme')).toBe('dark');
