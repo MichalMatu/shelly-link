@@ -22,6 +22,106 @@
   --ion-color-primary-contrast-rgb: var(--lcl-color-accent-contrast-rgb);
   --ion-color-primary-shade: var(--lcl-color-accent-strong);
   --ion-color-primary-tint: color-mix(in srgb, var(--lcl-color-accent) 90%, white);
+  --ion-color-step-50: color-mix(
+    in srgb,
+    var(--lcl-color-text) 5%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-100: color-mix(
+    in srgb,
+    var(--lcl-color-text) 10%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-150: color-mix(
+    in srgb,
+    var(--lcl-color-text) 15%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-200: color-mix(
+    in srgb,
+    var(--lcl-color-text) 20%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-250: color-mix(
+    in srgb,
+    var(--lcl-color-text) 25%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-300: color-mix(
+    in srgb,
+    var(--lcl-color-text) 30%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-350: color-mix(
+    in srgb,
+    var(--lcl-color-text) 35%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-400: color-mix(
+    in srgb,
+    var(--lcl-color-text) 40%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-450: color-mix(
+    in srgb,
+    var(--lcl-color-text) 45%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-500: color-mix(
+    in srgb,
+    var(--lcl-color-text) 50%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-550: color-mix(
+    in srgb,
+    var(--lcl-color-text) 55%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-600: color-mix(
+    in srgb,
+    var(--lcl-color-text) 60%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-650: color-mix(
+    in srgb,
+    var(--lcl-color-text) 65%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-700: color-mix(
+    in srgb,
+    var(--lcl-color-text) 70%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-750: color-mix(
+    in srgb,
+    var(--lcl-color-text) 75%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-800: color-mix(
+    in srgb,
+    var(--lcl-color-text) 80%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-850: color-mix(
+    in srgb,
+    var(--lcl-color-text) 85%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-900: color-mix(
+    in srgb,
+    var(--lcl-color-text) 90%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-950: color-mix(
+    in srgb,
+    var(--lcl-color-text) 95%,
+    var(--lcl-color-background)
+  );
+  --app-ionic-accent-foreground: color-mix(
+    in srgb,
+    var(--lcl-color-accent) 80%,
+    var(--lcl-color-text)
+  );
 }
 
 html:root,
@@ -632,11 +732,24 @@ select {
   --background: var(--lcl-color-surface-muted);
   --border-color: var(--lcl-color-border);
   --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
   --padding-end: var(--lcl-spacing-md);
   --padding-start: var(--lcl-spacing-md);
 
   color: var(--lcl-color-text);
   font-weight: var(--lcl-font-weight-semibold);
+}
+
+.app-settings__appearance-segment ion-segment-button {
+  --color: var(--lcl-color-text-muted);
+  --color-checked: var(--app-ionic-accent-foreground);
+  --indicator-color: var(--app-ionic-accent-foreground);
+}
+
+ion-alert.app-settings__language-alert {
+  --background: var(--lcl-color-surface);
+  --ion-color-primary: var(--app-ionic-accent-foreground);
+  color: var(--lcl-color-text);
 }
 
 .app-settings__diagnostics {
