@@ -1,6 +1,6 @@
 # Handoff — Stage 9 stabilization
 
-Status: **2026-10-07 — V1 feature work is effectively closed. Physical reboot/power-cycle, BLE scanner recovery, real Wi-Fi loss/recovery, the final real-hardware matrix and the automation Detail/preproduction ownership closeout are complete. The only intentionally outstanding release blocker before freeze is the 8-hour soak. A two-Plug real-load harness is prepared and its 5-minute preflight smoke passed on 2026-10-07.**
+Status: **2026-10-07 — V1 feature work is effectively closed. The two-Plug real-load harness is qualified by a passing 5-minute smoke. The only intentionally outstanding release blocker before freeze is the prepared 8-hour soak. Resume from `docs/CHECKPOINT_2026-10-07_PRE_SOAK.md`.**
 
 Repository: MichalMatu/shelly-link
 
@@ -9,11 +9,12 @@ Repository: MichalMatu/shelly-link
 Start from fresh main and fresh Local Agent state. Read:
 
 1. AGENTS.md;
-2. this file;
-3. docs/ARCHITECTURE.md;
-4. docs/DEVELOPMENT_PLAN.md;
-5. docs/UX_VISUAL_CONTRACT.md when changing presentation;
-6. docs/testing/hardware-matrix.md and only the dated acceptance records relevant to the behavior being changed.
+2. docs/CHECKPOINT_2026-10-07_PRE_SOAK.md;
+3. this file;
+4. docs/ARCHITECTURE.md;
+5. docs/DEVELOPMENT_PLAN.md;
+6. docs/UX_VISUAL_CONTRACT.md when changing presentation;
+7. docs/testing/hardware-matrix.md and only the dated acceptance records relevant to the behavior being changed.
 
 Historical PR descriptions and chat state are not canonical.
 
