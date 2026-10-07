@@ -206,7 +206,6 @@ export const TimeInstallationDetail = ({
                   onPendingChange={setTimeEditPending}
                 />
               </AutomationDetail.Section>
-
             </AutomationDetail.Hierarchy>
 
             <div className="installation-detail-delete-action">
