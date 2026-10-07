@@ -14,15 +14,15 @@ import {
   createTimePulseScheduleJob,
   timePulseSchedulePairState
 } from './timeAutomationSchedule.js';
+import { replaceTimePulseAutomation } from './timePulseAutomationReplacement.js';
 import {
   deleteTimePulseAutomation,
   installTimePulseAutomation,
   pauseTimePulseAutomation,
   resumeTimePulseAutomation,
-  replaceTimePulseAutomation,
-  type OwnedTimePulseRuntimeInstallation,
-  type TimePulseAutomationClients
+  type OwnedTimePulseRuntimeInstallation
 } from './timePulseAutomationRuntime.js';
+import type { TimePulseAutomationClients } from './timePulseAutomationRuntimeSupport.js';
 
 const ok = <T>(value: T): Result<T> => ({ ok: true, value });
 const failure = (message: string) => ({
