@@ -402,6 +402,9 @@ const mockTimeShellyRpc = async (page: Page) => {
           }
         };
         break;
+      case 'Sys.GetStatus':
+        result = { ram_free: 64_000, ram_size: 262_144 };
+        break;
       case 'Script.List':
         result = { scripts: [] };
         break;
@@ -580,8 +583,9 @@ const expectTimeDetailHierarchy = async (page: Page) => {
   expect(hierarchyBox.x + hierarchyBox.width).toBeLessThanOrEqual(
     surfaceBox.x + surfaceBox.width + 1
   );
-  await expect(page.locator('.installation-detail-hierarchy__section')).toHaveCount(2);
-  await expect(page.locator('.installation-detail-danger-zone')).toHaveCount(1);
+  await expect(page.locator('.installation-detail-hierarchy__section')).toHaveCount(1);
+  await expect(page.locator('.installation-detail-danger-zone')).toHaveCount(0);
+  await expect(page.locator('.installation-detail-delete-action')).toHaveCount(1);
   await expect(page.locator('.installation-detail-header')).toHaveCount(0);
   await expect(page.locator('.installation-detail-live')).toHaveCount(0);
   await expect(page.locator('.app-page-back-row')).toHaveCount(0);
@@ -980,6 +984,12 @@ for (const viewport of viewports) {
     await expect(manual).toHaveAttribute('aria-pressed', 'false');
     await expect(on).toBeDisabled();
     await expect(off).toBeDisabled();
+    const timeLiveStatus = timeCard.locator('.automation-card__live-status');
+    await expect
+      .poll(() =>
+        timeLiveStatus.evaluate((element) => getComputedStyle(element).borderTopWidth)
+      )
+      .toBe('0px');
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '10-time-dashboard');
       await manual.click();
@@ -1006,6 +1016,13 @@ for (const viewport of viewports) {
     await expect(page.getByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    await expect(page.getByText('Stan bieżący', { exact: true })).toHaveCount(0);
+    await expect(
+      page.getByRole('heading', { name: 'Usuń automatykę czasową' })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole('button', { name: 'Usuń automatykę czasową' })
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: 'AUTO', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'MANUAL', exact: true })).toHaveCount(
       0
@@ -1026,6 +1043,10 @@ for (const viewport of viewports) {
     await expectTimeDetailHierarchy(page);
 
     await page.getByRole('button', { name: 'Informacje', exact: true }).click();
+    await expect(page.getByText('RAM Shelly wolny')).toBeVisible();
+    await expect(page.getByText('62.5 KiB')).toBeVisible();
+    await expect(page.getByText('RAM Shelly razem')).toBeVisible();
+    await expect(page.getByText('256.0 KiB')).toBeVisible();
     const forgetPlugButton = page.getByRole('button', {
       name: 'Usuń gniazdko tylko z aplikacji'
     });
