@@ -323,6 +323,18 @@ const installTimeShellyFetchMock = () => {
         if (body.params?.id !== undefined) scriptGetCodeIds.push(body.params.id);
         result = { data: '// time pulse exact source', left: 0 };
         break;
+      case 'Script.GetStatus':
+        result = {
+          running: true,
+          mem_used: 4096,
+          mem_peak: 8192,
+          mem_free: 16384,
+          cpu: 1.2
+        };
+        break;
+      case 'Sys.GetStatus':
+        result = { ram_size: 259128, ram_free: 90000 };
+        break;
       case 'Script.Eval':
         result = {
           result: JSON.stringify([2, 3, 3_665_000, 'po', 1, null, 3_600_000])
@@ -642,6 +654,9 @@ describe('InstallationDetailScreen', () => {
 
     renderDetail(saved.id);
 
+    expect(await screen.findByText('Czas ON (s)')).toBeVisible();
+    expect(screen.getByText('Czas OFF (s)')).toBeVisible();
+
     const scriptTab = await screen.findByRole('button', { name: 'Skrypt' });
     expect(scriptTab).toBeVisible();
     fireEvent.click(scriptTab);
@@ -649,5 +664,9 @@ describe('InstallationDetailScreen', () => {
     expect(await screen.findByText('// time pulse exact source')).toBeVisible();
     expect(shelly.rpcMethods).toContain('Script.GetCode');
     expect(shelly.scriptGetCodeIds).toEqual([9]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Informacje' }));
+    expect(await screen.findByText('87.9 KiB')).toBeVisible();
+    expect(await screen.findByText('4.0 KiB')).toBeVisible();
   });
 });
