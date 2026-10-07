@@ -76,25 +76,20 @@ describe('Shelly resource diagnostics', () => {
     });
   });
 
-  it(
-    'reads whole-device RAM without inventing script diagnostics for native Time',
-    async () => {
-      mocks.call.mockResolvedValue({
-        ok: true,
-        value: { ram_size: 259_128, ram_free: 96_180 }
-      });
+  it('reads whole-device RAM without inventing script diagnostics for native Time', async () => {
+    mocks.call.mockResolvedValue({
+      ok: true,
+      value: { ram_size: 259_128, ram_free: 96_180 }
+    });
 
-      await expect(
-        readShellyResourceDiagnostics('http://192.168.0.20/')
-      ).resolves.toEqual({
-        script: null,
-        system: { ramSizeBytes: 259_128, ramFreeBytes: 96_180 }
-      });
+    await expect(readShellyResourceDiagnostics('http://192.168.0.20/')).resolves.toEqual({
+      script: null,
+      system: { ramSizeBytes: 259_128, ramFreeBytes: 96_180 }
+    });
 
-      expect(mocks.call).toHaveBeenCalledTimes(1);
-      expect(mocks.call).toHaveBeenCalledWith({ method: 'Sys.GetStatus' });
-    }
-  );
+    expect(mocks.call).toHaveBeenCalledTimes(1);
+    expect(mocks.call).toHaveBeenCalledWith({ method: 'Sys.GetStatus' });
+  });
 
   it('preserves available device RAM when Script.GetStatus is unavailable', async () => {
     mocks.call
