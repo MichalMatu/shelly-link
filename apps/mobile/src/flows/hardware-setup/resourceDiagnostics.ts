@@ -47,14 +47,16 @@ const readPayload = async (
 
 export const readShellyResourceDiagnostics = async (
   baseUrl: string,
-  scriptId: number
+  scriptId?: number
 ): Promise<ShellyResourceDiagnostics> => {
   const transport = createShellyTransport(baseUrl);
   const [scriptPayload, systemPayload] = await Promise.all([
-    readPayload(transport, {
-      method: RPC_METHODS.ScriptGetStatus,
-      params: { id: scriptId }
-    }),
+    scriptId === undefined
+      ? Promise.resolve(null)
+      : readPayload(transport, {
+          method: RPC_METHODS.ScriptGetStatus,
+          params: { id: scriptId }
+        }),
     readPayload(transport, { method: RPC_METHODS.SysGetStatus })
   ]);
 
