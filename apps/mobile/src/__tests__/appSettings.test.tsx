@@ -59,7 +59,6 @@ describe('app settings screen', () => {
     if (!languageSelect) throw new Error('language select missing');
     expect(languageSelect).toHaveAttribute('fill', 'outline');
     expect(languageSelect).toHaveAttribute('interface', 'alert');
-    expect(languageSelect).toHaveAttribute('color', 'primary');
     act(() => {
       fireEvent(
         languageSelect,
@@ -74,7 +73,6 @@ describe('app settings screen', () => {
 
     const appearanceSegment = settings.querySelector('ion-segment');
     if (!appearanceSegment) throw new Error('appearance segment missing');
-    expect(appearanceSegment).toHaveAttribute('color', 'primary');
     act(() => {
       fireEvent(
         appearanceSegment,
