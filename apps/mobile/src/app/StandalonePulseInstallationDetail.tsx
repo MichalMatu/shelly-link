@@ -2,10 +2,10 @@ import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
+import { automationDetailCapabilities } from '../features/automations/automationPublic.js';
 import {
   AutomationDetail,
   AutomationHistorySection,
-  automationDetailCapabilities,
   ClimateScriptDetailSection,
   ClimateScriptDiagnosticsSection,
   Pulse,
