@@ -1,11 +1,7 @@
 import type { InstalledAutomation } from '../data/installedAutomation.js';
 
 export type AutomationDetailVariant =
-  | 'climate'
-  | 'climate-pulse'
-  | 'time'
-  | 'time-pulse'
-  | 'pulse';
+  'climate' | 'climate-pulse' | 'time' | 'time-pulse' | 'pulse';
 
 export type AutomationDetailIcon = 'temperature' | 'clock' | 'pulse';
 export type AutomationHistoryProfile = 'climate' | 'pulse';
@@ -23,9 +19,7 @@ export const automationDetailCapabilities = (
 ): AutomationDetailCapabilities => {
   if (installation.kind === 'climate') {
     return {
-      variant: installation.config.execution?.pulse
-        ? 'climate-pulse'
-        : 'climate',
+      variant: installation.config.execution?.pulse ? 'climate-pulse' : 'climate',
       automationIcon: 'temperature',
       hasHistory: true,
       hasScript: true,
