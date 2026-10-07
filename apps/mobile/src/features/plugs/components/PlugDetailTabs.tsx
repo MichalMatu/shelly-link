@@ -11,12 +11,7 @@ import { useTranslation } from '../../../app/i18n.js';
 import './PlugDetailTabs.css';
 
 export type PlugDetailTab =
-  | 'automation'
-  | 'history'
-  | 'ble'
-  | 'device'
-  | 'script'
-  | 'info';
+  'automation' | 'history' | 'ble' | 'device' | 'script' | 'info';
 export type PlugDetailAutomationIcon = 'temperature' | 'clock' | 'pulse';
 
 export const automationDetailTabs = ({
@@ -70,9 +65,7 @@ export const PlugDetailTabs = ({
 }: PlugDetailTabsProps) => {
   const { t } = useTranslation();
   const visibleTabs = tabs.filter((tab) =>
-    availableTabs === undefined
-      ? tab.id !== 'history'
-      : availableTabs.includes(tab.id)
+    availableTabs === undefined ? tab.id !== 'history' : availableTabs.includes(tab.id)
   );
 
   return (
