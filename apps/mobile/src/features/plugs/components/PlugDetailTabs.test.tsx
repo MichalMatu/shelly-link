@@ -72,10 +72,14 @@ describe('PlugDetailTabs', () => {
     );
   });
 
-  it('shows History only when the caller opts into that tab', () => {
+  it('shows History only when the capability-derived tabs include it', () => {
     render(
       <I18nProvider>
-        <PlugDetailTabs activeTab="history" showHistory onChange={vi.fn()} />
+        <PlugDetailTabs
+          activeTab="history"
+          availableTabs={automationDetailTabs({ hasHistory: true, hasScript: true })}
+          onChange={vi.fn()}
+        />
       </I18nProvider>
     );
     expect(screen.getByRole('button', { name: 'History' })).toHaveAttribute(
