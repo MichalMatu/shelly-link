@@ -1,4 +1,12 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within
+} from '@testing-library/react';
 import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { I18nProvider, getLocalePreference, setLocalePreference } from '../app/i18n.js';
 import { clearRuntimeIssues, reportRuntimeIssue } from '../app/runtimeDiagnostics.js';
