@@ -129,6 +129,8 @@ The broader mobile status language is presentation-only and reuses authoritative
 
 Frozen Climate dashboard/detail geometry remains an explicit UX contract. Shared status presentation must not move transport, persistence, polling or runtime ownership into React, and it must not bypass the accepted Climate golden contract merely to make components look structurally identical.
 
+Installed-automation Detail presentation has one capability owner. `automationDetailCapabilities` derives the variant, Automation tab icon, History availability/profile and Script availability from `InstalledAutomation`. Climate, Time and standalone Pulse screens consume that result instead of maintaining parallel tab rules. Automation-body composition remains variant-specific, while physical Plug Device/Info/BLE surfaces and generic script source/diagnostic presentation are reused. A Detail refactor must change ownership without recreating per-variant chrome or duplicate healthy dashboard state.
+
 ## Climate engine and persistent config
 
 The stable direction is:
