@@ -7,12 +7,7 @@ import { AutomationOperationalStatusSummary } from './components/AutomationOpera
 import { TimeOperationalStatusSummary } from './components/TimeOperationalStatusSummary.js';
 import { Pulse } from './pulsePublic.js';
 
-export {
-  automationDetailCapabilities,
-  type AutomationDetailCapabilities,
-  type AutomationDetailVariant,
-  type AutomationHistoryProfile
-} from './presentation/automationDetailCapabilities.js';
+export { automationDetailCapabilities } from './presentation/automationDetailCapabilities.js';
 
 export { Pulse };
 
