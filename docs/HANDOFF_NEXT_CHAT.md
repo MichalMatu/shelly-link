@@ -11,7 +11,7 @@ Start from fresh main and fresh Local Agent state. Read:
 1. AGENTS.md;
 2. this file;
 3. docs/ARCHITECTURE.md;
-4. docs/ROADMAP.md;
+4. docs/DEVELOPMENT_PLAN.md;
 5. docs/UX_VISUAL_CONTRACT.md when changing presentation;
 6. docs/testing/hardware-matrix.md and only the dated acceptance records relevant to the behavior being changed.
 
@@ -49,7 +49,7 @@ Focused lifecycle tests pass, `pnpm check` passes, and GitHub CI passed for the 
 
 ## Documentation policy
 
-Architecture contains durable contracts. Roadmap contains current/future product stages. This handoff contains only active state and immediate work. Real-device numbers, commit hashes, logs and one-off qualification narratives belong in docs/testing/ or Git history.
+Architecture contains durable contracts. Development Plan contains current/future product stages. This handoff contains only active state and immediate work. Real-device numbers, commit hashes, logs and one-off qualification narratives belong in docs/testing/ or Git history.
 
 Current visual truth is the committed E2E snapshots plus docs/UX_VISUAL_CONTRACT.md.
 
@@ -62,17 +62,9 @@ The soak is only the last V1 release gate. It is not the complete future-develop
 
 ## Post-freeze continuation
 
-Continue from `docs/ROADMAP.md` in this order:
+The canonical post-freeze sequence lives only in `docs/DEVELOPMENT_PLAN.md`.
 
-1. complete the remaining Shelly-management parity over BLE, especially the current BLE-only mutation/automation-lifecycle gaps;
-2. add **Shelly Power Strip 4 Gen4** as the first multi-output device, preserving one physical device with four separately owned outputs rather than four duplicate Plug records/screens;
-3. start the large graphical frontend redesign against that generalized transport/device/output model.
-
-Do not collapse these tracks back into a vague “Gen4 support” or hide them behind the soak/release checklist.
-
-The non-soak Stage 9 hardware closeout is complete: Wi-Fi loss/recovery passed without credential changes; Xiaomi/PVVX and TP357 each passed 8/8 matrix cases; the production Plug remained on its existing enabled/running Climate runtime; and the separate test Plug was restored to Matter ON, zero scripts, zero schedules and relay OFF.
-
-Do not use stabilization as an excuse to add new Pulse modes, Environment Profiles or another generic UX-polish round.
+Do not duplicate the future roadmap in this handoff. Its purpose is the active continuation state and immediate V1 closeout only.
 
 ## Automation Detail closeout — 2026-10-07
 
