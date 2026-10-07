@@ -179,9 +179,9 @@ export const AppSettingsScreen = () => {
           <IonSelect
             aria-label={t('settings.language.title')}
             className="app-settings__language-select"
-            color="primary"
             fill="outline"
             interface="alert"
+            interfaceOptions={{ cssClass: 'app-settings__language-alert' }}
             cancelText={t('common.cancel')}
             okText={t('common.select')}
             value={localePreference}
@@ -211,7 +211,7 @@ export const AppSettingsScreen = () => {
           </div>
           <IonSegment
             aria-label={t('settings.appearance.title')}
-            color="primary"
+            className="app-settings__appearance-segment"
             value={themeMode}
             onIonChange={(event) => {
               const value = event.detail.value;
