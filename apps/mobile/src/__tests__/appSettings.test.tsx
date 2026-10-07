@@ -96,10 +96,16 @@ describe('app settings screen', () => {
     expect(getThemeMode()).toBe('dark');
     expect(document.documentElement.getAttribute('data-lcl-theme')).toBe('dark');
 
-    await act(async () => {
-      fireEvent.click(
-        within(settings).getByRole('button', { name: 'Support-Bericht kopieren' })
+    const ionicAction = (label: string) => {
+      const action = Array.from(settings.querySelectorAll('ion-button')).find(
+        (element) => element.textContent?.trim() === label
       );
+      if (!action) throw new Error(`settings Ionic action missing: ${label}`);
+      return action;
+    };
+
+    await act(async () => {
+      fireEvent.click(ionicAction('Support-Bericht kopieren'));
     });
 
     expect(writeText).toHaveBeenCalledWith(
@@ -109,5 +115,10 @@ describe('app settings screen', () => {
     expect(writeText).toHaveBeenCalledWith(
       expect.stringContaining('manual: client saw a blank screen')
     );
+
+    act(() => {
+      fireEvent.click(ionicAction('Diagnose löschen'));
+    });
+    expect(within(settings).queryByText(/client saw a blank screen/)).toBeNull();
   });
 });
