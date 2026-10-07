@@ -180,8 +180,11 @@ export class RpcShellyPlugsUiClient {
       return { ok: false, error: validationError(parsedMethods.error.message) };
     }
 
-    const canRead = parsedMethods.data.methods.includes(RPC_METHODS.PlugsUiGetConfig);
-    const canWrite = parsedMethods.data.methods.includes(RPC_METHODS.PlugsUiSetConfig);
+    const methods = new Set(
+      parsedMethods.data.methods.map((method) => method.trim().toLowerCase())
+    );
+    const canRead = methods.has(RPC_METHODS.PlugsUiGetConfig.toLowerCase());
+    const canWrite = methods.has(RPC_METHODS.PlugsUiSetConfig.toLowerCase());
     if (!canRead || (requireWrite && !canWrite)) {
       return { ok: true, value: { supported: false } };
     }
