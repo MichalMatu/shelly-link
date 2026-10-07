@@ -285,7 +285,10 @@ describe('Time + Pulse runtime lifecycle', () => {
 
   it('replaces Time + Pulse in place and preserves the owned schedule pair', async () => {
     const fake = new FakeTimePulseClients();
-    const installed = await installTimePulseAutomation({ clients: fake.bundle(), config });
+    const installed = await installTimePulseAutomation({
+      clients: fake.bundle(),
+      config
+    });
     const installation = {
       version: 1 as const,
       id: 'time:shelly-time-pulse:0',
@@ -317,7 +320,10 @@ describe('Time + Pulse runtime lifecycle', () => {
 
     expect(updated.config).toEqual(nextConfig.schedule);
     expect(updated.pulseRuntime.pulse).toEqual(nextConfig.pulse);
-    expect(updated.pulseRuntime.script).toEqual({ id: 7, hash: 'time-pulse-replaced' });
+    expect(updated.pulseRuntime.script).toEqual({
+      id: 7,
+      hash: 'time-pulse-replaced'
+    });
     expect(updated.schedule).toEqual(installed.schedule);
     expect(fake.replacementCode).toContain('21:30');
     expect(
