@@ -94,6 +94,56 @@ const mockStandalonePulseRpc = async (
           }
         };
         break;
+      case 'Shelly.ListMethods':
+        result = {
+          methods: [
+            'plugs_ui.GetConfig',
+            'plugs_ui.SetConfig',
+            'Cloud.GetConfig',
+            'Cloud.SetConfig',
+            'Cloud.GetStatus'
+          ]
+        };
+        break;
+      case 'PLUGS_UI.GetConfig':
+        result = {
+          leds: {
+            mode: 'switch',
+            colors: {
+              'switch:0': {
+                on: { rgb: [0, 100, 0], brightness: 100 },
+                off: { rgb: [100, 0, 0], brightness: 75 }
+              },
+              power: { brightness: 80 }
+            },
+            night_mode: {
+              enable: true,
+              brightness: 10,
+              active_between: ['22:00', '06:00']
+            }
+          },
+          controls: { 'switch:0': { in_mode: 'momentary' } }
+        };
+        break;
+      case 'Cloud.GetConfig':
+        result = { enable: false };
+        break;
+      case 'Cloud.GetStatus':
+        result = { connected: false };
+        break;
+      case 'Sys.GetStatus':
+        result = { ram_free: 140_152, ram_size: 270_676 };
+        break;
+      case 'Script.GetStatus':
+        result = {
+          id: 7,
+          running: scriptRunning,
+          mem_used: 2_100,
+          mem_peak: 4_914,
+          mem_free: 23_086,
+          cpu: 1
+        };
+        break;
       case 'Script.List':
         result = {
           scripts: scriptPresent
@@ -219,6 +269,12 @@ for (const viewport of viewports) {
     await expect(card).toContainText('320 Wh');
     await expect(card).toContainText('14:00');
     await expect(compactStatus).toBeVisible();
+    const pulseLiveStatus = card.locator('.automation-card__live-status');
+    await expect
+      .poll(() =>
+        pulseLiveStatus.evaluate((element) => getComputedStyle(element).borderTopWidth)
+      )
+      .toBe('0px');
     await expect(compactStatus.getByText('ON', { exact: true })).toBeVisible();
     await expect(compactStatus).toContainText('3 cykli');
     await expect(compactStatus).toContainText('1m 5s');
@@ -249,30 +305,21 @@ for (const viewport of viewports) {
     await expectPulseRuntimeControlsAbsent(page);
 
     const detailSurface = page.locator('.plug-detail-surface');
-    const fullStatus = detailSurface.getByLabel('Stan Pulse');
-    await expect(fullStatus).toBeVisible();
-    await expect(fullStatus).toContainText('Aktualny');
-    await expect(fullStatus).toContainText('3 cykli');
-    await expect(fullStatus).toContainText('1m 5s');
-    await expect(fullStatus).toContainText('Faza ON');
-    await expect(fullStatus).toContainText('Błąd automatyki');
-    await expect(fullStatus).toContainText('Brak');
-    await expect(fullStatus).toContainText('Twarde bezpieczeństwo');
-    await expect(detailSurface).toContainText('30 s');
-    await expect(detailSurface).toContainText('60 s');
+    await expect(detailSurface.getByLabel('Stan Pulse')).toHaveCount(0);
+    await expect(detailSurface.getByText('Stan bieżący', { exact: true })).toHaveCount(0);
+    await expect(page.getByLabel('Czas ON (s)')).toHaveValue('30');
+    await expect(page.getByLabel('Czas OFF (s)')).toHaveValue('60');
+    await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zapisz zmiany' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Edytuj cykl' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Usuń automatykę' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Usuń automatykę' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Bluetooth' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Skrypt' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     const surfaceBox = await detailSurface.boundingBox();
-    const fullBox = await fullStatus.boundingBox();
     expect(surfaceBox).not.toBeNull();
-    expect(fullBox).not.toBeNull();
-    expect(fullBox!.x).toBeGreaterThanOrEqual(surfaceBox!.x - 1);
-    expect(fullBox!.x + fullBox!.width).toBeLessThanOrEqual(
-      surfaceBox!.x + surfaceBox!.width + 1
-    );
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '29-standalone-pulse-detail');
     }
@@ -295,6 +342,25 @@ for (const viewport of viewports) {
     await expect(
       page.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
     ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
+    await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Tryb LED' })).toContainText(
+      'Sygnalizuj ON/OFF'
+    );
+    await expect(page.getByText(/nie udostępnia ustawień PLUGS_UI/i)).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole('button', { name: 'Informacje' }).click();
+    await expect(page.getByText('RAM Shelly wolny')).toBeVisible();
+    await expect(page.getByText('136.9 KiB')).toBeVisible();
+    await expect(page.getByText('RAM Shelly razem')).toBeVisible();
+    await expect(page.getByText('264.3 KiB')).toBeVisible();
+    await expect(page.getByText('CPU skryptu')).toBeVisible();
+    await expect(page.getByText('JS użyte teraz')).toBeVisible();
+    await expect(page.getByText('JS peak')).toBeVisible();
+    await expect(page.getByText('JS wolne')).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 }
