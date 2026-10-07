@@ -211,7 +211,9 @@ export const formatScriptDiagnosticRows = (
           ? 'STOPPED'
           : missing
   },
-  { label: t('hardware.metrics.configHash'), value: input.configHash ?? missing },
+  ...(input.configHash === undefined
+    ? []
+    : [{ label: t('hardware.metrics.configHash'), value: input.configHash ?? missing }]),
   {
     label: t('hardware.diagnostics.scriptCpu'),
     value: formatDiagnosticNumber(input.cpuPercent, '%', missing, 1)
@@ -313,7 +315,7 @@ export const formatClimateDetailDiagnostics = ({
     bleSensors: formatClimateBleSensorPresentations(sensors, snapshot, missing, t),
     scriptRows: formatAutomationResourceDiagnosticRows({
       resources,
-      configHash: snapshot?.script?.configHash,
+      configHash: snapshot?.script?.configHash ?? null,
       dataUpdatedAt,
       nowMs,
       missing,
