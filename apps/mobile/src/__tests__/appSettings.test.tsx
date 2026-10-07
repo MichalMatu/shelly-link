@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { I18nProvider, getLocalePreference, setLocalePreference } from '../app/i18n.js';
 import { clearRuntimeIssues, reportRuntimeIssue } from '../app/runtimeDiagnostics.js';
@@ -55,8 +55,11 @@ describe('app settings screen', () => {
     fireEvent.click(diagnostics.querySelector('summary')!);
     expect(within(settings).getByText(/client saw a blank screen/)).toBeInTheDocument();
 
-    const languageSelect = settings.querySelector('ion-select');
-    if (!languageSelect) throw new Error('language select missing');
+    const languageSelect = await waitFor(() => {
+      const element = settings.querySelector('ion-select');
+      if (!element) throw new Error('language select missing');
+      return element;
+    });
     expect(languageSelect).toHaveAttribute('fill', 'outline');
     expect(languageSelect).toHaveAttribute('interface', 'alert');
     act(() => {
