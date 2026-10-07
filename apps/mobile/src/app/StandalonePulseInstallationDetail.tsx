@@ -127,10 +127,6 @@ export const StandalonePulseInstallationDetail = ({
             )}
 
             <AutomationDetail.Hierarchy>
-              <AutomationDetail.Section title={t('detail.currentState')}>
-                <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-              </AutomationDetail.Section>
-
               <Pulse.Standalone.ConfigurationSection
                 installation={installation}
                 onPendingChange={setEditPending}
@@ -141,18 +137,18 @@ export const StandalonePulseInstallationDetail = ({
                 }}
                 onSaveError={() => pushToast('warning', managementLabels.saveFailed)}
               />
-
-              <AutomationDetail.DangerZone title={managementLabels.deleteAction}>
-                <button
-                  className="secondary-action secondary-action--danger"
-                  type="button"
-                  disabled={deleteMutation.isPending || editPending}
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  {managementLabels.deleteAction}
-                </button>
-              </AutomationDetail.DangerZone>
             </AutomationDetail.Hierarchy>
+
+            <div className="installation-detail-delete-action">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={deleteMutation.isPending || editPending}
+                onClick={() => setDeleteOpen(true)}
+              >
+                {managementLabels.deleteAction}
+              </button>
+            </div>
           </>
         )}
 
