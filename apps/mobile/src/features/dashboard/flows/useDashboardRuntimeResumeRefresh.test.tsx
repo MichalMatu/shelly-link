@@ -20,7 +20,8 @@ vi.mock('@capacitor/app', () => ({
 
 import { useDashboardRuntimeResumeRefresh } from './useDashboardRuntimeResumeRefresh.js';
 
-const createWrapper = (queryClient: QueryClient) =>
+const createWrapper =
+  (queryClient: QueryClient) =>
   ({ children }: PropsWithChildren) =>
     createElement(QueryClientProvider, { client: queryClient }, children);
 
@@ -32,10 +33,7 @@ describe('useDashboardRuntimeResumeRefresh', () => {
     mocks.remove.mockClear();
     mocks.listener = null;
     mocks.addListener.mockImplementation(
-      async (
-        _eventName: string,
-        listener: (state: { isActive: boolean }) => void
-      ) => {
+      async (_eventName: string, listener: (state: { isActive: boolean }) => void) => {
         mocks.listener = listener;
         return { remove: mocks.remove };
       }
