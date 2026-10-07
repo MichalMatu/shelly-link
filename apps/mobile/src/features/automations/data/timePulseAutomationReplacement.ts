@@ -99,14 +99,10 @@ export const replaceTimePulseAutomation = async ({
 
   await forceTimePulseOff(clients, scriptId);
   const replaced = unwrapShellyResult(
-    await clients.device.replaceScript(
-      scriptId,
-      generateShellyTimePulseScript(config),
-      {
-        expectedCurrentHash: installation.pulseRuntime.script.hash,
-        relayId: config.schedule.relayId
-      }
-    )
+    await clients.device.replaceScript(scriptId, generateShellyTimePulseScript(config), {
+      expectedCurrentHash: installation.pulseRuntime.script.hash,
+      relayId: config.schedule.relayId
+    })
   );
   if (replaced.scriptId !== scriptId) {
     await restoreTimePulseRuntime(installation, clients, enabled);
