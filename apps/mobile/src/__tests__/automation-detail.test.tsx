@@ -619,7 +619,11 @@ describe('InstallationDetailScreen', () => {
     expect(screen.queryByRole('button', { name: 'Edytuj' })).toBeNull();
     expect(screen.queryByText('Natywny Shelly Schedule')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Skrypt' })).toBeNull();
-    expect(await screen.findByText('12:00')).toBeVisible();
+    expect(screen.queryByText('12:00')).toBeNull();
+    expect(screen.queryByText('Stan bieżący', { exact: true })).toBeNull();
+    expect(
+      screen.queryByRole('heading', { name: 'Usuń automatykę czasową' })
+    ).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Usuń automatykę czasową' }));
     const dialog = screen.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
