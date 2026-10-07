@@ -23,7 +23,9 @@ export const automationDetailCapabilities = (
 ): AutomationDetailCapabilities => {
   if (installation.kind === 'climate') {
     return {
-      variant: installation.config.execution?.pulse ? 'climate-pulse' : 'climate',
+      variant: installation.config.execution?.pulse
+        ? 'climate-pulse'
+        : 'climate',
       automationIcon: 'temperature',
       hasHistory: true,
       hasScript: true,
