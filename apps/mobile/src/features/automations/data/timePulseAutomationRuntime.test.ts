@@ -19,6 +19,7 @@ import {
   installTimePulseAutomation,
   pauseTimePulseAutomation,
   resumeTimePulseAutomation,
+  replaceTimePulseAutomation,
   type OwnedTimePulseRuntimeInstallation,
   type TimePulseAutomationClients
 } from './timePulseAutomationRuntime.js';
@@ -66,6 +67,7 @@ class FakeTimePulseClients {
   failDeleteScript = false;
   calls: string[] = [];
   installedPlan: ShellyInstallPlan | null = null;
+  replacementCode: string | null = null;
 
   readonly device: TimePulseAutomationClients['device'] = {
     getDeviceInfo: async () =>
@@ -80,6 +82,15 @@ class FakeTimePulseClients {
         scriptId,
         running: true,
         scriptHash: 'time-pulse-hash'
+      } satisfies ShellyInstallResult);
+    },
+    replaceScript: async (scriptId, code) => {
+      this.calls.push(`script:replace:${scriptId}`);
+      this.replacementCode = code;
+      return ok({
+        scriptId,
+        running: true,
+        scriptHash: 'time-pulse-replaced'
       } satisfies ShellyInstallResult);
     },
     stopScript: async (scriptId) => {
@@ -270,6 +281,55 @@ describe('Time + Pulse runtime lifecycle', () => {
     expect(fake.calls).toContain('script:eval:7:rq(false)');
     expect(fake.calls).toContain('script:stop:7');
     expect(fake.calls.at(-1)).toBe('relay:off');
+  });
+
+  it('replaces Time + Pulse in place and preserves the owned schedule pair', async () => {
+    const fake = new FakeTimePulseClients();
+    const installed = await installTimePulseAutomation({ clients: fake.bundle(), config });
+    const installation = {
+      version: 1 as const,
+      id: 'time:shelly-time-pulse:0',
+      shelly: {
+        deviceId: 'shelly-time-pulse',
+        name: 'Time Pulse',
+        baseUrl: 'http://192.168.0.20/',
+        model: 'S3PL-00112EU',
+        gen: 3
+      },
+      schedule: installed.schedule,
+      config: config.schedule,
+      pulseRuntime: { script: installed.script, pulse: config.pulse },
+      kind: 'time' as const,
+      installedAtMs: 1,
+      updatedAtMs: 1
+    };
+    const nextConfig = {
+      schedule: { ...config.schedule, onTime: '21:30', offTime: '05:45' },
+      pulse: { ...config.pulse, onMs: 3_000, offMs: 4_000 }
+    };
+
+    const updated = await replaceTimePulseAutomation({
+      installation,
+      config: nextConfig,
+      clients: fake.bundle(),
+      nowMs: 2
+    });
+
+    expect(updated.config).toEqual(nextConfig.schedule);
+    expect(updated.pulseRuntime.pulse).toEqual(nextConfig.pulse);
+    expect(updated.pulseRuntime.script).toEqual({ id: 7, hash: 'time-pulse-replaced' });
+    expect(updated.schedule).toEqual(installed.schedule);
+    expect(fake.replacementCode).toContain('21:30');
+    expect(
+      timePulseSchedulePairState(
+        {
+          schedule: updated.schedule,
+          config: updated.config,
+          scriptId: updated.pulseRuntime.script.id
+        },
+        fake.jobs
+      ).scheduleState
+    ).toBe('running');
   });
 
   it('delete cancels, removes schedules and script, and finishes with relay OFF', async () => {
