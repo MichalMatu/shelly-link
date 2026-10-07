@@ -11,7 +11,12 @@ import { useTranslation } from '../../../app/i18n.js';
 import './PlugDetailTabs.css';
 
 export type PlugDetailTab =
-  'automation' | 'history' | 'ble' | 'device' | 'script' | 'info';
+  | 'automation'
+  | 'history'
+  | 'ble'
+  | 'device'
+  | 'script'
+  | 'info';
 export type PlugDetailAutomationIcon = 'temperature' | 'clock' | 'pulse';
 
 export const automationDetailTabs = ({
