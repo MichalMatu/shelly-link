@@ -8,7 +8,6 @@ import {
   AutomationDetail,
   ClimateScriptDetailSection,
   ClimateScriptDiagnosticsSection,
-  OperationalStatus,
   deleteTimeAutomation,
   Pulse,
   timePulseAutomationRuntime,
@@ -145,25 +144,6 @@ export const TimeInstallationDetail = ({
             )}
 
             <AutomationDetail.Hierarchy>
-              <AutomationDetail.Section title={t('detail.currentState')}>
-                {pulseInstallation ? (
-                  <Pulse.Operational.StatusSummary status={pulseQuery.data} />
-                ) : (
-                  <OperationalStatus.TimeSummary
-                    config={installation.config}
-                    localTime={runtimeQuery.data?.clock.localTime}
-                    relayOn={runtimeQuery.data?.relayOn}
-                    state={runtimeState}
-                  />
-                )}
-                <dl className="automation-summary installation-detail-summary installation-detail-summary--flush">
-                  <div>
-                    <dt>{t('time.clock')}</dt>
-                    <dd>{runtimeQuery.data?.clock.localTime ?? '—'}</dd>
-                  </div>
-                </dl>
-              </AutomationDetail.Section>
-
               <AutomationDetail.Section title={t('detail.configuration')}>
                 <TimeScheduleSetupPage
                   flow={{
@@ -185,18 +165,18 @@ export const TimeInstallationDetail = ({
                   onPendingChange={setTimeEditPending}
                 />
               </AutomationDetail.Section>
-
-              <AutomationDetail.DangerZone title={t('time.detail.delete')}>
-                <button
-                  className="secondary-action secondary-action--danger"
-                  type="button"
-                  disabled={deleteMutation.isPending || timeEditPending}
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  {t('time.detail.delete')}
-                </button>
-              </AutomationDetail.DangerZone>
             </AutomationDetail.Hierarchy>
+
+            <div className="installation-detail-delete-action">
+              <button
+                className="secondary-action secondary-action--danger"
+                type="button"
+                disabled={deleteMutation.isPending || timeEditPending}
+                onClick={() => setDeleteOpen(true)}
+              >
+                {t('time.detail.delete')}
+              </button>
+            </div>
           </>
         )}
 
