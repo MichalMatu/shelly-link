@@ -9,8 +9,8 @@ import { installationHealthCopy } from '../app/locales/installationHealth.js';
 import { installationScriptPreviewCopy } from '../app/locales/installationScriptPreview.js';
 import { useTranslation } from '../app/i18n.js';
 import { AppToastViewport, useToastQueue } from '../components/AppToastViewport.js';
-import { automationDetailCapabilities } from '../features/automations/automationPublic.js';
 import {
+  AutomationDetail,
   AutomationHistorySection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
@@ -125,7 +125,7 @@ const ClimateInstallationDetail = ({
   const [preparedAutomationDraftId, setPreparedAutomationDraftId] = useState<
     string | null
   >(null);
-  const detailCapabilities = automationDetailCapabilities(installation);
+  const detailCapabilities = AutomationDetail.capabilities(installation);
   const diagnosticsQuery = useInstalledAutomationDiagnostics(installation);
   const controlQuery = useInstalledAutomationControl(installation);
   const historyQuery = useAutomationHistory(installation, {
