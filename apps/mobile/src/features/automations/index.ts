@@ -2,11 +2,13 @@ export {
   ClimateAutomationDetailSection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
-  ClimateScriptDetailSection,
-  ClimateScriptDiagnosticsSection,
-  type ClimateBleSensorView,
-  type ClimateScriptDiagnosticRow
+  type ClimateBleSensorView
 } from './components/ClimateInstallationDetailSections.js';
+export {
+  AutomationScriptDetailSection,
+  AutomationScriptDiagnosticsSection,
+  type AutomationScriptDiagnosticRow
+} from './components/AutomationScriptDetailSections.js';
 export {
   readShellyAutomationScriptState,
   readShellyControlStatus,
