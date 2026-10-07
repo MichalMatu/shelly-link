@@ -14,8 +14,8 @@ import {
   AutomationHistorySection,
   ClimateRecoverySection,
   ClimateBleDetailSection,
-  ClimateScriptDetailSection,
-  ClimateScriptDiagnosticsSection,
+  AutomationScriptDetailSection,
+  AutomationScriptDiagnosticsSection,
   useAutomationHistory
 } from '../features/automations/index.js';
 import {
@@ -344,7 +344,7 @@ const ClimateInstallationDetail = ({
         )}
 
         {activeTab === 'script' && (
-          <ClimateScriptDetailSection
+          <AutomationScriptDetailSection
             attentionTitle={t('dashboard.health.attention')}
             {...(scriptMatch !== 'matched'
               ? { attentionMessage: t('detail.scriptNeedsAttention') }
@@ -376,7 +376,7 @@ const ClimateInstallationDetail = ({
               deviceRamFreeBytes={resources?.system?.ramFreeBytes}
               deviceRamTotalBytes={resources?.system?.ramSizeBytes}
             />
-            <ClimateScriptDiagnosticsSection
+            <AutomationScriptDiagnosticsSection
               title={t('common.diagnostics')}
               rows={scriptRows}
             />
