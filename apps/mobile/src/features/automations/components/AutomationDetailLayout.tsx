@@ -25,18 +25,3 @@ export const AutomationDetailSection = ({
     {children}
   </section>
 );
-
-type AutomationDetailDangerZoneProps = {
-  title: ReactNode;
-  children: ReactNode;
-};
-
-export const AutomationDetailDangerZone = ({
-  title,
-  children
-}: AutomationDetailDangerZoneProps) => (
-  <section className="installation-detail-danger-zone">
-    <h3 className="installation-detail-hierarchy__title">{title}</h3>
-    {children}
-  </section>
-);
