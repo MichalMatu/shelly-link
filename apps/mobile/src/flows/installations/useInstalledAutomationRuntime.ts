@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { readShellyResourceDiagnostics } from '../hardware-setup/resourceDiagnostics.js';
-import type { ClimateInstalledAutomation, InstalledAutomation } from './model.js';
+import type {
+  ClimateInstalledAutomation,
+  InstalledAutomation
+} from './model.js';
 import {
   enterInstalledAutomationManualMode,
   readInstalledAutomationControlStatus,
