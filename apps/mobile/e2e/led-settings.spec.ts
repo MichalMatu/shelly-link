@@ -394,12 +394,12 @@ for (const viewport of viewports) {
     await mockShelly(page, 'climate');
     await openDetail(page);
 
-    await expect(page.getByText('Zużycie energii')).toBeVisible();
-    await expect(page.getByLabel('Jasność trybu mocy')).toHaveValue('80');
-    await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
+    await expect(page.locator('ion-select[aria-label="Tryb LED"]')).toHaveAttribute('value', 'power');
+    await expect(page.locator('ion-input[aria-label="Jasność trybu mocy"] input')).toHaveValue('80');
+    await expect(page.locator('ion-input[aria-label="Jasność nocna"] input')).toHaveValue('10');
 
     const section = page.locator('.installation-detail-device-led');
-    const mode = section.getByRole('button', { name: 'Tryb LED' });
+    const mode = section.locator('ion-select[aria-label="Tryb LED"]');
     await mode.click();
     await page.getByRole('option', { name: 'Sygnalizuj ON/OFF' }).click();
     const colorGrids = section.locator('.plug-color-presets');
@@ -429,27 +429,27 @@ test('PLUGS_UI LED relay-state and off modes work end to end', async ({ page }) 
   await openDetail(page);
 
   const section = page.locator('.installation-detail-device-led');
-  const mode = section.getByRole('button', { name: 'Tryb LED' });
+  const mode = section.locator('ion-select[aria-label="Tryb LED"]');
   await mode.click();
   await page.getByRole('option', { name: 'Sygnalizuj ON/OFF' }).click();
-  await expect(mode).toContainText('Sygnalizuj ON/OFF');
+  await expect(mode).toHaveAttribute('value', 'switch');
   await expect(section.getByRole('button', { name: 'ON #00ff00' })).toHaveAttribute(
     'aria-pressed',
     'true'
   );
-  await expect(section.getByLabel('ON Jasność')).toHaveValue('100');
+  await expect(section.locator('ion-input[aria-label="ON Jasność"] input')).toHaveValue('100');
   await expect(section.getByRole('button', { name: 'OFF #ff0000' })).toHaveAttribute(
     'aria-pressed',
     'true'
   );
-  await expect(section.getByLabel('OFF Jasność')).toHaveValue('100');
+  await expect(section.locator('ion-input[aria-label="OFF Jasność"] input')).toHaveValue('100');
   await section.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
   await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
   expect(mock.ledSetRequests.at(-1)).toEqual({ mode: 'switch' });
 
   await mode.click();
   await page.getByRole('option', { name: 'Wyłączona' }).click();
-  await expect(mode).toContainText('Wyłączona');
+  await expect(mode).toHaveAttribute('value', 'off');
   await section.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
   await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
   expect(mock.ledSetRequests.at(-1)).toEqual({ mode: 'off' });
@@ -466,12 +466,12 @@ test('PLUGS_UI night mode editor handles the real empty disabled window', async 
   const mock = await mockShelly(page, 'climate');
   await openDetail(page);
 
-  await expect(page.getByLabel('Początek')).toHaveValue('22:00');
-  await expect(page.getByLabel('Koniec')).toHaveValue('06:00');
-  await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
-  await page.getByLabel('Włącz tryb nocny').check();
-  await page.getByLabel('Jasność nocna').fill('7');
-  await page.getByLabel('Początek').fill('23:30');
+  await expect(page.locator('ion-input[aria-label="Początek"] input')).toHaveValue('22:00');
+  await expect(page.locator('ion-input[aria-label="Koniec"] input')).toHaveValue('06:00');
+  await expect(page.locator('ion-input[aria-label="Jasność nocna"] input')).toHaveValue('10');
+  await page.locator('ion-toggle[aria-label="Włącz tryb nocny"]').click();
+  await page.locator('ion-input[aria-label="Jasność nocna"] input').fill('7');
+  await page.locator('ion-input[aria-label="Początek"] input').fill('23:30');
   await page.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
 
   await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
@@ -506,7 +506,7 @@ test('plain saved Plug exposes the same LED settings without an installed automa
   await expectNoHorizontalOverflow(page);
   await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
-  await expect(page.getByLabel('Jasność nocna')).toHaveValue('10');
+  await expect(page.locator('ion-input[aria-label="Jasność nocna"] input')).toHaveValue('10');
   await expectVisualScreen(page, '17-plain-plug-settings');
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
@@ -564,7 +564,7 @@ test('time installation exposes the same device-level LED settings', async ({ pa
 
   await expect(page.getByRole('heading', { name: 'Lampa' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
-  await expect(page.getByText('Zużycie energii')).toBeVisible();
+  await expect(page.locator('ion-select[aria-label="Tryb LED"]')).toHaveAttribute('value', 'power');
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
 });
