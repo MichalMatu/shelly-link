@@ -230,7 +230,7 @@ const setupUxSegmentedControlFixture = async (root) => {
   await writeFixture(
     root,
     'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
-    'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
+    'export const Fixture = () => <IonSegment className="sensor-add-mode-segment" selectOnFocus={false} swipeGesture={false}><IonSegmentButton /></IonSegment>;\n'
   );
   await writeFixture(
     root,
@@ -322,6 +322,22 @@ await executeCase({
   },
   expectedFailure:
     'setup segmented navigation must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup',
+  env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
+});
+
+await executeCase({
+  name: 'ux/Add Thermometer requires controlled Ionic segment',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxSegmentedControlFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
+      'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
+    );
+  },
+  expectedFailure:
+    'Add Thermometer mode selection must use the controlled Ionic segment without focus/swipe side effects',
   env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
 });
 
