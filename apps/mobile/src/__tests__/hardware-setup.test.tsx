@@ -201,22 +201,18 @@ const chooseSelectField = (
   optionLabel: string,
   container: HTMLElement = document.body
 ) => {
-  const ionicSelect = Array.from(container.querySelectorAll('ion-select')).find(
-    (element) => {
-      try {
-        return getIonicSelect(container, label) === element;
-      } catch {
-        return false;
-      }
+  if (container.querySelector('ion-select')) {
+    try {
+      const ionicSelect = getIonicSelect(container, label);
+      const option = Array.from(ionicSelect.querySelectorAll('ion-select-option')).find(
+        (element) => element.textContent?.trim() === optionLabel
+      );
+      if (!option) throw new Error(`Ionic option missing: ${optionLabel}`);
+      fireIonChange(ionicSelect, option.getAttribute('value'));
+      return;
+    } catch {
+      // Fall through to the legacy shared select control.
     }
-  );
-  if (ionicSelect) {
-    const option = Array.from(ionicSelect.querySelectorAll('ion-select-option')).find(
-      (element) => element.textContent?.trim() === optionLabel
-    );
-    if (!option) throw new Error(`Ionic option missing: ${optionLabel}`);
-    fireIonChange(ionicSelect, option.getAttribute('value'));
-    return;
   }
 
   const scope = within(container);
@@ -2457,7 +2453,7 @@ describe('HardwareSetupScreen', () => {
     expect(within(xiaomiItem!).getByText('21.3°C')).toBeInTheDocument();
     expect(within(xiaomiItem!).getByText('45.7%')).toBeInTheDocument();
     expect(within(xiaomiItem!).getByText('-58 dBm')).toBeInTheDocument();
-    const bleScanControl = within(page).getByRole('button', { name: 'Stop skanu' });
+    const bleScanControl = getIonicButton(page, 'Stop skanu');
     expect(bleScanControl).toHaveClass('device-scan-action');
     expect(bleScanControl).toHaveAttribute('aria-busy', 'true');
     expect(bleScanControl.querySelector('.device-scan-action__spinner')).not.toBeNull();
