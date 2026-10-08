@@ -35,6 +35,7 @@ const cssPaths = [
   'apps/mobile/src/features/automations/components/AutomationDetailLayout.css',
   'apps/mobile/src/features/thermometers/components/ThermometerSettingsPage.css',
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
+  'apps/mobile/src/features/plugs/components/PlugAddPage.css',
   'apps/mobile/src/features/plugs/components/PlugAddSpeedDial.css',
   'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',
   'packages/ui/src/primitives/ColorSwatch.css',
