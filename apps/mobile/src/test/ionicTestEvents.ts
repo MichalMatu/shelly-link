@@ -1,11 +1,43 @@
 import { fireEvent } from '@testing-library/react';
 
+type IonicHost = HTMLElement & {
+  ariaLabel?: string | null;
+  checked?: boolean;
+  disabled?: boolean;
+  value?: unknown;
+};
+
 const normalizedText = (value: string | null | undefined): string =>
   (value ?? '').replace(/\s+/g, ' ').trim();
 
-const byAccessibleName = (element: Element, name: string): boolean =>
-  element.getAttribute('aria-label') === name ||
-  normalizedText(element.textContent) === normalizedText(name);
+const hostAccessibleName = (element: IonicHost): string => {
+  const direct =
+    element.getAttribute('aria-label') ??
+    (typeof element.ariaLabel === 'string' ? element.ariaLabel : null);
+  if (direct) return normalizedText(direct);
+
+  const shadowLabel = element.shadowRoot
+    ?.querySelector<HTMLElement>('[aria-label]')
+    ?.getAttribute('aria-label');
+  if (shadowLabel) return normalizedText(shadowLabel);
+
+  const labelledContainer = element.closest('label, .field');
+  const visibleLabel = labelledContainer?.querySelector<HTMLElement>(':scope > span');
+  return normalizedText(visibleLabel?.textContent);
+};
+
+const byAccessibleName = (element: Element, name: string): boolean => {
+  const host = element as IonicHost;
+  const expected = normalizedText(name);
+  const direct = hostAccessibleName(host);
+  const text = normalizedText(element.textContent);
+
+  return (
+    direct === expected ||
+    text === expected ||
+    (direct.length > 0 && expected.startsWith(`${direct}:`))
+  );
+};
 
 const findIonic = <T extends Element>(
   root: ParentNode,
@@ -46,7 +78,18 @@ export const getIonicToggle = (root: ParentNode, name: string): HTMLElement => {
   return element;
 };
 
+export const ionicValue = (element: Element): unknown =>
+  (element as IonicHost).value ?? element.getAttribute('value');
+
+export const isIonicChecked = (element: Element): boolean =>
+  (element as IonicHost).checked ??
+  element.getAttribute('aria-checked') === 'true';
+
+export const isIonicDisabled = (element: Element): boolean =>
+  (element as IonicHost).disabled ?? element.hasAttribute('disabled');
+
 export const fireIonChange = (element: Element, value: unknown): void => {
+  (element as IonicHost).value = value;
   fireEvent(
     element,
     new CustomEvent('ionChange', {
@@ -57,6 +100,7 @@ export const fireIonChange = (element: Element, value: unknown): void => {
 };
 
 export const fireIonToggleChange = (element: Element, checked: boolean): void => {
+  (element as IonicHost).checked = checked;
   fireEvent(
     element,
     new CustomEvent('ionChange', {
@@ -67,6 +111,7 @@ export const fireIonToggleChange = (element: Element, checked: boolean): void =>
 };
 
 export const fireIonInput = (element: Element, value: string): void => {
+  (element as IonicHost).value = value;
   fireEvent(
     element,
     new CustomEvent('ionInput', {
