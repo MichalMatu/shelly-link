@@ -1,5 +1,5 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
-import { SegmentedControl } from '@lcl/ui';
+import { IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
@@ -15,6 +15,7 @@ import {
   sensorProfileDisplayLabels
 } from '../../../features/thermometers/index.js';
 import { SensorAddForm } from './SensorSetupPresentation.js';
+import './SensorSetupPage.css';
 
 type SensorDraftDevice = SensorSetupFlow['sensorDevices'][number];
 type SensorRemovalUsage = ReturnType<SensorSetupFlow['sensorRemovalUsage']>[number];
@@ -288,21 +289,27 @@ export const SensorSetupPage = ({
         className="device-add-page sensor-add-page"
         aria-label={t('hardware.sensor.add')}
       >
-        <SegmentedControl
-          ariaLabel={t('hardware.sensor.add')}
-          className="shelly-add-tabs"
-          itemClassName="shelly-add-tabs__tab"
+        <IonSegment
+          aria-label={t('hardware.sensor.add')}
+          className="sensor-add-mode-segment"
+          mode="ios"
+          selectOnFocus={false}
+          swipeGesture={false}
           value={addMode}
-          options={[
-            {
-              value: 'phone-scan',
-              label: t('hardware.sensor.scanBle'),
-              title: t('hardware.sensor.scanPhoneTitle')
-            },
-            { value: 'manual', label: t('hardware.shelly.addManual') }
-          ]}
-          onChange={selectAddMode}
-        />
+          onIonChange={(event) => {
+            const value = event.detail.value;
+            if (value === 'phone-scan' || value === 'manual') {
+              selectAddMode(value);
+            }
+          }}
+        >
+          <IonSegmentButton value="phone-scan">
+            <IonLabel>{t('hardware.sensor.scanBle')}</IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton value="manual">
+            <IonLabel>{t('hardware.shelly.addManual')}</IonLabel>
+          </IonSegmentButton>
+        </IonSegment>
         {addMode === 'phone-scan' ? (
           scanContent
         ) : (
