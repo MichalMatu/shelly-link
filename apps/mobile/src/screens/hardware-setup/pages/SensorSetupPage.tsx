@@ -199,8 +199,8 @@ export const SensorSetupPage = ({
                       }
                     />
                   </label>
-                  <button
-                    className="primary-action device-discovery-card__action ble-candidate-action"
+                  <IonButton
+                    className="sensor-add-primary-action device-discovery-card__action ble-candidate-action"
                     type="button"
                     disabled={isSavedSensor || displayName.trim().length === 0}
                     title={
@@ -211,7 +211,7 @@ export const SensorSetupPage = ({
                     onClick={() => saveScannedSensor(candidate)}
                   >
                     {isSavedSensor ? t('hardware.sensor.saved') : t('common.add')}
-                  </button>
+                  </IonButton>
                 </div>
                 <div className="device-discovery-card__meta ble-candidate-main">
                   <strong className="device-discovery-card__identity">
