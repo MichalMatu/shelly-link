@@ -18,3 +18,31 @@
   min-height: var(--lcl-size-control-min-height);
   text-transform: none;
 }
+
+.plug-add-primary-action,
+.plug-add-secondary-action {
+  --border-radius: var(--lcl-radius-md);
+  --box-shadow: none;
+  --padding-end: var(--lcl-spacing-lg);
+  --padding-start: var(--lcl-spacing-lg);
+
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+}
+
+.plug-add-primary-action {
+  --background: var(--lcl-color-accent);
+  --color: var(--lcl-color-accent-contrast);
+}
+
+.plug-add-secondary-action {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --color: var(--lcl-color-text);
+}
+
