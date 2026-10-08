@@ -40,10 +40,7 @@ export const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps
           value={flow.sensorProfileInput}
           onIonChange={(event) => {
             const value = event.detail.value;
-            if (
-              value === 'xiaomi_lywsd03mmc_bthome_v2' ||
-              value === 'tp357_custom_v1'
-            ) {
+            if (value === 'xiaomi_lywsd03mmc_bthome_v2' || value === 'tp357_custom_v1') {
               flow.setSensorProfileInput(value);
             }
           }}
@@ -92,9 +89,7 @@ export const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps
           inputmode="text"
           placeholder="AA:BB:CC:DD:EE:FF"
           value={flow.sensorMacInput}
-          onIonInput={(event) =>
-            flow.setSensorMacInput(String(event.detail.value ?? ''))
-          }
+          onIonInput={(event) => flow.setSensorMacInput(String(event.detail.value ?? ''))}
         />
         {macError && (
           <span className="field__error" id={macErrorId}>

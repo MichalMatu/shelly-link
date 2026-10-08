@@ -8,10 +8,7 @@ export type SensorAddModeSegmentProps = {
   onChange(value: SensorAddMode): void;
 };
 
-export const SensorAddModeSegment = ({
-  value,
-  onChange
-}: SensorAddModeSegmentProps) => {
+export const SensorAddModeSegment = ({ value, onChange }: SensorAddModeSegmentProps) => {
   const { t } = useTranslation();
 
   return (
@@ -27,10 +24,7 @@ export const SensorAddModeSegment = ({
         if (next === 'phone-scan' || next === 'manual') onChange(next);
       }}
     >
-      <IonSegmentButton
-        value="phone-scan"
-        title={t('hardware.sensor.scanPhoneTitle')}
-      >
+      <IonSegmentButton value="phone-scan" title={t('hardware.sensor.scanPhoneTitle')}>
         <IonLabel>{t('hardware.sensor.scanBle')}</IonLabel>
       </IonSegmentButton>
       <IonSegmentButton value="manual">

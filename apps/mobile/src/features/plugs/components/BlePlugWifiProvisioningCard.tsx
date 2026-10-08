@@ -111,7 +111,8 @@ export const BlePlugWifiProvisioningCard = ({
             >
               {networks.map((network) => (
                 <IonSelectOption key={network.ssid} value={network.ssid}>
-                  {network.ssid} · {network.rssi === undefined ? '—' : `${network.rssi} dBm`} ·{' '}
+                  {network.ssid} ·{' '}
+                  {network.rssi === undefined ? '—' : `${network.rssi} dBm`} ·{' '}
                   {network.auth === 0 ? copy.open : copy.secured}
                 </IonSelectOption>
               ))}

@@ -243,9 +243,7 @@ describe('PlugLedSettingsCard', () => {
     );
 
     const { queryClient } = renderCard();
-    const brightness = await waitFor(() =>
-      getIonicInput(document, copy.powerBrightness)
-    );
+    const brightness = await waitFor(() => getIonicInput(document, copy.powerBrightness));
     fireIonInput(brightness, '55');
     expect(brightness).toHaveAttribute('value', '55');
 
@@ -254,10 +252,7 @@ describe('PlugLedSettingsCard', () => {
       exact: true
     });
     await waitFor(() =>
-      expect(getIonicInput(document, copy.powerBrightness)).toHaveAttribute(
-        'value',
-        '55'
-      )
+      expect(getIonicInput(document, copy.powerBrightness)).toHaveAttribute('value', '55')
     );
   });
 

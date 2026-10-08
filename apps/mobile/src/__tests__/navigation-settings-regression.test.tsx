@@ -183,10 +183,7 @@ describe('navigation and settings regression coverage', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Bluetooth' }));
-    const scanBle = getIonicButton(
-      document,
-      'Skanuj termometry BLE przez to gniazdko'
-    );
+    const scanBle = getIonicButton(document, 'Skanuj termometry BLE przez to gniazdko');
     expect(scanBle).toBeVisible();
 
     fireEvent.click(scanBle);

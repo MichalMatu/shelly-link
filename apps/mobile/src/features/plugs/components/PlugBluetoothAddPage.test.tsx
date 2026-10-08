@@ -106,8 +106,8 @@ describe('PlugBluetoothAddPage', () => {
     savedState.plugs = [savedPlug];
     renderPage();
 
-    expect(
-      getIonicButton(document, `Added: ${verified.physicalId}`)
-    ).toHaveAttribute('disabled');
+    expect(getIonicButton(document, `Added: ${verified.physicalId}`)).toHaveAttribute(
+      'disabled'
+    );
   });
 });

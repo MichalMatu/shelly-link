@@ -914,9 +914,7 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const plugPage = await openShellyAddDialog('scan');
-    expect(
-      plugPage.querySelector('ion-segment-button[value="scan"]')
-    ).not.toBeNull();
+    expect(plugPage.querySelector('ion-segment-button[value="scan"]')).not.toBeNull();
     expect(plugPage).not.toHaveClass('automation-card');
     expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
     closeCurrentAddPage();
@@ -1603,9 +1601,9 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
     await waitFor(() =>
-      expect(
-        getIonicButton(page, 'Dodane: http://192.168.0.20/')
-      ).toHaveAttribute('disabled')
+      expect(getIonicButton(page, 'Dodane: http://192.168.0.20/')).toHaveAttribute(
+        'disabled'
+      )
     );
     expect(within(page).getByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
@@ -1672,12 +1670,12 @@ describe('HardwareSetupScreen', () => {
 
     expect(await within(dialog).findByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(within(dialog).getByText('http://192.168.0.21/')).toBeInTheDocument();
-    expect(
-      getIonicButton(dialog, 'Dodane: http://192.168.0.20/')
-    ).toHaveAttribute('disabled');
-    expect(
-      getIonicButton(dialog, 'Dodaj: http://192.168.0.21/')
-    ).not.toHaveAttribute('disabled');
+    expect(getIonicButton(dialog, 'Dodane: http://192.168.0.20/')).toHaveAttribute(
+      'disabled'
+    );
+    expect(getIonicButton(dialog, 'Dodaj: http://192.168.0.21/')).not.toHaveAttribute(
+      'disabled'
+    );
     const scannedHosts = vi
       .mocked(fetch)
       .mock.calls.map((call) => ({
@@ -1732,9 +1730,10 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(getIonicButton(page, 'Rozpocznij skan'));
     await within(page).findByText('http://192.168.0.20/');
 
-    expect(
-      getIonicInput(page, 'Nazwa gniazdka: http://192.168.0.20/')
-    ).toHaveAttribute('value', 'S3PL-00112EU');
+    expect(getIonicInput(page, 'Nazwa gniazdka: http://192.168.0.20/')).toHaveAttribute(
+      'value',
+      'S3PL-00112EU'
+    );
     fireEvent.click(getIonicButton(page, 'Dodaj: http://192.168.0.20/'));
     await waitFor(() =>
       expect(
@@ -1835,9 +1834,7 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(addDialog).queryByText(/Unexpected token|doctype|valid JSON/i)
     ).not.toBeInTheDocument();
-    expect(getIonicInput(addDialog, 'Adres IP Shelly')).toHaveValue(
-      '192.168.0.1'
-    );
+    expect(getIonicInput(addDialog, 'Adres IP Shelly')).toHaveValue('192.168.0.1');
     expect(getIonicInput(addDialog, 'Adres IP Shelly')).not.toHaveAttribute(
       'aria-invalid'
     );
@@ -2431,9 +2428,7 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     let page = await openSensorAddDialog();
-    const scanTab = page.querySelector(
-      'ion-segment-button[value="phone-scan"]'
-    );
+    const scanTab = page.querySelector('ion-segment-button[value="phone-scan"]');
     expect(scanTab).not.toBeNull();
     expect(scanTab).toHaveAttribute('title', 'Skanuj termometry BLE telefonem');
     selectAddMode(page, 'phone-scan');
@@ -2488,9 +2483,7 @@ describe('HardwareSetupScreen', () => {
 
     expect(screen.getByRole('region', { name: 'Dodaj termometr' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Dodaj termometr' })).toBeNull();
-    expect(
-      getIonicButton(xiaomiItem!, 'Już zapisany')
-    ).toHaveAttribute('disabled');
+    expect(getIonicButton(xiaomiItem!, 'Już zapisany')).toHaveAttribute('disabled');
     expect(await within(page).findByText('F7:5F:8D:0F:76:20')).toBeInTheDocument();
     closeCurrentAddPage();
     expect(await screen.findByText('Salon półka')).toBeInTheDocument();
@@ -3340,9 +3333,7 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const reopenedAddDialog = await openShellyAddDialog();
-    expect(getIonicInput(reopenedAddDialog, 'Nazwa gniazdka')).toHaveValue(
-      'Kuchnia'
-    );
+    expect(getIonicInput(reopenedAddDialog, 'Nazwa gniazdka')).toHaveValue('Kuchnia');
     expect(getIonicInput(reopenedAddDialog, 'Adres IP Shelly')).toHaveValue(
       '192.168.0.21'
     );
@@ -3363,14 +3354,15 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const addDialog = await openShellyAddDialog();
     expect(getIonicInput(addDialog, 'Nazwa gniazdka')).toHaveAttribute('value', 'Salon');
-    expect(getIonicInput(addDialog, 'Adres IP Shelly')).toHaveValue(
-      '192.168.0.20'
-    );
+    expect(getIonicInput(addDialog, 'Adres IP Shelly')).toHaveValue('192.168.0.20');
     closeCurrentAddPage();
     expect(screen.getByText('Salon')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     const addSensorDialog = await openSensorAddDialog();
-    expect(getIonicInput(addSensorDialog, 'Nazwa termometru')).toHaveAttribute('value', '');
+    expect(getIonicInput(addSensorDialog, 'Nazwa termometru')).toHaveAttribute(
+      'value',
+      ''
+    );
     expect(getIonicInput(addSensorDialog, 'MAC termometru')).toHaveAttribute('value', '');
     closeCurrentAddPage();
     expect(screen.getByText('Xiaomi salon')).toBeInTheDocument();

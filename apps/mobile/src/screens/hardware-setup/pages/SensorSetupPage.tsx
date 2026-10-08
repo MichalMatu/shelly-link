@@ -197,10 +197,7 @@ export const SensorSetupPage = ({
                       value={displayName}
                       disabled={isSavedSensor}
                       onIonInput={(event) =>
-                        setScannedSensorName(
-                          candidate,
-                          String(event.detail.value ?? '')
-                        )
+                        setScannedSensorName(candidate, String(event.detail.value ?? ''))
                       }
                     />
                   </label>

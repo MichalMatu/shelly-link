@@ -8,10 +8,7 @@ export type PlugAddModeSegmentProps = {
   onChange(value: PlugAddMode): void;
 };
 
-export const PlugAddModeSegment = ({
-  value,
-  onChange
-}: PlugAddModeSegmentProps) => {
+export const PlugAddModeSegment = ({ value, onChange }: PlugAddModeSegmentProps) => {
   const { t } = useTranslation();
 
   return (
