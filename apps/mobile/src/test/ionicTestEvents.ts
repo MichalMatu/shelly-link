@@ -88,8 +88,7 @@ export const ionicValue = (element: Element): unknown =>
   (element as IonicHost).value ?? element.getAttribute('value');
 
 export const isIonicChecked = (element: Element): boolean =>
-  (element as IonicHost).checked ??
-  element.getAttribute('aria-checked') === 'true';
+  (element as IonicHost).checked ?? element.getAttribute('aria-checked') === 'true';
 
 export const isIonicDisabled = (element: Element): boolean =>
   (element as IonicHost).disabled ?? element.hasAttribute('disabled');
@@ -99,7 +98,9 @@ export const ionicAriaValue = (
   attribute: `aria-${string}`
 ): string | null =>
   element.getAttribute(attribute) ??
-  element.shadowRoot?.querySelector<HTMLElement>(`[${attribute}]`)?.getAttribute(attribute) ??
+  element.shadowRoot
+    ?.querySelector<HTMLElement>(`[${attribute}]`)
+    ?.getAttribute(attribute) ??
   null;
 
 export const fireIonChange = (element: Element, value: unknown): void => {

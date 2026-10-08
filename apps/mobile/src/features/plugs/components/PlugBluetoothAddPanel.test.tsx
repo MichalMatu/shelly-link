@@ -90,9 +90,7 @@ describe('PlugBluetoothAddPanel', () => {
     });
 
     expect(
-      isIonicDisabled(
-        getIonicButton(document, `Added: ${verifiedCandidate.physicalId}`)
-      )
+      isIonicDisabled(getIonicButton(document, `Added: ${verifiedCandidate.physicalId}`))
     ).toBe(true);
   });
 

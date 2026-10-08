@@ -1576,10 +1576,7 @@ describe('HardwareSetupScreen', () => {
 
     expect(await within(page).findByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(within(page).getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
-    const scannedName = getIonicInput(
-      page,
-      'Nazwa gniazdka: http://192.168.0.20/'
-    );
+    const scannedName = getIonicInput(page, 'Nazwa gniazdka: http://192.168.0.20/');
     expect(ionicValue(scannedName)).toBe('S3PL-00112EU');
     const scannedRow = scannedName.closest(
       '.device-discovery-card'
@@ -1671,12 +1668,12 @@ describe('HardwareSetupScreen', () => {
 
     expect(await within(dialog).findByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(within(dialog).getByText('http://192.168.0.21/')).toBeInTheDocument();
-    expect(
-      isIonicDisabled(getIonicButton(dialog, 'Dodane: http://192.168.0.20/'))
-    ).toBe(true);
-    expect(
-      isIonicDisabled(getIonicButton(dialog, 'Dodaj: http://192.168.0.21/'))
-    ).toBe(false);
+    expect(isIonicDisabled(getIonicButton(dialog, 'Dodane: http://192.168.0.20/'))).toBe(
+      true
+    );
+    expect(isIonicDisabled(getIonicButton(dialog, 'Dodaj: http://192.168.0.21/'))).toBe(
+      false
+    );
     const scannedHosts = vi
       .mocked(fetch)
       .mock.calls.map((call) => ({
@@ -1731,9 +1728,9 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(getIonicButton(page, 'Rozpocznij skan'));
     await within(page).findByText('http://192.168.0.20/');
 
-    expect(
-      ionicValue(getIonicInput(page, 'Nazwa gniazdka: http://192.168.0.20/'))
-    ).toBe('S3PL-00112EU');
+    expect(ionicValue(getIonicInput(page, 'Nazwa gniazdka: http://192.168.0.20/'))).toBe(
+      'S3PL-00112EU'
+    );
     fireEvent.click(getIonicButton(page, 'Dodaj: http://192.168.0.20/'));
     await waitFor(() =>
       expect(isIonicDisabled(getIonicButton(page, 'Dodane: http://192.168.0.20/'))).toBe(
@@ -1746,12 +1743,8 @@ describe('HardwareSetupScreen', () => {
     expect(within(savedPlugList).getByText('S3PL-00112EU')).toBeInTheDocument();
 
     page = await openShellyAddDialog('manual');
-    expect(ionicValue(getIonicInput(page, 'Nazwa gniazdka'))).toBe(
-      initialManualName
-    );
-    expect(ionicValue(getIonicInput(page, 'Adres IP Shelly'))).toBe(
-      initialManualAddress
-    );
+    expect(ionicValue(getIonicInput(page, 'Nazwa gniazdka'))).toBe(initialManualName);
+    expect(ionicValue(getIonicInput(page, 'Adres IP Shelly'))).toBe(initialManualAddress);
   });
 
   it('stops an active Shelly scan from the inline task control', async () => {
@@ -3329,7 +3322,9 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const reopenedAddDialog = await openShellyAddDialog();
-    expect(ionicValue(getIonicInput(reopenedAddDialog, 'Nazwa gniazdka'))).toBe('Kuchnia');
+    expect(ionicValue(getIonicInput(reopenedAddDialog, 'Nazwa gniazdka'))).toBe(
+      'Kuchnia'
+    );
     expect(ionicValue(getIonicInput(reopenedAddDialog, 'Adres IP Shelly'))).toBe(
       '192.168.0.21'
     );
