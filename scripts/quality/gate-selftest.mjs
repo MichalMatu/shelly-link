@@ -229,12 +229,12 @@ const setupUxSegmentedControlFixture = async (root) => {
   );
   await writeFixture(
     root,
-    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
+    'apps/mobile/src/screens/hardware-setup/pages/SensorAddModeSegment.tsx',
     'export const Fixture = () => <IonSegment className="sensor-add-mode-segment" selectOnFocus={false} swipeGesture={false}><IonSegmentButton /></IonSegment>;\n'
   );
   await writeFixture(
     root,
-    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
+    'apps/mobile/src/features/plugs/components/PlugAddModeSegment.tsx',
     'export const Fixture = () => <IonSegment className="plug-add-mode-segment" selectOnFocus={false} swipeGesture={false}><IonSegmentButton /></IonSegment>;\n'
   );
   await writeFixture(
@@ -332,7 +332,7 @@ await executeCase({
     await setupUxSegmentedControlFixture(root);
     await writeFixture(
       root,
-      'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
+      'apps/mobile/src/screens/hardware-setup/pages/SensorAddModeSegment.tsx',
       'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
     );
   },
@@ -348,7 +348,7 @@ await executeCase({
     await setupUxSegmentedControlFixture(root);
     await writeFixture(
       root,
-      'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
+      'apps/mobile/src/features/plugs/components/PlugAddModeSegment.tsx',
       'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
     );
   },
