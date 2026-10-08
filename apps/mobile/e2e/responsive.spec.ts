@@ -1220,6 +1220,8 @@ for (const viewport of viewports) {
     await expect(page.getByRole('main', { name: 'Termometry' })).toBeVisible();
     await page.getByRole('button', { name: 'Ustawienia', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
+    await expect(page.locator('ion-select.app-settings__language-select')).toBeVisible();
+    await expect(page.locator('ion-segment.app-settings__appearance-segment')).toBeVisible();
     const settingsDiagnostics = page.locator('.app-settings__diagnostics');
     expect(await settingsDiagnostics.getAttribute('open')).toBeNull();
     await expect(settingsDiagnostics.locator('.lcl-disclosure__body')).toBeHidden();
@@ -1228,6 +1230,9 @@ for (const viewport of viewports) {
     }
     await settingsDiagnostics.locator('summary').click();
     await expect(settingsDiagnostics.locator('.lcl-disclosure__body')).toBeVisible();
+    await expect(
+      settingsDiagnostics.locator('ion-button.app-settings__secondary-action')
+    ).toBeVisible();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '18-settings-diagnostics-open');
     }
