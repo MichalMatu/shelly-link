@@ -911,10 +911,10 @@ const checkDisclosureContract = async () => {
 const checkSegmentedControlContract = async () => {
   const componentPath = 'packages/ui/src/primitives/SegmentedControl.tsx';
   const uiIndexPath = 'packages/ui/src/index.ts';
-  const componentUsagePaths = [
-    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
-    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
-  ];
+  const sharedUsagePath =
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx';
+  const ionicAddPlugPath =
+    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx';
   const setupNavigationPath =
     'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx';
   const geometryUsageContracts = [
@@ -924,10 +924,13 @@ const checkSegmentedControlContract = async () => {
     ]
   ];
 
-  const [componentSource, uiIndexSource] = await Promise.all([
-    readRepoFile(componentPath),
-    readRepoFile(uiIndexPath)
-  ]);
+  const [componentSource, uiIndexSource, sharedUsageSource, ionicAddPlugSource] =
+    await Promise.all([
+      readRepoFile(componentPath),
+      readRepoFile(uiIndexPath),
+      readRepoFile(sharedUsagePath),
+      readRepoFile(ionicAddPlugPath)
+    ]);
   if (
     !componentSource.includes('export const SegmentedControl') ||
     !componentSource.includes('lcl-segmented-control') ||
@@ -937,27 +940,38 @@ const checkSegmentedControlContract = async () => {
   ) {
     addFailure(
       componentPath,
-      'shared SegmentedControl must own add-device tablist structure and lcl-segmented-control geometry'
+      'shared SegmentedControl must own remaining shared tablist structure and lcl-segmented-control geometry'
     );
   }
   if (!uiIndexSource.includes("export * from './primitives/SegmentedControl.js';")) {
     addFailure(uiIndexPath, 'shared SegmentedControl must be exported from @lcl/ui');
   }
 
-  for (const path of componentUsagePaths) {
-    const source = await readRepoFile(path);
-    if (
-      !source.includes('<SegmentedControl') ||
-      !source.includes('className="shelly-add-tabs"') ||
-      !source.includes('itemClassName="shelly-add-tabs__tab"') ||
-      source.includes('shelly-add-tabs lcl-segmented-control') ||
-      source.includes('shelly-add-tabs__tab lcl-segmented-control__item')
-    ) {
-      addFailure(
-        path,
-        'add-device segmented tabs must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
-      );
-    }
+  if (
+    !sharedUsageSource.includes('<SegmentedControl') ||
+    !sharedUsageSource.includes('className="shelly-add-tabs"') ||
+    !sharedUsageSource.includes('itemClassName="shelly-add-tabs__tab"') ||
+    sharedUsageSource.includes('shelly-add-tabs lcl-segmented-control') ||
+    sharedUsageSource.includes('shelly-add-tabs__tab lcl-segmented-control__item')
+  ) {
+    addFailure(
+      sharedUsagePath,
+      'sensor add tabs must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
+    );
+  }
+
+  if (
+    !ionicAddPlugSource.includes('<IonSegment') ||
+    !ionicAddPlugSource.includes('<IonSegmentButton') ||
+    !ionicAddPlugSource.includes('className="plug-add-mode-segment"') ||
+    !ionicAddPlugSource.includes('selectOnFocus={false}') ||
+    !ionicAddPlugSource.includes('swipeGesture={false}') ||
+    ionicAddPlugSource.includes('<SegmentedControl')
+  ) {
+    addFailure(
+      ionicAddPlugPath,
+      'Add Plug mode selection must use the controlled Ionic segment without focus/swipe side effects'
+    );
   }
 
   const setupNavigationSource = await readRepoFile(setupNavigationPath);
