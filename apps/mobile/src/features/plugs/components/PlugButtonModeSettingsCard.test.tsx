@@ -7,6 +7,8 @@ import {
   fireIonChange,
   getIonicButton,
   getIonicSelect,
+  ionicValue,
+  isIonicDisabled,
   queryIonicButton,
   queryIonicSelect
 } from '../../../test/ionicTestEvents.js';
@@ -105,12 +107,12 @@ describe('PlugButtonModeSettingsCard', () => {
     renderCard();
     const modeSelect = await waitFor(() => getIonicSelect(document, copy.currentMode));
     const save = getIonicButton(document, copy.save);
-    expect(modeSelect).toHaveAttribute('value', 'momentary');
-    expect(save).toHaveAttribute('disabled');
+    expect(ionicValue(modeSelect)).toBe('momentary');
+    expect(isIonicDisabled(save)).toBe(true);
 
     fireIonChange(modeSelect, 'detached');
-    expect(modeSelect).toHaveAttribute('value', 'detached');
-    expect(save).not.toHaveAttribute('disabled');
+    expect(ionicValue(modeSelect)).toBe('detached');
+    await waitFor(() => expect(isIonicDisabled(save)).toBe(false));
     fireEvent.click(save);
 
     expect(await screen.findByText(copy.saved)).toBeVisible();
@@ -122,7 +124,7 @@ describe('PlugButtonModeSettingsCard', () => {
       }
     ]);
     expect(JSON.stringify(setConfigs)).not.toContain('"leds"');
-    expect(save).toHaveAttribute('disabled');
+    await waitFor(() => expect(isIonicDisabled(save)).toBe(true));
   });
 
   it('keeps button mode read-only while a managed climate automation owns the Plug', async () => {
@@ -178,13 +180,13 @@ describe('PlugButtonModeSettingsCard', () => {
     const { queryClient } = renderCard();
     const modeSelect = await waitFor(() => getIonicSelect(document, copy.currentMode));
     fireIonChange(modeSelect, 'detached');
-    expect(modeSelect).toHaveAttribute('value', 'detached');
+    expect(ionicValue(modeSelect)).toBe('detached');
 
     await queryClient.refetchQueries({
       queryKey: ['plug-button-mode-settings', target.deviceId, target.baseUrl],
       exact: true
     });
-    await waitFor(() => expect(modeSelect).toHaveAttribute('value', 'detached'));
+    await waitFor(() => expect(ionicValue(modeSelect)).toBe('detached'));
   });
 
   it('renders missing control capability as unsupported without mutating anything', async () => {
