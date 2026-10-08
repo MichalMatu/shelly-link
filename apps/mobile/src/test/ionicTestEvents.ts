@@ -22,7 +22,11 @@ const hostAccessibleName = (element: IonicHost): string => {
   if (shadowLabel) return normalizedText(shadowLabel);
 
   const labelledContainer = element.closest('label, .field');
-  const visibleLabel = labelledContainer?.querySelector<HTMLElement>(':scope > span');
+  const visibleLabel = labelledContainer
+    ? Array.from(labelledContainer.children).find(
+        (child) => child.tagName.toLowerCase() === 'span'
+      )
+    : undefined;
   return normalizedText(visibleLabel?.textContent);
 };
 
