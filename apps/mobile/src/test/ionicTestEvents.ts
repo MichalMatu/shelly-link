@@ -33,6 +33,11 @@ export const getIonicSelect = (root: ParentNode, name: string): HTMLElement => {
   return element;
 };
 
+export const queryIonicSelect = (
+  root: ParentNode,
+  name: string
+): HTMLElement | null => findIonic<HTMLElement>(root, 'ion-select', name);
+
 export const getIonicInput = (root: ParentNode, name: string): HTMLElement => {
   const element = findIonic<HTMLElement>(root, 'ion-input', name);
   if (!element) throw new Error(`Ionic input missing: ${name}`);
