@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../app/App.js';
 import { setLocalePreference } from '../app/i18n.js';
 import { setThemeMode } from '../app/themeMode.js';
+import { getIonicButton } from '../test/ionicTestEvents.js';
 import { createInstalledAutomation } from '../flows/installations/model.js';
 import {
   resetInstalledAutomationStore,
@@ -182,9 +183,10 @@ describe('navigation and settings regression coverage', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Bluetooth' }));
-    const scanBle = screen.getByRole('button', {
-      name: 'Skanuj termometry BLE przez to gniazdko'
-    });
+    const scanBle = getIonicButton(
+      document,
+      'Skanuj termometry BLE przez to gniazdko'
+    );
     expect(scanBle).toBeVisible();
 
     fireEvent.click(scanBle);
