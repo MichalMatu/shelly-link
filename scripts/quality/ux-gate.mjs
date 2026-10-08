@@ -914,9 +914,9 @@ const checkSegmentedControlContract = async () => {
   const componentPath = 'packages/ui/src/primitives/SegmentedControl.tsx';
   const uiIndexPath = 'packages/ui/src/index.ts';
   const ionicSensorAddPath =
-    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx';
+    'apps/mobile/src/screens/hardware-setup/pages/SensorAddModeSegment.tsx';
   const ionicAddPlugPath =
-    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx';
+    'apps/mobile/src/features/plugs/components/PlugAddModeSegment.tsx';
   const setupNavigationPath =
     'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx';
   const geometryUsageContracts = [
