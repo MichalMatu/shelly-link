@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { deviceTimeCopy } from '../../../app/locales/deviceTime.js';
+import { getIonicButton } from '../../../test/ionicTestEvents.js';
 import {
   BlePlugTimeSyncUnsupportedError,
   syncBlePlugTime
@@ -64,7 +65,7 @@ describe('BlePlugTimeSyncCard', () => {
     renderCard();
 
     expect(screen.getByText('18:42')).toBeVisible();
-    const button = screen.getByRole('button', { name: copy.sync });
+    const button = getIonicButton(document, copy.sync);
     fireEvent.click(button);
 
     expect(await screen.findByText(copy.synced)).toBeVisible();
@@ -77,7 +78,7 @@ describe('BlePlugTimeSyncCard', () => {
     vi.mocked(syncBlePlugTime).mockRejectedValue(new Error(technicalMessage));
     renderCard();
 
-    fireEvent.click(screen.getByRole('button', { name: copy.sync }));
+    fireEvent.click(getIonicButton(document, copy.sync));
 
     expect(await screen.findByText(copy.actionFailed)).toBeVisible();
     expect(screen.queryByText(technicalMessage)).toBeNull();
@@ -89,7 +90,7 @@ describe('BlePlugTimeSyncCard', () => {
     renderCard(null);
 
     expect(screen.getByText(copy.unavailable)).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: copy.sync }));
+    fireEvent.click(getIonicButton(document, copy.sync));
 
     expect(await screen.findByText(copy.unsupported)).toBeVisible();
     expect(syncBlePlugTime).toHaveBeenCalledOnce();
