@@ -763,25 +763,21 @@ describe('HardwareSetupScreen', () => {
       'placeholder',
       'Salon / Kuchnia / Przedpokój'
     );
-    const addSensorButton = within(sensorAddDialog).getByRole('button', {
-      name: 'Dodaj'
-    });
-    expect(addSensorButton).toBeEnabled();
+    const addSensorButton = getIonicButton(sensorAddDialog, 'Dodaj');
+    expect(isIonicDisabled(addSensorButton)).toBe(false);
     fireEvent.click(addSensorButton);
     expect(
       within(sensorAddDialog).getByText('Wpisz nazwę termometru.')
     ).toBeInTheDocument();
-    expect(getIonicInput(sensorAddDialog, 'Nazwa termometru')).toHaveAttribute(
-      'aria-invalid',
-      'true'
-    );
+    expect(
+      ionicAriaValue(getIonicInput(sensorAddDialog, 'Nazwa termometru'), 'aria-invalid')
+    ).toBe('true');
     expect(
       within(sensorAddDialog).getByText('Wpisz MAC termometru.')
     ).toBeInTheDocument();
-    expect(getIonicInput(sensorAddDialog, 'MAC termometru')).toHaveAttribute(
-      'aria-invalid',
-      'true'
-    );
+    expect(
+      ionicAriaValue(getIonicInput(sensorAddDialog, 'MAC termometru'), 'aria-invalid')
+    ).toBe('true');
     expect(screen.queryByText('Temperatura')).not.toBeInTheDocument();
     expect(screen.queryByText('Wilgotność')).not.toBeInTheDocument();
     expect(screen.queryByText('Bateria')).not.toBeInTheDocument();
