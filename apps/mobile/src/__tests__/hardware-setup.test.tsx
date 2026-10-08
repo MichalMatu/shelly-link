@@ -759,9 +759,10 @@ describe('HardwareSetupScreen', () => {
     expect(sensorProfile).toHaveAttribute('value', 'tp357_custom_v1');
     expect(screen.queryByText(/wspierane/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/pending/i)).not.toBeInTheDocument();
-    expect(
-      within(sensorAddDialog).getByPlaceholderText('Salon / Kuchnia / Przedpokój')
-    ).toBeInTheDocument();
+    expect(getIonicInput(sensorAddDialog, 'Nazwa termometru')).toHaveAttribute(
+      'placeholder',
+      'Salon / Kuchnia / Przedpokój'
+    );
     const addSensorButton = within(sensorAddDialog).getByRole('button', {
       name: 'Dodaj'
     });
