@@ -1,5 +1,5 @@
 import { Disclosure } from '@lcl/ui';
-import { IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
+import { IonButton, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import './PlugAddPage.css';
@@ -180,8 +180,8 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
               )}
             </div>
             <div className="shelly-manual-add__actions">
-              <button
-                className="primary-action"
+              <IonButton
+                className="plug-add-primary-action"
                 type="button"
                 aria-busy={manual.pending || undefined}
                 disabled={manual.disabled}
@@ -189,7 +189,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                 onClick={submitManual}
               >
                 {manual.pending ? t('hardware.shelly.checking') : t('common.add')}
-              </button>
+              </IonButton>
             </div>
           </div>
         </section>
@@ -272,14 +272,14 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                             }
                           />
                         </label>
-                        <button
+                        <IonButton
                           aria-label={
                             result.saved
                               ? `${t('hardware.shelly.alreadyAdded')}: ${result.baseUrl}`
                               : `${t('common.add')}: ${result.baseUrl}`
                           }
                           aria-busy={result.adding || undefined}
-                          className="primary-action device-discovery-card__action shelly-scan-result__add"
+                          className="plug-add-primary-action device-discovery-card__action shelly-scan-result__add"
                           type="button"
                           disabled={
                             result.saved || scan.checkPending || name.trim().length === 0
@@ -291,7 +291,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                             : result.adding
                               ? t('hardware.shelly.checking')
                               : t('common.add')}
-                        </button>
+                        </IonButton>
                       </div>
                       <div className="device-discovery-card__meta shelly-scan-result__meta">
                         <strong className="device-discovery-card__identity">
@@ -308,8 +308,9 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
             )}
 
             <div className="action-row shelly-network-scan__actions device-add-page__scan-control">
-              <button
-                className="secondary-action device-scan-action"
+              <IonButton
+                className="plug-add-secondary-action device-scan-action"
+                fill="outline"
                 type="button"
                 aria-busy={scan.active || undefined}
                 title={
@@ -327,7 +328,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                     ? t('hardware.shelly.scanStop')
                     : t('hardware.shelly.scanStart')}
                 </span>
-              </button>
+              </IonButton>
             </div>
           </div>
         </section>
