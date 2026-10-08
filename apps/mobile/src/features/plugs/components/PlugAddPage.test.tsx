@@ -66,12 +66,24 @@ describe('PlugAddPage', () => {
         detail: { value: 'unsupported' }
       })
     );
-    fireEvent.click(scanTab);
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'scan' }
+      })
+    );
 
     expect(props.scan.onStop).not.toHaveBeenCalled();
     expect(screen.queryByLabelText('Plug name')).toBeNull();
 
-    fireEvent.click(manualTab);
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'manual' }
+      })
+    );
 
     expect(props.scan.onStop).toHaveBeenCalledTimes(1);
     expect(scanTab).toHaveAttribute('aria-selected', 'false');
