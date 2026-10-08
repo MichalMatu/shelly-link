@@ -697,24 +697,26 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(shellyAddDialog).getByPlaceholderText('http://192.168.x.x')
     ).toBeInTheDocument();
-    const shellyScanTab = within(shellyAddDialog).getByRole('tab', {
-      name: 'Skanuj sieć'
-    });
-    const shellyManualTab = within(shellyAddDialog).getByRole('tab', {
-      name: 'Dodaj ręcznie'
-    });
-    expect(shellyScanTab).toBeVisible();
-    expect(shellyScanTab).toHaveAttribute('aria-selected', 'false');
-    expect(shellyManualTab).toHaveAttribute('aria-selected', 'true');
+    const shellyScanTab = shellyAddDialog.querySelector(
+      'ion-segment-button[value="scan"]'
+    );
+    const shellyManualTab = shellyAddDialog.querySelector(
+      'ion-segment-button[value="manual"]'
+    );
+    expect(shellyScanTab).not.toBeNull();
+    expect(shellyManualTab).not.toBeNull();
+    expect(shellyScanTab).toHaveTextContent('Skanuj sieć');
+    expect(shellyManualTab).toHaveTextContent('Dodaj ręcznie');
     expect(
       within(shellyAddDialog).getByRole('tabpanel', { name: 'Dodaj ręcznie' })
     ).toBeInTheDocument();
     expect(
       within(shellyAddDialog).queryByRole('tabpanel', { name: 'Skanuj sieć' })
     ).not.toBeInTheDocument();
-    expect(
-      within(shellyAddDialog).getByRole('button', { name: 'Dodaj' })
-    ).toHaveAttribute('title', 'Dodaj to sprawdzone gniazdko do aplikacji');
+    expect(getIonicButton(shellyAddDialog, 'Dodaj')).toHaveAttribute(
+      'title',
+      'Dodaj to sprawdzone gniazdko do aplikacji'
+    );
     expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
     closeCurrentAddPage();
     expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
@@ -929,7 +931,9 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const plugPage = await openShellyAddDialog('scan');
-    expect(within(plugPage).getByRole('tab', { name: 'Skanuj sieć' })).toBeVisible();
+    expect(
+      plugPage.querySelector('ion-segment-button[value="scan"]')
+    ).not.toBeNull();
     expect(plugPage).not.toHaveClass('automation-card');
     expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
     closeCurrentAddPage();
@@ -1588,12 +1592,10 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     const page = await openShellyAddDialog('scan');
-    expect(within(page).getByLabelText('Od')).toHaveValue('192.168.0.1');
-    expect(within(page).getByLabelText('Do')).toHaveValue('192.168.0.254');
+    expect(getIonicInput(page, 'Od')).toHaveAttribute('value', '192.168.0.1');
+    expect(getIonicInput(page, 'Do')).toHaveAttribute('value', '192.168.0.254');
 
-    const shellyScanControl = within(page).getByRole('button', {
-      name: 'Rozpocznij skan'
-    });
+    const shellyScanControl = getIonicButton(page, 'Rozpocznij skan');
     expect(shellyScanControl).toHaveClass('device-scan-action');
     expect(shellyScanControl).not.toHaveAttribute('aria-busy');
     expect(shellyScanControl.querySelector('.device-scan-action__spinner')).toBeNull();
@@ -1616,21 +1618,19 @@ describe('HardwareSetupScreen', () => {
       'device-discovery-card__identity'
     );
     expect(within(scannedRow!).getByText('S3PL-00112EU, gen 3')).toBeVisible();
-    expect(
-      within(scannedRow!).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
-    ).toHaveClass('device-discovery-card__action');
-    fireEvent.change(scannedName, { target: { value: 'Salon' } });
-
-    fireEvent.click(
-      within(page).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
+    expect(getIonicButton(scannedRow!, 'Dodaj: http://192.168.0.20/')).toHaveClass(
+      'device-discovery-card__action'
     );
+    fireIonInput(scannedName, 'Salon');
+
+    fireEvent.click(getIonicButton(page, 'Dodaj: http://192.168.0.20/'));
 
     expect(screen.getByRole('region', { name: 'Dodaj gniazdko' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Dodaj gniazdko' })).toBeNull();
     await waitFor(() =>
       expect(
-        within(page).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
-      ).toBeDisabled()
+        getIonicButton(page, 'Dodane: http://192.168.0.20/')
+      ).toHaveAttribute('disabled')
     );
     expect(within(page).getByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
@@ -1691,22 +1691,18 @@ describe('HardwareSetupScreen', () => {
 
     const addDialog = await openShellyAddDialog('scan');
     const dialog = addDialog;
-    fireEvent.change(within(dialog).getByLabelText('Od'), {
-      target: { value: '192.168.0.19' }
-    });
-    fireEvent.change(within(dialog).getByLabelText('Do'), {
-      target: { value: '192.168.0.21' }
-    });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
+    fireIonInput(getIonicInput(dialog, 'Od'), '192.168.0.19');
+    fireIonInput(getIonicInput(dialog, 'Do'), '192.168.0.21');
+    fireEvent.click(getIonicButton(dialog, 'Rozpocznij skan'));
 
     expect(await within(dialog).findByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(within(dialog).getByText('http://192.168.0.21/')).toBeInTheDocument();
     expect(
-      within(dialog).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
-    ).toBeDisabled();
+      getIonicButton(dialog, 'Dodane: http://192.168.0.20/')
+    ).toHaveAttribute('disabled');
     expect(
-      within(dialog).getByRole('button', { name: 'Dodaj: http://192.168.0.21/' })
-    ).toBeEnabled();
+      getIonicButton(dialog, 'Dodaj: http://192.168.0.21/')
+    ).not.toHaveAttribute('disabled');
     const scannedHosts = vi
       .mocked(fetch)
       .mock.calls.map((call) => ({
@@ -1725,24 +1721,23 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     const page = await openShellyAddDialog('scan');
-    expect(within(page).getByLabelText('Od')).toHaveValue('192.168.0.1');
-    expect(within(page).getByLabelText('Do')).toHaveValue('192.168.0.254');
+    expect(getIonicInput(page, 'Od')).toHaveAttribute('value', '192.168.0.1');
+    expect(getIonicInput(page, 'Do')).toHaveAttribute('value', '192.168.0.254');
     expect(within(page).queryByRole('button', { name: 'STA' })).toBeNull();
     expect(within(page).queryByRole('button', { name: 'AP' })).toBeNull();
     expect(
       within(page).queryByRole('button', { name: 'Informacja o skanowaniu Shelly' })
     ).toBeNull();
     expect(within(page).queryByText(/Zakres:/)).toBeNull();
-    expect(within(page).getByRole('button', { name: 'Rozpocznij skan' })).toHaveClass(
-      'secondary-action'
+    expect(getIonicButton(page, 'Rozpocznij skan')).toHaveClass(
+      'plug-add-secondary-action'
     );
 
-    const manualTab = within(page).getByRole('tab', { name: 'Dodaj ręcznie' });
-    fireEvent.click(manualTab);
+    selectAddMode(page, 'manual');
     expect(
       within(page).getByRole('tabpanel', { name: 'Dodaj ręcznie' })
     ).toBeInTheDocument();
-    fireEvent.click(within(page).getByRole('tab', { name: 'Skanuj sieć' }));
+    selectAddMode(page, 'scan');
     expect(
       within(page).getByRole('tabpanel', { name: 'Skanuj sieć' })
     ).toBeInTheDocument();
@@ -1752,26 +1747,20 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     let page = await openShellyAddDialog('scan');
-    const manualTab = within(page).getByRole('tab', { name: 'Dodaj ręcznie' });
-    const scanTab = within(page).getByRole('tab', { name: 'Skanuj sieć' });
-    fireEvent.click(manualTab);
-    const manualName = within(page).getByRole('textbox', { name: /^Nazwa gniazdka$/ });
-    const manualAddress = within(page).getByLabelText('Adres IP Shelly');
-    const initialManualName = (manualName as HTMLInputElement).value;
-    const initialManualAddress = (manualAddress as HTMLInputElement).value;
-    fireEvent.click(scanTab);
+    selectAddMode(page, 'manual');
+    const manualName = getIonicInput(page, 'Nazwa gniazdka');
+    const manualAddress = getIonicInput(page, 'Adres IP Shelly');
+    const initialManualName = manualName.getAttribute('value');
+    const initialManualAddress = manualAddress.getAttribute('value');
+    selectAddMode(page, 'scan');
 
-    fireEvent.click(within(page).getByRole('button', { name: 'Rozpocznij skan' }));
+    fireEvent.click(getIonicButton(page, 'Rozpocznij skan'));
     await within(page).findByText('http://192.168.0.20/');
 
     expect(
-      within(page).getByRole('textbox', {
-        name: 'Nazwa gniazdka: http://192.168.0.20/'
-      })
-    ).toHaveValue('S3PL-00112EU');
-    fireEvent.click(
-      within(page).getByRole('button', { name: 'Dodaj: http://192.168.0.20/' })
-    );
+      getIonicInput(page, 'Nazwa gniazdka: http://192.168.0.20/')
+    ).toHaveAttribute('value', 'S3PL-00112EU');
+    fireEvent.click(getIonicButton(page, 'Dodaj: http://192.168.0.20/'));
     await waitFor(() =>
       expect(
         within(page).getByRole('button', { name: 'Dodane: http://192.168.0.20/' })
@@ -1783,10 +1772,12 @@ describe('HardwareSetupScreen', () => {
     expect(within(savedPlugList).getByText('S3PL-00112EU')).toBeInTheDocument();
 
     page = await openShellyAddDialog('manual');
-    expect(within(page).getByRole('textbox', { name: /^Nazwa gniazdka$/ })).toHaveValue(
+    expect(getIonicInput(page, 'Nazwa gniazdka')).toHaveAttribute(
+      'value',
       initialManualName
     );
-    expect(within(page).getByLabelText('Adres IP Shelly')).toHaveValue(
+    expect(getIonicInput(page, 'Adres IP Shelly')).toHaveAttribute(
+      'value',
       initialManualAddress
     );
   });
@@ -1797,19 +1788,21 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     const dialog = await openShellyAddDialog('scan');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
+    fireEvent.click(getIonicButton(dialog, 'Rozpocznij skan'));
 
-    const stopButton = await within(dialog).findByRole('button', { name: 'Stop skanu' });
+    const stopButton = await waitFor(() => getIonicButton(dialog, 'Stop skanu'));
     expect(stopButton).toHaveClass('device-scan-action');
     expect(stopButton).toHaveAttribute('aria-busy', 'true');
     expect(stopButton.querySelector('.device-scan-action__spinner')).not.toBeNull();
     fireEvent.click(stopButton);
 
     await waitFor(() => expect(abortableFetch.getAbortCount()).toBeGreaterThan(0));
-    expect(within(dialog).getByRole('button', { name: 'Rozpocznij skan' })).toBeEnabled();
+    expect(getIonicButton(dialog, 'Rozpocznij skan')).not.toHaveAttribute('disabled');
     expect(
-      within(dialog).queryByRole('button', { name: 'Stop skanu' })
-    ).not.toBeInTheDocument();
+      Array.from(dialog.querySelectorAll('ion-button')).find(
+        (button) => button.textContent?.trim() === 'Stop skanu'
+      )
+    ).toBeUndefined();
     expect(screen.queryByText('Skan zatrzymany.')).not.toBeInTheDocument();
     expect(
       within(dialog).queryByText(/Nie znalazłem gniazdka Shelly/i)
@@ -1822,8 +1815,8 @@ describe('HardwareSetupScreen', () => {
     renderHardwareSetup();
 
     const dialog = await openShellyAddDialog('scan');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Rozpocznij skan' }));
-    await within(dialog).findByRole('button', { name: 'Stop skanu' });
+    fireEvent.click(getIonicButton(dialog, 'Rozpocznij skan'));
+    await waitFor(() => getIonicButton(dialog, 'Stop skanu'));
 
     closeCurrentAddPage();
 
