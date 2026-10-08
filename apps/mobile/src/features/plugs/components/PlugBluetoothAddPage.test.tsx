@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
-import { getIonicButton } from '../../../test/ionicTestEvents.js';
+import { getIonicButton, isIonicDisabled } from '../../../test/ionicTestEvents.js';
 import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
 import { PlugBluetoothAddPage } from './PlugBluetoothAddPage.js';
@@ -106,8 +106,8 @@ describe('PlugBluetoothAddPage', () => {
     savedState.plugs = [savedPlug];
     renderPage();
 
-    expect(getIonicButton(document, `Added: ${verified.physicalId}`)).toHaveAttribute(
-      'disabled'
-    );
+    expect(
+      isIonicDisabled(getIonicButton(document, `Added: ${verified.physicalId}`))
+    ).toBe(true);
   });
 });
