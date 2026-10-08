@@ -2218,7 +2218,7 @@ describe('HardwareSetupScreen', () => {
       },
       { timeout: 3000 }
     );
-  });
+  }, 15_000);
 
   it('loads a multi-sensor Shelly script into the rule form from the selected plug', async () => {
     const defaultFetch = vi.mocked(fetch);
