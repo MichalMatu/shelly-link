@@ -9,6 +9,9 @@ import {
   getIonicButton,
   getIonicInput,
   getIonicToggle,
+  ionicValue,
+  isIonicChecked,
+  isIonicDisabled,
   queryIonicButton
 } from '../../../test/ionicTestEvents.js';
 import { PlugLedSettingsCard } from './PlugLedSettingsCard.js';
@@ -111,13 +114,13 @@ describe('PlugLedSettingsCard', () => {
       getIonicToggle(document, copy.nightModeEnabled)
     );
     const nightBrightness = getIonicInput(document, copy.nightBrightness);
-    expect(nightToggle).toHaveAttribute('aria-checked', 'false');
-    expect(nightBrightness).toHaveAttribute('disabled');
-    expect(getIonicButton(document, copy.save)).toHaveAttribute('disabled');
+    expect(isIonicChecked(nightToggle)).toBe(false);
+    expect(isIonicDisabled(nightBrightness)).toBe(true);
+    expect(isIonicDisabled(getIonicButton(document, copy.save))).toBe(true);
 
     fireIonToggleChange(nightToggle, true);
-    expect(nightToggle).toHaveAttribute('aria-checked', 'true');
-    expect(nightBrightness).not.toHaveAttribute('disabled');
+    await waitFor(() => expect(isIonicChecked(nightToggle)).toBe(true));
+    await waitFor(() => expect(isIonicDisabled(nightBrightness)).toBe(false));
     fireIonInput(nightBrightness, '7');
     fireIonInput(getIonicInput(document, copy.nightStart), '23:30');
     fireEvent.click(getIonicButton(document, copy.save));
@@ -245,14 +248,14 @@ describe('PlugLedSettingsCard', () => {
     const { queryClient } = renderCard();
     const brightness = await waitFor(() => getIonicInput(document, copy.powerBrightness));
     fireIonInput(brightness, '55');
-    expect(brightness).toHaveAttribute('value', '55');
+    expect(ionicValue(brightness)).toBe('55');
 
     await queryClient.refetchQueries({
       queryKey: ['plug-led-settings', target.deviceId, target.baseUrl],
       exact: true
     });
     await waitFor(() =>
-      expect(getIonicInput(document, copy.powerBrightness)).toHaveAttribute('value', '55')
+      expect(ionicValue(getIonicInput(document, copy.powerBrightness))).toBe('55')
     );
   });
 
