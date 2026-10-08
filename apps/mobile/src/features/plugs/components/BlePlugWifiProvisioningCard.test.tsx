@@ -1,6 +1,13 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import {
+  fireIonChange,
+  fireIonInput,
+  getIonicButton,
+  getIonicInput,
+  getIonicSelect
+} from '../../../test/ionicTestEvents.js';
 import { useBlePlugWifiProvisioningFlow } from '../flows/useBlePlugWifiProvisioningFlow.js';
 import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { BlePlugWifiProvisioningCard } from './BlePlugWifiProvisioningCard.js';
@@ -63,16 +70,12 @@ describe('BlePlugWifiProvisioningCard', () => {
     });
     renderCard();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Scan networks' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Network' }));
-    const homeOption = screen.getByRole('option', { name: 'Home' });
-    expect(homeOption).toBeVisible();
-    fireEvent.click(homeOption);
+    fireEvent.click(getIonicButton(document, 'Scan networks'));
+    const networkSelect = getIonicSelect(document, 'Network');
+    fireIonChange(networkSelect, 'Home');
 
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'wifi-secret' }
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Connect' }));
+    fireIonInput(getIonicInput(document, 'Password'), 'wifi-secret');
+    fireEvent.click(getIonicButton(document, 'Connect'));
 
     expect(connectMutate).toHaveBeenCalledOnce();
     expect(connectMutate.mock.calls[0]?.[0]).toEqual({
