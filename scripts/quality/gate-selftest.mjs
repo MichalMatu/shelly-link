@@ -227,16 +227,16 @@ const setupUxSegmentedControlFixture = async (root) => {
     'packages/ui/src/index.ts',
     "export * from './primitives/SegmentedControl.js';\n"
   );
-  for (const relativePath of [
+  await writeFixture(
+    root,
+    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx',
+    'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
+  );
+  await writeFixture(
+    root,
     'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
-    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
-  ]) {
-    await writeFixture(
-      root,
-      relativePath,
-      'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
-    );
-  }
+    'export const Fixture = () => <IonSegment className="plug-add-mode-segment" selectOnFocus={false} swipeGesture={false}><IonSegmentButton /></IonSegment>;\n'
+  );
   await writeFixture(
     root,
     'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx',
@@ -322,6 +322,22 @@ await executeCase({
   },
   expectedFailure:
     'setup segmented navigation must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup',
+  env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
+});
+
+await executeCase({
+  name: 'ux/Add Plug requires controlled Ionic segment',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxSegmentedControlFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
+      'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
+    );
+  },
+  expectedFailure:
+    'Add Plug mode selection must use the controlled Ionic segment without focus/swipe side effects',
   env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
 });
 
