@@ -1,5 +1,5 @@
 import { Disclosure } from '@lcl/ui';
-import { IonButton, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
+import { IonButton, IonInput, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import './PlugAddPage.css';
@@ -136,16 +136,21 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                 showManualErrors && manual.nameError ? 'field field--invalid' : 'field'
               }
             >
-              <label htmlFor={manualNameId}>{t('hardware.shelly.deviceNameLabel')}</label>
-              <input
+              <span>{t('hardware.shelly.deviceNameLabel')}</span>
+              <IonInput
                 id={manualNameId}
+                aria-label={t('hardware.shelly.deviceNameLabel')}
                 aria-describedby={
                   showManualErrors && manual.nameError ? manualNameErrorId : undefined
                 }
                 aria-invalid={showManualErrors && manual.nameError ? true : undefined}
+                className="plug-add-input"
+                fill="outline"
                 type="text"
                 value={manual.name}
-                onChange={(event) => manual.onNameChange(event.currentTarget.value)}
+                onIonInput={(event) =>
+                  manual.onNameChange(String(event.detail.value ?? ''))
+                }
               />
               {showManualErrors && manual.nameError && (
                 <span className="field__error" id={manualNameErrorId}>
@@ -158,20 +163,23 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                 showManualErrors && manual.urlError ? 'field field--invalid' : 'field'
               }
             >
-              <label htmlFor={manualUrlId}>
-                {t('hardware.shelly.addressInputLabel')}
-              </label>
-              <input
+              <span>{t('hardware.shelly.addressInputLabel')}</span>
+              <IonInput
                 id={manualUrlId}
+                aria-label={t('hardware.shelly.addressInputLabel')}
                 aria-describedby={
                   showManualErrors && manual.urlError ? manualUrlErrorId : undefined
                 }
                 aria-invalid={showManualErrors && manual.urlError ? true : undefined}
+                className="plug-add-input"
+                fill="outline"
                 type="url"
-                inputMode="url"
+                inputmode="url"
                 placeholder={t('hardware.shelly.addressPlaceholder')}
                 value={manual.url}
-                onChange={(event) => manual.onUrlChange(event.currentTarget.value)}
+                onIonInput={(event) =>
+                  manual.onUrlChange(String(event.detail.value ?? ''))
+                }
               />
               {showManualErrors && manual.urlError && (
                 <span className="field__error" id={manualUrlErrorId}>
@@ -209,29 +217,37 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
             >
               <div className="shelly-network-scan__range">
                 <label className={showScanRangeError ? 'field field--invalid' : 'field'}>
-                  {t('hardware.shelly.scanRangeStart')}
-                  <input
+                  <span>{t('hardware.shelly.scanRangeStart')}</span>
+                  <IonInput
+                    aria-label={t('hardware.shelly.scanRangeStart')}
                     aria-describedby={showScanRangeError ? scanRangeErrorId : undefined}
                     aria-invalid={showScanRangeError}
+                    className="plug-add-input"
+                    fill="outline"
                     type="text"
-                    inputMode="numeric"
+                    inputmode="numeric"
                     placeholder="192.168.0.1"
                     value={scan.startInput}
-                    onChange={(event) =>
-                      scan.onStartInputChange(event.currentTarget.value)
+                    onIonInput={(event) =>
+                      scan.onStartInputChange(String(event.detail.value ?? ''))
                     }
                   />
                 </label>
                 <label className={showScanRangeError ? 'field field--invalid' : 'field'}>
-                  {t('hardware.shelly.scanRangeEnd')}
-                  <input
+                  <span>{t('hardware.shelly.scanRangeEnd')}</span>
+                  <IonInput
+                    aria-label={t('hardware.shelly.scanRangeEnd')}
                     aria-describedby={showScanRangeError ? scanRangeErrorId : undefined}
                     aria-invalid={showScanRangeError}
+                    className="plug-add-input"
+                    fill="outline"
                     type="text"
-                    inputMode="numeric"
+                    inputmode="numeric"
                     placeholder="192.168.0.99"
                     value={scan.endInput}
-                    onChange={(event) => scan.onEndInputChange(event.currentTarget.value)}
+                    onIonInput={(event) =>
+                      scan.onEndInputChange(String(event.detail.value ?? ''))
+                    }
                   />
                   {showScanRangeError && (
                     <span className="field__error" id={scanRangeErrorId}>
@@ -258,16 +274,17 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                       <div className="device-discovery-card__primary">
                         <label className="device-discovery-card__name">
                           <span>{t('hardware.shelly.deviceNameLabel')}</span>
-                          <input
-                            className="device-discovery-card__name-input shelly-scan-result__name-input"
+                          <IonInput
+                            className="plug-add-input device-discovery-card__name-input shelly-scan-result__name-input"
                             aria-label={`${t('hardware.shelly.deviceNameLabel')}: ${result.baseUrl}`}
+                            fill="outline"
                             type="text"
                             value={name}
                             disabled={result.saved}
-                            onChange={(event) =>
+                            onIonInput={(event) =>
                               setScanResultNames((current) => ({
                                 ...current,
-                                [result.baseUrl]: event.currentTarget.value
+                                [result.baseUrl]: String(event.detail.value ?? '')
                               }))
                             }
                           />
