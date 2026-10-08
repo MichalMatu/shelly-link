@@ -1,6 +1,11 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import {
+  fireIonInput,
+  getIonicButton,
+  getIonicInput
+} from '../../../test/ionicTestEvents.js';
 import { PlugAddPage, type PlugAddPageProps } from './PlugAddPage.js';
 
 const createProps = (): PlugAddPageProps => ({
@@ -81,7 +86,7 @@ describe('PlugAddPage', () => {
     );
 
     expect(props.scan.onStop).toHaveBeenCalledTimes(1);
-    expect(screen.getByLabelText('Plug name')).toHaveValue('Grow plug');
+    expect(getIonicInput(document, 'Plug name')).toHaveAttribute('value', 'Grow plug');
     expect(screen.queryByText('Scan range')).toBeNull();
   });
 
@@ -98,11 +103,10 @@ describe('PlugAddPage', () => {
     fireEvent.click(summary);
 
     expect(disclosure).toHaveAttribute('open');
-    expect(screen.getByLabelText('From')).toHaveValue('192.168.0.1');
-    expect(screen.getByLabelText('To')).toHaveValue('192.168.0.99');
-    fireEvent.change(screen.getByLabelText('From'), {
-      target: { value: '192.168.1.1' }
-    });
+    const fromInput = getIonicInput(document, 'From');
+    expect(fromInput).toHaveAttribute('value', '192.168.0.1');
+    expect(getIonicInput(document, 'To')).toHaveAttribute('value', '192.168.0.99');
+    fireIonInput(fromInput, '192.168.1.1');
     expect(props.scan.onStartInputChange).toHaveBeenCalledWith('192.168.1.1');
   });
 
@@ -121,7 +125,7 @@ describe('PlugAddPage', () => {
         detail: { value: 'manual' }
       })
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    fireEvent.click(getIonicButton(document, 'Add'));
 
     expect(screen.getByText('Enter a device name.')).toBeInTheDocument();
     expect(props.manual.onSubmit).not.toHaveBeenCalled();
@@ -140,9 +144,9 @@ describe('PlugAddPage', () => {
     ];
     renderPage(props);
 
-    const name = screen.getByLabelText('Plug name: http://192.168.0.31/');
-    fireEvent.change(name, { target: { value: 'Tent plug' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Add: http://192.168.0.31/' }));
+    const name = getIonicInput(document, 'Plug name: http://192.168.0.31/');
+    fireIonInput(name, 'Tent plug');
+    fireEvent.click(getIonicButton(document, 'Add: http://192.168.0.31/'));
 
     expect(props.scan.onAddResult).toHaveBeenCalledWith(
       'http://192.168.0.31/',
