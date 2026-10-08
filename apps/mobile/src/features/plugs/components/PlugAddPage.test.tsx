@@ -54,13 +54,11 @@ describe('PlugAddPage', () => {
     const segment = container.querySelector('ion-segment');
     if (!segment) throw new Error('Add Plug segment missing');
 
-    fireEvent(
-      segment,
-      new CustomEvent('ionChange', {
-        bubbles: true,
-        detail: { value: 'scan' }
-      })
-    );
+    const scanTab = screen.getByRole('tab', { name: 'Scan network' });
+    const manualTab = screen.getByRole('tab', { name: 'Add manually' });
+    expect(scanTab).toHaveAttribute('aria-selected', 'true');
+    expect(manualTab).toHaveAttribute('aria-selected', 'false');
+
     fireEvent(
       segment,
       new CustomEvent('ionChange', {
@@ -68,19 +66,16 @@ describe('PlugAddPage', () => {
         detail: { value: 'unsupported' }
       })
     );
+    fireEvent.click(scanTab);
 
     expect(props.scan.onStop).not.toHaveBeenCalled();
     expect(screen.queryByLabelText('Plug name')).toBeNull();
 
-    fireEvent(
-      segment,
-      new CustomEvent('ionChange', {
-        bubbles: true,
-        detail: { value: 'manual' }
-      })
-    );
+    fireEvent.click(manualTab);
 
     expect(props.scan.onStop).toHaveBeenCalledTimes(1);
+    expect(scanTab).toHaveAttribute('aria-selected', 'false');
+    expect(manualTab).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByLabelText('Plug name')).toHaveValue('Grow plug');
   });
 
