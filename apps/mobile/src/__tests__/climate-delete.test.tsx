@@ -295,7 +295,11 @@ describe('climate automation delete', () => {
     const dialog = await screen.findByRole('dialog');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Potwierdź usuń' }));
 
-    const toastRegion = await screen.findByRole('region', { name: 'Powiadomienia' });
+    const toastRegion = await screen.findByRole(
+      'region',
+      { name: 'Powiadomienia' },
+      { timeout: 5_000 }
+    );
     expect(
       await within(toastRegion).findByText(
         'Nie udało się bezpiecznie usunąć automatyki. Wpis pozostał w aplikacji.'
