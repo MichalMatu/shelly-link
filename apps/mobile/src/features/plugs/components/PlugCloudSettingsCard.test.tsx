@@ -7,6 +7,8 @@ import {
   fireIonToggleChange,
   getIonicButton,
   getIonicToggle,
+  isIonicChecked,
+  isIonicDisabled,
   queryIonicButton
 } from '../../../test/ionicTestEvents.js';
 import { PlugCloudSettingsCard } from './PlugCloudSettingsCard.js';
@@ -90,19 +92,19 @@ describe('PlugCloudSettingsCard', () => {
     renderCard();
     const toggle = await waitFor(() => getIonicToggle(document, copy.enable));
     const save = getIonicButton(document, copy.save);
-    expect(toggle).toHaveAttribute('aria-checked', 'false');
-    expect(save).toHaveAttribute('disabled');
+    expect(isIonicChecked(toggle)).toBe(false);
+    expect(isIonicDisabled(save)).toBe(true);
     expect(screen.getByText(`${copy.connection}: ${copy.disconnected}`)).toBeVisible();
 
     fireIonToggleChange(toggle, true);
-    expect(toggle).toHaveAttribute('aria-checked', 'true');
-    expect(save).not.toHaveAttribute('disabled');
+    await waitFor(() => expect(isIonicChecked(toggle)).toBe(true));
+    await waitFor(() => expect(isIonicDisabled(save)).toBe(false));
     fireEvent.click(save);
 
     expect(await screen.findByText(copy.saved)).toBeVisible();
     expect(setConfigs).toEqual([{ enable: true }]);
     expect(screen.getByText(`${copy.connection}: ${copy.connected}`)).toBeVisible();
-    expect(save).toHaveAttribute('disabled');
+    await waitFor(() => expect(isIonicDisabled(save)).toBe(true));
   });
 
   it('does not overwrite a dirty Cloud draft when the device query refetches', async () => {
@@ -131,13 +133,13 @@ describe('PlugCloudSettingsCard', () => {
     const { queryClient } = renderCard();
     const toggle = await waitFor(() => getIonicToggle(document, copy.enable));
     fireIonToggleChange(toggle, true);
-    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    await waitFor(() => expect(isIonicChecked(toggle)).toBe(true));
 
     await queryClient.refetchQueries({
       queryKey: ['plug-cloud-settings', target.deviceId, target.baseUrl],
       exact: true
     });
-    await waitFor(() => expect(toggle).toHaveAttribute('aria-checked', 'true'));
+    await waitFor(() => expect(isIonicChecked(toggle)).toBe(true));
   });
 
   it('renders a missing writable Cloud surface as unsupported without mutating anything', async () => {
