@@ -1,7 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
-import { getIonicButton, queryIonicButton } from '../../../test/ionicTestEvents.js';
+import {
+  getIonicButton,
+  isIonicDisabled,
+  queryIonicButton
+} from '../../../test/ionicTestEvents.js';
 import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
 import {
   PlugBluetoothAddPanel,
@@ -86,8 +90,10 @@ describe('PlugBluetoothAddPanel', () => {
     });
 
     expect(
-      getIonicButton(document, `Added: ${verifiedCandidate.physicalId}`)
-    ).toHaveAttribute('disabled');
+      isIonicDisabled(
+        getIonicButton(document, `Added: ${verifiedCandidate.physicalId}`)
+      )
+    ).toBe(true);
   });
 
   it('keeps Add available when preview failed after successful identity verification', () => {
@@ -97,8 +103,8 @@ describe('PlugBluetoothAddPanel', () => {
     });
 
     expect(
-      getIonicButton(document, `Add: ${verifiedCandidate.physicalId}`)
-    ).not.toHaveAttribute('disabled');
+      isIonicDisabled(getIonicButton(document, `Add: ${verifiedCandidate.physicalId}`))
+    ).toBe(false);
     expect(screen.getAllByText('—')).toHaveLength(4);
   });
 });
