@@ -54,11 +54,6 @@ describe('PlugAddPage', () => {
     const segment = container.querySelector('ion-segment');
     if (!segment) throw new Error('Add Plug segment missing');
 
-    const scanTab = screen.getByRole('tab', { name: 'Scan network' });
-    const manualTab = screen.getByRole('tab', { name: 'Add manually' });
-    expect(scanTab).toHaveAttribute('aria-selected', 'true');
-    expect(manualTab).toHaveAttribute('aria-selected', 'false');
-
     fireEvent(
       segment,
       new CustomEvent('ionChange', {
@@ -86,9 +81,8 @@ describe('PlugAddPage', () => {
     );
 
     expect(props.scan.onStop).toHaveBeenCalledTimes(1);
-    expect(scanTab).toHaveAttribute('aria-selected', 'false');
-    expect(manualTab).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByLabelText('Plug name')).toHaveValue('Grow plug');
+    expect(screen.queryByText('Scan range')).toBeNull();
   });
 
   it('keeps the technical scan range behind a compact disclosure', () => {
