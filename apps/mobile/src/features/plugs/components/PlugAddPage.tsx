@@ -1,8 +1,9 @@
 import { Disclosure } from '@lcl/ui';
-import { IonButton, IonInput, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
+import { IonButton, IonInput } from '@ionic/react';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import './PlugAddPage.css';
+import { PlugAddModeSegment, type PlugAddMode } from './PlugAddModeSegment.js';
 
 export type PlugScanResultView = {
   baseUrl: string;
@@ -61,7 +62,7 @@ const formatScanRangeSummary = (startInput: string, endInput: string): string =>
 
 export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
   const { t } = useTranslation();
-  const [activeSection, setActiveSection] = useState<'manual' | 'scan'>('scan');
+  const [activeSection, setActiveSection] = useState<PlugAddMode>('scan');
   const [didSubmitManual, setDidSubmitManual] = useState(false);
   const [didSubmitScan, setDidSubmitScan] = useState(false);
   const [scanResultNames, setScanResultNames] = useState<Record<string, string>>({});
@@ -78,7 +79,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
     ? t('hardware.shelly.scanRangeFailed')
     : formatScanRangeSummary(scan.startInput, scan.endInput);
 
-  const selectSection = (section: 'manual' | 'scan') => {
+  const selectSection = (section: PlugAddMode) => {
     if (section === activeSection) return;
     if (activeSection === 'scan' && scan.active) scan.onStop();
     setActiveSection(section);
@@ -102,27 +103,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
 
   return (
     <div className="device-add-page__body">
-      <IonSegment
-        aria-label={t('hardware.shelly.add')}
-        className="plug-add-mode-segment"
-        mode="ios"
-        selectOnFocus={false}
-        swipeGesture={false}
-        value={activeSection}
-        onIonChange={(event) => {
-          const value = event.detail.value;
-          if (value === 'scan' || value === 'manual') {
-            selectSection(value);
-          }
-        }}
-      >
-        <IonSegmentButton value="scan">
-          <IonLabel>{t('hardware.shelly.scanNetwork')}</IonLabel>
-        </IonSegmentButton>
-        <IonSegmentButton value="manual">
-          <IonLabel>{t('hardware.shelly.addManual')}</IonLabel>
-        </IonSegmentButton>
-      </IonSegment>
+      <PlugAddModeSegment value={activeSection} onChange={selectSection} />
 
       {activeSection === 'manual' && (
         <section
