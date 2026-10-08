@@ -248,14 +248,14 @@ describe('PlugLedSettingsCard', () => {
     const { queryClient } = renderCard();
     const brightness = await waitFor(() => getIonicInput(document, copy.powerBrightness));
     fireIonInput(brightness, '55');
-    expect(ionicValue(brightness)).toBe('55');
+    expect(ionicValue(brightness)).toBe(55);
 
     await queryClient.refetchQueries({
       queryKey: ['plug-led-settings', target.deviceId, target.baseUrl],
       exact: true
     });
     await waitFor(() =>
-      expect(ionicValue(getIonicInput(document, copy.powerBrightness))).toBe('55')
+      expect(ionicValue(getIonicInput(document, copy.powerBrightness))).toBe(55)
     );
   });
 
