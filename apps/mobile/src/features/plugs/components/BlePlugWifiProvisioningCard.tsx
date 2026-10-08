@@ -1,5 +1,5 @@
-import { IonButton, IonSelect, IonSelectOption } from '@ionic/react';
-import { useId, useState } from 'react';
+import { IonButton, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
+import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceWifiCopy } from '../../../app/locales/deviceWifi.js';
 import {
@@ -30,7 +30,6 @@ export const BlePlugWifiProvisioningCard = ({
   const [selectedSsid, setSelectedSsid] = useState('');
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
-  const passwordId = useId();
 
   const selected = networks.find((network) => network.ssid === selectedSsid);
   const secured = selected ? selected.auth !== 0 : false;
@@ -120,17 +119,19 @@ export const BlePlugWifiProvisioningCard = ({
           </div>
 
           {selected && secured && (
-            <label className="field" htmlFor={passwordId}>
-              {copy.password}
-              <input
-                id={passwordId}
+            <div className="field">
+              <span>{copy.password}</span>
+              <IonInput
+                aria-label={copy.password}
+                className="plug-settings-ionic-input"
+                fill="outline"
                 type="password"
-                autoComplete="off"
+                autocomplete="off"
                 value={password}
                 disabled={busy}
-                onChange={(event) => setPassword(event.currentTarget.value)}
+                onIonInput={(event) => setPassword(String(event.detail.value ?? ''))}
               />
-            </label>
+            </div>
           )}
 
           <div className="plug-settings-actions">
