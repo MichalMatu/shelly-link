@@ -1198,10 +1198,8 @@ describe('HardwareSetupScreen', () => {
     fireEvent.change(getIonicInput(addDialog, 'Nazwa gniazdka'), {
       target: { value: 'Salon' }
     });
-    fireEvent.change(getIonicInput(addDialog, 'Adres IP Shelly'), {
-      target: { value: '192.168.0.20' }
-    });
-    fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
+    fireIonInput(getIonicInput(addDialog, 'Adres IP Shelly'), '192.168.0.20');
+    fireEvent.click(getIonicButton(addDialog, 'Dodaj'));
 
     expect(
       await screen.findByText(
@@ -2433,22 +2431,26 @@ describe('HardwareSetupScreen', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
     let page = await openSensorAddDialog();
-    const scanTab = within(page).getByRole('tab', { name: 'Skanuj BLE' });
+    const scanTab = page.querySelector(
+      'ion-segment-button[value="phone-scan"]'
+    );
+    expect(scanTab).not.toBeNull();
     expect(scanTab).toHaveAttribute('title', 'Skanuj termometry BLE telefonem');
-    fireEvent.click(scanTab);
+    selectAddMode(page, 'phone-scan');
 
     expect(screen.queryByRole('dialog', { name: 'Skanuj BLE telefonem' })).toBeNull();
     let xiaomiAddress = await findBleScanCandidate(page);
     let xiaomiItem = xiaomiAddress.closest('article');
     expect(xiaomiItem).not.toBeNull();
     expect(xiaomiItem).toHaveClass('device-discovery-card');
-    const xiaomiAddButton = within(xiaomiItem!).getByRole('button', { name: 'Dodaj' });
+    const xiaomiAddButton = getIonicButton(xiaomiItem!, 'Dodaj');
     expect(xiaomiAddButton).toHaveAttribute('title', 'Zapisz ten termometr w aplikacji');
     expect(xiaomiAddButton).toHaveClass('device-discovery-card__action');
-    const xiaomiNameInput = within(xiaomiItem!).getByRole('textbox', {
-      name: 'Nazwa termometru: A4:C1:38:4F:24:CD'
-    });
-    expect(xiaomiNameInput).toHaveValue('Termometr 24:CD');
+    const xiaomiNameInput = getIonicInput(
+      xiaomiItem!,
+      'Nazwa termometru: A4:C1:38:4F:24:CD'
+    );
+    expect(xiaomiNameInput).toHaveAttribute('value', 'Termometr 24:CD');
     expect(xiaomiNameInput).toHaveClass('device-discovery-card__name-input');
     expect(within(xiaomiItem!).getByText('A4:C1:38:4F:24:CD')).toHaveClass(
       'device-discovery-card__identity'
@@ -2477,17 +2479,18 @@ describe('HardwareSetupScreen', () => {
     xiaomiItem = xiaomiAddress.closest('article');
     expect(xiaomiItem).not.toBeNull();
 
-    const scannedSensorName = within(xiaomiItem!).getByRole('textbox', {
-      name: 'Nazwa termometru: A4:C1:38:4F:24:CD'
-    });
-    fireEvent.change(scannedSensorName, { target: { value: 'Salon półka' } });
-    fireEvent.click(within(xiaomiItem!).getByRole('button', { name: 'Dodaj' }));
+    const scannedSensorName = getIonicInput(
+      xiaomiItem!,
+      'Nazwa termometru: A4:C1:38:4F:24:CD'
+    );
+    fireIonInput(scannedSensorName, 'Salon półka');
+    fireEvent.click(getIonicButton(xiaomiItem!, 'Dodaj'));
 
     expect(screen.getByRole('region', { name: 'Dodaj termometr' })).toBeVisible();
     expect(screen.queryByRole('heading', { name: 'Dodaj termometr' })).toBeNull();
     expect(
-      within(xiaomiItem!).getByRole('button', { name: 'Już zapisany' })
-    ).toBeDisabled();
+      getIonicButton(xiaomiItem!, 'Już zapisany')
+    ).toHaveAttribute('disabled');
     expect(await within(page).findByText('F7:5F:8D:0F:76:20')).toBeInTheDocument();
     closeCurrentAddPage();
     expect(await screen.findByText('Salon półka')).toBeInTheDocument();
