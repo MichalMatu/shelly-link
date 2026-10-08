@@ -10,36 +10,38 @@ type IonicHost = HTMLElement & {
 const normalizedText = (value: string | null | undefined): string =>
   (value ?? '').replace(/\s+/g, ' ').trim();
 
-const hostAccessibleName = (element: IonicHost): string => {
-  const direct =
-    element.getAttribute('aria-label') ??
-    (typeof element.ariaLabel === 'string' ? element.ariaLabel : null);
-  if (direct) return normalizedText(direct);
+const hostAccessibleNames = (element: IonicHost): string[] => {
+  const names = new Set<string>();
+  const add = (value: string | null | undefined) => {
+    const normalized = normalizedText(value);
+    if (normalized) names.add(normalized);
+  };
 
-  const shadowLabel = element.shadowRoot
-    ?.querySelector<HTMLElement>('[aria-label]')
-    ?.getAttribute('aria-label');
-  if (shadowLabel) return normalizedText(shadowLabel);
+  add(element.getAttribute('aria-label'));
+  add(typeof element.ariaLabel === 'string' ? element.ariaLabel : null);
+  add(
+    element.shadowRoot
+      ?.querySelector<HTMLElement>('[aria-label]')
+      ?.getAttribute('aria-label')
+  );
 
   const labelledContainer = element.closest('label, .field');
-  const visibleLabel = labelledContainer
-    ? Array.from(labelledContainer.children).find(
-        (child) => child.tagName.toLowerCase() === 'span'
-      )
-    : undefined;
-  return normalizedText(visibleLabel?.textContent);
+  if (labelledContainer) {
+    Array.from(labelledContainer.children)
+      .filter((child) => child.tagName.toLowerCase() === 'span')
+      .forEach((child) => add(child.textContent));
+  }
+
+  add(element.textContent);
+  return Array.from(names);
 };
 
 const byAccessibleName = (element: Element, name: string): boolean => {
-  const host = element as IonicHost;
   const expected = normalizedText(name);
-  const direct = hostAccessibleName(host);
-  const text = normalizedText(element.textContent);
-
-  return (
-    direct === expected ||
-    text === expected ||
-    (direct.length > 0 && expected.startsWith(`${direct}:`))
+  return hostAccessibleNames(element as IonicHost).some(
+    (candidate) =>
+      candidate === expected ||
+      (candidate.length > 0 && expected.startsWith(`${candidate}:`))
   );
 };
 
@@ -91,6 +93,14 @@ export const isIonicChecked = (element: Element): boolean =>
 
 export const isIonicDisabled = (element: Element): boolean =>
   (element as IonicHost).disabled ?? element.hasAttribute('disabled');
+
+export const ionicAriaValue = (
+  element: Element,
+  attribute: `aria-${string}`
+): string | null =>
+  element.getAttribute(attribute) ??
+  element.shadowRoot?.querySelector<HTMLElement>(`[${attribute}]`)?.getAttribute(attribute) ??
+  null;
 
 export const fireIonChange = (element: Element, value: unknown): void => {
   (element as IonicHost).value = value;
