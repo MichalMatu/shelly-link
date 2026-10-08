@@ -1221,7 +1221,9 @@ for (const viewport of viewports) {
     await page.getByRole('button', { name: 'Ustawienia', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
     await expect(page.locator('ion-select.app-settings__language-select')).toBeVisible();
-    await expect(page.locator('ion-segment.app-settings__appearance-segment')).toBeVisible();
+    await expect(
+      page.locator('ion-segment.app-settings__appearance-segment')
+    ).toBeVisible();
     const settingsDiagnostics = page.locator('.app-settings__diagnostics');
     expect(await settingsDiagnostics.getAttribute('open')).toBeNull();
     await expect(settingsDiagnostics.locator('.lcl-disclosure__body')).toBeHidden();

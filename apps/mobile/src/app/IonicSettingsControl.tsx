@@ -104,10 +104,7 @@ export type IonicSettingsActionProps = {
   onClick(): void;
 };
 
-export const IonicSettingsAction = ({
-  label,
-  onClick
-}: IonicSettingsActionProps) => (
+export const IonicSettingsAction = ({ label, onClick }: IonicSettingsActionProps) => (
   <IonButton
     className="app-settings__secondary-action"
     expand="block"
