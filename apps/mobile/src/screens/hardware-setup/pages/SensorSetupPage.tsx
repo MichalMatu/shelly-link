@@ -16,7 +16,7 @@ import {
 } from '../../../features/thermometers/index.js';
 import { SensorAddForm } from './SensorSetupPresentation.js';
 import './SensorSetupPage.css';
-import { SensorAddModeSegment, type SensorAddMode } from './SensorAddModeSegment.js';
+import { SensorAddModeSegment, type SensorAddMode } from '../../../features/thermometers/components/SensorAddModeSegment.js';
 
 type SensorDraftDevice = SensorSetupFlow['sensorDevices'][number];
 type SensorRemovalUsage = ReturnType<SensorSetupFlow['sensorRemovalUsage']>[number];
