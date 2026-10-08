@@ -1,5 +1,5 @@
+import { IonButton, IonSelect, IonSelectOption, IonToggle } from '@ionic/react';
 import type { ShellyPlugsUiLedMode } from '@lcl/shelly-client';
-import { SelectField } from '@lcl/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceLedCopy } from '../../../app/locales/deviceLed.js';
@@ -121,16 +121,23 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
 
       <div className="field">
         <span>{copy.currentMode}</span>
-        <SelectField<ShellyPlugsUiLedMode>
-          ariaLabel={copy.currentMode}
+        <IonSelect
+          aria-label={copy.currentMode}
+          className="plug-settings-ionic-select"
+          fill="outline"
+          interface="alert"
           value={draft.mode}
-          options={[
-            { value: 'power', label: copy.power },
-            { value: 'switch', label: copy.switch },
-            { value: 'off', label: copy.off }
-          ]}
-          onChange={setMode}
-        />
+          onIonChange={(event) => {
+            const value = event.detail.value;
+            if (value === 'power' || value === 'switch' || value === 'off') {
+              setMode(value);
+            }
+          }}
+        >
+          <IonSelectOption value="power">{copy.power}</IonSelectOption>
+          <IonSelectOption value="switch">{copy.switch}</IonSelectOption>
+          <IonSelectOption value="off">{copy.off}</IonSelectOption>
+        </IonSelect>
       </div>
 
       {capabilities.powerBrightness && draft.mode === 'power' && (
@@ -215,15 +222,15 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
       {capabilities.nightMode && (
         <fieldset className="plug-night-mode">
           <legend>{copy.nightMode}</legend>
-          <label className="plug-settings-check-row">
+          <div className="plug-settings-check-row">
             <span>{copy.nightModeEnabled}</span>
-            <input
+            <IonToggle
               aria-label={copy.nightModeEnabled}
+              className="plug-settings-ionic-toggle"
               checked={draft.nightModeEnabled}
-              type="checkbox"
-              onChange={(event) => setNightModeEnabled(event.currentTarget.checked)}
+              onIonChange={(event) => setNightModeEnabled(event.detail.checked)}
             />
-          </label>
+          </div>
           <label className="field">
             <span>{copy.nightBrightness}</span>
             <span className="field-unit-control">
@@ -277,14 +284,14 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
         </p>
       )}
 
-      <button
-        className="primary-action plug-settings-save"
+      <IonButton
+        className="plug-settings-ionic-action plug-settings-save"
         type="button"
         disabled={!patch || updateMutation.isPending}
         onClick={save}
       >
         {updateMutation.isPending ? copy.saving : copy.save}
-      </button>
+      </IonButton>
     </section>
   );
 };
