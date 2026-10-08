@@ -27,7 +27,10 @@ export const SensorAddModeSegment = ({
         if (next === 'phone-scan' || next === 'manual') onChange(next);
       }}
     >
-      <IonSegmentButton value="phone-scan">
+      <IonSegmentButton
+        value="phone-scan"
+        title={t('hardware.sensor.scanPhoneTitle')}
+      >
         <IonLabel>{t('hardware.sensor.scanBle')}</IonLabel>
       </IonSegmentButton>
       <IonSegmentButton value="manual">
