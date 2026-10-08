@@ -168,6 +168,13 @@ import {
 import { formatSensorId } from '../flows/hardware-setup/validation.js';
 import { HardwareSetupScreen } from '../screens/hardware-setup/HardwareSetupScreen.js';
 import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
+import {
+  fireIonChange,
+  fireIonInput,
+  getIonicButton,
+  getIonicInput,
+  getIonicSelect
+} from '../test/ionicTestEvents.js';
 import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 
 const renderHardwareSetup = (props: Parameters<typeof HardwareSetupScreen>[0] = {}) => {
@@ -192,10 +199,28 @@ const chooseSelectField = (
   optionLabel: string,
   container: HTMLElement = document.body
 ) => {
+  const ionicSelect = Array.from(container.querySelectorAll('ion-select')).find(
+    (element) => element.getAttribute('aria-label') === label
+  );
+  if (ionicSelect) {
+    const option = Array.from(ionicSelect.querySelectorAll('ion-select-option')).find(
+      (element) => element.textContent?.trim() === optionLabel
+    );
+    if (!option) throw new Error(`Ionic option missing: ${optionLabel}`);
+    fireIonChange(ionicSelect, option.getAttribute('value'));
+    return;
+  }
+
   const scope = within(container);
   fireEvent.click(scope.getByRole('button', { name: label }));
   const listbox = scope.getByRole('listbox', { name: label });
   fireEvent.click(within(listbox).getByRole('option', { name: optionLabel }));
+};
+
+const selectAddMode = (page: HTMLElement, value: 'manual' | 'scan' | 'phone-scan') => {
+  const segment = page.querySelector('ion-segment');
+  if (!segment) throw new Error('Ionic add mode segment missing');
+  fireIonChange(segment, value);
 };
 
 const rpcResult = (result: unknown) =>
@@ -286,9 +311,7 @@ const openShellyAddDialog = async (section: 'manual' | 'scan' = 'manual') => {
   const page = await screen.findByRole('region', { name: 'Dodaj gniazdko' });
   expect(page).toHaveClass('device-add-page');
   expect(screen.queryByRole('dialog', { name: 'Dodaj gniazdko' })).toBeNull();
-  if (section === 'manual') {
-    fireEvent.click(within(page).getByRole('tab', { name: 'Dodaj ręcznie' }));
-  }
+  if (section === 'manual') selectAddMode(page, 'manual');
   return page;
 };
 
@@ -297,7 +320,7 @@ const openSensorAddDialog = async () => {
   const page = await screen.findByRole('region', { name: 'Dodaj termometr' });
   expect(page).toHaveClass('device-add-page');
   expect(screen.queryByRole('dialog', { name: 'Dodaj termometr' })).toBeNull();
-  fireEvent.click(within(page).getByRole('tab', { name: 'Dodaj ręcznie' }));
+  selectAddMode(page, 'manual');
   return page;
 };
 
@@ -345,13 +368,9 @@ const getRuleSummary = () => {
 const addShellyThroughUi = async (name = 'Przedpokój') => {
   fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
   const addDialog = await openShellyAddDialog();
-  fireEvent.change(within(addDialog).getByLabelText('Nazwa gniazdka'), {
-    target: { value: name }
-  });
-  fireEvent.change(within(addDialog).getByLabelText('Adres IP Shelly'), {
-    target: { value: '192.168.0.20' }
-  });
-  fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
+  fireIonInput(getIonicInput(addDialog, 'Nazwa gniazdka'), name);
+  fireIonInput(getIonicInput(addDialog, 'Adres IP Shelly'), '192.168.0.20');
+  fireEvent.click(getIonicButton(addDialog, 'Dodaj'));
   expect(
     await screen.findByText('Dodano gniazdko.', {}, { timeout: 10000 })
   ).toBeInTheDocument();
@@ -386,13 +405,9 @@ const addSensorThroughUi = async ({
     profile === 'tp357_custom_v1' ? 'TP357' : 'Xiaomi/PVVX BTHome v2',
     addDialog
   );
-  fireEvent.change(within(addDialog).getByLabelText('Nazwa termometru'), {
-    target: { value: name }
-  });
-  fireEvent.change(within(addDialog).getByLabelText('MAC termometru'), {
-    target: { value: mac }
-  });
-  fireEvent.click(within(addDialog).getByRole('button', { name: 'Dodaj' }));
+  fireIonInput(getIonicInput(addDialog, 'Nazwa termometru'), name);
+  fireIonInput(getIonicInput(addDialog, 'MAC termometru'), mac);
+  fireEvent.click(getIonicButton(addDialog, 'Dodaj'));
   expect(await screen.findByText('Zapisano termometr.')).toBeInTheDocument();
   expect(screen.getByRole('region', { name: 'Dodaj termometr' })).toBeVisible();
   expect(screen.queryByRole('heading', { name: 'Dodaj termometr' })).toBeNull();
