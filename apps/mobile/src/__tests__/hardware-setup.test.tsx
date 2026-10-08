@@ -174,6 +174,7 @@ import {
   getIonicButton,
   getIonicInput,
   getIonicSelect,
+  ionicAriaValue,
   ionicValue,
   isIonicDisabled
 } from '../test/ionicTestEvents.js';
@@ -1572,7 +1573,7 @@ describe('HardwareSetupScreen', () => {
 
     const shellyScanControl = getIonicButton(page, 'Rozpocznij skan');
     expect(shellyScanControl).toHaveClass('device-scan-action');
-    expect(shellyScanControl).not.toHaveAttribute('aria-busy');
+    expect(ionicAriaValue(shellyScanControl, 'aria-busy')).toBeNull();
     expect(shellyScanControl.querySelector('.device-scan-action__spinner')).toBeNull();
     fireEvent.click(shellyScanControl);
 
@@ -1765,7 +1766,7 @@ describe('HardwareSetupScreen', () => {
 
     const stopButton = await waitFor(() => getIonicButton(dialog, 'Stop skanu'));
     expect(stopButton).toHaveClass('device-scan-action');
-    expect(stopButton).toHaveAttribute('aria-busy', 'true');
+    expect(ionicAriaValue(stopButton, 'aria-busy')).toBe('true');
     expect(stopButton.querySelector('.device-scan-action__spinner')).not.toBeNull();
     fireEvent.click(stopButton);
 
@@ -2455,7 +2456,7 @@ describe('HardwareSetupScreen', () => {
     expect(within(xiaomiItem!).getByText('-58 dBm')).toBeInTheDocument();
     const bleScanControl = getIonicButton(page, 'Stop skanu');
     expect(bleScanControl).toHaveClass('device-scan-action');
-    expect(bleScanControl).toHaveAttribute('aria-busy', 'true');
+    expect(ionicAriaValue(bleScanControl, 'aria-busy')).toBe('true');
     expect(bleScanControl.querySelector('.device-scan-action__spinner')).not.toBeNull();
 
     await waitFor(() => expect(within(page).getAllByRole('article')).toHaveLength(2));
