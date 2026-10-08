@@ -1,5 +1,5 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
-import { IonButton, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
+import { IonButton, IonInput, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
@@ -188,14 +188,18 @@ export const SensorSetupPage = ({
                 <div className="device-discovery-card__primary">
                   <label className="device-discovery-card__name ble-candidate-name">
                     <span>{t('hardware.sensor.nameLabel')}</span>
-                    <input
-                      className="device-discovery-card__name-input"
+                    <IonInput
+                      className="sensor-add-input device-discovery-card__name-input"
                       aria-label={`${t('hardware.sensor.nameLabel')}: ${candidate.runtimeAddress}`}
+                      fill="outline"
                       type="text"
                       value={displayName}
                       disabled={isSavedSensor}
-                      onChange={(event) =>
-                        setScannedSensorName(candidate, event.currentTarget.value)
+                      onIonInput={(event) =>
+                        setScannedSensorName(
+                          candidate,
+                          String(event.detail.value ?? '')
+                        )
                       }
                     />
                   </label>
