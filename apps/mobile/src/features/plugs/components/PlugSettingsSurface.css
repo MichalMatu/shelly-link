@@ -234,3 +234,39 @@
     grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 }
+
+.plug-settings-ionic-action {
+  --background: var(--lcl-color-accent);
+  --border-radius: var(--lcl-radius-md);
+  --box-shadow: none;
+  --color: var(--lcl-color-accent-contrast);
+  --padding-end: var(--lcl-spacing-lg);
+  --padding-start: var(--lcl-spacing-lg);
+
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+}
+
+.plug-settings-ionic-action--secondary {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --color: var(--lcl-color-text);
+}
+
+.plug-settings-ionic-select {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-end: var(--lcl-spacing-md);
+  --padding-start: var(--lcl-spacing-md);
+
+  color: var(--lcl-color-text);
+  font-weight: var(--lcl-font-weight-semibold);
+}
+
