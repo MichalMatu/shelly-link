@@ -1,6 +1,8 @@
-import { Disclosure, SegmentedControl } from '@lcl/ui';
+import { Disclosure } from '@lcl/ui';
+import { IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
+import './PlugAddPage.css';
 
 export type PlugScanResultView = {
   baseUrl: string;
@@ -100,17 +102,27 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
 
   return (
     <div className="device-add-page__body">
-      <SegmentedControl
-        ariaLabel={t('hardware.shelly.add')}
-        className="shelly-add-tabs"
-        itemClassName="shelly-add-tabs__tab"
+      <IonSegment
+        aria-label={t('hardware.shelly.add')}
+        className="plug-add-mode-segment"
+        mode="ios"
+        selectOnFocus={false}
+        swipeGesture={false}
         value={activeSection}
-        options={[
-          { value: 'scan', label: t('hardware.shelly.scanNetwork') },
-          { value: 'manual', label: t('hardware.shelly.addManual') }
-        ]}
-        onChange={selectSection}
-      />
+        onIonChange={(event) => {
+          const value = event.detail.value;
+          if (value === 'scan' || value === 'manual') {
+            selectSection(value);
+          }
+        }}
+      >
+        <IonSegmentButton value="scan">
+          <IonLabel>{t('hardware.shelly.scanNetwork')}</IonLabel>
+        </IonSegmentButton>
+        <IonSegmentButton value="manual">
+          <IonLabel>{t('hardware.shelly.addManual')}</IonLabel>
+        </IonSegmentButton>
+      </IonSegment>
 
       {activeSection === 'manual' && (
         <section
