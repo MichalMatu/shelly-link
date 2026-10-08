@@ -44,12 +44,38 @@ describe('PlugAddPage', () => {
   beforeEach(() => setLocalePreference('en'));
   afterEach(() => setLocalePreference('system'));
 
-  it('owns scan/manual tab state and stops an active scan before leaving it', () => {
+  it('owns scan/manual tab state and stops an active scan only when leaving scan', () => {
     const props = createProps();
     props.scan.active = true;
-    renderPage(props);
+    const { container } = renderPage(props);
+    const segment = container.querySelector('ion-segment');
+    if (!segment) throw new Error('Add Plug segment missing');
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Add manually' }));
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'scan' }
+      })
+    );
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'unsupported' }
+      })
+    );
+
+    expect(props.scan.onStop).not.toHaveBeenCalled();
+    expect(screen.queryByLabelText('Plug name')).toBeNull();
+
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'manual' }
+      })
+    );
 
     expect(props.scan.onStop).toHaveBeenCalledTimes(1);
     expect(screen.getByLabelText('Plug name')).toHaveValue('Grow plug');
@@ -82,7 +108,15 @@ describe('PlugAddPage', () => {
     props.manual.nameError = 'Enter a device name.';
     renderPage(props);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Add manually' }));
+    const segment = document.querySelector('ion-segment');
+    if (!segment) throw new Error('Add Plug segment missing');
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'manual' }
+      })
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 
     expect(screen.getByText('Enter a device name.')).toBeInTheDocument();
