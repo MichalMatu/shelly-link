@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { DiagnosticRow } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import { firmwareUpdateCopy } from '../../../app/locales/firmwareUpdate.js';
@@ -74,15 +75,15 @@ export const PlugFirmwareUpdateCard = ({
 
       {canUpdate && updatePhase !== 'complete' && (
         <div className="plug-settings-actions">
-          <button
-            className="primary-action"
+          <IonButton
+            className="plug-settings-ionic-action"
             type="button"
             disabled={updateMutation.isPending}
             aria-busy={updateMutation.isPending || undefined}
             onClick={() => updateMutation.mutate()}
           >
             {updateMutation.isPending ? pendingCopy : copy.update}
-          </button>
+          </IonButton>
         </div>
       )}
 
