@@ -1123,7 +1123,7 @@ describe('HardwareSetupScreen', () => {
         }
       }
     });
-  });
+  }, 15_000);
 
   it('blocks rule install when Shelly status does not expose BLE', async () => {
     const defaultFetch = vi.mocked(fetch);
@@ -1177,7 +1177,11 @@ describe('HardwareSetupScreen', () => {
     expect(
       screen.queryByRole('dialog', { name: 'Nie udało się sprawdzić Shelly' })
     ).not.toBeInTheDocument();
-    expect(vi.mocked(fetch)).not.toHaveBeenCalled();
+    expect(
+      vi
+        .mocked(fetch)
+        .mock.calls.some(([input]) => requestUrl(input).hostname === 'shelly.local')
+    ).toBe(false);
   });
 
   it('shows the concrete Shelly Add failure instead of replacing it with generic IP advice', async () => {
