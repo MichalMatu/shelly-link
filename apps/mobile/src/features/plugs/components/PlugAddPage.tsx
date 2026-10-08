@@ -116,20 +116,10 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
           }
         }}
       >
-        <IonSegmentButton
-          aria-label={t('hardware.shelly.scanNetwork')}
-          aria-selected={activeSection === 'scan' ? 'true' : 'false'}
-          role="tab"
-          value="scan"
-        >
+        <IonSegmentButton value="scan">
           <IonLabel>{t('hardware.shelly.scanNetwork')}</IonLabel>
         </IonSegmentButton>
-        <IonSegmentButton
-          aria-label={t('hardware.shelly.addManual')}
-          aria-selected={activeSection === 'manual' ? 'true' : 'false'}
-          role="tab"
-          value="manual"
-        >
+        <IonSegmentButton value="manual">
           <IonLabel>{t('hardware.shelly.addManual')}</IonLabel>
         </IonSegmentButton>
       </IonSegment>
