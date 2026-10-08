@@ -3,6 +3,12 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { deviceCloudCopy } from '../../../app/locales/deviceCloud.js';
+import {
+  fireIonToggleChange,
+  getIonicButton,
+  getIonicToggle,
+  queryIonicButton
+} from '../../../test/ionicTestEvents.js';
 import { PlugCloudSettingsCard } from './PlugCloudSettingsCard.js';
 
 const copy = deviceCloudCopy.pl;
@@ -82,21 +88,21 @@ describe('PlugCloudSettingsCard', () => {
     );
 
     renderCard();
-    const toggle = await screen.findByRole('checkbox', { name: copy.enable });
-    const save = screen.getByRole('button', { name: copy.save });
-    expect(toggle).not.toBeChecked();
-    expect(save).toBeDisabled();
+    const toggle = await waitFor(() => getIonicToggle(document, copy.enable));
+    const save = getIonicButton(document, copy.save);
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(save).toHaveAttribute('disabled');
     expect(screen.getByText(`${copy.connection}: ${copy.disconnected}`)).toBeVisible();
 
-    fireEvent.click(toggle);
-    expect(toggle).toBeChecked();
-    expect(save).toBeEnabled();
+    fireIonToggleChange(toggle, true);
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    expect(save).not.toHaveAttribute('disabled');
     fireEvent.click(save);
 
     expect(await screen.findByText(copy.saved)).toBeVisible();
     expect(setConfigs).toEqual([{ enable: true }]);
     expect(screen.getByText(`${copy.connection}: ${copy.connected}`)).toBeVisible();
-    expect(save).toBeDisabled();
+    expect(save).toHaveAttribute('disabled');
   });
 
   it('does not overwrite a dirty Cloud draft when the device query refetches', async () => {
@@ -123,15 +129,15 @@ describe('PlugCloudSettingsCard', () => {
     );
 
     const { queryClient } = renderCard();
-    const toggle = await screen.findByRole('checkbox', { name: copy.enable });
-    fireEvent.click(toggle);
-    expect(toggle).toBeChecked();
+    const toggle = await waitFor(() => getIonicToggle(document, copy.enable));
+    fireIonToggleChange(toggle, true);
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
 
     await queryClient.refetchQueries({
       queryKey: ['plug-cloud-settings', target.deviceId, target.baseUrl],
       exact: true
     });
-    await waitFor(() => expect(toggle).toBeChecked());
+    await waitFor(() => expect(toggle).toHaveAttribute('aria-checked', 'true'));
   });
 
   it('renders a missing writable Cloud surface as unsupported without mutating anything', async () => {
@@ -157,6 +163,6 @@ describe('PlugCloudSettingsCard', () => {
     renderCard();
     expect(await screen.findByText(copy.unsupported)).toBeVisible();
     expect(methods).toEqual(['Shelly.GetDeviceInfo', 'Shelly.ListMethods']);
-    expect(screen.queryByRole('button', { name: copy.save })).toBeNull();
+    expect(queryIonicButton(document, copy.save)).toBeNull();
   });
 });
