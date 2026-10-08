@@ -1,5 +1,5 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
-import { IonButton, IonInput, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
+import { IonButton, IonInput } from '@ionic/react';
 import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
@@ -16,6 +16,7 @@ import {
 } from '../../../features/thermometers/index.js';
 import { SensorAddForm } from './SensorSetupPresentation.js';
 import './SensorSetupPage.css';
+import { SensorAddModeSegment, type SensorAddMode } from './SensorAddModeSegment.js';
 
 type SensorDraftDevice = SensorSetupFlow['sensorDevices'][number];
 type SensorRemovalUsage = ReturnType<SensorSetupFlow['sensorRemovalUsage']>[number];
@@ -23,7 +24,6 @@ type SensorDialogState =
   | { kind: 'none' }
   | { kind: 'remove'; device: SensorDraftDevice }
   | { kind: 'blocked'; device: SensorDraftDevice; usage: SensorRemovalUsage };
-type SensorAddMode = 'manual' | 'phone-scan';
 
 type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
   primaryAddAction?: SensorAddMode;
@@ -294,27 +294,7 @@ export const SensorSetupPage = ({
         className="device-add-page sensor-add-page"
         aria-label={t('hardware.sensor.add')}
       >
-        <IonSegment
-          aria-label={t('hardware.sensor.add')}
-          className="sensor-add-mode-segment"
-          mode="ios"
-          selectOnFocus={false}
-          swipeGesture={false}
-          value={addMode}
-          onIonChange={(event) => {
-            const value = event.detail.value;
-            if (value === 'phone-scan' || value === 'manual') {
-              selectAddMode(value);
-            }
-          }}
-        >
-          <IonSegmentButton value="phone-scan">
-            <IonLabel>{t('hardware.sensor.scanBle')}</IonLabel>
-          </IonSegmentButton>
-          <IonSegmentButton value="manual">
-            <IonLabel>{t('hardware.shelly.addManual')}</IonLabel>
-          </IonSegmentButton>
-        </IonSegment>
+        <SensorAddModeSegment value={addMode} onChange={selectAddMode} />
         {addMode === 'phone-scan' ? (
           scanContent
         ) : (
