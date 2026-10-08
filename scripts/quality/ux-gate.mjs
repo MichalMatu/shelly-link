@@ -29,6 +29,7 @@ const cssPaths = [
   'apps/mobile/src/screens/AutomationDashboardScreen.css',
   'apps/mobile/src/features/automation-dashboard/components/AutomationDashboardBody.css',
   'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.css',
+  'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
   'apps/mobile/src/features/automations/components/ClimateHistorySection.css',
   'apps/mobile/src/features/automations/components/ClimateHistoryChart.css',
@@ -912,7 +913,7 @@ const checkDisclosureContract = async () => {
 const checkSegmentedControlContract = async () => {
   const componentPath = 'packages/ui/src/primitives/SegmentedControl.tsx';
   const uiIndexPath = 'packages/ui/src/index.ts';
-  const sharedUsagePath =
+  const ionicSensorAddPath =
     'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx';
   const ionicAddPlugPath =
     'apps/mobile/src/features/plugs/components/PlugAddPage.tsx';
@@ -925,11 +926,11 @@ const checkSegmentedControlContract = async () => {
     ]
   ];
 
-  const [componentSource, uiIndexSource, sharedUsageSource, ionicAddPlugSource] =
+  const [componentSource, uiIndexSource, ionicSensorAddSource, ionicAddPlugSource] =
     await Promise.all([
       readRepoFile(componentPath),
       readRepoFile(uiIndexPath),
-      readRepoFile(sharedUsagePath),
+      readRepoFile(ionicSensorAddPath),
       readRepoFile(ionicAddPlugPath)
     ]);
   if (
@@ -949,15 +950,16 @@ const checkSegmentedControlContract = async () => {
   }
 
   if (
-    !sharedUsageSource.includes('<SegmentedControl') ||
-    !sharedUsageSource.includes('className="shelly-add-tabs"') ||
-    !sharedUsageSource.includes('itemClassName="shelly-add-tabs__tab"') ||
-    sharedUsageSource.includes('shelly-add-tabs lcl-segmented-control') ||
-    sharedUsageSource.includes('shelly-add-tabs__tab lcl-segmented-control__item')
+    !ionicSensorAddSource.includes('<IonSegment') ||
+    !ionicSensorAddSource.includes('<IonSegmentButton') ||
+    !ionicSensorAddSource.includes('className="sensor-add-mode-segment"') ||
+    !ionicSensorAddSource.includes('selectOnFocus={false}') ||
+    !ionicSensorAddSource.includes('swipeGesture={false}') ||
+    ionicSensorAddSource.includes('<SegmentedControl')
   ) {
     addFailure(
-      sharedUsagePath,
-      'sensor add tabs must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
+      ionicSensorAddPath,
+      'Add Thermometer mode selection must use the controlled Ionic segment without focus/swipe side effects'
     );
   }
 
