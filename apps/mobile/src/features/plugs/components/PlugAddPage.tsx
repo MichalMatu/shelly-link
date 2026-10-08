@@ -124,7 +124,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                 aria-describedby={
                   showManualErrors && manual.nameError ? manualNameErrorId : undefined
                 }
-                aria-invalid={showManualErrors && manual.nameError ? true : undefined}
+                aria-invalid={showManualErrors && manual.nameError ? 'true' : undefined}
                 className="plug-add-input"
                 fill="outline"
                 type="text"
@@ -151,7 +151,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                 aria-describedby={
                   showManualErrors && manual.urlError ? manualUrlErrorId : undefined
                 }
-                aria-invalid={showManualErrors && manual.urlError ? true : undefined}
+                aria-invalid={showManualErrors && manual.urlError ? 'true' : undefined}
                 className="plug-add-input"
                 fill="outline"
                 type="url"
@@ -202,7 +202,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                   <IonInput
                     aria-label={t('hardware.shelly.scanRangeStart')}
                     aria-describedby={showScanRangeError ? scanRangeErrorId : undefined}
-                    aria-invalid={showScanRangeError}
+                    aria-invalid={showScanRangeError ? 'true' : undefined}
                     className="plug-add-input"
                     fill="outline"
                     type="text"
@@ -219,7 +219,7 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
                   <IonInput
                     aria-label={t('hardware.shelly.scanRangeEnd')}
                     aria-describedby={showScanRangeError ? scanRangeErrorId : undefined}
-                    aria-invalid={showScanRangeError}
+                    aria-invalid={showScanRangeError ? 'true' : undefined}
                     className="plug-add-input"
                     fill="outline"
                     type="text"
