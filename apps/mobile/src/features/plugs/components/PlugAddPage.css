@@ -1,0 +1,20 @@
+.plug-add-mode-segment {
+  --background: var(--lcl-color-surface);
+  --indicator-color: var(--lcl-color-accent);
+
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  padding: var(--lcl-spacing-xs);
+}
+
+.plug-add-mode-segment ion-segment-button {
+  --color: var(--lcl-color-text-muted);
+  --color-checked: var(--lcl-color-accent-contrast);
+  --indicator-color: var(--lcl-color-accent);
+  --indicator-box-shadow: none;
+
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-semibold);
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+}
