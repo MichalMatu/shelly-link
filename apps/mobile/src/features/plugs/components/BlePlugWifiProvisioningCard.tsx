@@ -1,4 +1,4 @@
-import { SelectField } from '@lcl/ui';
+import { IonButton, IonSelect, IonSelectOption } from '@ionic/react';
 import { useId, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceWifiCopy } from '../../../app/locales/deviceWifi.js';
@@ -78,39 +78,45 @@ export const BlePlugWifiProvisioningCard = ({
       </div>
 
       <div className="plug-settings-actions">
-        <button
-          className="secondary-action"
+        <IonButton
+          className="plug-settings-ionic-action plug-settings-ionic-action--secondary"
+          fill="outline"
           type="button"
           disabled={busy}
           aria-busy={scanMutation.isPending || undefined}
           onClick={scan}
         >
           {scanMutation.isPending ? copy.scanning : copy.scan}
-        </button>
+        </IonButton>
       </div>
 
       {networks.length > 0 && (
         <div className="plug-settings-fields">
           <div className="field">
             <span>{copy.network}</span>
-            <SelectField
-              ariaLabel={copy.network}
-              value={selectedSsid}
+            <IonSelect
+              aria-label={copy.network}
+              className="plug-settings-ionic-select"
+              fill="outline"
+              interface="alert"
               placeholder={copy.selectNetwork}
+              value={selectedSsid}
               disabled={busy}
-              options={networks.map((network) => ({
-                value: network.ssid,
-                label: network.ssid,
-                meta: `${network.rssi === undefined ? '—' : `${network.rssi} dBm`} · ${
-                  network.auth === 0 ? copy.open : copy.secured
-                }`
-              }))}
-              onChange={(value) => {
+              onIonChange={(event) => {
+                const value = event.detail.value;
+                if (typeof value !== 'string') return;
                 setSelectedSsid(value);
                 setPassword('');
                 setFeedback(null);
               }}
-            />
+            >
+              {networks.map((network) => (
+                <IonSelectOption key={network.ssid} value={network.ssid}>
+                  {network.ssid} · {network.rssi === undefined ? '—' : `${network.rssi} dBm`} ·{' '}
+                  {network.auth === 0 ? copy.open : copy.secured}
+                </IonSelectOption>
+              ))}
+            </IonSelect>
           </div>
 
           {selected && secured && (
@@ -128,15 +134,15 @@ export const BlePlugWifiProvisioningCard = ({
           )}
 
           <div className="plug-settings-actions">
-            <button
-              className="primary-action"
+            <IonButton
+              className="plug-settings-ionic-action"
               type="button"
               disabled={!selected || (secured && password.length === 0) || busy}
               aria-busy={connectMutation.isPending || undefined}
               onClick={connect}
             >
               {connectMutation.isPending ? copy.connecting : copy.connect}
-            </button>
+            </IonButton>
           </div>
         </div>
       )}
