@@ -38,7 +38,7 @@ History cards use the existing design-token system for dark/light surfaces, bord
 
 Current shared patterns include:
 
-- `SegmentedControl` for setup and add-device segmented navigation;
+- `SegmentedControl` for remaining shared setup/sensor segmented navigation; Add Plug mode selection uses Ionic `IonSegment`;
 - shared Plug dashboard shell and Plug controls;
 - shared Plug detail tabs and Plug Device/Info surfaces;
 - shared `Disclosure` behavior;
@@ -81,7 +81,9 @@ The heavier Settings Ionic controls may be lazy-loaded behind the Settings prese
 
 ### Add Plug
 
-The normal flow stays simple. Technical scan range is available through the compact `Zakres skanowania` disclosure and remains visible in its collapsed summary.
+The normal flow stays simple. Scan/manual mode selection uses a controlled Ionic `IonSegment` while the Plug feature retains ownership of scan lifecycle and page composition. Focus alone and swipe gestures must not switch modes because leaving an active scan has a real stop side effect.
+
+Technical scan range is available through the compact `Zakres skanowania` disclosure and remains visible in its collapsed summary.
 
 ### Pulse setup/editor
 
