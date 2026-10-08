@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { PlugAddPage, type PlugAddPageProps } from './PlugAddPage.js';
@@ -42,7 +42,10 @@ const renderPage = (props: PlugAddPageProps) =>
 
 describe('PlugAddPage', () => {
   beforeEach(() => setLocalePreference('en'));
-  afterEach(() => setLocalePreference('system'));
+  afterEach(() => {
+    cleanup();
+    setLocalePreference('system');
+  });
 
   it('owns scan/manual tab state and stops an active scan only when leaving scan', () => {
     const props = createProps();
