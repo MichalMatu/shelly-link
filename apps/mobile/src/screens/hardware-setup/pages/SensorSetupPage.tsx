@@ -1,5 +1,5 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
-import { IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
+import { IonButton, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
@@ -259,8 +259,9 @@ export const SensorSetupPage = ({
         </div>
       )}
       <div className="action-row device-add-page__actions device-add-page__scan-control">
-        <button
-          className="secondary-action device-scan-action"
+        <IonButton
+          className="sensor-add-secondary-action device-scan-action"
+          fill="outline"
           type="button"
           aria-busy={isPhoneBleScanPending || undefined}
           title={
@@ -278,7 +279,7 @@ export const SensorSetupPage = ({
               ? t('hardware.shelly.scanStop')
               : t('hardware.shelly.scanBleAgain')}
           </span>
-        </button>
+        </IonButton>
       </div>
     </section>
   );
@@ -320,9 +321,13 @@ export const SensorSetupPage = ({
           >
             <SensorAddForm flow={flow} showValidationErrors={didSubmitSensorAdd} />
             <div className="action-row device-add-page__actions">
-              <button className="primary-action" type="button" onClick={addSensor}>
+              <IonButton
+                className="sensor-add-primary-action"
+                type="button"
+                onClick={addSensor}
+              >
                 {t('common.add')}
-              </button>
+              </IonButton>
             </div>
           </section>
         )}
