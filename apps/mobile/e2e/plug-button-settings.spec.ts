@@ -199,8 +199,8 @@ for (const viewport of viewports) {
     await openPlugSettings(page);
 
     await expect(
-      page.getByRole('button', { name: 'Tryb przycisku', exact: true })
-    ).toContainText('Steruje przekaźnikiem');
+      page.locator('ion-select[aria-label="Tryb przycisku"]')
+    ).toHaveAttribute('value', 'momentary');
     await expect(
       page.getByText('Fizyczny przycisk przełącza przekaźnik ON/OFF.')
     ).toBeVisible();
@@ -214,7 +214,7 @@ test('physical button mode writes only PLUGS_UI controls', async ({ page }) => {
   const mock = await mockShelly(page);
   await openPlugSettings(page);
 
-  await page.getByRole('button', { name: 'Tryb przycisku', exact: true }).click();
+  await page.locator('ion-select[aria-label="Tryb przycisku"]').click();
   await page.getByRole('option', { name: 'Odłączony od przekaźnika' }).click();
   await expect(
     page.getByText('Fizyczny przycisk nie zmienia stanu przekaźnika.')
