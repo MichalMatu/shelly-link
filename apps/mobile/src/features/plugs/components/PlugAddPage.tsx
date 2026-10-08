@@ -116,10 +116,10 @@ export const PlugAddPage = ({ manual, scan }: PlugAddPageProps) => {
           }
         }}
       >
-        <IonSegmentButton value="scan">
+        <IonSegmentButton role="tab" value="scan">
           <IonLabel>{t('hardware.shelly.scanNetwork')}</IonLabel>
         </IonSegmentButton>
-        <IonSegmentButton value="manual">
+        <IonSegmentButton role="tab" value="manual">
           <IonLabel>{t('hardware.shelly.addManual')}</IonLabel>
         </IonSegmentButton>
       </IonSegment>
