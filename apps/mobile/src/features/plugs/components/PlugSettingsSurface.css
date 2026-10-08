@@ -281,3 +281,10 @@
   color: var(--lcl-color-text);
 }
 
+.plug-settings-ionic-toggle {
+  --handle-background: var(--lcl-color-surface);
+  --handle-background-checked: var(--lcl-color-accent-contrast);
+  --track-background: var(--lcl-color-border);
+  --track-background-checked: var(--lcl-color-accent);
+}
+
