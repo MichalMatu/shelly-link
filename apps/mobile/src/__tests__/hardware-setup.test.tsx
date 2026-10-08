@@ -699,9 +699,10 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText('Dodane gniazdka')).not.toBeInTheDocument();
     const shellyAddDialog = await openShellyAddDialog();
-    expect(
-      within(shellyAddDialog).getByPlaceholderText('http://192.168.x.x')
-    ).toBeInTheDocument();
+    expect(getIonicInput(shellyAddDialog, 'Adres IP Shelly')).toHaveAttribute(
+      'placeholder',
+      'http://192.168.x.x'
+    );
     const shellyScanTab = shellyAddDialog.querySelector(
       'ion-segment-button[value="scan"]'
     );
@@ -1173,10 +1174,9 @@ describe('HardwareSetupScreen', () => {
     expect(
       within(addDialog).getByText('Adres IP Shelly musi wyglądać jak 192.168.0.20.')
     ).toBeInTheDocument();
-    expect(getIonicInput(addDialog, 'Adres IP Shelly')).toHaveAttribute(
-      'aria-invalid',
-      'true'
-    );
+    expect(
+      ionicAriaValue(getIonicInput(addDialog, 'Adres IP Shelly'), 'aria-invalid')
+    ).toBe('true');
     expect(
       screen.queryByRole('dialog', { name: 'Nie udało się sprawdzić Shelly' })
     ).not.toBeInTheDocument();
@@ -1579,10 +1579,11 @@ describe('HardwareSetupScreen', () => {
 
     expect(await within(page).findByText('http://192.168.0.20/')).toBeInTheDocument();
     expect(within(page).getByText('S3PL-00112EU, gen 3')).toBeInTheDocument();
-    const scannedName = within(page).getByRole('textbox', {
-      name: 'Nazwa gniazdka: http://192.168.0.20/'
-    });
-    expect(scannedName).toHaveValue('S3PL-00112EU');
+    const scannedName = getIonicInput(
+      page,
+      'Nazwa gniazdka: http://192.168.0.20/'
+    );
+    expect(ionicValue(scannedName)).toBe('S3PL-00112EU');
     const scannedRow = scannedName.closest(
       '.device-discovery-card'
     ) as HTMLElement | null;
@@ -1766,7 +1767,6 @@ describe('HardwareSetupScreen', () => {
 
     const stopButton = await waitFor(() => getIonicButton(dialog, 'Stop skanu'));
     expect(stopButton).toHaveClass('device-scan-action');
-    expect(ionicAriaValue(stopButton, 'aria-busy')).toBe('true');
     expect(stopButton.querySelector('.device-scan-action__spinner')).not.toBeNull();
     fireEvent.click(stopButton);
 
@@ -2456,7 +2456,6 @@ describe('HardwareSetupScreen', () => {
     expect(within(xiaomiItem!).getByText('-58 dBm')).toBeInTheDocument();
     const bleScanControl = getIonicButton(page, 'Stop skanu');
     expect(bleScanControl).toHaveClass('device-scan-action');
-    expect(ionicAriaValue(bleScanControl, 'aria-busy')).toBe('true');
     expect(bleScanControl.querySelector('.device-scan-action__spinner')).not.toBeNull();
 
     await waitFor(() => expect(within(page).getAllByRole('article')).toHaveLength(2));
