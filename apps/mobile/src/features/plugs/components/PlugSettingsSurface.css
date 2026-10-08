@@ -270,3 +270,14 @@
   font-weight: var(--lcl-font-weight-semibold);
 }
 
+.plug-settings-ionic-input {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-end: var(--lcl-spacing-md);
+  --padding-start: var(--lcl-spacing-md);
+
+  color: var(--lcl-color-text);
+}
+
