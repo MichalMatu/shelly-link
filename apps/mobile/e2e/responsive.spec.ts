@@ -797,7 +797,7 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '05-climate-device');
     }
-    await expect(page.getByRole('button', { name: 'Tryb LED' })).toBeVisible();
+    await expect(page.locator('ion-select[aria-label="Tryb LED"]')).toBeVisible();
     await expect(page.getByText('ON', { exact: true })).toBeVisible();
     await expect(page.getByText('OFF', { exact: true })).toBeVisible();
     await expect(page.locator('input[type="color"]')).toHaveCount(0);
@@ -805,8 +805,8 @@ for (const viewport of viewports) {
     const offStateBox = await requiredBox(page.locator('fieldset.plug-led-state').nth(1));
     expect(offStateBox.y).toBeGreaterThan(onStateBox.y + onStateBox.height);
     const [nightStartBox, nightEndBox] = await Promise.all([
-      requiredBox(page.getByLabel('Początek')),
-      requiredBox(page.getByLabel('Koniec'))
+      requiredBox(page.locator('ion-input[aria-label="Początek"]')),
+      requiredBox(page.locator('ion-input[aria-label="Koniec"]'))
     ]);
     expect(Math.abs(nightStartBox.y - nightEndBox.y)).toBeLessThanOrEqual(2);
     await expect(
@@ -1204,7 +1204,10 @@ for (const viewport of viewports) {
       page.getByRole('heading', { name: 'Ustawienia termometru' })
     ).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Tożsamość' })).toBeVisible();
-    await expect(page.getByLabel('Nazwa termometru')).toHaveValue('Przedpokój');
+    await expect(page.locator('ion-input[aria-label="Nazwa termometru"]')).toHaveJSProperty(
+      'value',
+      'Przedpokój'
+    );
     await expect(page.getByText('A4:C1:38:4F:24:CD')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Odczyty na żywo' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Akcje urządzenia' })).toBeVisible();
