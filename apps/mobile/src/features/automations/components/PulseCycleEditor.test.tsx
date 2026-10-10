@@ -1,4 +1,11 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import {
+  fireIonChange,
+  fireIonInput,
+  getIonicInput,
+  getIonicSelect,
+  ionicValue
+} from '../../../test/ionicTestEvents.js';
 import { describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '../../../app/i18n.js';
 import { pulseCycleCopy } from '../../../app/locales/pulseCycle.js';
@@ -37,15 +44,37 @@ const renderEditor = ({
 };
 
 const selectOption = (label: string, optionLabel: string) => {
-  fireEvent.click(screen.getByRole('button', { name: label }));
-  const listbox = screen.getByRole('listbox', { name: label });
-  fireEvent.click(within(listbox).getByRole('option', { name: optionLabel }));
+  // The frozen Climate composition still uses the shared HTML listbox.
+  const legacy = screen.queryByRole('button', { name: label });
+  if (legacy) {
+    fireEvent.click(legacy);
+    const listbox = screen.getByRole('listbox', { name: label });
+    fireEvent.click(within(listbox).getByRole('option', { name: optionLabel }));
+    return;
+  }
+  const segment = document.querySelector<HTMLElement>(
+    `ion-segment[aria-label="${label}"]`
+  );
+  if (segment) {
+    const target = Array.from(segment.querySelectorAll('ion-segment-button')).find(
+      (button) => button.textContent === optionLabel
+    );
+    if (!target) throw new Error(`Unknown segment option: ${optionLabel}`);
+    fireIonChange(segment, target.getAttribute('value'));
+    return;
+  }
+  const select = getIonicSelect(document, label);
+  const target = Array.from(select.querySelectorAll('ion-select-option')).find(
+    (option) => option.textContent === optionLabel
+  );
+  if (!target) throw new Error(`Unknown select option: ${optionLabel}`);
+  fireIonChange(select, target.getAttribute('value'));
 };
 
 describe('PulseCycleEditor', () => {
   it('keeps optional Pulse compact while output behavior is Steady', () => {
     renderEditor();
-    expect(screen.getByLabelText(copy.outputBehavior)).toHaveValue('steady');
+    expect(ionicValue(document.querySelector('ion-segment')!)).toBe('steady');
     expect(screen.queryByText(copy.onSeconds)).not.toBeInTheDocument();
   });
 
@@ -58,7 +87,7 @@ describe('PulseCycleEditor', () => {
 
   it('explains Time as the active window and Pulse as behavior inside it', () => {
     renderEditor({ context: 'time' });
-    expect(screen.getByLabelText(copy.timeOutputBehavior)).toHaveValue('steady');
+    expect(ionicValue(document.querySelector('ion-segment')!)).toBe('steady');
     expect(screen.getByText(copy.timeHint)).toBeVisible();
     selectOption(copy.timeOutputBehavior, copy.steadyOn);
   });
@@ -89,6 +118,22 @@ describe('PulseCycleEditor', () => {
     expect(screen.getByText(copy.onSeconds)).toBeInTheDocument();
   });
 
+  it('keeps Climate control markup unchanged while migrating Time and Pulse', () => {
+    renderEditor({ context: 'climate', draft: { ...DEFAULT_PULSE_CYCLE_FORM, enabled: true } });
+    expect(document.querySelector('ion-input')).toBeNull();
+    expect(document.querySelector('ion-select')).toBeNull();
+    expect(document.querySelector('ion-segment')).toBeNull();
+    expect(screen.getAllByRole('spinbutton').length).toBeGreaterThan(0);
+  });
+
+  it('sends Ionic decimal input as a string without changing form ownership', () => {
+    const onChange = renderEditor({
+      draft: { ...DEFAULT_PULSE_CYCLE_FORM, enabled: true }
+    });
+    fireIonInput(getIonicInput(document, copy.onSeconds), '12.5');
+    expect(onChange).toHaveBeenCalledWith({ onSecondsInput: '12.5' });
+  });
+
   it('renders validation feedback on the invalid shared field', () => {
     const draft = {
       ...DEFAULT_PULSE_CYCLE_FORM,
@@ -96,7 +141,7 @@ describe('PulseCycleEditor', () => {
       onSecondsInput: '0.5'
     };
     renderEditor({ draft });
-    const input = screen.getAllByRole('spinbutton')[0];
+    const input = getIonicInput(document, copy.onSeconds);
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByText(copy.invalidValue)).toBeInTheDocument();
   });
