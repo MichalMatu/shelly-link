@@ -1,3 +1,4 @@
+import { IonInput, IonCheckbox } from '@ionic/react';
 import type { RulePresetId, ThresholdDirection } from '@lcl/automation-core';
 import type { ClimateSensorAggregation } from '@lcl/script-generator';
 import { Disclosure, InfoLabel, SelectField } from '@lcl/ui';
@@ -168,14 +169,15 @@ export const ClimateRuleEditor = ({
         <label className={props.isThresholdValid ? 'field' : 'field field--invalid'}>
           <span>{stripTrailingUnit(t(copy.onLabelKey), copy.unit)}</span>
           <span className="field-unit-control">
-            <input
+            <IonInput
+              className="lcl-climate-ionic-number-input"
               aria-label={t(copy.onLabelKey)}
               aria-describedby={props.isThresholdValid ? undefined : thresholdErrorId}
-              aria-invalid={!props.isThresholdValid}
+              aria-invalid={props.isThresholdValid ? 'false' : 'true'}
               type="number"
               step="0.1"
               value={props.onThresholdInput}
-              onChange={(event) => props.setOnThresholdInput(event.currentTarget.value)}
+              onIonInput={(event) => props.setOnThresholdInput(String(event.detail.value ?? ''))}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               {copy.unit}
@@ -185,14 +187,15 @@ export const ClimateRuleEditor = ({
         <label className={props.isThresholdValid ? 'field' : 'field field--invalid'}>
           <span>{stripTrailingUnit(t(copy.offLabelKey), copy.unit)}</span>
           <span className="field-unit-control">
-            <input
+            <IonInput
+              className="lcl-climate-ionic-number-input"
               aria-label={t(copy.offLabelKey)}
               aria-describedby={props.isThresholdValid ? undefined : thresholdErrorId}
-              aria-invalid={!props.isThresholdValid}
+              aria-invalid={props.isThresholdValid ? 'false' : 'true'}
               type="number"
               step="0.1"
               value={props.offThresholdInput}
-              onChange={(event) => props.setOffThresholdInput(event.currentTarget.value)}
+              onIonInput={(event) => props.setOffThresholdInput(String(event.detail.value ?? ''))}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               {copy.unit}
@@ -219,11 +222,11 @@ export const ClimateRuleEditor = ({
             {t('hardware.rule.vpdRangeHint')}
           </InfoLabel>
           <label className="toggle-row rule-vpd-assist__toggle">
-            <input
+            <IonCheckbox
+              className="lcl-climate-ionic-checkbox"
               aria-label={t('hardware.rule.vpdAssistTitle')}
-              type="checkbox"
               checked={props.vpdAssistEnabled}
-              onChange={(event) => props.setVpdAssistEnabled(event.currentTarget.checked)}
+              onIonChange={(event) => props.setVpdAssistEnabled(event.detail.checked)}
             />
             <span className="rule-vpd-assist__toggle-state">
               {props.vpdAssistEnabled ? t('common.enabled') : t('common.disabled')}
@@ -240,17 +243,18 @@ export const ClimateRuleEditor = ({
               {t('hardware.rule.vpdTargetShort')}
             </label>
             <span className="field-unit-control">
-              <input
+              <IonInput
+              className="lcl-climate-ionic-number-input"
                 id={vpdTargetInputId}
                 aria-label={t('hardware.rule.vpdTarget')}
                 aria-describedby={props.isVpdAssistValid ? undefined : vpdErrorId}
-                aria-invalid={!props.isVpdAssistValid}
+                aria-invalid={props.isVpdAssistValid ? 'false' : 'true'}
                 max={RULE_ADVANCED_LIMITS.vpdTargetMax}
                 min={RULE_ADVANCED_LIMITS.vpdTargetMin}
                 step="0.05"
                 type="number"
                 value={props.vpdTargetInput}
-                onChange={(event) => props.setVpdTargetInput(event.currentTarget.value)}
+                onIonInput={(event) => props.setVpdTargetInput(String(event.detail.value ?? ''))}
               />
               <span className="field-unit-control__unit" aria-hidden="true">
                 kPa
