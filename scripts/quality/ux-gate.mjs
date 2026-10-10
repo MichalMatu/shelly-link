@@ -1076,7 +1076,7 @@ const checkRuntimeReasonPresentation = async () => {
     'apps/mobile/src/features/automations/components/StandalonePulseDashboardStatus.tsx'
   ]) {
     const source = await readRepoFile(path);
-    if (!source.includes('formatRuntimeReason(') || /reasons\\[value\\]\\s*\\?\\?\\s*value/.test(source)) {
+    if (!source.includes('formatRuntimeReason(') || /reasons\[value\]\s*\?\?\s*value/.test(source)) {
       addFailure(path, 'runtime status must use the shared localized reason presenter');
     }
   }
@@ -1088,8 +1088,8 @@ const checkRuntimeReasonPresentation = async () => {
     if (path.includes('/devConsole') || path.includes('/DevCommandPalette')) continue;
     const source = await readRepoFile(path);
     if (
-      /error\\s+instanceof\\s+Error\\s*\\?\\s*error\\.message/.test(source) ||
-      /\\$\\{fallback\\}\\s+\\$\\{detail\\}/.test(source)
+      /error\s+instanceof\s+Error\s*\?\s*error\.message/.test(source) ||
+      /\$\{fallback\}\s+\$\{detail\}/.test(source)
     ) {
       addFailure(path, 'never place raw transport exceptions in a user-facing component');
     }
@@ -1116,6 +1116,8 @@ const checkPackageRuntimeCopy = async () => {
 const focusedCheck = process.env.LCL_UX_GATE_FOCUS;
 if (focusedCheck === 'segmented-control') {
   await checkSegmentedControlContract();
+} else if (focusedCheck === 'runtime-reason') {
+  await checkRuntimeReasonPresentation();
 } else if (focusedCheck) {
   console.error(`Unknown LCL_UX_GATE_FOCUS: ${focusedCheck}`);
   process.exit(2);
