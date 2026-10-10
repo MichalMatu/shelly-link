@@ -1309,9 +1309,7 @@ for (const viewport of viewports) {
     await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
       0
     );
-    await expect(
-      page.locator('ion-checkbox.lcl-climate-ionic-checkbox[aria-label="VPD assist"]')
-    ).toBeVisible();
+    await expect(page.getByLabel('VPD assist')).toBeVisible();
     await expect(
       page.getByText(
         'Reguła klimatu decyduje, kiedy wyjście pracuje. Pulse określa cykl ON/OFF podczas pracy.'
