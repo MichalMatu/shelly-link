@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 
@@ -25,13 +26,9 @@ export const SensorRemovalBlockedModal = ({
       title={t('hardware.sensor.deleteBlockedTitle')}
       actions={
         usage && onOpenAutomation ? (
-          <button
-            className="primary-action"
-            type="button"
-            onClick={() => onOpenAutomation(usage.id)}
-          >
+          <IonButton type="button" onClick={() => onOpenAutomation(usage.id)}>
             {t('common.openAutomation')}
-          </button>
+          </IonButton>
         ) : undefined
       }
       onClose={onClose}
