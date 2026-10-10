@@ -171,6 +171,7 @@ import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
 import {
   fireIonChange,
   fireIonInput,
+  fireIonToggleChange,
   getIonicButton,
   getIonicInput,
   getIonicSelect,
