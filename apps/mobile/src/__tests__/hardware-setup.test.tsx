@@ -2764,7 +2764,7 @@ describe('HardwareSetupScreen', () => {
 
       expect(screen.getByLabelText('VPD assist')).not.toBeChecked();
       fireIonToggleChange(screen.getByLabelText('VPD assist'), true);
-      fireIonInput(screen.getByLabelText(/Docelowe VPD kPa/), '1.25');
+      fireIonInput(getIonicInput(document, 'Docelowe VPD kPa'), '1.25');
 
       const advancedSection = openRuleDisclosure('Zaawansowane');
       expect(
@@ -2836,10 +2836,10 @@ describe('HardwareSetupScreen', () => {
       ).toHaveTextContent('function sv(t)');
       fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
 
-      fireIonInput(screen.getByLabelText(/Docelowe VPD kPa/), '0');
+      fireIonInput(getIonicInput(document, 'Docelowe VPD kPa'), '0');
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
       expect(screen.getByText('Zakres: 0.1 do 5 kPa.')).toBeInTheDocument();
-      fireIonInput(screen.getByLabelText(/Docelowe VPD kPa/), '1.25');
+      fireIonInput(getIonicInput(document, 'Docelowe VPD kPa'), '1.25');
 
       fireIonInput(getIonicInput(advancedSection, 'Ponowne ON po min'), '0');
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
