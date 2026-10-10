@@ -2815,6 +2815,18 @@ ion-alert.app-settings__language-alert {
   width: 100%;
 }
 
+.field-unit-control .lcl-climate-ionic-number-input::part(native) {
+  background: var(--app-glass-surface-strong);
+  border: var(--lcl-border-width-sm) solid var(--app-glass-border);
+  border-radius: var(--lcl-radius-md);
+  min-height: var(--lcl-size-control-min-height);
+}
+
+.field-unit-control:has(.lcl-climate-ionic-number-input)
+  .field-unit-control__unit {
+  z-index: 2;
+}
+
 .lcl-climate-ionic-checkbox {
   --checkbox-background: var(--lcl-color-surface);
   --checkbox-background-checked: var(--lcl-color-accent);
