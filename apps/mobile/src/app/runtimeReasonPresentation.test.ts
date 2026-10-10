@@ -37,6 +37,6 @@ describe('formatRuntimeReason', () => {
         pulseReasons: pulseOperationalStatusCopy.pl.reasons
       })
     ).toBe(pulseOperationalStatusCopy.pl.reasons.tm);
-    expect(formatRuntimeReason(null, t, { empty: 'Brak' })).toBe('Brak');
+    expect(formatRuntimeReason(null, t, { empty: 'None' })).toBe('None');
   });
 });
