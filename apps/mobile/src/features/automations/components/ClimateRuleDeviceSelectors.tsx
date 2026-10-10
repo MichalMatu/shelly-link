@@ -1,3 +1,4 @@
+import { IonCheckbox } from '@ionic/react';
 import {
   MAX_CLIMATE_SENSORS,
   type ClimateSensorAggregation
@@ -151,12 +152,12 @@ export const ClimateRuleDeviceSelectors = ({
               const checked = additionalSensorIds.includes(device.id);
               return (
                 <label className="toggle-row rule-sensor-multi-option" key={device.id}>
-                  <input
-                    type="checkbox"
+                  <IonCheckbox
+              className="lcl-climate-ionic-checkbox"
                     aria-label={device.name}
                     checked={checked}
                     disabled={!checked && additionalLimitReached}
-                    onChange={() => toggleAdditionalSensorDevice(device.id)}
+                    onIonChange={() => toggleAdditionalSensorDevice(device.id)}
                   />
                   <span>{device.name}</span>
                   {liveMeta(device)}
