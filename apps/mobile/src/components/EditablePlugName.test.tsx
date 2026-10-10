@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { I18nProvider, setLocalePreference } from '../app/i18n.js';
+import { I18nProvider, setLocalePreference, t } from '../app/i18n.js';
 import { fireIonInput, getIonicInput } from '../test/ionicTestEvents.js';
 import { EditablePlugName } from './EditablePlugName.js';
 
@@ -15,10 +15,11 @@ describe('EditablePlugName Ionic input', () => {
       </I18nProvider>
     );
     fireEvent.click(screen.getByRole('button', { name: /nazwa/i }));
-    const input = getIonicInput(document, 'Nazwa urządzenia');
+    const input = getIonicInput(document, t('hardware.shelly.deviceNameLabel'));
     fireIonInput(input, '  Fan 2  ');
     fireEvent(input, new CustomEvent('ionBlur', { bubbles: true }));
-    expect(onCommit).toHaveBeenCalledExactlyOnceWith('Fan 2');
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(onCommit).toHaveBeenCalledWith('Fan 2');
   });
 
   it('cancels an edit on Escape without changing the device name', () => {
@@ -29,7 +30,7 @@ describe('EditablePlugName Ionic input', () => {
       </I18nProvider>
     );
     fireEvent.click(screen.getByRole('button', { name: /nazwa/i }));
-    const input = getIonicInput(document, 'Nazwa urządzenia');
+    const input = getIonicInput(document, t('hardware.shelly.deviceNameLabel'));
     fireIonInput(input, 'Other');
     fireEvent.keyDown(input, { key: 'Escape' });
     expect(onCommit).not.toHaveBeenCalled();
