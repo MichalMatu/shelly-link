@@ -171,7 +171,6 @@ import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
 import {
   fireIonChange,
   fireIonInput,
-  fireIonToggleChange,
   getIonicButton,
   getIonicInput,
   getIonicSelect,
@@ -1926,7 +1925,7 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeInTheDocument();
     const advancedSection = openRuleDisclosure('Zaawansowane');
     expect(
-      getIonicInput(advancedSection, 'Ponowne ON po min')
+      within(advancedSection).getByLabelText('Ponowne ON po min')
     ).toBeInTheDocument();
     expect(within(advancedSection).getByRole('button', { name: 'Domyślne' })).toHaveClass(
       'rule-advanced-defaults-link'
@@ -2042,8 +2041,12 @@ describe('HardwareSetupScreen', () => {
     const onThresholdInput = screen.getByLabelText('Włącz poniżej °C');
     const offThresholdInput = screen.getByLabelText('Wyłącz powyżej °C');
 
-    fireIonInput(onThresholdInput, '21');
-    fireIonInput(offThresholdInput, '20');
+    fireEvent.change(onThresholdInput, {
+      target: { value: '21' }
+    });
+    fireEvent.change(offThresholdInput, {
+      target: { value: '20' }
+    });
 
     const error = screen.getByText('Próg włączenia musi być niższy niż próg wyłączenia.');
     expect(error).toHaveClass('field__error');
@@ -2264,16 +2267,16 @@ describe('HardwareSetupScreen', () => {
       target: { value: '23' }
     });
     const advancedSection = openRuleDisclosure('Zaawansowane');
-    fireEvent.change(getIonicInput(advancedSection, 'Minimalny RSSI dBm'), {
+    fireEvent.change(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), {
       target: { value: '-60' }
     });
-    fireEvent.change(getIonicInput(advancedSection, 'Brak odczytu przez min'), {
+    fireEvent.change(within(advancedSection).getByLabelText('Brak odczytu przez min'), {
       target: { value: '30' }
     });
-    fireEvent.change(getIonicInput(advancedSection, 'Ponowne ON po min'), {
+    fireEvent.change(within(advancedSection).getByLabelText('Ponowne ON po min'), {
       target: { value: '10' }
     });
-    fireEvent.change(getIonicInput(advancedSection, 'Maksymalny czas pracy h'), {
+    fireEvent.change(within(advancedSection).getByLabelText('Maksymalny czas pracy h'), {
       target: { value: '8' }
     });
 
@@ -2306,13 +2309,17 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('checkbox', { name: 'TP357 shelf' })).toBeChecked();
     expect(screen.getByLabelText('Agregacja odczytów')).toHaveAttribute('value', 'max');
     expect(screen.getByLabelText('Tryb reguły')).toHaveAttribute('value', 'heating');
-    expect(screen.getByLabelText('Włącz poniżej °C')).toHaveValue('19');
-    expect(screen.getByLabelText('Wyłącz powyżej °C')).toHaveValue('20');
+    expect(screen.getByLabelText('Włącz poniżej °C')).toHaveValue(19);
+    expect(screen.getByLabelText('Wyłącz powyżej °C')).toHaveValue(20);
 
-    expect(getIonicInput(advancedSection, 'Minimalny RSSI dBm')).toHaveValue('-85');
-    expect(getIonicInput(advancedSection, 'Brak odczytu przez min')).toHaveValue('2');
-    expect(getIonicInput(advancedSection, 'Ponowne ON po min')).toHaveValue('2');
-    expect(getIonicInput(advancedSection, 'Maksymalny czas pracy h')).toHaveValue('4');
+    expect(within(advancedSection).getByLabelText('Minimalny RSSI dBm')).toHaveValue(-85);
+    expect(within(advancedSection).getByLabelText('Brak odczytu przez min')).toHaveValue(
+      2
+    );
+    expect(within(advancedSection).getByLabelText('Ponowne ON po min')).toHaveValue(2);
+    expect(within(advancedSection).getByLabelText('Maksymalny czas pracy h')).toHaveValue(
+      4
+    );
 
     const scriptDialog = await openRuleScriptDialog();
     expect(within(scriptDialog).getByLabelText('Wygenerowany skrypt')).toHaveTextContent(
@@ -2515,9 +2522,9 @@ describe('HardwareSetupScreen', () => {
     expect(onThreshold.closest('.field-row')).toBe(offThreshold.closest('.field-row'));
     expect(onThreshold.closest('.rule-threshold-row')).toBeNull();
 
-    fireIonInput(onThreshold, '21');
-    expect(ionicValue(onThreshold)).toBe('21');
-    expect(ionicValue(offThreshold)).toBe('20');
+    fireEvent.change(onThreshold, { target: { value: '21' } });
+    expect(onThreshold).toHaveValue(21);
+    expect(offThreshold).toHaveValue(20);
     expect(
       screen.getByText('Próg włączenia musi być niższy niż próg wyłączenia.')
     ).toBeVisible();
@@ -2739,8 +2746,8 @@ describe('HardwareSetupScreen', () => {
         within(vpdSection as HTMLElement).queryByRole('tooltip', { name: 'VPD assist' })
       ).not.toBeInTheDocument();
 
-      expect(screen.getByLabelText('Włącz poniżej %')).toHaveValue('45');
-      expect(screen.getByLabelText('Wyłącz powyżej %')).toHaveValue('55');
+      expect(screen.getByLabelText('Włącz poniżej %')).toHaveValue(45);
+      expect(screen.getByLabelText('Wyłącz powyżej %')).toHaveValue(55);
       expect(getRuleSummary()).toHaveTextContent('Nawilżanie włączy się poniżej 45.0%');
       let scriptDialog = await openRuleScriptDialog();
       expect(
@@ -2750,8 +2757,8 @@ describe('HardwareSetupScreen', () => {
 
       chooseSelectField('Tryb reguły', 'Osuszanie');
 
-      expect(screen.getByLabelText('Włącz powyżej %')).toHaveValue('65');
-      expect(screen.getByLabelText('Wyłącz poniżej %')).toHaveValue('55');
+      expect(screen.getByLabelText('Włącz powyżej %')).toHaveValue(65);
+      expect(screen.getByLabelText('Wyłącz poniżej %')).toHaveValue(55);
       expect(getRuleSummary()).toHaveTextContent('Osuszanie włączy się powyżej 65.0%');
       scriptDialog = await openRuleScriptDialog();
       expect(
@@ -2763,8 +2770,10 @@ describe('HardwareSetupScreen', () => {
       fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
 
       expect(screen.getByLabelText('VPD assist')).not.toBeChecked();
-      fireIonToggleChange(screen.getByLabelText('VPD assist'), true);
-      fireIonInput(getIonicInput(document, 'Docelowe VPD kPa'), '1.25');
+      fireEvent.click(screen.getByLabelText('VPD assist'));
+      fireEvent.change(screen.getByLabelText(/Docelowe VPD kPa/), {
+        target: { value: '1.25' }
+      });
 
       const advancedSection = openRuleDisclosure('Zaawansowane');
       expect(
@@ -2800,10 +2809,21 @@ describe('HardwareSetupScreen', () => {
       expect(
         screen.getAllByText('%', { selector: '.field-unit-control__unit' })
       ).toHaveLength(2);
-      fireIonInput(getIonicInput(advancedSection, 'Minimalny RSSI dBm'), '-80');
-      fireIonInput(getIonicInput(advancedSection, 'Brak odczytu przez min'), '10');
-      fireIonInput(getIonicInput(advancedSection, 'Ponowne ON po min'), '3');
-      fireIonInput(getIonicInput(advancedSection, 'Maksymalny czas pracy h'), '3');
+      fireEvent.change(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), {
+        target: { value: '-80' }
+      });
+      fireEvent.change(within(advancedSection).getByLabelText('Brak odczytu przez min'), {
+        target: { value: '10' }
+      });
+      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
+        target: { value: '3' }
+      });
+      fireEvent.change(
+        within(advancedSection).getByLabelText('Maksymalny czas pracy h'),
+        {
+          target: { value: '3' }
+        }
+      );
       expect(getRuleSummary()).toHaveTextContent(
         'Gdy termometr Xiaomi salon zniknie na 10 min albo Shelly Salon uruchomi się ponownie'
       );
@@ -2836,17 +2856,25 @@ describe('HardwareSetupScreen', () => {
       ).toHaveTextContent('function sv(t)');
       fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
 
-      fireIonInput(getIonicInput(document, 'Docelowe VPD kPa'), '0');
+      fireEvent.change(screen.getByLabelText(/Docelowe VPD kPa/), {
+        target: { value: '0' }
+      });
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
       expect(screen.getByText('Zakres: 0.1 do 5 kPa.')).toBeInTheDocument();
-      fireIonInput(getIonicInput(document, 'Docelowe VPD kPa'), '1.25');
+      fireEvent.change(screen.getByLabelText(/Docelowe VPD kPa/), {
+        target: { value: '1.25' }
+      });
 
-      fireIonInput(getIonicInput(advancedSection, 'Ponowne ON po min'), '0');
+      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
+        target: { value: '0' }
+      });
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
       expect(
         within(advancedSection).getByText('Zakres: 0.25 do 60 min.')
       ).toBeInTheDocument();
-      fireIonInput(getIonicInput(advancedSection, 'Ponowne ON po min'), '3');
+      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
+        target: { value: '3' }
+      });
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeEnabled();
 
       scriptDialog = await openRuleScriptDialog();
@@ -3296,7 +3324,9 @@ describe('HardwareSetupScreen', () => {
     closeCurrentAddPage();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
-    fireIonInput(screen.getByLabelText('Włącz poniżej °C'), '18');
+    fireEvent.change(screen.getByLabelText('Włącz poniżej °C'), {
+      target: { value: '18' }
+    });
 
     fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const reopenedAddDialog = await openShellyAddDialog();
