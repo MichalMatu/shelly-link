@@ -1,10 +1,27 @@
 import type { HardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSetupFlow.js';
 import { t } from '../../app/i18n.js';
 
-// Errors are technical transport data; the UI renders a localized safe message.
+// Only approved, translated diagnostic guidance may cross the UI boundary.
+// Transport/server messages remain available in diagnostic logs, not in toast copy.
+const safeFeedbackKeys = [
+  'hardware.shelly.invalidResponse',
+  'hardware.shelly.scriptsMissing',
+  'hardware.shelly.scriptsDisabled',
+  'hardware.shelly.bleMissing',
+  'hardware.shelly.bleDisabled',
+  'hardware.sensor.phoneBlePermissionDenied',
+  'hardware.sensor.phoneBleUnavailableInBrowser',
+  'hardware.sensor.phoneBleNoRuntimeAddress',
+  'hardware.sensor.phoneBleGenericFailed',
+  'hardware.safety.matterBlocked'
+] as const;
+
 export const mutationError = (error: unknown): string => {
-  // Intentionally consume the technical error without exposing it to the user.
-  void error;
+  const message = error instanceof Error ? error.message.trim() : '';
+  for (const key of safeFeedbackKeys) {
+    const localized = t(key);
+    if (message === localized) return localized;
+  }
   return t('common.operationFailed');
 };
 
