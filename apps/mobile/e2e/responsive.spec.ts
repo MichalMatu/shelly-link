@@ -805,8 +805,8 @@ for (const viewport of viewports) {
     const offStateBox = await requiredBox(page.locator('fieldset.plug-led-state').nth(1));
     expect(offStateBox.y).toBeGreaterThan(onStateBox.y + onStateBox.height);
     const [nightStartBox, nightEndBox] = await Promise.all([
-      requiredBox(page.locator('ion-input[aria-label="Początek"]')),
-      requiredBox(page.locator('ion-input[aria-label="Koniec"]'))
+      requiredBox(page.locator('.plug-night-mode ion-input.plug-time-input').nth(0)),
+      requiredBox(page.locator('.plug-night-mode ion-input.plug-time-input').nth(1))
     ]);
     expect(Math.abs(nightStartBox.y - nightEndBox.y)).toBeLessThanOrEqual(2);
     await expect(
@@ -1204,7 +1204,7 @@ for (const viewport of viewports) {
       page.getByRole('heading', { name: 'Ustawienia termometru' })
     ).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Tożsamość' })).toBeVisible();
-    await expect(page.locator('ion-input[aria-label="Nazwa termometru"]')).toHaveJSProperty(
+    await expect(page.locator('ion-input.thermometer-settings__input')).toHaveJSProperty(
       'value',
       'Przedpokój'
     );
@@ -1255,7 +1255,7 @@ for (const viewport of viewports) {
     const scanRangeDisclosure = page.locator('.shelly-network-scan__range-disclosure');
     await expect(scanRangeDisclosure.getByText('Zakres skanowania')).toBeVisible();
     await expect(scanRangeDisclosure).not.toHaveAttribute('open', '');
-    await expect(page.locator('ion-input[aria-label="Od"]')).toBeHidden();
+    await expect(scanRangeDisclosure.locator('ion-input')).toBeHidden();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '15-add-plug');
     }
