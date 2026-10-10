@@ -2041,12 +2041,8 @@ describe('HardwareSetupScreen', () => {
     const onThresholdInput = screen.getByLabelText('Włącz poniżej °C');
     const offThresholdInput = screen.getByLabelText('Wyłącz powyżej °C');
 
-    fireEvent.change(onThresholdInput, {
-      target: { value: '21' }
-    });
-    fireEvent.change(offThresholdInput, {
-      target: { value: '20' }
-    });
+    fireIonInput(onThresholdInput, '21');
+    fireIonInput(offThresholdInput, '20');
 
     const error = screen.getByText('Próg włączenia musi być niższy niż próg wyłączenia.');
     expect(error).toHaveClass('field__error');
@@ -2309,17 +2305,13 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('checkbox', { name: 'TP357 shelf' })).toBeChecked();
     expect(screen.getByLabelText('Agregacja odczytów')).toHaveAttribute('value', 'max');
     expect(screen.getByLabelText('Tryb reguły')).toHaveAttribute('value', 'heating');
-    expect(screen.getByLabelText('Włącz poniżej °C')).toHaveValue(19);
-    expect(screen.getByLabelText('Wyłącz powyżej °C')).toHaveValue(20);
+    expect(screen.getByLabelText('Włącz poniżej °C')).toHaveValue('19');
+    expect(screen.getByLabelText('Wyłącz powyżej °C')).toHaveValue('20');
 
-    expect(within(advancedSection).getByLabelText('Minimalny RSSI dBm')).toHaveValue(-85);
-    expect(within(advancedSection).getByLabelText('Brak odczytu przez min')).toHaveValue(
-      2
-    );
-    expect(within(advancedSection).getByLabelText('Ponowne ON po min')).toHaveValue(2);
-    expect(within(advancedSection).getByLabelText('Maksymalny czas pracy h')).toHaveValue(
-      4
-    );
+    expect(within(advancedSection).getByLabelText('Minimalny RSSI dBm')).toHaveValue('-85');
+    expect(within(advancedSection).getByLabelText('Brak odczytu przez min')).toHaveValue('2');
+    expect(within(advancedSection).getByLabelText('Ponowne ON po min')).toHaveValue('2');
+    expect(within(advancedSection).getByLabelText('Maksymalny czas pracy h')).toHaveValue('4');
 
     const scriptDialog = await openRuleScriptDialog();
     expect(within(scriptDialog).getByLabelText('Wygenerowany skrypt')).toHaveTextContent(
@@ -2522,9 +2514,9 @@ describe('HardwareSetupScreen', () => {
     expect(onThreshold.closest('.field-row')).toBe(offThreshold.closest('.field-row'));
     expect(onThreshold.closest('.rule-threshold-row')).toBeNull();
 
-    fireEvent.change(onThreshold, { target: { value: '21' } });
-    expect(onThreshold).toHaveValue(21);
-    expect(offThreshold).toHaveValue(20);
+    fireIonInput(onThreshold, '21');
+    expect(ionicValue(onThreshold)).toBe('21');
+    expect(ionicValue(offThreshold)).toBe('20');
     expect(
       screen.getByText('Próg włączenia musi być niższy niż próg wyłączenia.')
     ).toBeVisible();
@@ -2746,8 +2738,8 @@ describe('HardwareSetupScreen', () => {
         within(vpdSection as HTMLElement).queryByRole('tooltip', { name: 'VPD assist' })
       ).not.toBeInTheDocument();
 
-      expect(screen.getByLabelText('Włącz poniżej %')).toHaveValue(45);
-      expect(screen.getByLabelText('Wyłącz powyżej %')).toHaveValue(55);
+      expect(screen.getByLabelText('Włącz poniżej %')).toHaveValue('45');
+      expect(screen.getByLabelText('Wyłącz powyżej %')).toHaveValue('55');
       expect(getRuleSummary()).toHaveTextContent('Nawilżanie włączy się poniżej 45.0%');
       let scriptDialog = await openRuleScriptDialog();
       expect(
@@ -2757,8 +2749,8 @@ describe('HardwareSetupScreen', () => {
 
       chooseSelectField('Tryb reguły', 'Osuszanie');
 
-      expect(screen.getByLabelText('Włącz powyżej %')).toHaveValue(65);
-      expect(screen.getByLabelText('Wyłącz poniżej %')).toHaveValue(55);
+      expect(screen.getByLabelText('Włącz powyżej %')).toHaveValue('65');
+      expect(screen.getByLabelText('Wyłącz poniżej %')).toHaveValue('55');
       expect(getRuleSummary()).toHaveTextContent('Osuszanie włączy się powyżej 65.0%');
       scriptDialog = await openRuleScriptDialog();
       expect(
