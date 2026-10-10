@@ -2,6 +2,7 @@ import type { HistoryRecord } from '@lcl/automation-core';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import { getIonicButton } from '../../../test/ionicTestEvents.js';
 import { AutomationHistorySection } from './AutomationHistorySection.js';
 
 vi.mock('@nivo/line', () => ({
@@ -119,7 +120,7 @@ describe('AutomationHistorySection', () => {
     const onRetry = vi.fn();
     renderSection({ error: true, onRetry });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    fireEvent.click(getIonicButton(document, 'Try again'));
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });
