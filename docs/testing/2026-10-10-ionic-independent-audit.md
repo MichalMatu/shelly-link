@@ -48,3 +48,57 @@ On 2026-10-10 the S22+ was again available at `192.168.0.100:40973`; ADB confirm
 - Three controlled cold starts (`am force-stop` then `am start -W`) completed in **593 / 533 / 573 ms**, all in the foreground with a process running. Each was followed by 5 seconds of capture: **0 `triggerEvent` errors, 0 `E/Capacitor/Console` errors, 0 native `FATAL EXCEPTION` events**. Fresh actual screenshot: 1080 × 2340; SHA-256 `680dfee26bcbf12ab3092aefdb967f7b821ff2683a21c8a84cd68efc3825bb44`; local path `/tmp/shelly-ionic-triggerEvent-20261010-119-s22.png`.
 - Three more cold starts followed by system `Back` (two after 4 seconds and one immediately after activity start) also produced **0 `triggerEvent`, 0 `E/Capacitor/Console`, 0 native fatal**. In each case Back returned to the previously foreground Android Settings screen. The app was then relaunched and left in foreground, PID present, with its `firstInstallTime=2026-09-28 04:57:23` unchanged.
 - This **narrows but does not close** the original single Android bridge-console TypeError. It is not currently reproducible under 6 starts and 3 Back presses on the same unchanged APK, and does not establish an Ionic regression. Do not ship a speculative native bridge workaround. If the error recurs, capture WebView/Capacitor initialization timing, `logcat` with timestamps and devtools JS stack before altering production code. Full TalkBack/focus/keyboard testing and remaining ordinary Ionic actions are still open.
+
+## Follow-up: Ionic BLE retry and foreground validation
+
+- **App product commit:** `c71845097ac448eaf1b5d4a80c246f6c167fdb63`.
+  The standalone Shelly BLE discovery page's ordinary restart action now uses
+  `IonButton`; its onClick, disabled and busy semantics are preserved.
+  The focused BLE restart test and TypeScript passed.
+- **Native app controls:** 74 JSX instances: 64 buttons and 10 Climate inputs.
+  The file-by-file classification is in
+  `docs/testing/2026-10-10-ionic-native-control-census.md`.
+  Of these, 30 are ordinary actions still to address (eight in frozen Climate),
+  34 are deliberate custom buttons, and 10 are frozen Climate inputs.
+- **Full `pnpm check`: PASS** at documentation HEAD `3406069f` with the above
+  unchanged product code, including 549/549 mobile tests. Capacitor sync and
+  debug APK assembly passed. The APK SHA-256 is
+  `5f40e523285643ce70a32a973869d62c19b960a10c5265e395fc216a3c5f1544`.
+- **Full canonical visual E2E is not yet green on this source.**
+  Two separate runs each passed 49/50: a 7,638-pixel (3%) Time/Pulse
+  screenshot difference and an unrelated LED-mode test timeout.
+  Each offending test then passed in isolation (1/1), without code changes
+  or snapshot updates. A third complete 50-test run was submitted as
+  Local Agent task `shelly-ionic-c718-visual-full-third-20261010-137`.
+  Do not treat isolated passes as equivalent to full acceptance.
+- **First preserving-data S22+ install:** `adb install -r` succeeded, and
+  first-install date stayed at 2026-09-28 04:57:23. The recorded 712-ms
+  cold launch was immediately backgrounded while Android reported
+  "Not drawing due to screen off." Its roughly 15-KB screenshot was
+  effectively blank and **does not count as a valid UI screenshot**.
+  `triggerEvent` occurred immediately after `Capacitor: App stopped`.
+- **Corrected awake/foreground S22+ test:** a fresh cold start completed
+  in **515 ms**, with `topResumedActivity` and `mCurrentFocus` both pointing
+  to Shelly Link and Android reporting `mWakefulness=Awake`.
+  An actual 1080 × 2340, 172,321-byte screenshot was captured:
+  SHA-256 `53f26335cf5e170c91afc0e7a7076e9c8a57b7ed64139ac4ec8c8d5635d4595b`.
+  UIAutomator exposed 75 nodes, 45 text/description-labeled, including
+  Plug dashboard state, Climate/Pulse status, and ON/OFF controls.
+  No `triggerEvent` console exception was seen during this focused start.
+  The snapshot remains in the Local Agent runtime at
+  `/tmp/shelly-ionic-s22-foreground-20261010-135.png`.
+- **Intermittent Capacitor lifecycle issue remains open.** At
+  `Bridge.java:885,889`, Capacitor 7.6.7 evaluates
+  `window.Capacitor.triggerEvent(...)`. The error is associated with
+  background/stop timing, but a particular missing bridge initialization
+  or event type has not been conclusively established.
+  Do not patch the library speculatively or waive the problem silently.
+- **Bundle review still open:** JS 2,369,839 B, largest
+  `ion-icon` chunk 1,043,584 B, CSS 154,245 B, 20 JS chunks.
+  Hard budget passes, review thresholds fail.
+- **Accessibility gap:** `@lcl/ui` Modal focus-trap discovery currently
+  searches native buttons/fields and explicit `[tabindex]`, but does not
+  intentionally traverse Ionic shadow-root controls. Inspect and test
+  `ion-button`/field Tab order, first focus and wraparound before migrating
+  more modal actions. TalkBack and keyboard interactions on S22+ remain open.
+
