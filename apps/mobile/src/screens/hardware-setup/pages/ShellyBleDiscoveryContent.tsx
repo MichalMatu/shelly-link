@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { FeedbackPanel } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
@@ -94,8 +95,9 @@ export const ShellyBleDiscoveryContent = ({
                     </div>
                   )}
                 </dl>
-                <button
-                  className="secondary-action ble-candidate-action"
+                <IonButton
+                  className="ble-candidate-action"
+                  fill="outline"
                   type="button"
                   disabled={isSavedSensor}
                   title={
@@ -108,7 +110,7 @@ export const ShellyBleDiscoveryContent = ({
                   {isSavedSensor
                     ? t('hardware.sensor.saved')
                     : t('hardware.sensor.saveThermometer')}
-                </button>
+                </IonButton>
               </article>
             );
           })}

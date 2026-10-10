@@ -2947,7 +2947,7 @@ describe('HardwareSetupScreen', () => {
     expect(within(dialog).getByText('-37 dBm')).toBeInTheDocument();
 
     expect(dialog).toBeInTheDocument();
-    expect(within(dialog).getByRole('button', { name: 'Już zapisany' })).toBeDisabled();
+    expect(isIonicDisabled(getIonicButton(dialog, 'Już zapisany'))).toBe(true);
     expect(screen.queryByText('Zapisano termometr.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Wstecz: Shelly' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Termometry' }));
@@ -3184,9 +3184,7 @@ describe('HardwareSetupScreen', () => {
     const firstAddress = await findBleScanCandidate(dialog);
     const firstItem = firstAddress.closest('article');
     expect(firstItem).not.toBeNull();
-    expect(
-      within(firstItem!).getByRole('button', { name: 'Już zapisany' })
-    ).toBeDisabled();
+    expect(isIonicDisabled(getIonicButton(firstItem!, 'Już zapisany'))).toBe(true);
 
     const discoveryLifecycleCount = () =>
       vi
@@ -3212,9 +3210,9 @@ describe('HardwareSetupScreen', () => {
     });
     const recoveredItem = recoveredCandidate.closest('article');
     expect(recoveredItem).not.toBeNull();
-    expect(
-      within(recoveredItem!).getByRole('button', { name: 'Zapisz termometr' })
-    ).toBeEnabled();
+    expect(isIonicDisabled(getIonicButton(recoveredItem!, 'Zapisz termometr'))).toBe(
+      false
+    );
     expect(discoveryLifecycleCount()).toBe(lifecycleBeforeRecovery);
     expect(screen.queryByText('404 Not Found')).not.toBeInTheDocument();
   }, 12_000);
