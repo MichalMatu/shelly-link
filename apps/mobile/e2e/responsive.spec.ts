@@ -83,6 +83,8 @@ const mockShellyRpc = async (
   let manualRequestOn = false;
   let automationFault: string | null = null;
   let buttonMode: 'momentary' | 'detached' = options.buttonMode ?? 'momentary';
+  let bleScannerPreparationPaused = false;
+  const resumeBleScannerRequests: Array<() => void> = [];
 
   const handleRpc = async (route: Route) => {
     const requestUrl = new URL(route.request().url());
@@ -141,6 +143,11 @@ const mockShellyRpc = async (
         offset?: number;
       };
     };
+    if (requestBody.method === 'Script.List' && bleScannerPreparationPaused) {
+      await new Promise<void>((resolve) => {
+        resumeBleScannerRequests.push(resolve);
+      });
+    }
     let result: unknown = {};
     switch (requestBody.method) {
       case 'Shelly.GetDeviceInfo':
@@ -342,6 +349,15 @@ const mockShellyRpc = async (
 
   await page.route('**/__lcl_shelly_proxy?**', handleRpc);
   await page.route('http://192.168.0.20/rpc', handleRpc);
+  return {
+    holdBleScannerPreparation() {
+      bleScannerPreparationPaused = true;
+    },
+    resumeBleScannerPreparation() {
+      bleScannerPreparationPaused = false;
+      resumeBleScannerRequests.splice(0).forEach((resume) => resume());
+    }
+  };
 };
 
 const mockTimeShellyRpc = async (page: Page) => {
@@ -684,7 +700,7 @@ for (const viewport of viewports) {
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await seedInstalledAutomation(page);
-    await mockShellyRpc(page, { buttonMode: 'detached' });
+    const shellyRpc = await mockShellyRpc(page, { buttonMode: 'detached' });
     await page.goto('/');
 
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -855,6 +871,9 @@ for (const viewport of viewports) {
     await expectNoLegacyInlineFeedback(page);
     if (viewport.name === 'phone-large') {
       await page.getByRole('button', { name: 'Bluetooth' }).click();
+      // Keep the loading screenshot stable; the fake RPC intentionally does not
+      // implement BLE scanner installation and its eventual error is tested below.
+      shellyRpc.holdBleScannerPreparation();
       await page
         .getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
         .click();
@@ -862,6 +881,10 @@ for (const viewport of viewports) {
         page.getByRole('heading', { name: 'Skanuj termometry BLE' })
       ).toBeVisible();
       await expectVisualScreen(page, '04-plug-ble-discovery');
+      shellyRpc.resumeBleScannerPreparation();
+      await expect(
+        page.getByText('Nie udało się uruchomić skanera BLE.', { exact: true })
+      ).toBeVisible();
     }
     expect(consoleProblems).toEqual([]);
   });
