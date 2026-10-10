@@ -34,7 +34,9 @@ const commandSequence = '/help';
 
 const isEditableTarget = (target: EventTarget | null): boolean =>
   target instanceof HTMLElement &&
-  (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName));
+  target.closest(
+    'input, select, textarea, ion-input, ion-textarea, ion-select, ion-searchbar, [contenteditable="true"]'
+  ) !== null;
 
 const readSnapshot = (): DevCommandSnapshot => ({
   localePreference: getLocalePreference(),

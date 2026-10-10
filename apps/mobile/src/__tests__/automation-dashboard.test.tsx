@@ -381,6 +381,8 @@ describe('AutomationDashboardScreen', () => {
     expect(within(plugCard).queryByText('Brak automatyzacji')).toBeNull();
     fireEvent.click(within(plugCard).getByRole('button', { name: 'Nazwa gniazdka' }));
     const nameInput = getIonicInput(plugCard, 'Nazwa gniazdka');
+    fireEvent.click(nameInput);
+    expect(onOpenPlugSettings).not.toHaveBeenCalled();
     fireIonInput(nameInput, 'Nawilżacz salon');
     fireEvent(nameInput, new CustomEvent('ionBlur', { bubbles: true }));
     expect(within(plugCard).getByText('Nawilżacz salon')).toBeVisible();
