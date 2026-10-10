@@ -1,3 +1,4 @@
+import { IonicActionButton } from '../../../components/IonicActionButton.js';
 import type { RuleSetupFlow } from '../pageContracts.js';
 import type { RulePresetId } from '@lcl/automation-core';
 import { FeedbackPanel, Modal, ScriptPreview } from '@lcl/ui';
@@ -173,14 +174,14 @@ export const RuleSetupPage = ({
 
       <Modal
         actions={
-          <button
+          <IonicActionButton
             className="primary-action"
             type="button"
             disabled={flow.loadAutomationScriptMutation.isPending}
             onClick={confirmLoadScriptFromShelly}
           >
             {t('hardware.rule.restoreFromShellyConfirm')}
-          </button>
+          </IonicActionButton>
         }
         closeLabel={t('common.cancel')}
         description={flow.selectedShelly?.name ?? ''}
@@ -207,7 +208,7 @@ export const RuleSetupPage = ({
       </Modal>
       <Modal
         actions={
-          <button
+          <IonicActionButton
             className="primary-action"
             type="button"
             aria-busy={flow.safeRelayTestMutation.isPending}
@@ -218,7 +219,7 @@ export const RuleSetupPage = ({
             {flow.safeRelayTestMutation.isPending
               ? t('common.testing')
               : t('common.test')}
-          </button>
+          </IonicActionButton>
         }
         busy={flow.safeRelayTestMutation.isPending}
         closeLabel={t('common.close')}
