@@ -1,3 +1,4 @@
+import { IonicActionButton } from '../components/IonicActionButton.js';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -166,14 +167,14 @@ export const TimeInstallationDetail = ({
             </AutomationDetail.Hierarchy>
 
             <div className="installation-detail-delete-action">
-              <button
+              <IonicActionButton
                 className="secondary-action secondary-action--danger"
                 type="button"
                 disabled={deleteMutation.isPending || timeEditPending}
                 onClick={() => setDeleteOpen(true)}
               >
                 {t('time.detail.delete')}
-              </button>
+              </IonicActionButton>
             </div>
           </>
         )}
@@ -240,13 +241,13 @@ export const TimeInstallationDetail = ({
             )}
             {savedDevice && (
               <div className="installation-detail-delete-action">
-                <button
+                <IonicActionButton
                   className="secondary-action secondary-action--danger"
                   type="button"
                   onClick={() => setForgetOpen(true)}
                 >
                   {t('hardware.shelly.deleteTitle')}
-                </button>
+                </IonicActionButton>
               </div>
             )}
           </section>
