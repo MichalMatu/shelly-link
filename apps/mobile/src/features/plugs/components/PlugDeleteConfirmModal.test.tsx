@@ -1,4 +1,4 @@
-import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import { I18nProvider, setLocalePreference, t } from '../../../app/i18n.js';
 import { getIonicButton } from '../../../test/ionicTestEvents.js';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -20,13 +20,15 @@ describe('PlugDeleteConfirmModal destructive action guard', () => {
         />
       </I18nProvider>
     );
-    const dialog = screen.getByRole('dialog', { name: 'Usunąć gniazdko?' });
+    const dialog = screen.getByRole('dialog', {
+      name: t('hardware.shelly.deleteConfirmTitle')
+    });
     expect(dialog).toHaveTextContent('Salon');
     expect(onConfirm).not.toHaveBeenCalled();
-    const confirm = getIonicButton(dialog, 'Usuń');
+    const confirm = getIonicButton(dialog, t('common.delete'));
     expect(confirm).toHaveClass('plug-settings-ionic-action--danger');
     expect(confirm).toHaveAttribute('title');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Anuluj' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: t('common.cancel') }));
     expect(onClose).toHaveBeenCalledOnce();
     expect(onConfirm).not.toHaveBeenCalled();
     fireEvent.click(confirm);
