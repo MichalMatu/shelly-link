@@ -310,3 +310,11 @@
 .plug-settings-button-modes ion-radio.radio-checked {
   border-color: var(--lcl-color-accent);
 }
+
+.plug-settings-section .field-unit-control > ion-input.plug-settings-ionic-input {
+  --padding-end: calc(var(--lcl-spacing-xl) + var(--lcl-spacing-lg));
+}
+
+.plug-settings-section .field-unit-control__unit {
+  z-index: 1;
+}
