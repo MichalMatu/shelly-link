@@ -12,7 +12,7 @@
     "build:landing": "pnpm --filter @lcl/landing build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "test": "pnpm -r test",
+    "test": "pnpm -r --workspace-concurrency=1 test",
     "test:coverage:core": "pnpm --filter @lcl/automation-core test:coverage && pnpm --filter @lcl/script-generator test:coverage",
     "test:watch": "pnpm -r test -- --watch",
     "format": "prettier --write .",
