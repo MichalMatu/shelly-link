@@ -199,7 +199,9 @@ describe('PlugLedSettingsCard', () => {
     expect(
       screen.getByRole('dialog', { name: `OFF · ${copy.customColorTitle}` })
     ).toBeVisible();
-    const hueRange = rendered.container.querySelector('ion-range[aria-label="OFF Odcień"]');
+    const hueRange = Array.from(rendered.container.querySelectorAll('ion-range')).find(
+      (range) => range.getAttribute('aria-label') === `OFF ${copy.hue}`
+    );
     expect(hueRange).not.toBeNull();
     fireEvent(
       hueRange!,
