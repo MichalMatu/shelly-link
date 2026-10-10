@@ -1,38 +1,8 @@
-import type { Translate, TranslationKey } from '../../app/i18n.js';
+import type { Translate } from '../../app/i18n.js';
+import { formatRuntimeReason } from '../../app/runtimeReasonPresentation.js';
 import type { HardwareDiagnosticSnapshot } from '../hardware-setup/schemas.js';
 
 type DiagnosticDetails = HardwareDiagnosticSnapshot['diagnostics'];
-
-const diagnosticReasonKeys = new Set([
-  'ab',
-  'abh',
-  'ar',
-  'b',
-  'bf',
-  'bl',
-  'blh',
-  'bm',
-  'bo',
-  'boot',
-  'bs',
-  'cf',
-  'cv',
-  'db',
-  'ib',
-  'mc',
-  'mn',
-  'mx',
-  'ok',
-  'pt',
-  'rl',
-  'se',
-  'st',
-  'sy',
-  'ta',
-  'tm',
-  'tr',
-  'ts'
-]);
 
 export const formatDiagnosticDuration = (durationMs: number): string => {
   const totalSeconds = Math.max(0, Math.trunc(durationMs / 1000));
@@ -64,10 +34,7 @@ export const formatDiagnosticUptimeAge = (
   });
 };
 
-export const formatDiagnosticReason = (reason: string, t: Translate): string =>
-  diagnosticReasonKeys.has(reason)
-    ? t(`hardware.diagnosticsReason.${reason}` as TranslationKey)
-    : t('dashboard.health.unknown');
+export const formatDiagnosticReason = formatRuntimeReason;
 
 export const formatBleDataState = (
   diagnostics: DiagnosticDetails,
