@@ -797,7 +797,7 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '05-climate-device');
     }
-    await expect(page.locator('ion-select[aria-label="Tryb LED"]')).toBeVisible();
+    await expect(page.locator('ion-select.plug-settings-ionic-select')).toBeVisible();
     await expect(page.getByText('ON', { exact: true })).toBeVisible();
     await expect(page.getByText('OFF', { exact: true })).toBeVisible();
     await expect(page.locator('input[type="color"]')).toHaveCount(0);
