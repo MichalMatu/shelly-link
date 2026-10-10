@@ -199,9 +199,12 @@ describe('PlugLedSettingsCard', () => {
     expect(
       screen.getByRole('dialog', { name: `OFF · ${copy.customColorTitle}` })
     ).toBeVisible();
-    fireEvent.change(screen.getByLabelText(`OFF ${copy.hue}`), {
-      target: { value: '240' }
-    });
+    const hueRange = rendered.container.querySelector('ion-range[aria-label="OFF Odcień"]');
+    expect(hueRange).not.toBeNull();
+    fireEvent(
+      hueRange!,
+      new CustomEvent('ionInput', { bubbles: true, detail: { value: 240 } })
+    );
     fireEvent.click(screen.getByRole('button', { name: copy.applyColor }));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(
