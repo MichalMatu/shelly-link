@@ -975,17 +975,19 @@ for (const viewport of viewports) {
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
-    await page.getByRole('button', { name: 'Wyjście w aktywnym przedziale' }).click();
-    await page.getByRole('option', { name: 'Pulse ON/OFF', exact: true }).click();
-    await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
-    await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
-    await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
+    await page
+      .locator('ion-segment.pulse-cycle-ionic-segment ion-segment-button[value="pulse"]')
+      .click();
+    await expect(page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(0)).toBeVisible();
+    await expect(page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(1)).toBeVisible();
+    await expect(page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(2)).toBeVisible();
     await expectNoHorizontalOverflow(page);
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '25-time-pulse-setup');
     }
-    await page.getByRole('button', { name: 'Wyjście w aktywnym przedziale' }).click();
-    await page.getByRole('option', { name: 'Stałe ON', exact: true }).click();
+    await page
+      .locator('ion-segment.pulse-cycle-ionic-segment ion-segment-button[value="steady"]')
+      .click();
 
     await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -1393,9 +1395,8 @@ for (const viewport of viewports) {
     await expect(page.getByText(/harmonogram/i)).toHaveCount(0);
     await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
     await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
-    await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Faza startowa' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Wykonanie' })).toBeVisible();
+    await expect(page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(2)).toBeVisible();
+    await expect(pulseSetup.locator('ion-select.pulse-cycle-ionic-select')).toHaveCount(2);
     await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
       0
     );
