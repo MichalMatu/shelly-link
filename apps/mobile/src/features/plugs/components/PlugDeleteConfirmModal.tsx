@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 
@@ -21,14 +22,15 @@ export const PlugDeleteConfirmModal = ({
       open={deviceName !== null}
       title={t('hardware.shelly.deleteConfirmTitle')}
       actions={
-        <button
-          className="secondary-action secondary-action--danger"
+        <IonButton
+          className="plug-settings-ionic-action plug-settings-ionic-action--secondary plug-settings-ionic-action--danger"
+          fill="outline"
           type="button"
           title={t('hardware.shelly.deleteTitle')}
           onClick={onConfirm}
         >
           {t('common.delete')}
-        </button>
+        </IonButton>
       }
       onClose={onClose}
     >

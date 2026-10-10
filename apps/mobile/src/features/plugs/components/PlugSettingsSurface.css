@@ -255,6 +255,11 @@
   --color: var(--lcl-color-text);
 }
 
+.plug-settings-ionic-action--danger {
+  --border-color: var(--lcl-color-status-danger-border);
+  --color: var(--lcl-color-status-danger-text);
+}
+
 .plug-settings-ionic-select {
   --background: var(--lcl-color-surface);
   --border-color: var(--lcl-color-border);
