@@ -1,4 +1,4 @@
-import { IonRange } from '@ionic/react';
+import { IonButton, IonRange } from '@ionic/react';
 import { ColorSwatch, Modal } from '@lcl/ui';
 import { useState } from 'react';
 import { plugLedHexToRgb, plugLedRgbToHex } from '../data/plugLedColor.js';
@@ -164,8 +164,8 @@ export const PlugLedColorEditor = ({
 
       <Modal
         actions={
-          <button
-            className="primary-action"
+          <IonButton
+            className="plug-settings-ionic-action"
             type="button"
             onClick={() => {
               onChange(pickerRgb);
@@ -173,7 +173,7 @@ export const PlugLedColorEditor = ({
             }}
           >
             {applyLabel}
-          </button>
+          </IonButton>
         }
         closeLabel={cancelLabel}
         open={pickerOpen}

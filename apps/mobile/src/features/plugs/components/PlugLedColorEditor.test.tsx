@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { getIonicButton } from '../../../test/ionicTestEvents.js';
 import { PlugLedColorEditor } from './PlugLedColorEditor.js';
 
 describe('PlugLedColorEditor Ionic controls', () => {
@@ -35,7 +36,8 @@ describe('PlugLedColorEditor Ionic controls', () => {
       })
     );
     expect(sliders[0]).toHaveProperty('value', 180);
-    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+    expect(document.querySelector('.lcl-modal__footer ion-button')).not.toBeNull();
+    fireEvent.click(getIonicButton(document, 'Apply'));
     expect(onChange).toHaveBeenCalledOnce();
     const result = onChange.mock.calls[0]?.[0] as number[];
     expect(result).toHaveLength(3);
