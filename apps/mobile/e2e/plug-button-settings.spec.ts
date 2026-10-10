@@ -214,7 +214,9 @@ test('physical button mode writes only PLUGS_UI controls', async ({ page }) => {
   const mock = await mockShelly(page);
   await openPlugSettings(page);
 
-  await page.locator('ion-radio-group.plug-settings-button-modes ion-radio[value="detached"]').click();
+  await page
+    .locator('ion-radio-group.plug-settings-button-modes ion-radio[value="detached"]')
+    .click();
   await expect(
     page.getByText('Fizyczny przycisk nie zmienia stanu przekaźnika.')
   ).toBeVisible();

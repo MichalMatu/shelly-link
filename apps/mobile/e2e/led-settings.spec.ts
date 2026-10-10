@@ -377,7 +377,9 @@ const consoleProblems = (page: Page) => {
 };
 
 const selectLedMode = async (page: Page, name: string) => {
-  const mode = page.locator('.installation-detail-device-led ion-select.plug-settings-ionic-select');
+  const mode = page.locator(
+    '.installation-detail-device-led ion-select.plug-settings-ionic-select'
+  );
   await mode.click();
   const alert = page.locator('ion-alert');
   await alert.getByRole('radio', { name, exact: true }).click();
@@ -402,9 +404,20 @@ for (const viewport of viewports) {
     await mockShelly(page, 'climate');
     await openDetail(page);
 
-    await expect(page.locator('ion-select.plug-settings-ionic-select')).toHaveJSProperty('value', 'power');
-    await expect(page.locator('label.field:has-text("Jasność trybu mocy") ion-input.plug-settings-ionic-input input')).toHaveValue('80');
-    await expect(page.locator('label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input')).toHaveValue('10');
+    await expect(page.locator('ion-select.plug-settings-ionic-select')).toHaveJSProperty(
+      'value',
+      'power'
+    );
+    await expect(
+      page.locator(
+        'label.field:has-text("Jasność trybu mocy") ion-input.plug-settings-ionic-input input'
+      )
+    ).toHaveValue('80');
+    await expect(
+      page.locator(
+        'label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input'
+      )
+    ).toHaveValue('10');
 
     const section = page.locator('.installation-detail-device-led');
     await selectLedMode(page, 'Sygnalizuj ON/OFF');
@@ -442,12 +455,20 @@ test('PLUGS_UI LED relay-state and off modes work end to end', async ({ page }) 
     'aria-pressed',
     'true'
   );
-  await expect(section.locator('.plug-led-state-stack fieldset.plug-led-state:first-child ion-input.plug-settings-ionic-input input')).toHaveValue('100');
+  await expect(
+    section.locator(
+      '.plug-led-state-stack fieldset.plug-led-state:first-child ion-input.plug-settings-ionic-input input'
+    )
+  ).toHaveValue('100');
   await expect(section.getByRole('button', { name: 'OFF #ff0000' })).toHaveAttribute(
     'aria-pressed',
     'true'
   );
-  await expect(section.locator('.plug-led-state-stack fieldset.plug-led-state:last-child ion-input.plug-settings-ionic-input input')).toHaveValue('100');
+  await expect(
+    section.locator(
+      '.plug-led-state-stack fieldset.plug-led-state:last-child ion-input.plug-settings-ionic-input input'
+    )
+  ).toHaveValue('100');
   await section.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
   await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
   expect(mock.ledSetRequests.at(-1)).toEqual({ mode: 'switch' });
@@ -470,12 +491,30 @@ test('PLUGS_UI night mode editor handles the real empty disabled window', async 
   const mock = await mockShelly(page, 'climate');
   await openDetail(page);
 
-  await expect(page.locator('label.field:has-text("Początek") ion-input.plug-settings-ionic-input input')).toHaveValue('22:00');
-  await expect(page.locator('label.field:has-text("Koniec") ion-input.plug-settings-ionic-input input')).toHaveValue('06:00');
-  await expect(page.locator('label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input')).toHaveValue('10');
+  await expect(
+    page.locator(
+      'label.field:has-text("Początek") ion-input.plug-settings-ionic-input input'
+    )
+  ).toHaveValue('22:00');
+  await expect(
+    page.locator(
+      'label.field:has-text("Koniec") ion-input.plug-settings-ionic-input input'
+    )
+  ).toHaveValue('06:00');
+  await expect(
+    page.locator(
+      'label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input'
+    )
+  ).toHaveValue('10');
   await page.locator('.plug-night-mode ion-toggle.plug-settings-ionic-toggle').click();
-  await page.locator('label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input').fill('7');
-  await page.locator('label.field:has-text("Początek") ion-input.plug-settings-ionic-input input').fill('23:30');
+  await page
+    .locator(
+      'label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input'
+    )
+    .fill('7');
+  await page
+    .locator('label.field:has-text("Początek") ion-input.plug-settings-ionic-input input')
+    .fill('23:30');
   await page.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
 
   await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
@@ -510,7 +549,11 @@ test('plain saved Plug exposes the same LED settings without an installed automa
   await expectNoHorizontalOverflow(page);
   await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
-  await expect(page.locator('label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input')).toHaveValue('10');
+  await expect(
+    page.locator(
+      'label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input'
+    )
+  ).toHaveValue('10');
   await expectVisualScreen(page, '17-plain-plug-settings');
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
@@ -568,7 +611,10 @@ test('time installation exposes the same device-level LED settings', async ({ pa
 
   await expect(page.getByRole('heading', { name: 'Lampa' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
-  await expect(page.locator('ion-select.plug-settings-ionic-select')).toHaveJSProperty('value', 'power');
+  await expect(page.locator('ion-select.plug-settings-ionic-select')).toHaveJSProperty(
+    'value',
+    'power'
+  );
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
 });

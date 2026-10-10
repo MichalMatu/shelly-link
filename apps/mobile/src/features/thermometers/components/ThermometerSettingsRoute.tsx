@@ -76,10 +76,7 @@ export const ThermometerSettingsRoute = ({
 
   useEffect(() => {
     if (!pvvxFeedback.isError) return;
-    pushToast(
-      'warning',
-      t('hardware.sensor.pvvxFailedTitle')
-    );
+    pushToast('warning', t('hardware.sensor.pvvxFailedTitle'));
     pvvxFeedback.reset();
   }, [pvvxFeedback, pushToast, t]);
 

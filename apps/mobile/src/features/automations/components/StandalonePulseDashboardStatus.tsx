@@ -87,17 +87,21 @@ export const StandalonePulseDashboardStatus = ({
           </div>
           <div>
             <dt>{t('hardware.metrics.reason')}</dt>
-            <dd>{formatRuntimeReason(status.lastReason, t, {
-                  pulseReasons: labels.reasons,
-                  empty: labels.none
-                })}</dd>
+            <dd>
+              {formatRuntimeReason(status.lastReason, t, {
+                pulseReasons: labels.reasons,
+                empty: labels.none
+              })}
+            </dd>
           </div>
           <div>
             <dt>{labels.automationFault}</dt>
-            <dd>{formatRuntimeReason(status.automationFault, t, {
-                  pulseReasons: labels.reasons,
-                  empty: labels.none
-                })}</dd>
+            <dd>
+              {formatRuntimeReason(status.automationFault, t, {
+                pulseReasons: labels.reasons,
+                empty: labels.none
+              })}
+            </dd>
           </div>
           <div>
             <dt>{labels.hardSafety}</dt>
@@ -106,9 +110,9 @@ export const StandalonePulseDashboardStatus = ({
                 ? '—'
                 : status.hardSafety
                   ? formatRuntimeReason(status.hardSafetyReason, t, {
-                  pulseReasons: labels.reasons,
-                  empty: labels.active
-                })
+                      pulseReasons: labels.reasons,
+                      empty: labels.active
+                    })
                   : labels.clear}
             </dd>
           </div>

@@ -3,9 +3,34 @@ import type { Translate, TranslationKey } from './i18n.js';
 // Shelly runtime wire codes are diagnostic data, never user-facing copy.
 // Pulse-specific codes take precedence because the two protocols overlap (e.g. "tm").
 const climateReasonCodes = new Set([
-  'ab', 'abh', 'ar', 'b', 'bf', 'bl', 'blh', 'bm', 'bo', 'boot',
-  'bs', 'cf', 'cv', 'db', 'ib', 'mc', 'mn', 'mx', 'ok', 'pt',
-  'rl', 'se', 'st', 'sy', 'ta', 'tm', 'tr', 'ts'
+  'ab',
+  'abh',
+  'ar',
+  'b',
+  'bf',
+  'bl',
+  'blh',
+  'bm',
+  'bo',
+  'boot',
+  'bs',
+  'cf',
+  'cv',
+  'db',
+  'ib',
+  'mc',
+  'mn',
+  'mx',
+  'ok',
+  'pt',
+  'rl',
+  'se',
+  'st',
+  'sy',
+  'ta',
+  'tm',
+  'tr',
+  'ts'
 ]);
 
 export const formatRuntimeReason = (

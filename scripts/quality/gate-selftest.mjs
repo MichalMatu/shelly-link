@@ -259,7 +259,11 @@ const setupUxReasonPresentationFixture = async (root) => {
     'apps/mobile/src/features/automations/components/PulseOperationalStatusSummary.tsx',
     'apps/mobile/src/features/automations/components/StandalonePulseDashboardStatus.tsx'
   ]) {
-    await writeFixture(root, path, 'export const status = formatRuntimeReason(code, t);\n');
+    await writeFixture(
+      root,
+      path,
+      'export const status = formatRuntimeReason(code, t);\n'
+    );
   }
 };
 
@@ -386,7 +390,7 @@ await executeCase({
     await writeFixture(
       root,
       'apps/mobile/src/features/automations/components/PulseOperationalStatusSummary.tsx',
-      "export const status = reasons[value] ?? value;\n"
+      'export const status = reasons[value] ?? value;\n'
     );
   },
   expectedFailure: 'runtime status must use the shared localized reason presenter',

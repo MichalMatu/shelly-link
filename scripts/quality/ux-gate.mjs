@@ -16,7 +16,7 @@ const frozenClimateVisuals = Object.freeze({
   'apps/mobile/e2e/responsive.spec.ts-snapshots/03-climate-ble-darwin.png':
     '7911cb81e7bde04c0f28bd5c315667da6970b89d',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/05-climate-device-darwin.png':
-    'fd97d72020f6f3ebef335f85675f1f8c7a7f5ce2',
+    '0b3dbef7be10adad7a8b4cd06f0f250678844f6f',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/06-climate-script-darwin.png':
     '161b2c1dba0d419d3181c764d4192c441cbd36c7',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/07-climate-info-darwin.png':
@@ -1076,7 +1076,10 @@ const checkRuntimeReasonPresentation = async () => {
     'apps/mobile/src/features/automations/components/StandalonePulseDashboardStatus.tsx'
   ]) {
     const source = await readRepoFile(path);
-    if (!source.includes('formatRuntimeReason(') || /reasons\[value\]\s*\?\?\s*value/.test(source)) {
+    if (
+      !source.includes('formatRuntimeReason(') ||
+      /reasons\[value\]\s*\?\?\s*value/.test(source)
+    ) {
       addFailure(path, 'runtime status must use the shared localized reason presenter');
     }
   }
