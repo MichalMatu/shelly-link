@@ -1,4 +1,5 @@
 import { useTranslation } from '../../../app/i18n.js';
+import { formatRuntimeReason } from '../../../app/runtimeReasonPresentation.js';
 import { pulseOperationalStatusCopy } from '../../../app/locales/pulseOperationalStatus.js';
 import {
   pulseOperationalRemainingMs,
@@ -14,12 +15,6 @@ const remainingLabel = (status: PulseOperationalStatus): string | null => {
   const seconds = Math.ceil(remainingMs / 1_000);
   return seconds < 60 ? `${seconds} s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 };
-
-const reasonLabel = (
-  value: string | null,
-  reasons: Readonly<Record<string, string>>,
-  empty: string
-): string => (value ? (reasons[value] ?? value) : empty);
 
 export type StandalonePulseDashboardStatusProps = {
   status: PulseOperationalStatus | null | undefined;
@@ -92,11 +87,17 @@ export const StandalonePulseDashboardStatus = ({
           </div>
           <div>
             <dt>{t('hardware.metrics.reason')}</dt>
-            <dd>{reasonLabel(status.lastReason, labels.reasons, labels.none)}</dd>
+            <dd>{formatRuntimeReason(status.lastReason, t, {
+                  pulseReasons: labels.reasons,
+                  empty: labels.none
+                })}</dd>
           </div>
           <div>
             <dt>{labels.automationFault}</dt>
-            <dd>{reasonLabel(status.automationFault, labels.reasons, labels.none)}</dd>
+            <dd>{formatRuntimeReason(status.automationFault, t, {
+                  pulseReasons: labels.reasons,
+                  empty: labels.none
+                })}</dd>
           </div>
           <div>
             <dt>{labels.hardSafety}</dt>
@@ -104,7 +105,10 @@ export const StandalonePulseDashboardStatus = ({
               {status.hardSafety === null
                 ? '—'
                 : status.hardSafety
-                  ? reasonLabel(status.hardSafetyReason, labels.reasons, labels.active)
+                  ? formatRuntimeReason(status.hardSafetyReason, t, {
+                  pulseReasons: labels.reasons,
+                  empty: labels.active
+                })
                   : labels.clear}
             </dd>
           </div>
