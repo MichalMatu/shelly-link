@@ -850,9 +850,7 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByRole('button', { name: 'Wstecz: Shelly' })).toBeVisible();
     expect(screen.queryByRole('tablist', { name: 'Menu konfiguracji' })).toBeNull();
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
-    );
+    fireEvent.click(getIonicButton(document, 'Skanuj termometry BLE przez to gniazdko'));
     expect(screen.queryByRole('dialog', { name: 'Skanuj termometry BLE' })).toBeNull();
     expect(
       await screen.findByRole('heading', { name: 'Skanuj termometry BLE' })
