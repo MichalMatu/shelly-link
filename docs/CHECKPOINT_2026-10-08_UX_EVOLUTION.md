@@ -31,15 +31,15 @@ This is a guardrail, not a claim that every future API payload or third-party er
 - Five specifically reviewed Darwin screenshots were accepted for intentional Ionic presentation differences: `05-climate-device`, `17-plain-plug-settings`, `28-thermometer-settings`, `20-climate-button-mode-managed`, and `15-add-plug`. No general snapshot refresh was authorized.
 - The scan network action has been restored to full width, including its touch area. No layout rewrite of frozen Climate was undertaken.
 - `pnpm quality:ux` and the 27-case `pnpm quality:selftest` passed during snapshot acceptance; all commit hooks passed.
-- Final full `pnpm check` for the latest error-presentation changes is being validated separately. Do not report the final stage as green until the result is confirmed.
+- Final full `pnpm check` **passed** on `3ef4f5752a791edcf7b8fb90f019a7e3066c1439` (format, lint, quality, tests, typecheck, builds and performance budget). The performance gate still flags intentional JS growth for review, without exceeding hard limits.
 
 ## Android acceptance
 
-The prior build installed successfully on Samsung S22+ (SM-S906B), Android 16, preserving data, but it predates the latest UX/presentation changes.
+The current UX code candidate `7ffe113224b079ce3cdd766eee3cedcd7287bddb` was built, synced through Capacitor, and assembled as an Android debug APK (SHA-256 `4d370cde0589bec3dd11f454f855b0952bc3aaba16b1f8ad5c714a1f075a563a`).
 
 Wireless ADB was verified on 2026-10-10 using the user-provided endpoint `192.168.0.100:40973`. The device responded as `SM-S906B`, Android 16, wireless debugging enabled. The endpoint is session-specific and may change; rediscover or reconnect when needed.
 
-For the newest candidate: build `@lcl/mobile`, run Capacitor Android sync, assemble the debug APK, then `adb install -r` **without uninstalling or clearing data**. Cold-start and capture logs/screenshot to validate on-device presentation. Never use the destructive `android:phone-alpha` helper for this preserving-data check.
+On 2026-10-10, `adb install -r` returned `Success` on Samsung S22+ / Android 16 without uninstall or data clearing. Android still reports `firstInstallTime=2026-09-28` and `lastUpdateTime=2026-10-10`. A subsequent cold start succeeded in **891 ms**, with `MainActivity` resumed, the app process running, and a 1080 × 2340 screenshot captured. The log contains platform/WebView/Capacitor warnings but no observed fatal startup error. Do not use the destructive `android:phone-alpha` helper for future preserving-data checks.
 
 ## Completion criteria and handoff
 
