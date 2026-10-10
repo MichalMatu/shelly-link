@@ -1,4 +1,4 @@
-import { setupIonicReact } from '@ionic/react';
+import { IonApp, setupIonicReact } from '@ionic/react';
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -29,4 +29,8 @@ if (import.meta.env.DEV) {
   });
 }
 
-createRoot(root).render(<App />);
+createRoot(root).render(
+  <IonApp>
+    <App />
+  </IonApp>
+);
