@@ -407,7 +407,6 @@ for (const viewport of viewports) {
     await expect(page.locator('label.field:has-text("Jasność nocna") ion-input.plug-settings-ionic-input input')).toHaveValue('10');
 
     const section = page.locator('.installation-detail-device-led');
-    const mode = section.locator('ion-select.plug-settings-ionic-select');
     await selectLedMode(page, 'Sygnalizuj ON/OFF');
     const colorGrids = section.locator('.plug-color-presets');
     await expect(colorGrids).toHaveCount(2);
