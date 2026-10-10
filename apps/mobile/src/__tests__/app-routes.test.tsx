@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../app/i18n.js';
+import { getIonicButton } from '../test/ionicTestEvents.js';
 import { createInstalledAutomation } from '../flows/installations/model.js';
 import {
   resetInstalledAutomationStore,
@@ -211,9 +212,7 @@ describe('AppRoutes navigation shell', () => {
     renderRoutes();
     const card = screen.getByText('Nawilżacz').closest('article');
     expect(card).not.toBeNull();
-    fireEvent.click(
-      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
-    );
+    fireEvent.click(getIonicButton(card as HTMLElement, 'Dodaj automatykę'));
     fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
     expect(screen.getByText('mock-fixed-shelly-shellyplugsg3-route-30')).toBeVisible();
@@ -229,9 +228,7 @@ describe('AppRoutes navigation shell', () => {
     renderRoutes();
     const card = screen.getByText('Lampa').closest('article');
     expect(card).not.toBeNull();
-    fireEvent.click(
-      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
-    );
+    fireEvent.click(getIonicButton(card as HTMLElement, 'Dodaj automatykę'));
     expect(screen.getByRole('button', { name: /Sterować według czasu/ })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
@@ -249,9 +246,7 @@ describe('AppRoutes navigation shell', () => {
     });
     renderRoutes();
     const card = screen.getByText('Wentylator').closest('article');
-    fireEvent.click(
-      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
-    );
+    fireEvent.click(getIonicButton(card as HTMLElement, 'Dodaj automatykę'));
     fireEvent.click(screen.getByRole('button', { name: 'Ustawienia' }));
     expect(screen.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Ustawienia' })).toHaveAttribute(
@@ -277,9 +272,7 @@ describe('AppRoutes navigation shell', () => {
     );
 
     const card = screen.getByText('Grzejnik').closest('article');
-    fireEvent.click(
-      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
-    );
+    fireEvent.click(getIonicButton(card as HTMLElement, 'Dodaj automatykę'));
     fireEvent.click(screen.getByRole('button', { name: /Sterować temperaturą/ }));
     expect(await screen.findByText('mock-setup-temperature')).toBeVisible();
 
@@ -316,9 +309,7 @@ describe('AppRoutes navigation shell', () => {
     });
     renderRoutes();
     const card = screen.getByText('Pompa').closest('article');
-    fireEvent.click(
-      within(card as HTMLElement).getByRole('button', { name: 'Dodaj automatykę' })
-    );
+    fireEvent.click(getIonicButton(card as HTMLElement, 'Dodaj automatykę'));
     fireEvent.click(screen.getByRole('button', { name: /Sterować według czasu/ }));
     expect(await screen.findByText('mock-setup-time')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'mock-complete' }));

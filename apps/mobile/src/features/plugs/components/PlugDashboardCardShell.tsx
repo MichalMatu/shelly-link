@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { IconDotsVertical, IconPlug } from '@tabler/icons-react';
 import type { Key, ReactNode } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -148,14 +149,15 @@ export const PlugDashboardCardShell = ({
       )}
 
       {automationAction && (
-        <button
-          className="primary-action plug-card__automation-action"
+        <IonButton
+          className="plug-card__automation-action"
+          expand="block"
           type="button"
           disabled={automationAction.disabled}
           onClick={automationAction.onClick}
         >
           {t('dashboard.addAutomation')}
-        </button>
+        </IonButton>
       )}
 
       {footer}

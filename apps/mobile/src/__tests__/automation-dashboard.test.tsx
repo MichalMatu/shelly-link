@@ -22,7 +22,7 @@ import {
 } from '../flows/installations/store.js';
 import { resetHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
-import { fireIonInput, getIonicInput } from '../test/ionicTestEvents.js';
+import { fireIonInput, getIonicButton, getIonicInput } from '../test/ionicTestEvents.js';
 import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 
 vi.mock('../flows/hardware-setup/useHardwareSetupFlow.js', () => ({
@@ -423,7 +423,7 @@ describe('AutomationDashboardScreen', () => {
       })
     ).toBe(true);
 
-    fireEvent.click(within(plugCard).getByRole('button', { name: 'Dodaj automatykę' }));
+    fireEvent.click(getIonicButton(plugCard, 'Dodaj automatykę'));
     expect(onAddAutomation).toHaveBeenCalledWith('shellyplugsg3-dashboard-30');
     expect(onOpenPlugSettings).not.toHaveBeenCalled();
   });
