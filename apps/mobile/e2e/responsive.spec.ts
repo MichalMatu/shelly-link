@@ -978,9 +978,15 @@ for (const viewport of viewports) {
     await page
       .locator('ion-segment.pulse-cycle-ionic-segment ion-segment-button[value="pulse"]')
       .click();
-    await expect(page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(0)).toBeVisible();
-    await expect(page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(1)).toBeVisible();
-    await expect(page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(2)).toBeVisible();
+    await expect(
+      page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(0)
+    ).toBeVisible();
+    await expect(
+      page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(1)
+    ).toBeVisible();
+    await expect(
+      page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(2)
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '25-time-pulse-setup');
@@ -1395,8 +1401,12 @@ for (const viewport of viewports) {
     await expect(page.getByText(/harmonogram/i)).toHaveCount(0);
     await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
     await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
-    await expect(page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(2)).toBeVisible();
-    await expect(pulseSetup.locator('ion-select.pulse-cycle-ionic-select')).toHaveCount(2);
+    await expect(
+      page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(2)
+    ).toBeVisible();
+    await expect(pulseSetup.locator('ion-select.pulse-cycle-ionic-select')).toHaveCount(
+      2
+    );
     await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
       0
     );
