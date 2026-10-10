@@ -32,6 +32,12 @@ Final responsive E2E passed **50/50** (0 flaky) on `3ef4f5752a791edcf7b8fb90f019
 
 Wireless ADB to Samsung S22+ / Android 16 was verified at `192.168.0.100:40973` on 2026-10-10 (the endpoint may change). APK from UX code commit `7ffe113224b079ce3cdd766eee3cedcd7287bddb` was installed via **`adb install -r` with data preserved**. Android cold start succeeded in 891 ms, with a 1080 × 2340 screenshot and a running foreground activity. A later stable screenshot confirmed the dark-mode dashboard and translated `Above threshold` label. Full evidence, APK hash and caveats are in the UX checkpoint. Never use the destructive alpha-install script for preserving-data checks. No merge into `main` without explicit authorization.
 
+### Full Ionic completion work (in progress)
+
+The previous UX reliability stage remains closed, but the **subsequent full component migration is not yet finished**. On `work/ux-evolution`, the Time and standalone Pulse form controls and actions now use Ionic (`IonInput`, `IonSelect`, `IonSegment`, `IonButton`), inline Plug/Thermometer name editing uses `IonInput`, the LED HSL editor uses `IonRange`, and the app is mounted under `IonApp`. Current visually reviewed form baselines are `09`, `25`, `26`, and `29`; Climate's original editor and established composition remain untouched. `docs/UX_VISUAL_CONTRACT.md` records the precise accepted deltas.
+
+Remaining work is the native-control audit in hardware setup and Climate rule/advanced forms, deliberate assessment of shared modal/navigation primitives, and removal of obsolete control CSS. Do not swap bespoke wheel/gesture/icon controls indiscriminately merely to inflate Ionic counts. Retain existing owners, local runtime safety and E2E baselines; no automatic snapshot bulk refresh. The last pre-Ionic-completion `pnpm check`/phone acceptance belongs to the previous checkpoint, not to the new migration.
+
 ## Accepted product/runtime baseline
 
 Keep these contracts:
