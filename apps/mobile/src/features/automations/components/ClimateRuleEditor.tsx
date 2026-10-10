@@ -4,7 +4,6 @@ import type { ClimateSensorAggregation } from '@lcl/script-generator';
 import { Disclosure, InfoLabel, SelectField } from '@lcl/ui';
 import { useId, type ReactNode } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
-import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
   DEFAULT_RULE_ADVANCED_SETTINGS,
   RULE_ADVANCED_LIMITS
@@ -17,6 +16,7 @@ import {
   stripTrailingUnit
 } from '../presentation/climateRulePresentation.js';
 import { ClimateRuleAdvancedSettings } from './ClimateRuleAdvancedSettings.js';
+import { ClimateRuleDeveloperActions } from './ClimateRuleDeveloperActions.js';
 
 import {
   ClimateRuleDeviceSelectors,
@@ -291,30 +291,13 @@ export const ClimateRuleEditor = ({
           setMaxOnHoursInput={props.setMaxOnHoursInput}
         />
         {showScriptActions && (
-          <div className="action-row rule-developer-actions rule-developer-actions--compact">
-            <button
-              className="secondary-action"
-              type="button"
-              disabled={!props.canPreviewScript}
-              title={t('hardware.rule.scriptPreviewTitle')}
-              onClick={props.openScriptPreview}
-            >
-              <CodeIcon />
-              {t('hardware.rule.scriptPreview')}
-            </button>
-            <button
-              className="secondary-action"
-              type="button"
-              aria-busy={props.loadScriptPending}
-              disabled={!props.hasSelectedShelly || props.loadScriptPending}
-              title={t('hardware.rule.loadScriptFromShellyTitle')}
-              onClick={props.loadScriptFromShelly}
-            >
-              {props.loadScriptPending
-                ? t('hardware.rule.loadingScriptFromShelly')
-                : t('hardware.rule.loadScriptFromShelly')}
-            </button>
-          </div>
+          <ClimateRuleDeveloperActions
+            canPreviewScript={props.canPreviewScript}
+            hasSelectedShelly={props.hasSelectedShelly}
+            loadScriptPending={props.loadScriptPending}
+            openScriptPreview={props.openScriptPreview}
+            loadScriptFromShelly={props.loadScriptFromShelly}
+          />
         )}
       </Disclosure>
 
