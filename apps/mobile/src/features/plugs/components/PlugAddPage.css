@@ -56,3 +56,8 @@
 
   color: var(--lcl-color-text);
 }
+
+.shelly-network-scan__actions > ion-button.plug-add-secondary-action {
+  flex: 1 1 100%;
+  width: 100%;
+}
