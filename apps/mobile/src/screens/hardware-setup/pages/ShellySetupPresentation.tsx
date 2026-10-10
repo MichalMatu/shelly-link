@@ -1,4 +1,4 @@
-import { IonInput } from '@ionic/react';
+import { IonButton, IonInput } from '@ionic/react';
 import type { ShellyClockStatus, ShellyComponentState } from '@lcl/shelly-client';
 import { IconBluetooth, IconSettings, IconPencil, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
@@ -259,16 +259,19 @@ export const SavedShellyDeviceCard = ({
       </div>
 
       {onBleScan && (
-        <button
+        <IonButton
           className="shelly-ble-action"
+          fill="clear"
+          size="small"
           type="button"
           disabled={isControlBusy}
+          aria-label={t('hardware.shelly.scanBleViaShellyTitle')}
           title={t('hardware.shelly.scanBleViaShellyTitle')}
           onClick={() => onBleScan(device)}
         >
           <IconBluetooth className="icon-action__svg" aria-hidden="true" />
           <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
-        </button>
+        </IonButton>
       )}
     </article>
   );

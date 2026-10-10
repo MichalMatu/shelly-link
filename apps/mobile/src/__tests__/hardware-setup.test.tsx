@@ -389,9 +389,7 @@ const addShellyThroughUi = async (name = 'Przedpokój') => {
 };
 
 const openShellyBleScanFromSettings = async () => {
-  fireEvent.click(
-    screen.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
-  );
+  fireEvent.click(getIonicButton(document, 'Skanuj termometry BLE przez to gniazdko'));
 };
 
 const addSensorThroughUi = async ({
@@ -1236,9 +1234,7 @@ describe('HardwareSetupScreen', () => {
     });
     expect(infoToggle).toHaveAttribute('title', 'Ustawienia gniazdka');
     expect(
-      within(savedPlugList).getByRole('button', {
-        name: 'Skanuj termometry BLE przez to gniazdko'
-      })
+      getIonicButton(savedPlugList, 'Skanuj termometry BLE przez to gniazdko')
     ).toBeInTheDocument();
     expect(
       within(savedPlugList).getByRole('button', {
@@ -1289,9 +1285,7 @@ describe('HardwareSetupScreen', () => {
       within(savedPlugList).getByRole('button', { name: 'Ustawienia gniazdka' })
     ).toBeInTheDocument();
     expect(
-      within(savedPlugList).getByRole('button', {
-        name: 'Skanuj termometry BLE przez to gniazdko'
-      })
+      getIonicButton(savedPlugList, 'Skanuj termometry BLE przez to gniazdko')
     ).toBeInTheDocument();
 
     const runtimeMutations = vi
@@ -1549,9 +1543,7 @@ describe('HardwareSetupScreen', () => {
       within(savedPlugList).getByRole('button', { name: 'Ustawienia gniazdka' })
     ).toBeInTheDocument();
     expect(
-      within(savedPlugList).getByRole('button', {
-        name: 'Skanuj termometry BLE przez to gniazdko'
-      })
+      getIonicButton(savedPlugList, 'Skanuj termometry BLE przez to gniazdko')
     ).toBeInTheDocument();
 
     const rpcMethods = vi
