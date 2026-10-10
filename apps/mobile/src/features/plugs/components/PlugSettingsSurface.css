@@ -77,13 +77,6 @@
   min-height: var(--lcl-size-control-min-height);
 }
 
-.plug-settings-check-row input[type='checkbox'] {
-  accent-color: var(--lcl-color-accent);
-  flex: 0 0 auto;
-  height: var(--lcl-size-control-icon-size);
-  width: var(--lcl-size-control-icon-size);
-}
-
 .plug-color-editor {
   min-width: 0;
 }
