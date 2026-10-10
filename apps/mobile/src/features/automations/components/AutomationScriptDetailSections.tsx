@@ -1,4 +1,3 @@
-import { IonicActionButton } from '../../../components/IonicActionButton.js';
 import { DiagnosticRow, FeedbackPanel, ScriptPreview } from '@lcl/ui';
 
 export type AutomationScriptDiagnosticRow = {
@@ -70,9 +69,9 @@ export const AutomationScriptDetailSection = ({
     )}
     {error && (
       <FeedbackPanel tone="danger" title={errorTitle}>
-        <IonicActionButton className="secondary-action" type="button" onClick={onRetry}>
+        <button className="secondary-action" type="button" onClick={onRetry}>
           {retryLabel}
-        </IonicActionButton>
+        </button>
       </FeedbackPanel>
     )}
     {source !== undefined && (

@@ -1,4 +1,3 @@
-import { IonicActionButton } from '../../../components/IonicActionButton.js';
 import { Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 
@@ -26,13 +25,13 @@ export const SensorRemovalBlockedModal = ({
       title={t('hardware.sensor.deleteBlockedTitle')}
       actions={
         usage && onOpenAutomation ? (
-          <IonicActionButton
+          <button
             className="primary-action"
             type="button"
             onClick={() => onOpenAutomation(usage.id)}
           >
             {t('common.openAutomation')}
-          </IonicActionButton>
+          </button>
         ) : undefined
       }
       onClose={onClose}
@@ -65,14 +64,14 @@ export const SensorRemovalConfirmModal = ({
       open={deviceName !== null}
       title={t('hardware.sensor.deleteConfirmTitle')}
       actions={
-        <IonicActionButton
+        <button
           className="secondary-action secondary-action--danger"
           type="button"
           title={t('hardware.sensor.deleteTitle')}
           onClick={onConfirm}
         >
           {t('common.delete')}
-        </IonicActionButton>
+        </button>
       }
       onClose={onClose}
     >

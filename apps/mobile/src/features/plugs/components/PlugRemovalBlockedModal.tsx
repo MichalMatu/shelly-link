@@ -1,4 +1,3 @@
-import { IonicActionButton } from '../../../components/IonicActionButton.js';
 import { Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 
@@ -26,9 +25,9 @@ export const PlugRemovalBlockedModal = ({
       title={t('hardware.shelly.deleteBlockedTitle')}
       actions={
         onOpenAutomation ? (
-          <IonicActionButton className="primary-action" type="button" onClick={onOpenAutomation}>
+          <button className="primary-action" type="button" onClick={onOpenAutomation}>
             {t('common.openAutomation')}
-          </IonicActionButton>
+          </button>
         ) : undefined
       }
       onClose={onClose}

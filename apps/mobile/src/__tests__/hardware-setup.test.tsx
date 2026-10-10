@@ -3260,7 +3260,7 @@ describe('HardwareSetupScreen', () => {
     const dialog = await findShellyBleScanPage();
     expect(await findBleScanCandidate(dialog)).toBeInTheDocument();
 
-    fireEvent.click(getIonicButton(dialog, 'Skanuj ponownie'));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Skanuj ponownie' }));
 
     await waitFor(() =>
       expect(within(dialog).getByText('A4:C1:38:4F:24:CD')).toBeInTheDocument()
