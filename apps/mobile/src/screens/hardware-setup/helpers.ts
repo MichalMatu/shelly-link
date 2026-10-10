@@ -9,7 +9,9 @@ export const formatDiagnosticNumber = (
   suffix: string,
   fractionDigits = 1
 ): string =>
-  value == null ? t('common.missing') : `${value.toFixed(fractionDigits)}${suffix}`;
+  value == null || !Number.isFinite(value)
+    ? t('common.missing')
+    : `${value.toFixed(fractionDigits)}${suffix}`;
 
 export const canInstallScript = (
   flow: Pick<
