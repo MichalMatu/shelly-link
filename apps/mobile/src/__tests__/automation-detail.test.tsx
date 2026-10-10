@@ -662,7 +662,7 @@ describe('InstallationDetailScreen', () => {
     expect(screen.queryByText('12:00')).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Usuń automatykę czasową' })).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Usuń automatykę czasową' }));
+    fireEvent.click(getIonicButton(document, 'Usuń automatykę czasową'));
     const dialog = screen.getByRole('dialog', { name: 'Usunąć automatykę czasową?' });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Potwierdź usuń' }));
 
