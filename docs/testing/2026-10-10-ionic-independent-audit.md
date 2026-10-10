@@ -5,7 +5,7 @@ Scope: `work/ux-evolution` only. The `main` branch was not modified. This report
 ## Current verified product head
 
 - Source/test commit: `81b36f78e4ed3e4bbce171d8c97a1e0b531ece2f`.
-- Focused commits: `fc344ec2` (Ionic host interactions), `41f...` [do not use shortened historical IDs as proof], `d240a625` (Plug Detail CTA), `80afbb54` (test host selectors), `a8eb3540` (bounded Vitest concurrency), `c5a778b3` (BLE candidate save), `733d33a8` (Plug dashboard CTA), `81efec8c` (unused CSS), `81b36f78` (BLE-only host assertion). See Git history for complete chronological diff.
+- Focused commits: `fc344ec2` (Ionic host interactions), `d240a625` (Plug Detail CTA), `80afbb54` (test host selectors), `a8eb3540` (bounded Vitest concurrency), `c5a778b3` (BLE candidate save), `733d33a8` (Plug dashboard CTA), `81efec8c` (unused CSS), `81b36f78` (BLE-only host assertion). See Git history for complete chronological diff.
 - `pnpm check`: PASS at `81b36f78`, including **549/549 mobile unit/integration tests**. Previous parallel-run failures disappeared with explicit 2-worker Vitest and serialized workspace tests; isolated failing suites passed 83/83. The concurrency change affects test execution only.
 - Canonical Darwin responsive/visual E2E: **50/50**, zero skipped/unexpected/flaky at `81efec8c`. `81b36f78` changes only one unit test after that visual run. No snapshots refreshed.
 - Capacitor sync + Android debug Gradle assemble: PASS. Debug APK 5,179,520 bytes; SHA-256 `db33815dfcc43b909dee24a76a0300f4fbe08e4795f7fc240b0b19891b2ab552`.
