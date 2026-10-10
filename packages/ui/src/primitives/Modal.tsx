@@ -194,6 +194,7 @@ export const Modal = ({
       onClick={canDismiss ? onClose : undefined}
     >
       <section
+        aria-busy={busy || undefined}
         aria-describedby={description ? descriptionId : undefined}
         aria-modal="true"
         aria-labelledby={titleId}
