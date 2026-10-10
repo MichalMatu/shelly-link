@@ -13,9 +13,6 @@ type StandalonePulseSetupPageProps = {
   onInstalled?(): void;
 };
 
-const errorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
 export const StandalonePulseSetupPage = ({
   selectedShelly,
   onInstalled
@@ -81,7 +78,7 @@ export const StandalonePulseSetupPage = ({
       >
         {pulseFlow.installMutation.isError && (
           <FeedbackPanel tone="danger" title={t('common.operationFailed')}>
-            {errorMessage(pulseFlow.installMutation.error)}
+            {t('common.operationFailed')}
           </FeedbackPanel>
         )}
       </Modal>
