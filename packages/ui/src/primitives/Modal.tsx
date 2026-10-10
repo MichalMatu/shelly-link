@@ -30,14 +30,22 @@ const focusableSelector = [
   'input:not([disabled])',
   'select:not([disabled])',
   'textarea:not([disabled])',
+  'ion-button:not([disabled])',
+  'ion-input:not([disabled])',
+  'ion-select:not([disabled])',
+  'ion-textarea:not([disabled])',
+  'ion-checkbox:not([disabled])',
+  'ion-toggle:not([disabled])',
   '[tabindex]:not([tabindex="-1"])'
 ].join(',');
 
 const focusableElements = (container: HTMLElement): HTMLElement[] =>
   Array.from(container.querySelectorAll<HTMLElement>(focusableSelector)).filter(
     (element) =>
-      element.tabIndex >= 0 &&
+      (element.tabIndex >= 0 ||
+        /^ION-(BUTTON|INPUT|SELECT|TEXTAREA|CHECKBOX|TOGGLE)$/.test(element.tagName)) &&
       !element.hasAttribute('hidden') &&
+      !element.hasAttribute('disabled') &&
       element.getAttribute('aria-hidden') !== 'true'
   );
 
