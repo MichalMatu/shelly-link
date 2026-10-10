@@ -316,5 +316,5 @@
 }
 
 .plug-settings-section .field-unit-control__unit {
-  z-index: 1;
+  z-index: var(--lcl-z-index-content);
 }
