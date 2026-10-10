@@ -27,7 +27,10 @@ export const deriveShellyInputState = ({
   try {
     baseUrl = normalizeShellyUrl(shellyUrlInput);
   } catch {
-    fieldErrors.url = t('hardware.validation.shellyIpFormat');
+    fieldErrors.url =
+      shellyUrlInput.trim().length === 0
+        ? t('hardware.validation.shellyIpRequired')
+        : t('hardware.validation.shellyIpInvalid');
   }
 
   return fieldErrors.name || fieldErrors.url
