@@ -1,4 +1,4 @@
-import { IonButton, IonSelect, IonSelectOption } from '@ionic/react';
+import { IonButton, IonRadio, IonRadioGroup } from '@ionic/react';
 import type { ShellyPlugsUiButtonInputMode } from '@lcl/shelly-client';
 import { DiagnosticRow } from '@lcl/ui';
 import { useEffect, useState } from 'react';
@@ -105,13 +105,10 @@ export const PlugButtonModeSettingsCard = ({
 
       <div className="field">
         <span>{copy.currentMode}</span>
-        <IonSelect
+        <IonRadioGroup
           aria-label={copy.currentMode}
-          className="plug-settings-ionic-select"
-          fill="outline"
-          interface="alert"
+          className="plug-settings-button-modes"
           value={draft}
-          disabled={locked}
           onIonChange={(event) => {
             const value = event.detail.value;
             if (value === 'momentary' || value === 'detached') {
@@ -120,9 +117,13 @@ export const PlugButtonModeSettingsCard = ({
             }
           }}
         >
-          <IonSelectOption value="momentary">{copy.momentary}</IonSelectOption>
-          <IonSelectOption value="detached">{copy.detached}</IonSelectOption>
-        </IonSelect>
+          <IonRadio value="momentary" labelPlacement="end" justify="start">
+            {copy.momentary}
+          </IonRadio>
+          <IonRadio value="detached" labelPlacement="end" justify="start">
+            {copy.detached}
+          </IonRadio>
+        </IonRadioGroup>
       </div>
 
       <p className="plug-settings-feedback">
