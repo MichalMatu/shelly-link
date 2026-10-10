@@ -1,9 +1,9 @@
-import { IonInput, IonCheckbox } from '@ionic/react';
 import type { RulePresetId, ThresholdDirection } from '@lcl/automation-core';
 import type { ClimateSensorAggregation } from '@lcl/script-generator';
 import { Disclosure, InfoLabel, SelectField } from '@lcl/ui';
 import { useId, type ReactNode } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
+import { CodeIcon } from '../../../components/icons/CodeIcon.js';
 import {
   DEFAULT_RULE_ADVANCED_SETTINGS,
   RULE_ADVANCED_LIMITS
@@ -16,7 +16,6 @@ import {
   stripTrailingUnit
 } from '../presentation/climateRulePresentation.js';
 import { ClimateRuleAdvancedSettings } from './ClimateRuleAdvancedSettings.js';
-import { ClimateRuleDeveloperActions } from './ClimateRuleDeveloperActions.js';
 
 import {
   ClimateRuleDeviceSelectors,
@@ -169,15 +168,14 @@ export const ClimateRuleEditor = ({
         <label className={props.isThresholdValid ? 'field' : 'field field--invalid'}>
           <span>{stripTrailingUnit(t(copy.onLabelKey), copy.unit)}</span>
           <span className="field-unit-control">
-            <IonInput
-              className="lcl-climate-ionic-number-input"
+            <input
               aria-label={t(copy.onLabelKey)}
               aria-describedby={props.isThresholdValid ? undefined : thresholdErrorId}
-              aria-invalid={props.isThresholdValid ? 'false' : 'true'}
+              aria-invalid={!props.isThresholdValid}
               type="number"
               step="0.1"
               value={props.onThresholdInput}
-              onIonInput={(event) => props.setOnThresholdInput(String(event.detail.value ?? ''))}
+              onChange={(event) => props.setOnThresholdInput(event.currentTarget.value)}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               {copy.unit}
@@ -187,15 +185,14 @@ export const ClimateRuleEditor = ({
         <label className={props.isThresholdValid ? 'field' : 'field field--invalid'}>
           <span>{stripTrailingUnit(t(copy.offLabelKey), copy.unit)}</span>
           <span className="field-unit-control">
-            <IonInput
-              className="lcl-climate-ionic-number-input"
+            <input
               aria-label={t(copy.offLabelKey)}
               aria-describedby={props.isThresholdValid ? undefined : thresholdErrorId}
-              aria-invalid={props.isThresholdValid ? 'false' : 'true'}
+              aria-invalid={!props.isThresholdValid}
               type="number"
               step="0.1"
               value={props.offThresholdInput}
-              onIonInput={(event) => props.setOffThresholdInput(String(event.detail.value ?? ''))}
+              onChange={(event) => props.setOffThresholdInput(event.currentTarget.value)}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               {copy.unit}
@@ -222,11 +219,11 @@ export const ClimateRuleEditor = ({
             {t('hardware.rule.vpdRangeHint')}
           </InfoLabel>
           <label className="toggle-row rule-vpd-assist__toggle">
-            <IonCheckbox
-              className="lcl-climate-ionic-checkbox"
+            <input
               aria-label={t('hardware.rule.vpdAssistTitle')}
+              type="checkbox"
               checked={props.vpdAssistEnabled}
-              onIonChange={(event) => props.setVpdAssistEnabled(event.detail.checked)}
+              onChange={(event) => props.setVpdAssistEnabled(event.currentTarget.checked)}
             />
             <span className="rule-vpd-assist__toggle-state">
               {props.vpdAssistEnabled ? t('common.enabled') : t('common.disabled')}
@@ -243,18 +240,17 @@ export const ClimateRuleEditor = ({
               {t('hardware.rule.vpdTargetShort')}
             </label>
             <span className="field-unit-control">
-              <IonInput
-              className="lcl-climate-ionic-number-input"
+              <input
                 id={vpdTargetInputId}
                 aria-label={t('hardware.rule.vpdTarget')}
                 aria-describedby={props.isVpdAssistValid ? undefined : vpdErrorId}
-                aria-invalid={props.isVpdAssistValid ? 'false' : 'true'}
+                aria-invalid={!props.isVpdAssistValid}
                 max={RULE_ADVANCED_LIMITS.vpdTargetMax}
                 min={RULE_ADVANCED_LIMITS.vpdTargetMin}
                 step="0.05"
                 type="number"
                 value={props.vpdTargetInput}
-                onIonInput={(event) => props.setVpdTargetInput(String(event.detail.value ?? ''))}
+                onChange={(event) => props.setVpdTargetInput(event.currentTarget.value)}
               />
               <span className="field-unit-control__unit" aria-hidden="true">
                 kPa
@@ -291,13 +287,30 @@ export const ClimateRuleEditor = ({
           setMaxOnHoursInput={props.setMaxOnHoursInput}
         />
         {showScriptActions && (
-          <ClimateRuleDeveloperActions
-            canPreviewScript={props.canPreviewScript}
-            hasSelectedShelly={props.hasSelectedShelly}
-            loadScriptPending={props.loadScriptPending}
-            openScriptPreview={props.openScriptPreview}
-            loadScriptFromShelly={props.loadScriptFromShelly}
-          />
+          <div className="action-row rule-developer-actions rule-developer-actions--compact">
+            <button
+              className="secondary-action"
+              type="button"
+              disabled={!props.canPreviewScript}
+              title={t('hardware.rule.scriptPreviewTitle')}
+              onClick={props.openScriptPreview}
+            >
+              <CodeIcon />
+              {t('hardware.rule.scriptPreview')}
+            </button>
+            <button
+              className="secondary-action"
+              type="button"
+              aria-busy={props.loadScriptPending}
+              disabled={!props.hasSelectedShelly || props.loadScriptPending}
+              title={t('hardware.rule.loadScriptFromShellyTitle')}
+              onClick={props.loadScriptFromShelly}
+            >
+              {props.loadScriptPending
+                ? t('hardware.rule.loadingScriptFromShelly')
+                : t('hardware.rule.loadScriptFromShelly')}
+            </button>
+          </div>
         )}
       </Disclosure>
 
