@@ -1,3 +1,4 @@
+import { IonicActionButton } from '../../../components/IonicActionButton.js';
 import { Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 
@@ -21,14 +22,14 @@ export const PlugDeleteConfirmModal = ({
       open={deviceName !== null}
       title={t('hardware.shelly.deleteConfirmTitle')}
       actions={
-        <button
+        <IonicActionButton
           className="secondary-action secondary-action--danger"
           type="button"
           title={t('hardware.shelly.deleteTitle')}
           onClick={onConfirm}
         >
           {t('common.delete')}
-        </button>
+        </IonicActionButton>
       }
       onClose={onClose}
     >
