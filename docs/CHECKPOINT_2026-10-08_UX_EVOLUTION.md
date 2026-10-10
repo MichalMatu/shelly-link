@@ -78,3 +78,31 @@ The historic completed UX-reliability stage above must not be confused with the 
 - Remaining native production HTML controls: **75 in the app** (65 buttons, 10 frozen Climate inputs), plus separate shared UI primitives. Some buttons are intentionally custom navigation/gesture/relay/LED/time-wheel widgets; **ordinary action buttons still remain**. Do not declare migration complete, revert Climate's visual freeze or repeat the failed bulk modal/primary-action conversion.
 - JS performance review remains open: 2,369,824 B total, 1,043,584 B largest (initially loaded `ion-icon` chunk), 20 JS chunks. Hard budget passes; review thresholds fail. Only demonstrably unused checkbox CSS was removed.
 - Detailed evidence, exact remaining categories, Android caveats and ordered gates: `docs/testing/2026-10-10-ionic-independent-audit.md`. Diagnose Android bridge/WebView first; finish audited standard actions and accessibility; rerun all acceptance gates after **any** further product changes. No background task is implied by this checkpoint.
+
+### Ionic BLE restart and S22+ corrected acceptance (2026-10-10)
+
+Latest **product** change: `c71845097ac448eaf1b5d4a80c246f6c167fdb63`.
+The Shelly BLE standalone restart action uses `IonButton` with unchanged
+busy/disabled/onClick behavior. The app now has **74** native controls,
+classified file-by-file in `docs/testing/2026-10-10-ionic-native-control-census.md`.
+
+The full `pnpm check` passed with **549/549** mobile tests, and Android sync
+and debug build passed. The installed APK hash is
+`5f40e523285643ce70a32a973869d62c19b960a10c5265e395fc216a3c5f1544`.
+Full responsive/visual E2E still had **49/50** on two attempts, caused by
+different cases (Time/Pulse visual 3% and LED timeout); both passed in
+isolation without code or snapshot changes. A full rerun was queued.
+Do not mark this product commit fully accepted until a clean full run exists.
+
+The first 712-ms S22+ cold launch was immediately backgrounded on a dark
+screen and the screenshot was effectively blank, so it did not verify UI.
+A corrected test with the screen awake kept the app truly foregrounded:
+cold start **515 ms**, actual 1080 × 2340 screenshot (172,321 B), and
+UIAutomator **75 nodes / 45 labels**. No `triggerEvent` in that start.
+The exception had occurred when `Capacitor: App stopped`; this background
+race is still unexplained. Physical app data remained preserved.
+Do not treat the one clean focused launch as full TalkBack/keyboard sign-off.
+
+Current evidence and gaps:
+`docs/testing/2026-10-10-ionic-independent-audit.md`.
+
