@@ -2798,45 +2798,6 @@ ion-alert.app-settings__language-alert {
   width: 100%;
 }
 
-/* Preserve the Climate form geometry while delegating numeric input to Ionic. */
-.field-unit-control .lcl-climate-ionic-number-input {
-  --background: var(--app-glass-surface-strong);
-  --color: var(--lcl-color-text);
-  --placeholder-color: var(--lcl-color-text-muted);
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --padding-start: var(--lcl-spacing-md);
-  --padding-end: calc(var(--lcl-spacing-xl) + var(--lcl-spacing-lg));
-
-  background: var(--app-glass-surface-strong);
-  border: var(--lcl-border-width-sm) solid var(--app-glass-border);
-  border-radius: var(--lcl-radius-md);
-  min-height: var(--lcl-size-control-min-height);
-  width: 100%;
-}
-
-.field-unit-control .lcl-climate-ionic-number-input::part(native) {
-  background: var(--app-glass-surface-strong);
-  border: var(--lcl-border-width-sm) solid var(--app-glass-border);
-  border-radius: var(--lcl-radius-md);
-  min-height: var(--lcl-size-control-min-height);
-}
-
-.field-unit-control:has(.lcl-climate-ionic-number-input)
-  .field-unit-control__unit {
-  z-index: 2;
-}
-
-.lcl-climate-ionic-checkbox {
-  --checkbox-background: var(--lcl-color-surface);
-  --checkbox-background-checked: var(--lcl-color-accent);
-  --border-color: var(--lcl-color-border);
-  --border-color-checked: var(--lcl-color-accent);
-  --checkmark-color: var(--lcl-color-accent-contrast);
-
-  flex: 0 0 auto;
-}
-
 .field-unit-control__unit {
   color: var(--lcl-color-text-muted);
   pointer-events: none;
