@@ -1,3 +1,4 @@
+import { IonicActionButton } from '../../../components/IonicActionButton.js';
 import { DiagnosticRow, FeedbackPanel } from '@lcl/ui';
 import { IconBluetooth, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -122,7 +123,7 @@ export const ShellySettingsContent = ({
 
       <div className="action-row">
         {enableBleDiscovery && (
-          <button
+          <IonicActionButton
             className="secondary-action"
             type="button"
             title={t('hardware.shelly.scanBleViaShellyTitle')}
@@ -130,9 +131,9 @@ export const ShellySettingsContent = ({
           >
             <IconBluetooth className="icon-action__svg" aria-hidden="true" />
             <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
-          </button>
+          </IonicActionButton>
         )}
-        <button
+        <IonicActionButton
           className="secondary-action secondary-action--danger"
           type="button"
           title={t('hardware.shelly.deleteTitle')}
@@ -140,7 +141,7 @@ export const ShellySettingsContent = ({
         >
           <IconTrash className="icon-action__svg" aria-hidden="true" />
           <span>{t('hardware.shelly.deleteTitle')}</span>
-        </button>
+        </IonicActionButton>
       </div>
     </div>
   );
