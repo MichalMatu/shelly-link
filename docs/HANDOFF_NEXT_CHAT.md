@@ -50,6 +50,16 @@ The **safe handoff head** after a failed ordinary/modal `IonicActionButton` batc
 
 The next conversation's mission is to challenge the Ionic migration and fix actual omissions, **not** to disguise remaining custom HTML controls or the frozen Climate form with unreviewed visual baseline updates. See the UX checkpoint for the exact remaining classes, known 80-control census and safe acceptance. Work only on `work/ux-evolution`, preserve `main` and Android data, do not use subchats, and verify Local Agent state before queuing tasks.
 
+### Ionic React audit update — 2026-10-10 (newest status)
+
+**Component migration is still open.** Read `docs/testing/2026-10-10-ionic-independent-audit.md` for evidence, exception categories and Android diagnostics; earlier 80-control and APK values above are historical.
+
+- Latest verified **application** source: `81b36f78e4ed3e4bbce171d8c97a1e0b531ece2f`. `pnpm check` passed (549/549 mobile tests), canonical responsive/visual E2E **50/50** (snapshots unchanged), Capacitor sync and Android debug APK build passed.
+- Samsung S22+ received that APK with `adb install -r` and **data preserved**; cold start 1005 ms and screenshot 1080 × 2340 succeeded. **Critical qualification:** logcat captured `Uncaught TypeError: Cannot read properties of undefined (reading 'triggerEvent')` from Capacitor/Console, without a native fatal crash. The subsequent wireless ADB reconnection failed. Do not call Android error-free or migration fully verified until bridge/WebView issue is understood.
+- Current census: **75 native controls** in production mobile TSX (65 buttons, 10 sensitive Climate inputs), plus separate `@lcl/ui` primitives. Deliberate navigation/gesture/relay controls remain justified; ordinary scan/retry/delete/setup/modal actions still require individual migration or recorded exemption. Climate form migration produced unacceptable visual drift and must not be reattempted unchanged.
+- Bundled JS 2,369,824 B; initial `ion-icon` chunk 1,043,584 B. Review-size thresholds are exceeded despite green hard budget. Real-device TalkBack/keyboard/focus/overlays and bundle optimization remain open.
+- Next actions: reconnect S22+ by *current* Wireless ADB endpoint, check Android System WebView version/channel, reproduce error across cold starts, inspect bridge initialization and stack; then finish small test-backed action slices and phone accessibility, with full gates for each product code change. No `main` edits, no subchats/Codex, and no snapshot refresh to mask Climate regressions.
+
 ## Accepted product/runtime baseline
 
 Keep these contracts:
