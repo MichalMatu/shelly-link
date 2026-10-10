@@ -394,12 +394,12 @@ for (const viewport of viewports) {
     await mockShelly(page, 'climate');
     await openDetail(page);
 
-    await expect(page.locator('ion-select[aria-label="Tryb LED"]')).toHaveAttribute('value', 'power');
+    await expect(page.locator('ion-select.plug-settings-ionic-select')).toHaveJSProperty('value', 'power');
     await expect(page.locator('ion-input[aria-label="Jasność trybu mocy"] input')).toHaveValue('80');
     await expect(page.locator('ion-input[aria-label="Jasność nocna"] input')).toHaveValue('10');
 
     const section = page.locator('.installation-detail-device-led');
-    const mode = section.locator('ion-select[aria-label="Tryb LED"]');
+    const mode = section.locator('ion-select.plug-settings-ionic-select');
     await mode.click();
     await page.getByRole('option', { name: 'Sygnalizuj ON/OFF' }).click();
     const colorGrids = section.locator('.plug-color-presets');
@@ -429,10 +429,10 @@ test('PLUGS_UI LED relay-state and off modes work end to end', async ({ page }) 
   await openDetail(page);
 
   const section = page.locator('.installation-detail-device-led');
-  const mode = section.locator('ion-select[aria-label="Tryb LED"]');
+  const mode = section.locator('ion-select.plug-settings-ionic-select');
   await mode.click();
   await page.getByRole('option', { name: 'Sygnalizuj ON/OFF' }).click();
-  await expect(mode).toHaveAttribute('value', 'switch');
+  await expect(mode).toHaveJSProperty('value', 'switch');
   await expect(section.getByRole('button', { name: 'ON #00ff00' })).toHaveAttribute(
     'aria-pressed',
     'true'
@@ -449,7 +449,7 @@ test('PLUGS_UI LED relay-state and off modes work end to end', async ({ page }) 
 
   await mode.click();
   await page.getByRole('option', { name: 'Wyłączona' }).click();
-  await expect(mode).toHaveAttribute('value', 'off');
+  await expect(mode).toHaveJSProperty('value', 'off');
   await section.getByRole('button', { name: 'Zapisz ustawienia LED' }).click();
   await expect(page.getByText('Ustawienia LED zapisane.')).toBeVisible();
   expect(mock.ledSetRequests.at(-1)).toEqual({ mode: 'off' });
@@ -564,7 +564,7 @@ test('time installation exposes the same device-level LED settings', async ({ pa
 
   await expect(page.getByRole('heading', { name: 'Lampa' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
-  await expect(page.locator('ion-select[aria-label="Tryb LED"]')).toHaveAttribute('value', 'power');
+  await expect(page.locator('ion-select.plug-settings-ionic-select')).toHaveJSProperty('value', 'power');
   await expectNoHorizontalOverflow(page);
   expect(problems).toEqual([]);
 });
