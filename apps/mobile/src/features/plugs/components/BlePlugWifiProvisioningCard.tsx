@@ -14,11 +14,8 @@ export type BlePlugWifiProvisioningCardProps = {
   plug: SavedPlugWithBleLocator;
 };
 
-const errorMessage = (error: unknown, fallback: string, unsupported: string): string => {
-  if (error instanceof BlePlugWifiProvisioningUnsupportedError) return unsupported;
-  const detail = error instanceof Error ? error.message.trim() : '';
-  return detail ? `${fallback} ${detail}` : fallback;
-};
+const errorMessage = (error: unknown, fallback: string, unsupported: string): string =>
+  error instanceof BlePlugWifiProvisioningUnsupportedError ? unsupported : fallback;
 
 export const BlePlugWifiProvisioningCard = ({
   plug
