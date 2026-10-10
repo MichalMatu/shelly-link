@@ -105,4 +105,3 @@ Do not treat the one clean focused launch as full TalkBack/keyboard sign-off.
 
 Current evidence and gaps:
 `docs/testing/2026-10-10-ionic-independent-audit.md`.
-

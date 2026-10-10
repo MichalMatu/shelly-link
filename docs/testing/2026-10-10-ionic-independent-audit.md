@@ -101,4 +101,3 @@ On 2026-10-10 the S22+ was again available at `192.168.0.100:40973`; ADB confirm
   intentionally traverse Ionic shadow-root controls. Inspect and test
   `ion-button`/field Tab order, first focus and wraparound before migrating
   more modal actions. TalkBack and keyboard interactions on S22+ remain open.
-

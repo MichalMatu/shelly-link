@@ -50,7 +50,6 @@ The **safe handoff head** after a failed ordinary/modal `IonicActionButton` batc
 
 The next conversation's mission is to challenge the Ionic migration and fix actual omissions, **not** to disguise remaining custom HTML controls or the frozen Climate form with unreviewed visual baseline updates. See the UX checkpoint for the exact remaining classes, known 80-control census and safe acceptance. Work only on `work/ux-evolution`, preserve `main` and Android data, do not use subchats, and verify Local Agent state before queuing tasks.
 
-
 #### Newest Ionic follow-up — BLE restart, Android and visual gate
 
 Product code commit `c71845097ac448eaf1b5d4a80c246f6c167fdb63`
