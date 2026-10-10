@@ -46,3 +46,16 @@ On 2026-10-10, `adb install -r` returned `Success` on Samsung S22+ / Android 16 
 The UX reliability/presentation stage is **verified**: final `pnpm check` passed, responsive E2E passed 50/50, and physical Android build/install/cold-start/screenshot were verified. The installed APK was built from `7ffe113224b079ce3cdd766eee3cedcd7287bddb`; subsequent commits through `3ef4f5752a791edcf7b8fb90f019a7e3066c1439` changed only documentation formatting. The installed application code therefore matches the verified product source.
 
 No outstanding functional or visual regression is recorded from this stage. Future work can separately review JS growth reported by the performance gate and any new real-world diagnostic codes. Leave `main` untouched until explicitly instructed to merge. Do not use subchats for this work.
+
+## Full Ionic migration continuation — 2026-10-10
+
+This is a **subsequent, still-in-progress component migration**, separate from the already accepted UX reliability stage above. The isolated branch remains `work/ux-evolution` and `main` is untouched.
+
+- `IonApp` now encloses the existing shell. Time and standalone Pulse standard controls/actions use `IonInput`, `IonSelect`, `IonSegment` and `IonButton`; Plug, Thermometer and saved Shelly inline renaming use `IonInput`, and the LED HSL picker uses `IonRange`.
+- Existing Climate composition is preserved; its advanced numeric/rule controls remain an explicitly sensitive migration slice. The app still has bespoke page navigation, icon/gesture controls and CSS—do **not** call the whole Ionic migration complete.
+- All six Ionic adaptation regressions were fixed with public Ionic host/event tests. One parallel-load race in a BLE polling test was deterministically gated, with **no change** to BLE runtime behavior.
+- Full `pnpm check` **passed** on code commit `89e95b43f9352f2653417658272b3a0bf2e93bdb`, including **546/546 mobile tests**, package coverage, builds and hard performance limits. JS-size review warnings remain.
+- Complete responsive E2E passed **50/50**, 0 failed, 0 skipped and 0 flaky on `34995a8442b1f760d6ebd0fe3d1baf4948522513`. The reviewed `11-time-detail` snapshot is the only code-independent change after the final source check. All accepted Climate screenshots remained unchanged.
+- Android debug APK was built/synced/assembled from `34995a8442b1f760d6ebd0fe3d1baf4948522513`, SHA-256 `37acd5235e3b728e3d643b5c3ba4ccde1de7109f12e09b3e72710da6862bb071`, size 5,179,520 bytes. **Not installed**: Wireless ADB mDNS returned no services and `adb devices` returned no device on 2026-10-10. No uninstall or data clear was performed; new phone acceptance requires reconnection, `adb install -r`, cold start, logs and screenshots.
+
+Remaining: continue only reviewed safe standard-control slices, preserve frozen Climate layout, evaluate navigation/modal interoperability and CSS cleanup, reconnect physical Samsung S22+ for preserving-data acceptance, and complete an end-to-end rerun before declaring full Ionic completion. Do not merge `main` without the user's explicit instruction.
