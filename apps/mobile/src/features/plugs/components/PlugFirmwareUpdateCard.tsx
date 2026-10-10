@@ -11,11 +11,6 @@ export type PlugFirmwareUpdateCardProps = {
   target?: PlugFirmwareUpdateTarget | undefined;
 };
 
-const detailError = (fallback: string, error: unknown): string => {
-  const detail = error instanceof Error ? error.message.trim() : '';
-  return detail ? `${fallback} ${detail}` : fallback;
-};
-
 export const PlugFirmwareUpdateCard = ({
   currentFirmware,
   target
@@ -69,7 +64,7 @@ export const PlugFirmwareUpdateCard = ({
       )}
       {target && query.isError && (
         <p className="plug-settings-feedback plug-settings-feedback--warning">
-          {detailError(copy.checkFailed, query.error)}
+          {copy.checkFailed}
         </p>
       )}
 
@@ -102,7 +97,7 @@ export const PlugFirmwareUpdateCard = ({
           role="status"
           className="plug-settings-feedback plug-settings-feedback--warning"
         >
-          {detailError(copy.updateFailed, updateMutation.error)}
+          {copy.updateFailed}
         </p>
       )}
     </section>
