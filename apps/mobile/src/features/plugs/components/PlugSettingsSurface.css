@@ -180,12 +180,17 @@
 }
 
 .plug-color-picker__range {
-  accent-color: var(--lcl-color-accent);
+  --bar-background: var(--lcl-color-border);
+  --bar-background-active: var(--lcl-color-accent);
+  --knob-background: var(--lcl-color-accent);
+  --pin-background: var(--lcl-color-accent);
+
   width: 100%;
 }
 
 .plug-color-picker__range--hue {
-  background: linear-gradient(
+  --bar-background-active: transparent;
+  --bar-background: linear-gradient(
     90deg,
     var(--lcl-color-spectrum-red),
     var(--lcl-color-spectrum-yellow),
@@ -195,7 +200,6 @@
     var(--lcl-color-spectrum-magenta),
     var(--lcl-color-spectrum-red)
   );
-  border-radius: var(--lcl-radius-round);
 }
 
 .plug-night-mode__times {
