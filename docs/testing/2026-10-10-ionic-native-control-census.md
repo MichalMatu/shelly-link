@@ -1,8 +1,8 @@
 # Native HTML control census — Ionic React, 2026-10-10
 
-Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `1a6021e8a246667005dadbe4d72e335fbaee5b4d` (`work/ux-evolution`). Testy TSX nie są liczone. Znaczniki natywne to `<button>`, `<input>`, `<select>`, `<textarea>`; jeden element JSX w pętli jest liczony raz, nie per urządzenie. **67 = 57 przycisków + 10 input**, w **31 plikach**.
+Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `d4485ad76fdcf9b03d39270344e6df2561b86f81` (`work/ux-evolution`). Testy TSX nie są liczone. Znaczniki natywne to `<button>`, `<input>`, `<select>`, `<textarea>`; jeden element JSX w pętli jest liczony raz, nie per urządzenie. **66 = 56 przycisków + 10 input**, w **31 plikach**.
 
-**Wynik klasyfikacji:** 23 zwykłych przycisków do migracji (z czego 8 na zamrożonych powierzchniach Climate), 34 celowe przyciski z własnymi interakcjami, 10 input w zamrożonym Climate. "Zwykła" to zadanie otwarte, nie automatyczny nakaz zamiany 1:1. "Celowa" oznacza pozostawienie do czasu, aż pełny odpowiednik zachowa wizualną geometrię, ARIA i gesty; wymaga odrębnych testów dostępności.
+**Wynik klasyfikacji:** 22 zwykłe przyciski do migracji (z czego 8 na zamrożonych powierzchniach Climate), 34 celowe przyciski z własnymi interakcjami, 10 input w zamrożonym Climate. "Zwykła" to zadanie otwarte, nie automatyczny nakaz zamiany 1:1. "Celowa" oznacza pozostawienie do czasu, aż pełny odpowiednik zachowa wizualną geometrię, ARIA i gesty; wymaga odrębnych testów dostępności.
 
 | Ścieżka pod `apps/mobile/src/`                                          | Liczba | Klasa                        | Uzasadnienie / dalsza praca                                                                                |
 | ----------------------------------------------------------------------- | -----: | ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -35,7 +35,7 @@ Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `1a6021e8a246667005dadbe4d72
 | `screens/hardware-setup/pages/SensorSetupPage.tsx`                      |      1 | 1 celowa                     | Fab/gest dodawania sensora                                                                                 |
 | `screens/hardware-setup/pages/ShellySettingsContent.tsx`                |      1 | 1 zwykła                     | Skan BLE w ustawieniach jest IonButton z aria-label; usuwanie ma przycisk natywny                          |
 | `screens/hardware-setup/pages/ShellySetupPage.tsx`                      |      1 | 1 celowa                     | Fab dodawania Shelly; odrębny zwykły retry przeniesiony do IonButton w c7184509                            |
-| `screens/hardware-setup/pages/ShellySetupPresentation.tsx`              |      4 | 3 celowe + 1 zwykła          | Ikonowe edytuj/ustawienia/usuń i zwykła akcja BLE scan                                                     |
+| `screens/hardware-setup/pages/ShellySetupPresentation.tsx`              |      3 | 3 celowe                     | Ikonowe edytuj/ustawienia/usuń pozostają; skan BLE na zapisanej karcie używa IonButton                     |
 | `screens/hardware-setup/pages/TimeScheduleSetupPage.tsx`                |      3 | 3 celowe                     | Pokrętło czasu + dwa triggery dialogu HH/MM                                                                |
 
 ## Osobny pakiet `@lcl/ui`
@@ -46,7 +46,7 @@ W `packages/ui/src` pozostaje **7 własnych przycisków** (niezaliczonych do 67)
 
 - Regresja `16-climate-setup` podczas poprzedniej migracji pól Climate (~15,000 pikseli różnicy) została wycofana; nie aktualizować baseline by ją ukryć.
 - Poprzedni szeroki refaktor przycisków i focus trap modalnego spowodował 17 błędów testowych i został wycofany. Zmieniać tylko testowane grupy funkcjonalne.
-- Ukończenie wymaga rozpatrzenia wszystkich 23 zwykłych przycisków, a nie tylko zielonego TypeScriptu; sprawdzić w szczególności modale, klawiaturę i czytniki ekranu Androida.
+- Ukończenie wymaga rozpatrzenia wszystkich 22 zwykłe przyciski, a nie tylko zielonego TypeScriptu; sprawdzić w szczególności modale, klawiaturę i czytniki ekranu Androida.
 - Źródłem wyników integracyjnych i pomiaru bundla pozostaje `docs/testing/2026-10-10-ionic-independent-audit.md`; ostatni wynik źródłowego `pnpm check` sprzed tej partii był 549/549, E2E 50/50. Po zmianie `c7184509` pełna rekwalifikacja jest wykonywana osobno.
 
 ## Uzupełnienie — 2026-10-10
@@ -62,3 +62,7 @@ The BLE discovery modal restart now uses IonButton and keeps busy semantics via 
 ## Shelly BLE settings action — 2026-10-10 (latest count)
 
 Commit 1a6021e8 migrated only the settings-detail BLE scan action to Ionic, with explicit aria-label. A different same-labeled saved-device-card scan remains native. Both focused integration scenarios passed 2/2, alongside TypeScript and quality gates. Current count: 67 native JSX controls (57 buttons + 10 frozen Climate inputs), 23 ordinary pending actions, 34 intentional custom buttons, in 31 files.
+
+## Saved Shelly BLE card — accepted 2026-10-11
+
+Commit d4485ad76fdcf9b03d39270344e6df2561b86f81 migrated the compact saved-card BLE scan button to IonButton, retaining callback, busy-disabled semantics and card styling. The 58 hardware setup tests passed, as did a canonical phone-large BLE E2E with screenshot 04-plug-ble-discovery. Entire 50-case visual E2E passed without snapshot changes. Full pnpm check passed 554/554 mobile tests, Capacitor sync and Android debug assembly passed. Total remaining 66 native JSX controls (56 button, 10 frozen Climate inputs), with 22 ordinary actions and 34 intentional custom controls. No phone or physical Shelly device was contacted.
