@@ -32,3 +32,14 @@
 .field--invalid .pulse-cycle-ionic-input {
   --border-color: var(--lcl-color-status-danger-text);
 }
+
+.pulse-cycle-submit-action {
+  --background: var(--lcl-color-accent);
+  --color: var(--lcl-color-accent-contrast);
+  --border-radius: var(--lcl-radius-md);
+
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+  width: 100%;
+}
