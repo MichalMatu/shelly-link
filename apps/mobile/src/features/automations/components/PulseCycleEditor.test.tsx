@@ -119,7 +119,10 @@ describe('PulseCycleEditor', () => {
   });
 
   it('keeps Climate control markup unchanged while migrating Time and Pulse', () => {
-    renderEditor({ context: 'climate', draft: { ...DEFAULT_PULSE_CYCLE_FORM, enabled: true } });
+    renderEditor({
+      context: 'climate',
+      draft: { ...DEFAULT_PULSE_CYCLE_FORM, enabled: true }
+    });
     expect(document.querySelector('ion-input')).toBeNull();
     expect(document.querySelector('ion-select')).toBeNull();
     expect(document.querySelector('ion-segment')).toBeNull();

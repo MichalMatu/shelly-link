@@ -276,7 +276,11 @@ export const TimeScheduleSetupPage = ({
 
       <Modal
         actions={
-          <IonButton className="time-schedule-ionic-action" type="button" onClick={applyTime}>
+          <IonButton
+            className="time-schedule-ionic-action"
+            type="button"
+            onClick={applyTime}
+          >
             {t('common.select')}
           </IonButton>
         }

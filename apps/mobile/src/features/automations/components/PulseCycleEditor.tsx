@@ -1,4 +1,11 @@
-import { IonInput, IonLabel, IonSegment, IonSegmentButton, IonSelect, IonSelectOption } from '@ionic/react';
+import {
+  IonInput,
+  IonLabel,
+  IonSegment,
+  IonSegmentButton,
+  IonSelect,
+  IonSelectOption
+} from '@ionic/react';
 import { SelectField } from '@lcl/ui';
 import { useId } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -80,7 +87,9 @@ export const PulseCycleEditor = ({
             step={step}
             type="number"
             value={value}
-            onIonInput={(event) => onChange({ [field]: String(event.detail.value ?? '') })}
+            onIonInput={(event) =>
+              onChange({ [field]: String(event.detail.value ?? '') })
+            }
           />
         ) : (
           <input
@@ -212,7 +221,11 @@ export const PulseCycleEditor = ({
                   value={draft.executionMode}
                   onIonChange={(event) => {
                     const value = event.detail.value;
-                    if (value === 'continuous' || value === 'cycles' || value === 'duration') {
+                    if (
+                      value === 'continuous' ||
+                      value === 'cycles' ||
+                      value === 'duration'
+                    ) {
                       onChange({ executionMode: value });
                     }
                   }}
