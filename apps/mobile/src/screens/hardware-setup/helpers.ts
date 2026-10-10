@@ -2,7 +2,11 @@ import type { HardwareSetupFlow } from '../../flows/hardware-setup/useHardwareSe
 import { t } from '../../app/i18n.js';
 
 // Errors are technical transport data; the UI renders a localized safe message.
-export const mutationError = (_error: unknown): string => t('common.operationFailed');
+export const mutationError = (error: unknown): string => {
+  // Intentionally consume the technical error without exposing it to the user.
+  void error;
+  return t('common.operationFailed');
+};
 
 export const formatDiagnosticNumber = (
   value: number | null | undefined,
