@@ -6,11 +6,8 @@ import { deviceButtonModeCopy } from '../../../app/locales/deviceButtonMode.js';
 import {
   fireIonChange,
   getIonicButton,
-  getIonicSelect,
-  ionicValue,
   isIonicDisabled,
-  queryIonicButton,
-  queryIonicSelect
+  queryIonicButton
 } from '../../../test/ionicTestEvents.js';
 import { PlugButtonModeSettingsCard } from './PlugButtonModeSettingsCard.js';
 
@@ -105,13 +102,17 @@ describe('PlugButtonModeSettingsCard', () => {
     );
 
     renderCard();
-    const modeSelect = await waitFor(() => getIonicSelect(document, copy.currentMode));
+    const modeGroup = await waitFor(() => {
+      const group = document.querySelector('ion-radio-group');
+      if (!group) throw new Error('Button mode group not mounted');
+      return group;
+    });
     const save = getIonicButton(document, copy.save);
-    expect(ionicValue(modeSelect)).toBe('momentary');
+    expect(modeGroup.value).toBe('momentary');
     expect(isIonicDisabled(save)).toBe(true);
 
-    fireIonChange(modeSelect, 'detached');
-    expect(ionicValue(modeSelect)).toBe('detached');
+    fireIonChange(modeGroup, 'detached');
+    expect(modeGroup.value).toBe('detached');
     await waitFor(() => expect(isIonicDisabled(save)).toBe(false));
     fireEvent.click(save);
 
@@ -152,7 +153,7 @@ describe('PlugButtonModeSettingsCard', () => {
     expect(screen.getByText(copy.currentMode)).toBeVisible();
     expect(screen.getByText(copy.detached)).toBeVisible();
     expect(screen.getByText(copy.managedHint)).toBeVisible();
-    expect(queryIonicSelect(document, copy.currentMode)).toBeNull();
+    expect(document.querySelector('ion-radio-group')).toBeNull();
     expect(queryIonicButton(document, copy.save)).toBeNull();
   });
 
@@ -178,15 +179,19 @@ describe('PlugButtonModeSettingsCard', () => {
     );
 
     const { queryClient } = renderCard();
-    const modeSelect = await waitFor(() => getIonicSelect(document, copy.currentMode));
-    fireIonChange(modeSelect, 'detached');
-    expect(ionicValue(modeSelect)).toBe('detached');
+    const modeGroup = await waitFor(() => {
+      const group = document.querySelector('ion-radio-group');
+      if (!group) throw new Error('Button mode group not mounted');
+      return group;
+    });
+    fireIonChange(modeGroup, 'detached');
+    expect(modeGroup.value).toBe('detached');
 
     await queryClient.refetchQueries({
       queryKey: ['plug-button-mode-settings', target.deviceId, target.baseUrl],
       exact: true
     });
-    await waitFor(() => expect(ionicValue(modeSelect)).toBe('detached'));
+    await waitFor(() => expect(modeGroup.value).toBe('detached'));
   });
 
   it('renders missing control capability as unsupported without mutating anything', async () => {
