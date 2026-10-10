@@ -346,7 +346,7 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
     await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
-    await expect(page.locator('ion-select[aria-label="Tryb LED"]')).toHaveAttribute(
+    await expect(page.locator('ion-select.plug-settings-ionic-select')).toHaveAttribute(
       'value',
       'switch'
     );
