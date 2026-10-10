@@ -158,3 +158,13 @@ The only intentional capability gap in this area is **Time + Pulse History**. Tr
 ## Verification boundary
 
 The audit hardening passed its focused lifecycle suites, the canonical `pnpm check` and GitHub CI. Fresh real-device evidence covers Wi-Fi loss/recovery, the 16/16 final runtime matrix, final device postflight, standalone Pulse History v2 and the 5-minute two-Plug real-load soak preflight. UX-4 passed the canonical `pnpm check`, responsive/visual acceptance and a real generated-runtime smoke with exact preflight restoration. The 8-hour soak remains intentionally deferred.
+
+## Ionic follow-up: blocked navigation and emulator — 2026-10-10
+
+After shared Modal Ionic Shadow DOM focus correction (`3b8756a62`), standalone LED Apply moved to IonButton (`227927674`) and its parent test now uses an Ionic host query (`695c7d5f9`). Plug and Thermometer blocked-owner navigation actions moved to Ionic (`69285bb259` and `aa172d673`) with focused owner/installation ID tests.
+
+Native app JSX controls remaining: **71 = 61 buttons + 10 Climate inputs**; 27 ordinary actions, 34 intentional custom buttons, 10 protected Climate inputs. Full census: `docs/testing/2026-10-10-ionic-native-control-census.md`.
+
+The earlier full `pnpm check` passed 551/551 mobile tests on `695c7d5f9`; canonical visual E2E 50/50 on `227927674` without snapshot changes. Full acceptance for the blocked-navigation commits must still be run.
+
+Headless `medium_phone` Android 16 emulator failed to finish boot within the bounded window, before APK installation. It was stopped; there is **no emulator app acceptance**. Neither the user phone nor physical Shelly devices were contacted. Actual TalkBack, keyboard and overlay accessibility, plus background Capacitor triggerEvent, remain open.

@@ -1,8 +1,8 @@
 # Native HTML control census — Ionic React, 2026-10-10
 
-Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `c71845097ac448eaf1b5d4a80c246f6c167fdb63` (`work/ux-evolution`). Testy TSX nie są liczone. Znaczniki natywne to `<button>`, `<input>`, `<select>`, `<textarea>`; jeden element JSX w pętli jest liczony raz, nie per urządzenie. **74 = 64 przyciski + 10 input**, w **33 plikach**.
+Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `aa172d673efb9a9071d960dcb79e8d8db222f7fd` (`work/ux-evolution`). Testy TSX nie są liczone. Znaczniki natywne to `<button>`, `<input>`, `<select>`, `<textarea>`; jeden element JSX w pętli jest liczony raz, nie per urządzenie. **71 = 61 przycisków + 10 input**, w **32 plikach**.
 
-**Wynik klasyfikacji:** 30 zwykłych przycisków do migracji (z czego 8 na zamrożonych powierzchniach Climate), 34 celowe przyciski z własnymi interakcjami, 10 input w zamrożonym Climate. "Zwykła" to zadanie otwarte, nie automatyczny nakaz zamiany 1:1. "Celowa" oznacza pozostawienie do czasu, aż pełny odpowiednik zachowa wizualną geometrię, ARIA i gesty; wymaga odrębnych testów dostępności.
+**Wynik klasyfikacji:** 27 zwykłych przycisków do migracji (z czego 8 na zamrożonych powierzchniach Climate), 34 celowe przyciski z własnymi interakcjami, 10 input w zamrożonym Climate. "Zwykła" to zadanie otwarte, nie automatyczny nakaz zamiany 1:1. "Celowa" oznacza pozostawienie do czasu, aż pełny odpowiednik zachowa wizualną geometrię, ARIA i gesty; wymaga odrębnych testów dostępności.
 
 | Ścieżka pod `apps/mobile/src/`                                          | Liczba | Klasa                        | Uzasadnienie / dalsza praca                                                                                |
 | ----------------------------------------------------------------------- | -----: | ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -22,13 +22,12 @@ Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `c71845097ac448eaf1b5d4a80c2
 | `features/plugs/components/PlugDashboardCardShell.tsx`                  |      1 | 1 celowa                     | Ikonowe otwarcie szczegółów, zachować ochronę przed klikami w IonInput                                     |
 | `features/plugs/components/PlugDeleteConfirmModal.tsx`                  |      1 | 1 zwykła                     | Potwierdzenie zapomnienia Pluga, wymaga bezpiecznej obsługi focus w Modal                                  |
 | `features/plugs/components/PlugDetailTabs.tsx`                          |      1 | 1 celowa                     | Dedykowane zakładki szczegółów i aria-current                                                              |
-| `features/plugs/components/PlugLedColorEditor.tsx`                      |      4 | 3 celowe + 1 zwykła          | Próbki kolorów jako przyciski wyboru; Apply w modalu to zwykła akcja                                       |
+| `features/plugs/components/PlugLedColorEditor.tsx`                      |      3 | 3 celowe                     | Próbki kolorów pozostają własnymi przyciskami; Apply jest teraz IonButton                                  |
 | `features/plugs/components/PlugRelayControls.tsx`                       |      2 | 2 celowe                     | Fizyczne ON/OFF; nie zmieniać semantyki ani runtime                                                        |
-| `features/plugs/components/PlugRemovalBlockedModal.tsx`                 |      1 | 1 zwykła                     | Przejście do automatyki blokującej zapomnienie Pluga                                                       |
 | `features/plugs/screens/BlePlugDetailScreen.tsx`                        |      1 | 1 zwykła                     | Usuwanie zapisanego BLE Pluga                                                                              |
 | `features/plugs/screens/WifiPlugDetailScreen.tsx`                       |      1 | 1 zwykła                     | Usuwanie zapisanego Wi-Fi Pluga                                                                            |
 | `features/thermometers/components/SavedSensorCard.tsx`                  |      4 | 4 celowe                     | Ikonowe edytuj/szczegóły/synchronizuj/usuń z etykietami                                                    |
-| `features/thermometers/components/SensorRemovalBlockedModal.tsx`        |      2 | 2 zwykłe                     | Przejście do właściciela lub potwierdzenie usunięcia termometru                                            |
+| `features/thermometers/components/SensorRemovalBlockedModal.tsx`        |      1 | 1 zwykła                     | Nawigacja do automatyki używa IonButton; natywne potwierdzenie usunięcia pozostało                         |
 | `screens/InstallationDetailScreen.tsx`                                  |      3 | 3 zwykłe                     | Akcje usunięcia automatyki i potwierdzenia; weryfikacja tożsamości zostaje w flow                          |
 | `screens/SetupIntentScreen.tsx`                                         |      2 | 2 celowe                     | Przyciski-karty wyboru intencji nawigacyjnej                                                               |
 | `screens/TimeInstallationDetail.tsx`                                    |      3 | 3 zwykłe                     | Usunięcie automatyki Time i potwierdzenia                                                                  |
@@ -48,5 +47,11 @@ W `packages/ui/src` pozostaje **7 własnych przycisków** (niezaliczonych do 74)
 
 - Regresja `16-climate-setup` podczas poprzedniej migracji pól Climate (~15,000 pikseli różnicy) została wycofana; nie aktualizować baseline by ją ukryć.
 - Poprzedni szeroki refaktor przycisków i focus trap modalnego spowodował 17 błędów testowych i został wycofany. Zmieniać tylko testowane grupy funkcjonalne.
-- Ukończenie wymaga rozpatrzenia wszystkich 30 zwykłych przycisków, a nie tylko zielonego TypeScriptu; sprawdzić w szczególności modale, klawiaturę i czytniki ekranu Androida.
+- Ukończenie wymaga rozpatrzenia wszystkich 27 zwykłych przycisków, a nie tylko zielonego TypeScriptu; sprawdzić w szczególności modale, klawiaturę i czytniki ekranu Androida.
 - Źródłem wyników integracyjnych i pomiaru bundla pozostaje `docs/testing/2026-10-10-ionic-independent-audit.md`; ostatni wynik źródłowego `pnpm check` sprzed tej partii był 549/549, E2E 50/50. Po zmianie `c7184509` pełna rekwalifikacja jest wykonywana osobno.
+
+## Uzupełnienie — 2026-10-10
+
+Migracje: LED Apply (`227927674`), Plug blocked navigation (`69285bb259`) oraz Thermometer blocked navigation (`aa172d673`). Niezmieniona ochrona właściciela automatyki została zweryfikowana w osobnych testach.
+
+Headless emulator medium_phone (Android 16, arm64) nie osiągnął boot_completed w limicie, przed instalacją APK. Emulator został wyłączony; telefon pozostał nietknięty.
