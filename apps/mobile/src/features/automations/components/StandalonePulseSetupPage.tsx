@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -53,8 +54,9 @@ export const StandalonePulseSetupPage = ({
       />
 
       <div className="time-schedule-actions">
-        <button
-          className="primary-action"
+        <IonButton
+          className="pulse-cycle-submit-action"
+          expand="block"
           type="button"
           disabled={
             !selectedShelly ||
@@ -64,7 +66,7 @@ export const StandalonePulseSetupPage = ({
           onClick={() => void install()}
         >
           {pulseFlow.installMutation.isPending ? copy.installing : copy.install}
-        </button>
+        </IonButton>
       </div>
 
       <Modal
