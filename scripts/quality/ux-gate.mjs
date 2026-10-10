@@ -1061,6 +1061,41 @@ const checkStandalonePulseControlPlacement = async () => {
   }
 };
 
+const checkRuntimeReasonPresentation = async () => {
+  const formatterPath = 'apps/mobile/src/app/runtimeReasonPresentation.ts';
+  const formatter = await readRepoFile(formatterPath);
+  if (
+    !formatter.includes('hardware.diagnosticsReason.') ||
+    !formatter.includes('dashboard.health.unknown')
+  ) {
+    addFailure(formatterPath, 'device reason codes must never leak as raw UI copy');
+  }
+
+  for (const path of [
+    'apps/mobile/src/features/automations/components/PulseOperationalStatusSummary.tsx',
+    'apps/mobile/src/features/automations/components/StandalonePulseDashboardStatus.tsx'
+  ]) {
+    const source = await readRepoFile(path);
+    if (!source.includes('formatRuntimeReason(') || /reasons\\[value\\]\\s*\\?\\?\\s*value/.test(source)) {
+      addFailure(path, 'runtime status must use the shared localized reason presenter');
+    }
+  }
+
+  const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter(
+    (path) => path.endsWith('.tsx') && !path.includes('.test.')
+  );
+  for (const path of tsxPaths) {
+    if (path.includes('/devConsole') || path.includes('/DevCommandPalette')) continue;
+    const source = await readRepoFile(path);
+    if (
+      /error\\s+instanceof\\s+Error\\s*\\?\\s*error\\.message/.test(source) ||
+      /\\$\\{fallback\\}\\s+\\$\\{detail\\}/.test(source)
+    ) {
+      addFailure(path, 'never place raw transport exceptions in a user-facing component');
+    }
+  }
+};
+
 const checkPackageRuntimeCopy = async () => {
   const blockedCopyPattern =
     /(['"`])(?:(?!\1).)*(?:[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]|Kopiuj|Temperatura|Wilgotność|Bateria|brak|zgodne|blokada|Skan BLE|zabrakło pamięci)(?:(?!\1).)*\1/;
@@ -1106,6 +1141,7 @@ if (focusedCheck === 'segmented-control') {
   await checkDisclosureContract();
   await checkSegmentedControlContract();
   await checkStandalonePulseControlPlacement();
+  await checkRuntimeReasonPresentation();
   await checkPackageRuntimeCopy();
 }
 
