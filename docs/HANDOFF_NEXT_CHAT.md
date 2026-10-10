@@ -28,9 +28,9 @@ Settings, Add Plug, Add Thermometer, and multiple Plug settings controls now use
 
 The app now has a shared localized Climate/Pulse runtime reason presenter (`ab` = above threshold, unknown codes = localized fallback) and a vetted localized-error boundary for hardware setup. Generic RPC/transport exceptions must not appear in end-user cards or toast copy. Preserve helpful known cases such as Bluetooth permissions and Shelly firmware/Matter guidance. The UX quality gate and its negative self-tests cover selected regression patterns.
 
-Responsive E2E reached **50/50** on `593b36c3b93473d86a405240a5385486fcd93df2`. The `04-plug-ble-discovery` baseline is unchanged; a deterministic test captures the loading state before asserting error feedback. Final `pnpm check` and Android device acceptance for subsequent changes are still being finalized; do not claim those steps completed based on the earlier E2E run.
+Responsive E2E reached **50/50** on `593b36c3b93473d86a405240a5385486fcd93df2`. The `04-plug-ble-discovery` baseline is unchanged; a deterministic test captures the loading state before asserting error feedback. Full `pnpm check` subsequently passed on `3ef4f5752a791edcf7b8fb90f019a7e3066c1439`. The performance gate is green, with JS-size review warnings; the earlier E2E run remains the last recorded complete responsive sweep.
 
-Wireless ADB to Samsung S22+ / Android 16 was verified at `192.168.0.100:40973` on 2026-10-10 (the endpoint may change). The next APK must be built from the current UX head, installed via **`adb install -r` with data preserved**, cold-started, and visually inspected on the phone. Never use the destructive alpha-install script for this step. No merge into `main` without explicit authorization.
+Wireless ADB to Samsung S22+ / Android 16 was verified at `192.168.0.100:40973` on 2026-10-10 (the endpoint may change). APK from UX code commit `7ffe113224b079ce3cdd766eee3cedcd7287bddb` was installed via **`adb install -r` with data preserved**. Android cold start succeeded in 891 ms, with a 1080 × 2340 screenshot and a running foreground activity. Full evidence, APK hash and caveats are in the UX checkpoint. Never use the destructive alpha-install script for preserving-data checks. No merge into `main` without explicit authorization.
 
 ## Accepted product/runtime baseline
 
