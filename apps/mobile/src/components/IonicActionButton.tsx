@@ -17,5 +17,6 @@ export const IonicActionButton = ({
     className={['lcl-ionic-action', className].filter(Boolean).join(' ')}
     fill="clear"
     role="button"
+    tabIndex={props.disabled ? -1 : 0}
   />
 );
