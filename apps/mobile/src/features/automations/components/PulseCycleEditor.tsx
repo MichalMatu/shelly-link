@@ -72,7 +72,7 @@ export const PulseCycleEditor = ({
           <IonInput
             aria-label={label}
             aria-describedby={invalid ? errorId : undefined}
-            aria-invalid={invalid}
+            aria-invalid={String(invalid)}
             className="pulse-cycle-ionic-input"
             fill="outline"
             inputmode="decimal"
