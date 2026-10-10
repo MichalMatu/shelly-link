@@ -2623,6 +2623,11 @@ ion-alert.app-settings__language-alert {
 }
 
 .sensor-card-name-input {
+  --background: var(--lcl-color-surface-muted);
+  --color: var(--lcl-color-text);
+  --padding-start: var(--lcl-spacing-sm);
+  --padding-end: var(--lcl-spacing-sm);
+
   min-height: var(--lcl-size-compact-control-min-height);
   min-width: 0;
   width: 100%;
@@ -2649,6 +2654,11 @@ ion-alert.app-settings__language-alert {
 }
 
 .plug-name-editor__input {
+  --background: var(--lcl-color-surface-muted);
+  --color: var(--lcl-color-text);
+  --padding-start: var(--lcl-spacing-sm);
+  --padding-end: var(--lcl-spacing-sm);
+
   background: var(--lcl-color-surface-muted);
   border: var(--lcl-border-width-sm) solid var(--lcl-color-accent);
   border-radius: var(--lcl-radius-sm);
