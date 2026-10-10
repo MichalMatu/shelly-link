@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import type { TimeScheduleSetupFlow } from '../pageContracts.js';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useEffect, useState, type UIEvent } from 'react';
@@ -251,8 +252,9 @@ export const TimeScheduleSetupPage = ({
       )}
 
       <div className="time-schedule-actions">
-        <button
-          className="primary-action"
+        <IonButton
+          className="time-schedule-ionic-action"
+          expand="block"
           type="button"
           disabled={
             !flow.selectedShelly ||
@@ -269,14 +271,14 @@ export const TimeScheduleSetupPage = ({
             : timeFlow.installMutation.isPending
               ? t('time.installing')
               : t('time.install')}
-        </button>
+        </IonButton>
       </div>
 
       <Modal
         actions={
-          <button className="primary-action" type="button" onClick={applyTime}>
+          <IonButton className="time-schedule-ionic-action" type="button" onClick={applyTime}>
             {t('common.select')}
-          </button>
+          </IonButton>
         }
         closeLabel={t('common.cancel')}
         open={editingTime !== null}
