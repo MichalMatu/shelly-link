@@ -14,7 +14,7 @@ Repository: `MichalMatu/shelly-link`. Continue **only** on `work/ux-evolution`; 
 
 The source fix is shared presentation, not just replacing the visible `Automation reason: ab` incident:
 
-- `apps/mobile/src/app/runtimeReasonPresentation.ts` translates known compact Climate/Pulse runtime codes. `ab` gets the localized *above threshold* label, Pulse-specific codes take precedence when overlapping, and unknown codes receive a neutral translated fallback instead of raw wire values.
+- `apps/mobile/src/app/runtimeReasonPresentation.ts` translates known compact Climate/Pulse runtime codes. `ab` gets the localized _above threshold_ label, Pulse-specific codes take precedence when overlapping, and unknown codes receive a neutral translated fallback instead of raw wire values.
 - Supported Pulse reasons now include window and lockout states across supported languages.
 - UI boundaries for configuration, BLE, provisioning, and firmware no longer concatenate arbitrary exception payloads into messages.
 - `mutationError` at hardware setup preserves only an explicit allowlist of already-localized, actionable guidance (such as Bluetooth permission steps, missing Shelly Scripts, and invalid Shelly responses). Unknown technical text becomes `common.operationFailed`.
