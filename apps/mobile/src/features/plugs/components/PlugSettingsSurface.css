@@ -287,3 +287,26 @@
   --track-background: var(--lcl-color-border);
   --track-background-checked: var(--lcl-color-accent);
 }
+
+.plug-settings-button-modes {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+}
+
+.plug-settings-button-modes ion-radio {
+  --color: var(--lcl-color-text-muted);
+  --color-checked: var(--lcl-color-accent);
+  --inner-padding-end: var(--lcl-spacing-sm);
+
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text);
+  font-size: var(--lcl-font-size-sm);
+  min-height: var(--lcl-size-control-min-height);
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
+}
+
+.plug-settings-button-modes ion-radio.radio-checked {
+  border-color: var(--lcl-color-accent);
+}
