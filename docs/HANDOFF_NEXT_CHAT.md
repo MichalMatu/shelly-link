@@ -44,8 +44,6 @@ The same pre-experiment product APK (SHA-256 `37acd5235e3b728e3d643b5c3ba4ccde1d
 
 Next: finish classification and migration of remaining standard controls, preserve intentionally bespoke controls with documented rationale, run exhaustive `pnpm check`, responsive E2E and visual diff review, then real-device acceptance. Assess removal of genuinely unused CSS and dependency/JS growth as separate measured work. `main` stays untouched without explicit approval.
 
-
-
 ### Independent Ionic closeout audit — next conversation
 
 The **safe handoff head** after a failed ordinary/modal `IonicActionButton` batch is `ceb48075b62f102811d679c3bfbf604df4f3ad23` plus documentation-only commits. The unsuccessful 16-file action/focus experiment was completely reverted; GitHub reports no source diff against `f056eb706242126d1d2c36d1bf0db5cb16e2d773`, and only documentation differences against the accepted Android code `34995a8442b1f760d6ebd0fe3d1baf4948522513`. Do not infer success from its passing TypeScript/UX gates: affected Vitest suites had 17 failures. Do not reintroduce the batch wholesale.
