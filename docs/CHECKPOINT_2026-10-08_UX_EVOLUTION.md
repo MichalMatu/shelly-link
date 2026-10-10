@@ -26,7 +26,7 @@ This is a guardrail, not a claim that every future API payload or third-party er
 
 ## E2E and visuals
 
-- Responsive E2E improved from **23/50** at the start of this effort to **50/50 passing** on source `593b36c3b93473d86a405240a5385486fcd93df2` before the subsequent focused localization/validation changes.
+- Responsive E2E improved from **23/50** at the start of this effort to **50/50 passing** on the final verified source `3ef4f5752a791edcf7b8fb90f019a7e3066c1439` (0 skipped, 0 unexpected, 0 flaky).
 - The BLE scan-loading screenshot `04-plug-ble-discovery` remains unchanged; E2E now holds its scanner RPC preparation to capture a stable loading state, then verifies that failure feedback is localized separately.
 - Five specifically reviewed Darwin screenshots were accepted for intentional Ionic presentation differences: `05-climate-device`, `17-plain-plug-settings`, `28-thermometer-settings`, `20-climate-button-mode-managed`, and `15-add-plug`. No general snapshot refresh was authorized.
 - The scan network action has been restored to full width, including its touch area. No layout rewrite of frozen Climate was undertaken.
@@ -39,13 +39,10 @@ The current UX code candidate `7ffe113224b079ce3cdd766eee3cedcd7287bddb` was bui
 
 Wireless ADB was verified on 2026-10-10 using the user-provided endpoint `192.168.0.100:40973`. The device responded as `SM-S906B`, Android 16, wireless debugging enabled. The endpoint is session-specific and may change; rediscover or reconnect when needed.
 
-On 2026-10-10, `adb install -r` returned `Success` on Samsung S22+ / Android 16 without uninstall or data clearing. Android still reports `firstInstallTime=2026-09-28` and `lastUpdateTime=2026-10-10`. A subsequent cold start succeeded in **891 ms**, with `MainActivity` resumed, the app process running, and a 1080 × 2340 screenshot captured. The log contains platform/WebView/Capacitor warnings but no observed fatal startup error. Do not use the destructive `android:phone-alpha` helper for future preserving-data checks.
+On 2026-10-10, `adb install -r` returned `Success` on Samsung S22+ / Android 16 without uninstall or data clearing. Android still reports `firstInstallTime=2026-09-28` and `lastUpdateTime=2026-10-10`. A subsequent cold start succeeded in **891 ms**, with `MainActivity` resumed, the app process running, and a 1080 × 2340 screenshot captured. A later stable screenshot confirmed readable English labels (including `Automation reason: Above threshold`) and a usable dark-mode dashboard for both Humidifier and Fan. The log contains platform/WebView/Capacitor warnings but no observed fatal startup error. Do not use the destructive `android:phone-alpha` helper for future preserving-data checks.
 
-## Completion criteria and handoff
+## Acceptance and handoff
 
-1. Obtain a green `pnpm check` on the final UX head; if failure, fix root cause and retain meaningful translated user-facing errors.
-2. Confirm complete responsive E2E on the final head, without indiscriminate snapshot updates.
-3. Build/sync/assemble and install via Wireless ADB with `install -r`, then inspect the cold start, log warnings, and an actual phone screenshot.
-4. Record exact source commit, test result, and device acceptance here and in the UX section of `docs/HANDOFF_NEXT_CHAT.md`.
+The UX reliability/presentation stage is **verified**: final `pnpm check` passed, responsive E2E passed 50/50, and physical Android build/install/cold-start/screenshot were verified. The installed APK was built from `7ffe113224b079ce3cdd766eee3cedcd7287bddb`; subsequent commits through `3ef4f5752a791edcf7b8fb90f019a7e3066c1439` changed only documentation formatting. The installed application code therefore matches the verified product source.
 
-Leave `main` untouched until explicitly instructed to merge. Do not use subchats for this work.
+No outstanding functional or visual regression is recorded from this stage. Future work can separately review JS growth reported by the performance gate and any new real-world diagnostic codes. Leave `main` untouched until explicitly instructed to merge. Do not use subchats for this work.
