@@ -1,78 +1,51 @@
-# Checkpoint — Ionic UX evolution
+# UX evolution checkpoint — updated 2026-10-10
 
-Date: 2026-10-08
+Repository: `MichalMatu/shelly-link`. Continue **only** on `work/ux-evolution`; do not merge or edit `main` as part of this checkpoint.
 
-Repository: `MichalMatu/shelly-link`
+## Active product contract
 
-Development branch: `work/ux-evolution`
+- Ionic React is initialized and themed through LCL design tokens.
+- Settings, Add Plug, Add Thermometer, and standard Plug settings controls already use Ionic. Do not undo completed slices.
+- Plug physical-button behavior has two directly visible Ionic radio choices rather than a small alert/select modal. The Climate-owned read-only button mode remains read-only.
+- No cross-app redesign: Climate dashboard/detail composition and runtime/safety boundaries stay frozen. The narrowly reviewed Ionic form control geometry is documented in `docs/UX_VISUAL_CONTRACT.md`.
+- React displays device state; Shelly remains the source of truth for automation behavior, safety, and relay control.
 
-Base branch remains `main`. The UX branch was created from `main@7e9fdaa5f7d7c514313d2c962a2cc02bb26615b7`; no UX migration commits have been merged into `main`.
+## Systemic user-facing data presentation
 
-## Purpose
+The source fix is shared presentation, not just replacing the visible `Automation reason: ab` incident:
 
-This branch is the isolated development line for gradually replacing hand-built standard controls with Ionic React where that reduces custom interaction code, while preserving Shelly Link product composition, LCL design tokens and the frozen Climate visual contract.
+- `apps/mobile/src/app/runtimeReasonPresentation.ts` translates known compact Climate/Pulse runtime codes. `ab` gets the localized *above threshold* label, Pulse-specific codes take precedence when overlapping, and unknown codes receive a neutral translated fallback instead of raw wire values.
+- Supported Pulse reasons now include window and lockout states across supported languages.
+- UI boundaries for configuration, BLE, provisioning, and firmware no longer concatenate arbitrary exception payloads into messages.
+- `mutationError` at hardware setup preserves only an explicit allowlist of already-localized, actionable guidance (such as Bluetooth permission steps, missing Shelly Scripts, and invalid Shelly responses). Unknown technical text becomes `common.operationFailed`.
+- Shelly address validation distinguishes an empty field from a malformed address with localized, actionable feedback.
+- Non-finite diagnostic measurements render as missing instead of `NaN` or `Infinity`.
+- `scripts/quality/ux-gate.mjs` detects selected unsafe runtime reason/error patterns; `quality:selftest` exercises both passing and deliberately failing fixtures. New focused tests guard the reason formatter and safe feedback boundary.
 
-The migration is deliberately incremental. Ionic owns standard interaction behavior; LCL tokens own the visual language; product feature components continue to own Shelly Link-specific composition.
+This is a guardrail, not a claim that every future API payload or third-party error string has already been exhaustively classified. Expand explicit localized mappings as new real-world codes are discovered; never expose unrecognized data by default.
 
-## Completed migration slices
+## E2E and visuals
 
-The current branch includes:
+- Responsive E2E improved from **23/50** at the start of this effort to **50/50 passing** on source `593b36c3b93473d86a405240a5385486fcd93df2` before the subsequent focused localization/validation changes.
+- The BLE scan-loading screenshot `04-plug-ble-discovery` remains unchanged; E2E now holds its scanner RPC preparation to capture a stable loading state, then verifies that failure feedback is localized separately.
+- Five specifically reviewed Darwin screenshots were accepted for intentional Ionic presentation differences: `05-climate-device`, `17-plain-plug-settings`, `28-thermometer-settings`, `20-climate-button-mode-managed`, and `15-add-plug`. No general snapshot refresh was authorized.
+- The scan network action has been restored to full width, including its touch area. No layout rewrite of frozen Climate was undertaken.
+- `pnpm quality:ux` and the 27-case `pnpm quality:selftest` passed during snapshot acceptance; all commit hooks passed.
+- Final full `pnpm check` for the latest error-presentation changes is being validated separately. Do not report the final stage as green until the result is confirmed.
 
-- growth-aware performance budgets instead of fixed limits that would immediately block normal application growth;
-- `setupIonicReact()` initialization for the installed Ionic React runtime;
-- Settings Appearance migrated to `IonSegment` / `IonSegmentButton`;
-- Settings Language migrated to `IonSelect` / `IonSelectOption`;
-- generated LCL RGB color companions used by the Ionic theme bridge;
-- Ionic background/text/primary mappings plus the intermediate `--ion-color-step-*` scale derived from LCL light/dark tokens;
-- Settings-specific focus/selected-state styling that avoids relying on the raw Ionic default palette;
-- the Settings Ionic controls isolated behind a lazy-loaded `IonicSettingsControl` module so the heavier framework control graph is not imported directly by the rest of the Settings screen.
+## Android acceptance
 
-Existing locale and theme preference owners remain unchanged. The migration does not move product state or side effects into Ionic components.
+The prior build installed successfully on Samsung S22+ (SM-S906B), Android 16, preserving data, but it predates the latest UX/presentation changes.
 
-## Validation checkpoint
+Wireless ADB was verified on 2026-10-10 using the user-provided endpoint `192.168.0.100:40973`. The device responded as `SM-S906B`, Android 16, wireless debugging enabled. The endpoint is session-specific and may change; rediscover or reconnect when needed.
 
-The code checkpoint at `53bb7b5c8558992a881a081698d2394222af98dc` was validated through draft PR #113 solely to run repository CI.
+For the newest candidate: build `@lcl/mobile`, run Capacitor Android sync, assemble the debug APK, then `adb install -r` **without uninstalling or clearing data**. Cold-start and capture logs/screenshot to validate on-device presentation. Never use the destructive `android:phone-alpha` helper for this preserving-data check.
 
-CI run `37703419452` passed:
+## Completion criteria and handoff
 
-- static;
-- tests;
-- build;
-- responsive;
-- aggregate checks.
+1. Obtain a green `pnpm check` on the final UX head; if failure, fix root cause and retain meaningful translated user-facing errors.
+2. Confirm complete responsive E2E on the final head, without indiscriminate snapshot updates.
+3. Build/sync/assemble and install via Wireless ADB with `install -r`, then inspect the cold start, log warnings, and an actual phone screenshot.
+4. Record exact source commit, test result, and device acceptance here and in the UX section of `docs/HANDOFF_NEXT_CHAT.md`.
 
-The draft PR was then closed without merge.
-
-This proves repository CI at the checkpoint. It does **not** replace the separate physical Android acceptance requirement or a Darwin canonical visual review when a future slice materially changes rendered geometry.
-
-## Cleanup
-
-The temporary validation PR is closed and unmerged.
-
-Orphaned Local Agent payload files created while recovering the interrupted Settings task were removed from the `agent-control` queue. Historical result/task records remain normal control-plane history and are not product source.
-
-## Current boundaries
-
-Do not use this branch as permission for a broad visual rewrite.
-
-Keep these boundaries:
-
-- frozen Climate dashboard/detail composition remains unchanged;
-- `@lcl/design-tokens` remains the visual source of truth;
-- Ionic is preferred for standard controls where it removes custom focus/keyboard/overlay behavior;
-- product-specific cards, telemetry, History, Plug runtime controls and safety presentation remain Shelly Link components;
-- shared `@lcl/ui` primitives are not automatically replaced when doing so would introduce Ionic into a package boundary or erase a real product role.
-
-## Recommended next slice
-
-The next small migration should stay inside Settings: migrate the Diagnostics secondary action buttons (copy support report / clear diagnostics) to `IonButton`, keeping their existing behavior and visual role.
-
-Why this is next:
-
-- same already-migrated non-frozen screen;
-- no device/BLE/runtime behavior;
-- no Climate golden-master risk;
-- can reuse the existing lazy Ionic Settings boundary;
-- gives a small, reviewable proof for framework buttons before touching shared Add Plug navigation, global overlays or device-setting surfaces.
-
-After that, reassess Add Plug segmented navigation. It is a larger contract change than it first appears because `quality:ux` currently enforces the shared `@lcl/ui SegmentedControl` for add-device navigation.
+Leave `main` untouched until explicitly instructed to merge. Do not use subchats for this work.
