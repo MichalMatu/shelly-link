@@ -1,3 +1,4 @@
+import { IonInput } from '@ionic/react';
 import { useTranslation } from '../../../app/i18n.js';
 import { stripTrailingUnit } from '../presentation/climateRulePresentation.js';
 import {
@@ -43,18 +44,19 @@ export const ClimateRuleAdvancedSettings = (props: ClimateRuleAdvancedSettingsPr
         >
           <span>{stripTrailingUnit(t('hardware.rule.minChangeLabel'), 'min')}</span>
           <span className="field-unit-control">
-            <input
+            <IonInput
+              className="lcl-climate-ionic-number-input"
               aria-label={t('hardware.rule.minChangeLabel')}
               aria-describedby={
                 validation.isMinChangeMinValid ? undefined : 'advanced-min-change-error'
               }
-              aria-invalid={!validation.isMinChangeMinValid}
+              aria-invalid={validation.isMinChangeMinValid ? 'false' : 'true'}
               max={RULE_ADVANCED_LIMITS.minChangeMinMax}
               min={RULE_ADVANCED_LIMITS.minChangeMinMin}
               step="0.25"
               type="number"
               value={props.minChangeMinInput}
-              onChange={(event) => props.setMinChangeMinInput(event.currentTarget.value)}
+              onIonInput={(event) => props.setMinChangeMinInput(String(event.detail.value ?? ''))}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               min
@@ -76,18 +78,19 @@ export const ClimateRuleAdvancedSettings = (props: ClimateRuleAdvancedSettingsPr
         >
           <span>{stripTrailingUnit(t('hardware.rule.maxOnHoursLabel'), 'h')}</span>
           <span className="field-unit-control">
-            <input
+            <IonInput
+              className="lcl-climate-ionic-number-input"
               aria-label={t('hardware.rule.maxOnHoursLabel')}
               aria-describedby={
                 validation.isMaxOnHoursValid ? undefined : 'advanced-max-on-error'
               }
-              aria-invalid={!validation.isMaxOnHoursValid}
+              aria-invalid={validation.isMaxOnHoursValid ? 'false' : 'true'}
               max={RULE_ADVANCED_LIMITS.maxOnHoursMax}
               min={RULE_ADVANCED_LIMITS.maxOnHoursMin}
               step="0.25"
               type="number"
               value={props.maxOnHoursInput}
-              onChange={(event) => props.setMaxOnHoursInput(event.currentTarget.value)}
+              onIonInput={(event) => props.setMaxOnHoursInput(String(event.detail.value ?? ''))}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               h
@@ -126,20 +129,19 @@ export const ClimateRuleAdvancedSettings = (props: ClimateRuleAdvancedSettingsPr
         >
           <span>{stripTrailingUnit(t('hardware.rule.staleTimeoutLabel'), 'min')}</span>
           <span className="field-unit-control">
-            <input
+            <IonInput
+              className="lcl-climate-ionic-number-input"
               aria-label={t('hardware.rule.staleTimeoutLabel')}
               aria-describedby={
                 validation.isStaleTimeoutValid ? undefined : 'advanced-stale-error'
               }
-              aria-invalid={!validation.isStaleTimeoutValid}
+              aria-invalid={validation.isStaleTimeoutValid ? 'false' : 'true'}
               max={RULE_ADVANCED_LIMITS.staleTimeoutMinMax}
               min={RULE_ADVANCED_LIMITS.staleTimeoutMinMin}
               step="1"
               type="number"
               value={props.staleTimeoutMinInput}
-              onChange={(event) =>
-                props.setStaleTimeoutMinInput(event.currentTarget.value)
-              }
+              onIonInput={(event) => props.setStaleTimeoutMinInput(String(event.detail.value ?? ''))}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               min
@@ -161,18 +163,19 @@ export const ClimateRuleAdvancedSettings = (props: ClimateRuleAdvancedSettingsPr
         >
           <span>{stripTrailingUnit(t('hardware.rule.rssiMinLabel'), 'dBm')}</span>
           <span className="field-unit-control">
-            <input
+            <IonInput
+              className="lcl-climate-ionic-number-input"
               aria-label={t('hardware.rule.rssiMinLabel')}
               aria-describedby={
                 validation.isRssiMinValid ? undefined : 'advanced-rssi-error'
               }
-              aria-invalid={!validation.isRssiMinValid}
+              aria-invalid={validation.isRssiMinValid ? 'false' : 'true'}
               max={RULE_ADVANCED_LIMITS.rssiMinMax}
               min={RULE_ADVANCED_LIMITS.rssiMinMin}
               step="1"
               type="number"
               value={props.rssiMinInput}
-              onChange={(event) => props.setRssiMinInput(event.currentTarget.value)}
+              onIonInput={(event) => props.setRssiMinInput(String(event.detail.value ?? ''))}
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               dBm
