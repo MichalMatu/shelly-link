@@ -20,21 +20,17 @@ For the isolated UX migration, continue only on `work/ux-evolution` and also rea
 
 Historical PR descriptions and chat state are not canonical.
 
-## UX evolution branch — 2026-10-08
+## UX evolution branch — 2026-10-10
 
-The active UX experiment lives on `work/ux-evolution`; it has not been merged into `main`.
+The isolated UX line remains `work/ux-evolution`; `main` is deliberately untouched. Read `docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md` (updated 2026-10-10) and `docs/UX_VISUAL_CONTRACT.md` before resuming.
 
-The first Ionic migration checkpoint is complete:
+Settings, Add Plug, Add Thermometer, and multiple Plug settings controls now use Ionic. Physical Plug button modes are two visible Ionic radio choices. Climate remains composition-frozen except the five explicitly reviewed Ionic control screenshot deltas; no broad redesign is authorized.
 
-- Ionic React runtime initialization is explicit;
-- Settings Appearance uses `IonSegment`;
-- Settings Language uses `IonSelect`;
-- Ionic light/dark colors are bridged from LCL tokens, including RGB companions and intermediate color steps;
-- Settings-specific Ionic controls are isolated behind a lazy-loaded module;
-- repository CI passed static, tests, build, responsive and aggregate checks on the code checkpoint;
-- the validation-only PR was closed without merge.
+The app now has a shared localized Climate/Pulse runtime reason presenter (`ab` = above threshold, unknown codes = localized fallback) and a vetted localized-error boundary for hardware setup. Generic RPC/transport exceptions must not appear in end-user cards or toast copy. Preserve helpful known cases such as Bluetooth permissions and Shelly firmware/Matter guidance. The UX quality gate and its negative self-tests cover selected regression patterns.
 
-Do not broaden this into a visual redesign yet. Continue with small non-frozen standard-control slices and keep Climate golden renders untouched. The detailed continuation state and next recommended slice live in `docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md`.
+Responsive E2E reached **50/50** on `593b36c3b93473d86a405240a5385486fcd93df2`. The `04-plug-ble-discovery` baseline is unchanged; a deterministic test captures the loading state before asserting error feedback. Final `pnpm check` and Android device acceptance for subsequent changes are still being finalized; do not claim those steps completed based on the earlier E2E run.
+
+Wireless ADB to Samsung S22+ / Android 16 was verified at `192.168.0.100:40973` on 2026-10-10 (the endpoint may change). The next APK must be built from the current UX head, installed via **`adb install -r` with data preserved**, cold-started, and visually inspected on the phone. Never use the destructive alpha-install script for this step. No merge into `main` without explicit authorization.
 
 ## Accepted product/runtime baseline
 
