@@ -2762,10 +2762,8 @@ describe('HardwareSetupScreen', () => {
       fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
 
       expect(screen.getByLabelText('VPD assist')).not.toBeChecked();
-      fireEvent.click(screen.getByLabelText('VPD assist'));
-      fireEvent.change(screen.getByLabelText(/Docelowe VPD kPa/), {
-        target: { value: '1.25' }
-      });
+      fireIonToggleChange(screen.getByLabelText('VPD assist'), true);
+      fireIonInput(screen.getByLabelText(/Docelowe VPD kPa/), '1.25');
 
       const advancedSection = openRuleDisclosure('Zaawansowane');
       expect(
@@ -2801,21 +2799,10 @@ describe('HardwareSetupScreen', () => {
       expect(
         screen.getAllByText('%', { selector: '.field-unit-control__unit' })
       ).toHaveLength(2);
-      fireEvent.change(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), {
-        target: { value: '-80' }
-      });
-      fireEvent.change(within(advancedSection).getByLabelText('Brak odczytu przez min'), {
-        target: { value: '10' }
-      });
-      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
-        target: { value: '3' }
-      });
-      fireEvent.change(
-        within(advancedSection).getByLabelText('Maksymalny czas pracy h'),
-        {
-          target: { value: '3' }
-        }
-      );
+      fireIonInput(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), '-80');
+      fireIonInput(within(advancedSection).getByLabelText('Brak odczytu przez min'), '10');
+      fireIonInput(within(advancedSection).getByLabelText(/Ponowne ON po min/), '3');
+      fireIonInput(within(advancedSection).getByLabelText('Maksymalny czas pracy h'), '3');
       expect(getRuleSummary()).toHaveTextContent(
         'Gdy termometr Xiaomi salon zniknie na 10 min albo Shelly Salon uruchomi się ponownie'
       );
@@ -2848,25 +2835,17 @@ describe('HardwareSetupScreen', () => {
       ).toHaveTextContent('function sv(t)');
       fireEvent.click(within(scriptDialog).getByRole('button', { name: 'Zamknij' }));
 
-      fireEvent.change(screen.getByLabelText(/Docelowe VPD kPa/), {
-        target: { value: '0' }
-      });
+      fireIonInput(screen.getByLabelText(/Docelowe VPD kPa/), '0');
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
       expect(screen.getByText('Zakres: 0.1 do 5 kPa.')).toBeInTheDocument();
-      fireEvent.change(screen.getByLabelText(/Docelowe VPD kPa/), {
-        target: { value: '1.25' }
-      });
+      fireIonInput(screen.getByLabelText(/Docelowe VPD kPa/), '1.25');
 
-      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
-        target: { value: '0' }
-      });
+      fireIonInput(within(advancedSection).getByLabelText(/Ponowne ON po min/), '0');
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
       expect(
         within(advancedSection).getByText('Zakres: 0.25 do 60 min.')
       ).toBeInTheDocument();
-      fireEvent.change(within(advancedSection).getByLabelText(/Ponowne ON po min/), {
-        target: { value: '3' }
-      });
+      fireIonInput(within(advancedSection).getByLabelText(/Ponowne ON po min/), '3');
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeEnabled();
 
       scriptDialog = await openRuleScriptDialog();
@@ -3316,9 +3295,7 @@ describe('HardwareSetupScreen', () => {
     closeCurrentAddPage();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Reguła' }));
-    fireEvent.change(screen.getByLabelText('Włącz poniżej °C'), {
-      target: { value: '18' }
-    });
+    fireIonInput(screen.getByLabelText('Włącz poniżej °C'), '18');
 
     fireEvent.click(screen.getByRole('tab', { name: 'Shelly' }));
     const reopenedAddDialog = await openShellyAddDialog();
