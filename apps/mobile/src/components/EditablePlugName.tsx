@@ -40,7 +40,11 @@ export const EditablePlugName = ({ name, variant, onCommit }: EditablePlugNamePr
         onIonBlur={() => finishEditing(draft)}
         onKeyDown={(event) => {
           if (event.key === 'Enter') finishEditing(draft);
-          if (event.key === 'Escape') finishEditing(name);
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            setDraft(name);
+            setEditing(false);
+          }
         }}
       />
     );
