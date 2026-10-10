@@ -8,22 +8,22 @@ describe('PlugLedColorEditor Ionic controls', () => {
     render(
       <PlugLedColorEditor
         ariaPrefix="LED"
-        colorLabel="Kolor"
-        defaultLabel="Domyślny"
-        customLabel="Własny"
-        customTitle="Własny kolor"
-        hueLabel="Odcień"
-        saturationLabel="Nasycenie"
-        lightnessLabel="Jasność"
-        applyLabel="Zastosuj"
-        cancelLabel="Anuluj"
+        colorLabel="Color"
+        defaultLabel="Default"
+        customLabel="Custom"
+        customTitle="Custom color"
+        hueLabel="Hue"
+        saturationLabel="Saturation"
+        lightnessLabel="Lightness"
+        applyLabel="Apply"
+        cancelLabel="Cancel"
         fallbackValue={[0, 100, 0]}
         value={null}
         onChange={onChange}
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'LED Własny' }));
+    fireEvent.click(screen.getByRole('button', { name: 'LED Custom' }));
     const sliders = Array.from(document.querySelectorAll('ion-range'));
     expect(sliders).toHaveLength(3);
     expect(document.querySelector('input[type="range"]')).toBeNull();
@@ -35,7 +35,7 @@ describe('PlugLedColorEditor Ionic controls', () => {
       })
     );
     expect(sliders[0]).toHaveProperty('value', 180);
-    fireEvent.click(screen.getByRole('button', { name: 'Zastosuj' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
     expect(onChange).toHaveBeenCalledOnce();
     const result = onChange.mock.calls[0]?.[0] as number[];
     expect(result).toHaveLength(3);
