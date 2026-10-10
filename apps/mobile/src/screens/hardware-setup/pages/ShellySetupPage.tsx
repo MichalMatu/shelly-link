@@ -73,10 +73,8 @@ export const ShellySetupPage = ({
     try {
       countIpv4RangeScanAddresses(flow.shellyScanStartInput, flow.shellyScanEndInput);
       return null;
-    } catch (error) {
-      return error instanceof Error
-        ? error.message
-        : t('hardware.shelly.scanRangeFailed');
+    } catch {
+      return t('hardware.shelly.scanRangeFailed');
     }
   })();
   const isBleDiscoveryBusy =
