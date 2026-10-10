@@ -111,3 +111,13 @@ Native app JSX controls remaining: **71 = 61 buttons + 10 Climate inputs**; 27 o
 The earlier full `pnpm check` passed 551/551 mobile tests on `695c7d5f9`; canonical visual E2E 50/50 on `227927674` without snapshot changes. Full acceptance for the blocked-navigation commits must still be run.
 
 Headless `medium_phone` Android 16 emulator failed to finish boot within the bounded window, before APK installation. It was stopped; there is **no emulator app acceptance**. Neither the user phone nor physical Shelly devices were contacted. Actual TalkBack, keyboard and overlay accessibility, plus background Capacitor triggerEvent, remain open.
+
+## Latest Ionic increment: busy dialog and developer actions — 2026-10-10
+
+App code now includes BLE restart modal IonButton and native dialog aria-busy (c3e5033ca) plus developer Clear errors and Reset all IonButtons (595ce2a3d). Unit regression checks verified both busy disablement and command behavior; accessibility testing showed that hydrated Ionic buttons can otherwise leave an incorrect aria-busy=false on the inner native button.
+
+Native mobile TSX controls now: **68 total = 58 buttons + 10 protected Climate inputs**, in 31 files. Ordinary unmigrated actions: 24. Intentional custom buttons: 34. Full inventory in docs/testing/2026-10-10-ionic-native-control-census.md.
+
+At product source c3e5033ca, full pnpm check passed **554/554** mobile tests, Capacitor sync and Android debug APK completed. APK SHA-256: 3c070b8e8a5b078e1b667c4af5d796fea056ab82231f374908fcddcc2720594f. The latest developer command migration (595ce2a3d) has separate 9/9 targeted tests and needs whole-project reacceptance.
+
+Full 50-test canonical E2E is **not yet clean** for these commits. Prior full attempts were 47/50 and 45/50 under severe host load; six prior failed runtime cases passed when isolated, and two visual snapshots showed differences in unrelated Time/Pulse and thermometer screens. Do not update approved baselines or claim a clean full run. Physical S22+ unavailable; medium_phone emulator did not boot, so Android runtime accessibility and Capacitor triggerEvent still require future checking. Main stays untouched.

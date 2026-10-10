@@ -1,12 +1,12 @@
 # Native HTML control census — Ionic React, 2026-10-10
 
-Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `aa172d673efb9a9071d960dcb79e8d8db222f7fd` (`work/ux-evolution`). Testy TSX nie są liczone. Znaczniki natywne to `<button>`, `<input>`, `<select>`, `<textarea>`; jeden element JSX w pętli jest liczony raz, nie per urządzenie. **71 = 61 przycisków + 10 input**, w **32 plikach**.
+Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `595ce2a3d67c02bda1c66f08f02896a09072be42` (`work/ux-evolution`). Testy TSX nie są liczone. Znaczniki natywne to `<button>`, `<input>`, `<select>`, `<textarea>`; jeden element JSX w pętli jest liczony raz, nie per urządzenie. **68 = 58 przycisków + 10 input**, w **31 plikach**.
 
-**Wynik klasyfikacji:** 27 zwykłych przycisków do migracji (z czego 8 na zamrożonych powierzchniach Climate), 34 celowe przyciski z własnymi interakcjami, 10 input w zamrożonym Climate. "Zwykła" to zadanie otwarte, nie automatyczny nakaz zamiany 1:1. "Celowa" oznacza pozostawienie do czasu, aż pełny odpowiednik zachowa wizualną geometrię, ARIA i gesty; wymaga odrębnych testów dostępności.
+**Wynik klasyfikacji:** 24 zwykłych przycisków do migracji (z czego 8 na zamrożonych powierzchniach Climate), 34 celowe przyciski z własnymi interakcjami, 10 input w zamrożonym Climate. "Zwykła" to zadanie otwarte, nie automatyczny nakaz zamiany 1:1. "Celowa" oznacza pozostawienie do czasu, aż pełny odpowiednik zachowa wizualną geometrię, ARIA i gesty; wymaga odrębnych testów dostępności.
 
 | Ścieżka pod `apps/mobile/src/`                                          | Liczba | Klasa                        | Uzasadnienie / dalsza praca                                                                                |
 | ----------------------------------------------------------------------- | -----: | ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `app/DevCommandPalette.tsx`                                             |      4 | 2 zwykłe + 2 celowe          | Reset all i Clear errors: akcje; wybór języka i motywu: własne przyciski stanu aria-pressed                |
+| `app/DevCommandPalette.tsx`                                             |      2 | 2 celowe                     | Reset all i Clear errors migrowano do IonButton; wybory języka i motywu zachowują własne aria-pressed      |
 | `app/StandalonePulseInstallationDetail.tsx`                             |      3 | 3 zwykłe                     | Usuwanie/odinstalowanie automatyki, w tym potwierdzenia; zachować blokadę pending i wyłączenie przekaźnika |
 | `components/AppBottomNavigation.tsx`                                    |      3 | 3 celowe                     | Trwała nawigacja Plugs / Thermometers / Settings                                                           |
 | `components/AppPageBack.tsx`                                            |      1 | 1 celowa                     | Nawigacja zagnieżdżonego ekranu                                                                            |
@@ -33,7 +33,6 @@ Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `aa172d673efb9a9071d960dcb79
 | `screens/TimeInstallationDetail.tsx`                                    |      3 | 3 zwykłe                     | Usunięcie automatyki Time i potwierdzenia                                                                  |
 | `screens/hardware-setup/pages/RuleSetupPage.tsx`                        |      2 | 2 zwykłe (Climate)           | Wczytywanie/skanowanie i bezpieczny test przekaźnika; frozen master                                        |
 | `screens/hardware-setup/pages/SensorSetupPage.tsx`                      |      1 | 1 celowa                     | Fab/gest dodawania sensora                                                                                 |
-| `screens/hardware-setup/pages/ShellyBleDiscoveryModal.tsx`              |      1 | 1 zwykła                     | Restart BLE w stopce modalnej, nie powielać nieudanego globalnego refaktoru                                |
 | `screens/hardware-setup/pages/ShellySettingsContent.tsx`                |      2 | 2 zwykłe                     | Rozpoczęcie BLE scan oraz usunięcie urządzenia, ekran Device                                               |
 | `screens/hardware-setup/pages/ShellySetupPage.tsx`                      |      1 | 1 celowa                     | Fab dodawania Shelly; odrębny zwykły retry przeniesiony do IonButton w c7184509                            |
 | `screens/hardware-setup/pages/ShellySetupPresentation.tsx`              |      4 | 3 celowe + 1 zwykła          | Ikonowe edytuj/ustawienia/usuń i zwykła akcja BLE scan                                                     |
@@ -47,7 +46,7 @@ W `packages/ui/src` pozostaje **7 własnych przycisków** (niezaliczonych do 74)
 
 - Regresja `16-climate-setup` podczas poprzedniej migracji pól Climate (~15,000 pikseli różnicy) została wycofana; nie aktualizować baseline by ją ukryć.
 - Poprzedni szeroki refaktor przycisków i focus trap modalnego spowodował 17 błędów testowych i został wycofany. Zmieniać tylko testowane grupy funkcjonalne.
-- Ukończenie wymaga rozpatrzenia wszystkich 27 zwykłych przycisków, a nie tylko zielonego TypeScriptu; sprawdzić w szczególności modale, klawiaturę i czytniki ekranu Androida.
+- Ukończenie wymaga rozpatrzenia wszystkich 24 zwykłych przycisków, a nie tylko zielonego TypeScriptu; sprawdzić w szczególności modale, klawiaturę i czytniki ekranu Androida.
 - Źródłem wyników integracyjnych i pomiaru bundla pozostaje `docs/testing/2026-10-10-ionic-independent-audit.md`; ostatni wynik źródłowego `pnpm check` sprzed tej partii był 549/549, E2E 50/50. Po zmianie `c7184509` pełna rekwalifikacja jest wykonywana osobno.
 
 ## Uzupełnienie — 2026-10-10
@@ -55,3 +54,7 @@ W `packages/ui/src` pozostaje **7 własnych przycisków** (niezaliczonych do 74)
 Migracje: LED Apply (`227927674`), Plug blocked navigation (`69285bb259`) oraz Thermometer blocked navigation (`aa172d673`). Niezmieniona ochrona właściciela automatyki została zweryfikowana w osobnych testach.
 
 Headless emulator medium_phone (Android 16, arm64) nie osiągnął boot_completed w limicie, przed instalacją APK. Emulator został wyłączony; telefon pozostał nietknięty.
+
+## Latest small action migrations — 2026-10-10
+
+The BLE discovery modal restart now uses IonButton and keeps busy semantics via aria-busy on the native dialog; hydration otherwise left aria-busy=false on the inner native ion-button. This issue was reproduced and fixed at commit c3e5033caab102a3b9c00d4b5691fe889b9a17fe. Two developer palette commands also use IonButton at 595ce2a3d67c02bda1c66f08f02896a09072be42. Intentional language/theme toggles retain aria-pressed. Current inventory is 58 native buttons plus 10 protected Climate inputs.
