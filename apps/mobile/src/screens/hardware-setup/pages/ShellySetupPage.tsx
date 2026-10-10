@@ -1,3 +1,4 @@
+import { IonicActionButton } from '../../../components/IonicActionButton.js';
 import type { ShellySetupFlow } from '../pageContracts.js';
 import { InfoLabel } from '@lcl/ui';
 import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
@@ -269,7 +270,7 @@ export const ShellySetupPage = ({
           />
           {flow.bleDiscoverySession && flow.bleDiscoverySnapshot?.running === false && (
             <div className="action-row">
-              <button
+              <IonicActionButton
                 className="secondary-action"
                 type="button"
                 aria-busy={flow.restartBleDiscoveryMutation.isPending}
@@ -278,7 +279,7 @@ export const ShellySetupPage = ({
                 onClick={flow.restartBleDiscovery}
               >
                 {t('hardware.shelly.scanBleAgain')}
-              </button>
+              </IonicActionButton>
             </div>
           )}
         </div>
