@@ -3122,6 +3122,7 @@ describe('HardwareSetupScreen', () => {
 
   it('recovers Shelly BLE polling after one transient refresh failure', async () => {
     let bleScanReads = 0;
+    let revealRecoveredCandidate = false;
     const secondAddress = 'F7:5F:8D:0F:76:20';
     const defaultFetch = vi.mocked(fetch);
     vi.stubGlobal(
@@ -3148,7 +3149,7 @@ describe('HardwareSetupScreen', () => {
                 r: -37,
                 s: 1782667904992
               },
-              ...(bleScanReads >= 3
+              ...(bleScanReads >= 3 && revealRecoveredCandidate
                 ? [
                     {
                       a: secondAddress,
@@ -3202,6 +3203,9 @@ describe('HardwareSetupScreen', () => {
       timeout: 7000
     });
     expect(within(dialog).queryByText(secondAddress)).not.toBeInTheDocument();
+    // The poll may already have retried under parallel test load. Release the
+    // recovered candidate only after verifying that the transient 404 stayed hidden.
+    revealRecoveredCandidate = true;
 
     const recoveredCandidate = await within(dialog).findByText(secondAddress, undefined, {
       timeout: 7000
