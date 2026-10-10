@@ -28,7 +28,7 @@ describe('PlugLedColorEditor Ionic controls', () => {
     expect(sliders).toHaveLength(3);
     expect(document.querySelector('input[type="range"]')).toBeNull();
     fireEvent(
-      sliders[0],
+      sliders[0]!,
       new CustomEvent('ionInput', {
         bubbles: true,
         detail: { value: 180 }
