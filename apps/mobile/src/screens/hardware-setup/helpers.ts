@@ -13,6 +13,7 @@ const safeFeedbackKeys = [
   'hardware.sensor.phoneBleUnavailableInBrowser',
   'hardware.sensor.phoneBleNoRuntimeAddress',
   'hardware.sensor.phoneBleGenericFailed',
+  'hardware.sensor.phoneBleDisabled',
   'hardware.safety.matterBlocked'
 ] as const;
 
