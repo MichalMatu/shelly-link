@@ -1,3 +1,4 @@
+import { IonInput } from '@ionic/react';
 import { IconPencil } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../app/i18n.js';
@@ -29,22 +30,17 @@ export const EditablePlugName = ({ name, variant, onCommit }: EditablePlugNamePr
 
   if (editing) {
     return (
-      <input
-        autoFocus
+      <IonInput
+        autofocus
         className={`plug-name-editor__input plug-name-editor__input--${variant}`}
         aria-label={t('hardware.shelly.deviceNameLabel')}
         type="text"
         value={draft}
-        onBlur={(event) => finishEditing(event.currentTarget.value)}
-        onChange={(event) => setDraft(event.currentTarget.value)}
+        onIonInput={(event) => setDraft(String(event.detail.value ?? ''))}
+        onIonBlur={() => finishEditing(draft)}
         onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            event.currentTarget.blur();
-          }
-          if (event.key === 'Escape') {
-            event.currentTarget.value = name;
-            event.currentTarget.blur();
-          }
+          if (event.key === 'Enter') finishEditing(draft);
+          if (event.key === 'Escape') finishEditing(name);
         }}
       />
     );
