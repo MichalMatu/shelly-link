@@ -1029,10 +1029,10 @@ describe('HardwareSetupScreen', () => {
     fireEvent.click(
       within(savedPlugList).getByRole('button', { name: 'Nazwa gniazdka' })
     );
-    const nameInput = within(savedPlugList).getByLabelText('Nazwa gniazdka');
-    fireEvent.change(nameInput, { target: { value: 'Salon testowy' } });
-    expect(nameInput).toHaveValue('Salon testowy');
-    fireEvent.blur(nameInput);
+    const nameInput = getIonicInput(savedPlugList, 'Nazwa gniazdka');
+    fireIonInput(nameInput, 'Salon testowy');
+    expect(ionicValue(nameInput)).toBe('Salon testowy');
+    fireEvent(nameInput, new CustomEvent('ionBlur', { bubbles: true }));
     expect(within(savedPlugList).getByText('Salon testowy')).toBeInTheDocument();
 
     fireEvent.click(
