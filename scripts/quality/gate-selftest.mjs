@@ -249,6 +249,20 @@ const setupUxSegmentedControlFixture = async (root) => {
   );
 };
 
+const setupUxReasonPresentationFixture = async (root) => {
+  await writeFixture(
+    root,
+    'apps/mobile/src/app/runtimeReasonPresentation.ts',
+    "const keys = 'hardware.diagnosticsReason.'; const unknown = 'dashboard.health.unknown';\n"
+  );
+  for (const path of [
+    'apps/mobile/src/features/automations/components/PulseOperationalStatusSummary.tsx',
+    'apps/mobile/src/features/automations/components/StandalonePulseDashboardStatus.tsx'
+  ]) {
+    await writeFixture(root, path, 'export const status = formatRuntimeReason(code, t);\n');
+  }
+};
+
 const setupPerformanceFixture = async (root, { jsBytes }) => {
   await writeFixture(
     root,
@@ -355,6 +369,43 @@ await executeCase({
   expectedFailure:
     'Add Plug mode selection must use the controlled Ionic segment without focus/swipe side effects',
   env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
+});
+
+await executeCase({
+  name: 'ux/runtime reasons use localized presentation',
+  gatePath: uxGate,
+  setup: setupUxReasonPresentationFixture,
+  env: { LCL_UX_GATE_FOCUS: 'runtime-reason' }
+});
+
+await executeCase({
+  name: 'ux/runtime codes must not fall back to raw wire values',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxReasonPresentationFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/features/automations/components/PulseOperationalStatusSummary.tsx',
+      "export const status = reasons[value] ?? value;\n"
+    );
+  },
+  expectedFailure: 'runtime status must use the shared localized reason presenter',
+  env: { LCL_UX_GATE_FOCUS: 'runtime-reason' }
+});
+
+await executeCase({
+  name: 'ux/transport errors must never be dumped into user screens',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxReasonPresentationFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/features/plugs/components/FaultCard.tsx',
+      "export const errorText = error instanceof Error ? error.message : 'fallback';\n"
+    );
+  },
+  expectedFailure: 'never place raw transport exceptions in a user-facing component',
+  env: { LCL_UX_GATE_FOCUS: 'runtime-reason' }
 });
 
 await executeCase({
