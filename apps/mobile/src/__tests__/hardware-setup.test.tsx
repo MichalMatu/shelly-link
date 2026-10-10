@@ -1926,7 +1926,7 @@ describe('HardwareSetupScreen', () => {
     ).not.toBeInTheDocument();
     const advancedSection = openRuleDisclosure('Zaawansowane');
     expect(
-      within(advancedSection).getByLabelText('Ponowne ON po min')
+      getIonicInput(advancedSection, 'Ponowne ON po min')
     ).toBeInTheDocument();
     expect(within(advancedSection).getByRole('button', { name: 'Domyślne' })).toHaveClass(
       'rule-advanced-defaults-link'
@@ -2264,16 +2264,16 @@ describe('HardwareSetupScreen', () => {
       target: { value: '23' }
     });
     const advancedSection = openRuleDisclosure('Zaawansowane');
-    fireEvent.change(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), {
+    fireEvent.change(getIonicInput(advancedSection, 'Minimalny RSSI dBm'), {
       target: { value: '-60' }
     });
-    fireEvent.change(within(advancedSection).getByLabelText('Brak odczytu przez min'), {
+    fireEvent.change(getIonicInput(advancedSection, 'Brak odczytu przez min'), {
       target: { value: '30' }
     });
-    fireEvent.change(within(advancedSection).getByLabelText('Ponowne ON po min'), {
+    fireEvent.change(getIonicInput(advancedSection, 'Ponowne ON po min'), {
       target: { value: '10' }
     });
-    fireEvent.change(within(advancedSection).getByLabelText('Maksymalny czas pracy h'), {
+    fireEvent.change(getIonicInput(advancedSection, 'Maksymalny czas pracy h'), {
       target: { value: '8' }
     });
 
@@ -2309,10 +2309,10 @@ describe('HardwareSetupScreen', () => {
     expect(screen.getByLabelText('Włącz poniżej °C')).toHaveValue('19');
     expect(screen.getByLabelText('Wyłącz powyżej °C')).toHaveValue('20');
 
-    expect(within(advancedSection).getByLabelText('Minimalny RSSI dBm')).toHaveValue('-85');
-    expect(within(advancedSection).getByLabelText('Brak odczytu przez min')).toHaveValue('2');
-    expect(within(advancedSection).getByLabelText('Ponowne ON po min')).toHaveValue('2');
-    expect(within(advancedSection).getByLabelText('Maksymalny czas pracy h')).toHaveValue('4');
+    expect(getIonicInput(advancedSection, 'Minimalny RSSI dBm')).toHaveValue('-85');
+    expect(getIonicInput(advancedSection, 'Brak odczytu przez min')).toHaveValue('2');
+    expect(getIonicInput(advancedSection, 'Ponowne ON po min')).toHaveValue('2');
+    expect(getIonicInput(advancedSection, 'Maksymalny czas pracy h')).toHaveValue('4');
 
     const scriptDialog = await openRuleScriptDialog();
     expect(within(scriptDialog).getByLabelText('Wygenerowany skrypt')).toHaveTextContent(
@@ -2800,10 +2800,10 @@ describe('HardwareSetupScreen', () => {
       expect(
         screen.getAllByText('%', { selector: '.field-unit-control__unit' })
       ).toHaveLength(2);
-      fireIonInput(within(advancedSection).getByLabelText('Minimalny RSSI dBm'), '-80');
-      fireIonInput(within(advancedSection).getByLabelText('Brak odczytu przez min'), '10');
-      fireIonInput(within(advancedSection).getByLabelText(/Ponowne ON po min/), '3');
-      fireIonInput(within(advancedSection).getByLabelText('Maksymalny czas pracy h'), '3');
+      fireIonInput(getIonicInput(advancedSection, 'Minimalny RSSI dBm'), '-80');
+      fireIonInput(getIonicInput(advancedSection, 'Brak odczytu przez min'), '10');
+      fireIonInput(getIonicInput(advancedSection, 'Ponowne ON po min'), '3');
+      fireIonInput(getIonicInput(advancedSection, 'Maksymalny czas pracy h'), '3');
       expect(getRuleSummary()).toHaveTextContent(
         'Gdy termometr Xiaomi salon zniknie na 10 min albo Shelly Salon uruchomi się ponownie'
       );
@@ -2841,12 +2841,12 @@ describe('HardwareSetupScreen', () => {
       expect(screen.getByText('Zakres: 0.1 do 5 kPa.')).toBeInTheDocument();
       fireIonInput(screen.getByLabelText(/Docelowe VPD kPa/), '1.25');
 
-      fireIonInput(within(advancedSection).getByLabelText(/Ponowne ON po min/), '0');
+      fireIonInput(getIonicInput(advancedSection, 'Ponowne ON po min'), '0');
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeDisabled();
       expect(
         within(advancedSection).getByText('Zakres: 0.25 do 60 min.')
       ).toBeInTheDocument();
-      fireIonInput(within(advancedSection).getByLabelText(/Ponowne ON po min/), '3');
+      fireIonInput(getIonicInput(advancedSection, 'Ponowne ON po min'), '3');
       expect(screen.getByRole('button', { name: 'Wyślij' })).toBeEnabled();
 
       scriptDialog = await openRuleScriptDialog();
