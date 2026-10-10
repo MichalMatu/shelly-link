@@ -50,6 +50,35 @@ The **safe handoff head** after a failed ordinary/modal `IonicActionButton` batc
 
 The next conversation's mission is to challenge the Ionic migration and fix actual omissions, **not** to disguise remaining custom HTML controls or the frozen Climate form with unreviewed visual baseline updates. See the UX checkpoint for the exact remaining classes, known 80-control census and safe acceptance. Work only on `work/ux-evolution`, preserve `main` and Android data, do not use subchats, and verify Local Agent state before queuing tasks.
 
+
+#### Newest Ionic follow-up — BLE restart, Android and visual gate
+
+Product code commit `c71845097ac448eaf1b5d4a80c246f6c167fdb63`
+migrated the standalone Shelly BLE restart action to `IonButton`.
+Remaining app-native controls: **74**. See the complete census in
+`docs/testing/2026-10-10-ionic-native-control-census.md`.
+
+Full `pnpm check` passed (**549/549** mobile tests), as did Capacitor sync
+and Android APK assembly. APK SHA-256:
+`5f40e523285643ce70a32a973869d62c19b960a10c5265e395fc216a3c5f1544`.
+Two full E2E attempts reached 49/50, each with a different unexpected
+failure; both cases passed alone. A third full acceptance is queued as
+Local Agent task `shelly-ionic-c718-visual-full-third-20261010-137`.
+Never update snapshots automatically.
+
+`adb install -r` preserved data on S22+. The original 712-ms launch was
+immediately backgrounded with the screen off, so the resulting blank
+screenshot did not qualify. A corrected awake/foreground test verified
+a **515-ms** cold start, a genuine 172-KB screenshot and 75 UIAutomator
+nodes (45 labeled). The intermittent `triggerEvent` error was previously
+logged at `Capacitor: App stopped`; its root cause remains open.
+
+Next steps: obtain a clean full 50/50 visual run; validate Ionic host
+focus inside the shared `Modal` with targeted tests; continue the
+30 remaining ordinary actions in small batches; measure JS chunk impact;
+test keyboard/TalkBack/overlays on the actual device. Keep `main`
+unchanged and do not bypass safety or update baselines to hide defects.
+
 ### Ionic React audit update — 2026-10-10 (newest status)
 
 **Component migration is still open.** Read `docs/testing/2026-10-10-ionic-independent-audit.md` for evidence, exception categories and Android diagnostics; earlier 80-control and APK values above are historical.
