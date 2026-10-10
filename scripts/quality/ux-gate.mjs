@@ -34,6 +34,7 @@ const cssPaths = [
   'apps/mobile/src/features/automations/components/ClimateHistorySection.css',
   'apps/mobile/src/features/automations/components/ClimateHistoryChart.css',
   'apps/mobile/src/features/automations/components/AutomationDetailLayout.css',
+  'apps/mobile/src/features/automations/components/PulseCycleEditor.css',
   'apps/mobile/src/features/thermometers/components/ThermometerSettingsPage.css',
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
   'apps/mobile/src/features/plugs/components/PlugAddPage.css',
