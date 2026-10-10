@@ -207,7 +207,7 @@ describe('PlugLedSettingsCard', () => {
       hueRange!,
       new CustomEvent('ionInput', { bubbles: true, detail: { value: 240 } })
     );
-    fireEvent.click(screen.getByRole('button', { name: copy.applyColor }));
+    fireEvent.click(getIonicButton(document, copy.applyColor));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(
       screen.getByRole('button', { name: `OFF ${copy.customColor}` })
