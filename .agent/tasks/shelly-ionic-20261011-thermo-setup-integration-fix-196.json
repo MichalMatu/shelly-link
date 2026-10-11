@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-20261011-thermo-setup-integration-fix-196",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": true,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 1200,
+  "task_timeout": 1660,
+  "idle_timeout": 520,
+  "steps": [
+    {
+      "name": "fix-thermometer-Delete-Ionic-selector-and-run-hardware-suite",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\npython3 - <<'PY'\nfrom pathlib import Path\np=Path('apps/mobile/src/__tests__/hardware-setup.test.tsx')\ns=p.read_text()\nold=\"\"\"    fireEvent.click(\n      within(await screen.findByRole('dialog', { name: 'Usunąć termometr?' })).getByRole(\n        'button',\n        { name: 'Usuń' }\n      )\n    );\"\"\"\nnew=\"\"\"    fireEvent.click(\n      getIonicButton(\n        await screen.findByRole('dialog', { name: 'Usunąć termometr?' }),\n        'Usuń'\n      )\n    );\"\"\"\nassert s.count(old)==1\nassert 'getIonicButton,' in s\np.write_text(s.replace(old,new))\nPY\npnpm exec prettier --write apps/mobile/src/__tests__/hardware-setup.test.tsx\ngit diff --check\necho 'HARDWARE_SETUP_INTEGRATION_SUITE'\npnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --reporter=default\npnpm --filter @lcl/mobile typecheck\npnpm quality:ux\ngit add apps/mobile/src/__tests__/hardware-setup.test.tsx\ngit commit -m \"test(ionic): exercise thermometer removal through Ionic host\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"INTEGRATION_FIX_SHA=$(git rev-parse HEAD)\"\ngit status --short\n",
+      "timeout": 1200,
+      "output_policy": "summary"
+    }
+  ]
+}
