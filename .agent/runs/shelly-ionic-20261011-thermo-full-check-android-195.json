@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-20261011-thermo-full-check-android-195",
+  "task_digest": "829fe0045a812844dd7b39e6e0e298bec1bf74d42d667df497836c03161773f8",
+  "idle_timeout": 1270,
+  "task_timeout": 3900,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T00:48:20.115785+00:00",
+  "attempt_id": "e1322514e7027b8fd154d7b7",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 25703,
+  "updated_at": "2026-10-11T00:48:20.115844+00:00",
+  "pid": 25703
+}
