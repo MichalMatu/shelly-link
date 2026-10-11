@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-current-thermometer-validation-20261011-205",
+  "task_digest": "4b5da3c078449f466fa35561795439e63db77a0aafa77e10884b9dfe60af39d9",
+  "idle_timeout": 1100,
+  "task_timeout": 3700,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T02:28:21.764975+00:00",
+  "attempt_id": "f9365303fa64c60350d29750",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 34875,
+  "updated_at": "2026-10-11T02:28:21.765100+00:00",
+  "pid": 34875
+}
