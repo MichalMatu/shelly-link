@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-20261011-thermometer-confirm-compliant-193",
+  "task_digest": "8ab1496df003ca751366400efd86a6e760424e1cbe76c06a1dedf9c91c1a46ba",
+  "idle_timeout": 740,
+  "task_timeout": 1980,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T00:44:51.796420+00:00",
+  "attempt_id": "7db8c8a1104e929a9ad89120",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 20267,
+  "updated_at": "2026-10-11T00:44:51.796472+00:00",
+  "pid": 20267
+}
