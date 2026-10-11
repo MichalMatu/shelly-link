@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-20261011-clean-handoff-prettier-188",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": true,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 500,
+  "task_timeout": 900,
+  "idle_timeout": 370,
+  "steps": [
+    {
+      "name": "format-and-verify-fresh-Ionic-handoff-docs",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE_HEAD=$(git rev-parse HEAD)\"\npnpm exec prettier --write docs/HANDOFF_2026-10-11_IONIC_UX.md docs/HANDOFF_NEXT_CHAT.md\npnpm exec prettier --check docs/HANDOFF_2026-10-11_IONIC_UX.md docs/HANDOFF_NEXT_CHAT.md\ngit diff --check\nif test -n \"$(git status --porcelain)\"; then\n git add docs/HANDOFF_2026-10-11_IONIC_UX.md docs/HANDOFF_NEXT_CHAT.md\n git commit -m \"docs(ionic): format fresh next-chat handoff\"\n git push origin HEAD:refs/heads/work/ux-evolution\nfi\necho \"FINAL_HEAD=$(git rev-parse HEAD)\"\necho \"WORKTREE\";git status --short\n",
+      "timeout": 500,
+      "output_policy": "summary"
+    }
+  ]
+}
