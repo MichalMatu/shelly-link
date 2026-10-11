@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-thermometer-delete-full-20261011-191",
+  "task_digest": "abfb8fe5e0709183d56a4d2e65525eee6d641681c4e675af5e2e98a9a0c49a3b",
+  "idle_timeout": 1350,
+  "task_timeout": 3900,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T01:55:08.957052+00:00",
+  "attempt_id": "638cc6f3221eae54551603a2",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 98670,
+  "updated_at": "2026-10-11T01:55:08.957158+00:00",
+  "pid": 98670
+}
