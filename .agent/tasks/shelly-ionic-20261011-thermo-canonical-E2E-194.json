@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-20261011-thermo-canonical-E2E-194",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 3100,
+  "task_timeout": 3750,
+  "idle_timeout": 1450,
+  "steps": [
+    {
+      "name": "run-canonical-50-E2E-on-thermometer-Ionic-confirmation",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE_HEAD=$(git rev-parse HEAD)\"\necho 'WAIT_SAFE_LOAD'\nREADY=0\nfor n in $(seq 1 24);do\n LOAD=\"$(python3 -c 'import os;print(\"%.1f\"%os.getloadavg()[0])')\"\n echo \"LOAD:$n:$LOAD\"\n if python3 -c \"raise SystemExit(0 if float('$LOAD') < 14 else 1)\";then READY=1;break;fi\n sleep 10\ndone\ntest \"$READY\" -eq 1\necho 'CANONICAL_VISUAL_E2E'\nset +e\nLCL_E2E_PORT=5297 LCL_VISUAL_CONTRACT=1 pnpm exec playwright test -c apps/mobile/playwright.config.ts --workers=1 --reporter=json >/tmp/shelly-ionic-20261011-194-e2e.json 2>/tmp/shelly-ionic-20261011-194-e2e.err\nRESULT=$?\nset -e\npython3 - <<'PY'\nimport json\nfrom pathlib import Path\ns=Path('/tmp/shelly-ionic-20261011-194-e2e.json').read_text(errors='replace')\ntry:\n j=json.loads(s[s.find('{'):]);stats=j['stats'];print('E2E_STATS',stats)\n def walk(ss):\n  for suite in ss:\n   for sp in suite.get('specs',[]):\n    for t in sp.get('tests',[]):\n     if t.get('status') not in ('expected','skipped'):\n      print('E2E_FAILURE',sp.get('title'),t.get('status'))\n      for run in t.get('results',[]):\n       if run.get('error'): print('ERROR',(run['error'].get('message') or '')[:1300])\n   walk(suite.get('suites',[]))\n walk(j.get('suites',[]))\nexcept Exception as e:print('E2E_PARSE_FAILURE',str(e),s[-1600:])\nPY\necho \"E2E_COMMAND_EXIT=$RESULT\"\ntail -15 /tmp/shelly-ionic-20261011-194-e2e.err || true\necho 'WORKTREE';git status --short\ntest \"$RESULT\" -eq 0\n",
+      "timeout": 3100,
+      "output_policy": "summary"
+    }
+  ]
+}
