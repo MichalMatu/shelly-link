@@ -126,3 +126,14 @@
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   }
 }
+
+.sensor-removal-danger-action {
+  --border-color: var(--lcl-color-status-danger-border);
+  --border-radius: var(--lcl-radius-md);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --box-shadow: none;
+  --color: var(--lcl-color-status-danger-text);
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+}
