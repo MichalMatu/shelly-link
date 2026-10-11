@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-20261011-thermo-canonical-E2E-194",
+  "task_digest": "0b5bbf5596e0d9a89d863f3858ad4ad7c243e580ca8b8eb086d54ee6bd602d98",
+  "idle_timeout": 1450,
+  "task_timeout": 3750,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T00:45:53.750049+00:00",
+  "attempt_id": "5fcfe16596788d7c4f4126f2",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 22309,
+  "updated_at": "2026-10-11T00:45:53.750181+00:00",
+  "pid": 22309
+}
