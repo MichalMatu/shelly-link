@@ -1,5 +1,8 @@
 # Handoff — Stage 9 stabilization
 
+> **AKTUALNY HANDOFF IONIC UX — 2026-10-11:** Zacznij od [HANDOFF_2026-10-11_IONIC_UX.md](./HANDOFF_2026-10-11_IONIC_UX.md). Ten dokument zawiera starszą historię Stage 9 i chronologiczne checkpointy; starsze liczby nie opisują bieżącego `work/ux-evolution`. Na początku października 11 HEAD to `b439478b` (CI i Sandbox Pack zielone), lecz ostatnim pełnym lokalnym 50/50 + `pnpm check` + Gradle jest `bc0b1a9e`. Najnowsza migracja potwierdzenia usunięcia termometru wymaga ponowienia lokalnego full acceptance.
+
+
 Status: **2026-10-07 — V1 feature work is effectively closed. The two-Plug real-load harness is qualified by a passing 5-minute smoke. The only intentionally outstanding release blocker before freeze is the prepared 8-hour soak. Resume from `docs/CHECKPOINT_2026-10-07_PRE_SOAK.md`.**
 
 Repository: MichalMatu/shelly-link
