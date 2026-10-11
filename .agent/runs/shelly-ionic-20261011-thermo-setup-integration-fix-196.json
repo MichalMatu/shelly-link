@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-20261011-thermo-setup-integration-fix-196",
+  "task_digest": "383eda218716b348af4f87ada7a2770bd5bbfd628fe2ae795ebfc288e6b99fa0",
+  "idle_timeout": 520,
+  "task_timeout": 1660,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T01:02:01.265147+00:00",
+  "attempt_id": "c1a76c0c17ee328c4addd219",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 41795,
+  "updated_at": "2026-10-11T01:02:01.265475+00:00",
+  "pid": 41795
+}
