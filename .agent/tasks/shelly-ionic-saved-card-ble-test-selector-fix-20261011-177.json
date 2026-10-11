@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-saved-card-ble-test-selector-fix-20261011-177",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": true,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 1050,
+  "task_timeout": 1500,
+  "idle_timeout": 520,
+  "steps": [
+    {
+      "name": "fix-only-shared-test-helper-for-Ionic-card-and-commit-slice",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\necho 'EXPECTED_DIRTY_FILES';git status --short\npython3 - <<'PY'\nfrom pathlib import Path\np=Path('apps/mobile/src/__tests__/hardware-setup.test.tsx')\ns=p.read_text()\na=\"\"\"const openShellyBleScanFromSettings = async () => {\n  fireEvent.click(\n    screen.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })\n  );\n};\"\"\"\nb=\"\"\"const openShellyBleScanFromSettings = async () => {\n  fireEvent.click(getIonicButton(document, 'Skanuj termometry BLE przez to gniazdko'));\n};\"\"\"\nassert s.count(a)==1\nassert 'getIonicButton' in s\np.write_text(s.replace(a,b))\nPY\npnpm exec prettier --write apps/mobile/src/__tests__/hardware-setup.test.tsx\npnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --reporter=dot >/tmp/shelly-ionic-card-ble-177-focused.log 2>&1 || {echo FOCUSED_TEST_FAILED;grep -E 'FAIL|Error|×|Test Files|Tests ' /tmp/shelly-ionic-card-ble-177-focused.log|tail -65||true;tail -45 /tmp/shelly-ionic-card-ble-177-focused.log;exit 33;}\ngrep -E 'Test Files|Tests ' /tmp/shelly-ionic-card-ble-177-focused.log | tail -5\npnpm --filter @lcl/mobile typecheck\ngit diff --check\ngit add apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx\ngit commit -m \"refactor(ionic): saved Shelly BLE card scan as compact Ionic action\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"COMMIT=$(git rev-parse HEAD)\"\ngit status --short\n",
+      "timeout": 1050,
+      "output_policy": "summary"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-current-host-style-inspect-20261011-174",
+  "task_digest": "7f4279012bdef84d3d38dcc1b35c5e00860bcd856513f94f4ba37d2bba4237b0",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:18:31.363468+00:00",
+  "attempt_id": "09a0c4c1187a0d957e9cdf4c",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 8255,
+  "updated_at": "2026-10-10T23:18:31.611947+00:00",
+  "pid": 8255
+}

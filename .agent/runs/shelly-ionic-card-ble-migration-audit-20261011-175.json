@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-card-ble-migration-audit-20261011-175",
+  "task_digest": "2e29a8e00d8f152741809df749aaedcfc11d17cb31c58b47770b8fa79c763d1d",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:19:12.428946+00:00",
+  "attempt_id": "4ee211c9045095f8871bfcb8",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 9364,
+  "updated_at": "2026-10-10T23:19:12.698505+00:00",
+  "pid": 9364
+}

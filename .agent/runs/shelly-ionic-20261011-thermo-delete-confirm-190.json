@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-20261011-thermo-delete-confirm-190",
+  "task_digest": "e6d8b96b5b005144344ae8a39dc5b5d6d41e08a9ad76495f8bf76316479b5acb",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-11T00:42:42.920558+00:00",
+  "attempt_id": "e244ddae2e0cb01028e237e8",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 16626,
+  "updated_at": "2026-10-11T00:42:43.721865+00:00",
+  "pid": 16626
+}

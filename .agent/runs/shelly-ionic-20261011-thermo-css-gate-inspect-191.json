@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-20261011-thermo-css-gate-inspect-191",
+  "task_digest": "9d9e4de2f20ac1c8937c3bd6f3af0f73711f438c7f2f44db15cf4637f3821af7",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-11T00:43:41.505888+00:00",
+  "attempt_id": "6b3841e5c7b34d6bd0112fb7",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 18613,
+  "updated_at": "2026-10-11T00:43:41.727261+00:00",
+  "pid": 18613
+}

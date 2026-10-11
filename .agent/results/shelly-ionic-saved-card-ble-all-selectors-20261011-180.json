@@ -1,0 +1,61 @@
+{
+  "allow_write": true,
+  "attempt_id": "84065bf1fe11039ccb22038b",
+  "command_timeout": 1050,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 2708,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\npython3 - <<'PY'\nfrom pathlib import Path\np=Path('apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx')\ns=p.read_text()\na=\"import { IonInput } from '@ionic/react';\"\nassert s.count(a)==1\ns=s.replace(a,\"import { IonButton, IonInput } from '@ionic/react';\")\nold='''        <button\n          className=\"shelly-ble-action\"\n          type=\"button\"\n          disabled={isControlBusy}\n          title={t('hardware.shelly.scanBleViaShellyTitle')}\n          onClick={() => onBleScan(device)}\n        >\n          <IconBluetooth className=\"icon-action__svg\" aria-hidden=\"true\" />\n          <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>\n        </button>'''\nnew='''        <IonButton\n          className=\"shelly-ble-action\"\n          fill=\"clear\"\n          size=\"small\"\n          type=\"button\"\n          disabled={isControlBusy}\n          aria-label={t('hardware.shelly.scanBleViaShellyTitle')}\n          title={t('hardware.shelly.scanBleViaShellyTitle')}\n          onClick={() => onBleScan(device)}\n        >\n          <IconBluetooth className=\"icon-action__svg\" aria-hidden=\"true\" />\n          <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>\n        </IonButton>'''\nassert s.count(old)==1\np.write_text(s.replace(old,new))\np=Path('apps/mobile/src/theme/theme.css')\ns=p.read_text()\nold='''.shelly-ble-action {\n  align-items: center;\n  align-self: start;\n  background: transparent;\n  border: 0;\n  color: var(--lcl-color-accent);\n  cursor: pointer;\n  display: inline-flex;\n  font-size: var(--lcl-font-size-sm);\n  font-weight: var(--lcl-font-weight-bold);\n  gap: var(--lcl-spacing-xs);\n  justify-content: flex-start;\n  min-height: var(--lcl-size-compact-control-min-height);\n  padding: 0;\n  text-align: left;\n  width: fit-content;\n}\n\n.shelly-ble-action:disabled {\n  cursor: not-allowed;\n  opacity: var(--lcl-opacity-disabled);\n}'''\nnew='''.shelly-ble-action {\n  --background: transparent;\n  --background-hover: transparent;\n  --background-activated: transparent;\n  --box-shadow: none;\n  --color: var(--lcl-color-accent);\n  --padding-bottom: 0;\n  --padding-end: 0;\n  --padding-start: 0;\n  --padding-top: 0;\n\n  align-self: start;\n  font-size: var(--lcl-font-size-sm);\n  font-weight: var(--lcl-font-weight-bold);\n  margin: 0;\n  min-height: var(--lcl-size-compact-control-min-height);\n  text-transform: none;\n  width: fit-content;\n}\n\n.shelly-ble-action::part(native) {\n  gap: var(--lcl-spacing-xs);\n  justify-content: flex-start;\n  text-align: left;\n}\n\n.shelly-ble-action[disabled] {\n  opacity: var(--lcl-opacity-disabled);\n}'''\nassert s.count(old)==1\np.write_text(s.replace(old,new))\np=Path('apps/mobile/src/__tests__/hardware-setup.test.tsx')\ns=p.read_text()\na=\"\"\"const openShellyBleScanFromSettings = async () => {\n  fireEvent.click(\n    screen.getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })\n  );\n};\"\"\"\nb=\"\"\"const openShellyBleScanFromSettings = async () => {\n  fireEvent.click(getIonicButton(document, 'Skanuj termometry BLE przez to gniazdko'));\n};\"\"\"\nassert s.count(a)==1\nassert 'getIonicButton' in s\ns=s.replace(a,b)\nold_assertion=\"\"\"    expect(\n      within(savedPlugList).getByRole('button', {\n        name: 'Skanuj termometry BLE przez to gniazdko'\n      })\n    ).toBeInTheDocument();\"\"\"\nnew_assertion=\"\"\"    expect(\n      getIonicButton(savedPlugList, 'Skanuj termometry BLE przez to gniazdko')\n    ).toBeInTheDocument();\"\"\"\nassert s.count(old_assertion)==3, 'saved Plug tests changed unexpectedly'\np.write_text(s.replace(old_assertion,new_assertion))\nPY\npnpm exec prettier --write apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx\npnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --reporter=dot >/tmp/shelly-ionic-card-ble-179-focused.log 2>&1 || {\n echo 'FOCUSED_TEST_FAILED'\n grep -E 'FAIL|Error|Test Files|Tests ' /tmp/shelly-ionic-card-ble-179-focused.log | tail -40 || true\n tail -38 /tmp/shelly-ionic-card-ble-179-focused.log\n exit 33\n}\ngrep -E 'Test Files|Tests ' /tmp/shelly-ionic-card-ble-179-focused.log | tail -5\npnpm --filter @lcl/mobile typecheck\ngit diff --check\ngit add apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx\ngit commit -m \"refactor(ionic): use compact Ionic action for saved Shelly BLE scan\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"MIGRATION_COMMIT=$(git rev-parse HEAD)\"\ngit status --short\n",
+      "current_rss_mb": 25.11,
+      "elapsed_seconds": 59.253,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx 68ms (unchanged)\napps/mobile/src/theme/theme.css 175ms (unchanged)\napps/mobile/src/__tests__/hardware-setup.test.tsx 242ms (unchanged)\n Test Files  1 passed (1)\n      Tests  58 passed (58)\n\n> @lcl/mobile@2.0.10 typecheck /Users/michal/agent-workspace/repos/shelly-link/work/apps/mobile\n> tsc -p tsconfig.json --noEmit\n\n\n> shelly-link@2.0.10 precommit /Users/michal/agent-workspace/repos/shelly-link/work\n> lint-staged && pnpm quality:ux\n\n[STARTED] Backing up original state...\n[COMPLETED] Backed up original state in git stash (0d6ea3a61)\n[STARTED] Running tasks for staged files...\n[STARTED] package.json — 3 files\n[STARTED] *.{ts,tsx,js,mjs,cjs} — 2 files\n[STARTED] *.{json,md,css,yml,yaml} — 1 file\n[STARTED] prettier --write\n[STARTED] prettier --write\n[COMPLETED] prettier --write\n[COMPLETED] *.{json,md,css,yml,yaml} — 1 file\n[COMPLETED] prettier --write\n[STARTED] eslint --fix\n[COMPLETED] eslint --fix\n[COMPLETED] *.{ts,tsx,js,mjs,cjs} — 2 files\n[COMPLETED] package.json — 3 files\n[COMPLETED] Running tasks for staged files...\n[STARTED] Staging changes from tasks...\n[COMPLETED] Staging changes from tasks...\n[STARTED] Cleaning up temporary files...\n[COMPLETED] Cleaning up temporary files...\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n[agent-work d4485ad76] refactor(ionic): use compact Ionic action for saved Shelly BLE scan\n 3 files changed, 28 insertions(+), 26 deletions(-)\n\n> shelly-link@2.0.10 prepush /Users/michal/agent-workspace/repos/shelly-link/work\n> pnpm quality:ux && pnpm quality:repo\n\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n\n> shelly-link@2.0.10 quality:repo /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/brand-gate.mjs && node scripts/quality/script-lifecycle-gate.mjs && node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs && pnpm quality:selftest\n\nShelly Link branding gate passed.\nExclusive script lifecycle gate passed.\nRepository quality gate passed.\nFeature boundary quality gate passed.\n\n> shelly-link@2.0.10 quality:selftest /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/gate-selftest.mjs\n\nQuality gate self-test passed (27 cases).\nTo https://github.com/MichalMatu/shelly-link.git\n   1984a7b46..d4485ad76  HEAD -> work/ux-evolution\nMIGRATION_COMMIT=d4485ad76fdcf9b03d39270344e6df2561b86f81\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 787.28,
+      "stage_index": 1,
+      "stage_name": "complete-card-Ionic-conversion-and-all-four-test-selectors",
+      "stage_phase": "commands",
+      "stage_timeout": 1050,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T23:26:17.382766+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.075,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.108,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-saved-card-ble-all-selectors-20261011-180",
+  "idle_timeout": 500,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 59.253,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "complete-card-Ionic-conversion-and-all-four-test-selectors",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T23:25:16.558165+00:00",
+  "status": "done",
+  "task_digest": "30f313c86a9943aaf200811185dbc690f316382602c0026bdbc4cf2dd5fc14ea",
+  "task_timeout": 1500,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

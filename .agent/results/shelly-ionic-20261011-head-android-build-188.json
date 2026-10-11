@@ -1,0 +1,61 @@
+{
+  "allow_write": true,
+  "attempt_id": "ce91e2e09b1f1891edfdc82a",
+  "command_timeout": 1800,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 820,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"APP_SOURCE_HEAD=$(git rev-parse HEAD)\"\necho 'CAPACITOR_SYNC_ANDROID'\npnpm --filter @lcl/mobile exec cap sync android\nSDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"\ntest -d \"$SDK\"\nprintf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties\necho 'GRADLE_DEBUG_APK'\n(cd apps/mobile/android && ./gradlew assembleDebug --quiet)\nAPK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk\ntest -s \"$APK\"\necho \"APK_SHA256=$(shasum -a 256 \"$APK\" | awk '{print $1}')\"\necho \"APK_BYTES=$(wc -c < \"$APK\" | tr -d ' ')\"\necho 'PRODUCTION_NATIVE_CENSUS'\npython3 - <<'PY'\nfrom pathlib import Path\nimport re\nn={'button':0,'input':0,'select':0,'textarea':0};fs=set()\nfor p in Path('apps/mobile/src').rglob('*.tsx'):\n if re.search(r'\\.(test|spec)\\.tsx$',p.name):continue\n t=p.read_text()\n for tag in n:\n  count=len(re.findall(r'<'+tag+r'\\b',t))\n  n[tag]+=count\n  if count:fs.add(str(p))\nprint('NATIVE_CONTROLS',n,'FILES',len(fs),'TOTAL',sum(n.values()))\nPY\necho 'FINAL_TREE';git status --short\n",
+      "current_rss_mb": 49.84,
+      "elapsed_seconds": 5.698,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\nAPP_SOURCE_HEAD=bc0b1a9e806c080648d635943e2ce5bd3f17f4f6\nCAPACITOR_SYNC_ANDROID\n✔ Copying web assets from dist to android/app/src/main/assets/public in 11.46ms\n✔ Creating capacitor.config.json in android/app/src/main/assets in 707.67μs\n✔ copy android in 21.86ms\n✔ Updating Android plugins in 1.95ms\n[info] Found 2 Capacitor plugins for android:\n       @capacitor-community/bluetooth-le@7.3.2\n       @capacitor/app@7.1.2\n✔ update android in 30.58ms\n[info] Sync finished in 0.072s\nGRADLE_DEBUG_APK\nAPK_SHA256=a5283ed32fb042a7fa66e322e93cae9d3d17a0545cd1c73baf71c41f436ba5cd\nAPK_BYTES=5179520\nPRODUCTION_NATIVE_CENSUS\nNATIVE_CONTROLS {'button': 55, 'input': 10, 'select': 0, 'textarea': 0} FILES 30 TOTAL 65\nFINAL_TREE\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 392.52,
+      "stage_index": 1,
+      "stage_name": "build-new-debug-APK-and-recount-native-controls",
+      "stage_phase": "commands",
+      "stage_timeout": 1800,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-11T00:39:30.630126+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.123,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.084,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-20261011-head-android-build-188",
+  "idle_timeout": 850,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 5.698,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "build-new-debug-APK-and-recount-native-controls",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-11T00:39:23.320384+00:00",
+  "status": "done",
+  "task_digest": "18815a1ecbac38093a4b02124d6b7dd8233247fca75dbc26ac52743e321924be",
+  "task_timeout": 2300,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

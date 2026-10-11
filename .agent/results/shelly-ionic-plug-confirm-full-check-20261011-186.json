@@ -1,0 +1,62 @@
+{
+  "allow_write": true,
+  "attempt_id": "06ed14a8dd804e496708b3ee",
+  "command_timeout": 3350,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 5855,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\necho 'FULL_PNPM_CHECK'\npnpm check >/tmp/shelly-ionic-plug-confirm-186-check.log 2>&1 || {\n echo 'CHECK_FAILED'\n grep -E 'FAIL|Error|Test Files|Tests |budget' /tmp/shelly-ionic-plug-confirm-186-check.log | tail -72 || true\n tail -80 /tmp/shelly-ionic-plug-confirm-186-check.log\n exit 54\n}\necho 'PNPM_CHECK_PASS'\ngrep -E 'Test Files|Tests |Performance budget|Performance review|threshold exceeded|budget passed' /tmp/shelly-ionic-plug-confirm-186-check.log | tail -54 || true\necho 'CAPACITOR_SYNC_AND_ANDROID_ASSEMBLE'\npnpm --filter @lcl/mobile exec cap sync android\nSDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"\nprintf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties\n(cd apps/mobile/android && ./gradlew assembleDebug --quiet)\nAPK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk\ntest -s \"$APK\"\necho \"APK_SHA256=$(shasum -a 256 \"$APK\" | awk '{print $1}')\"\necho \"APK_BYTES=$(wc -c < \"$APK\" | tr -d ' ')\"\necho 'WORKTREE';git status --short\nuptime\n",
+      "current_rss_mb": 494.67,
+      "elapsed_seconds": 170.749,
+      "exit_code": 54,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\nSOURCE=b9fbb7ea425c85271218dffcf83726917b8d9f68\nFULL_PNPM_CHECK\nCHECK_FAILED\n Test Files  11 passed (11)\n      Tests  157 passed (157)\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n Test Files  2 passed (2)\n      Tests  6 passed (6)\n Test Files  1 passed (1)\n      Tests  21 passed (21)\n Test Files  4 passed (4)\n      Tests  37 passed (37)\n ✓ src/__tests__/sensor-display-name-budget.test.ts (2 tests) 85ms\n Test Files  27 passed (27)\n      Tests  238 passed (238)\n Test Files  15 passed (15)\n      Tests  121 passed (121)\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n FAIL  src/__tests__/i18n.test.ts > i18n > keeps Polish UI copy out of production components and helpers\nAssertionError: expected [ Array(1) ] to deeply equal []\n Test Files  1 failed | 122 passed (123)\n      Tests  1 failed | 554 passed (555)\n ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @lcl/mobile@2.0.10 test: `vitest run --passWithNoTests`\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/app/runtimeReasonPresentation.test.ts (8 tests) 5ms\n(node:43159) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/hardware-setup/data/recoveredSensorRegistry.test.ts (2 tests) 4ms\n(node:43170) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/flows/hardware-setup/sensorReadingsStore.test.ts (2 tests) 3ms\n(node:43185) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:43189) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/flows/installations/healthRecovery.test.ts (7 tests) 3ms\n ✓ src/flows/hardware-setup/useClimateAutomationInstallFlow.test.ts (4 tests) 4ms\n(node:43203) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/platform/shellyBleTransport.test.ts (1 test) 3ms\n(node:43205) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/automations/data/installedAutomationUsage.test.ts (2 tests) 3ms\n(node:43213) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/automations/components/climateHistoryChartAxis.test.ts (5 tests) 3ms\n(node:43219) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/plugs/data/plugBleOnboarding.test.ts (2 tests) 3ms\n(node:43224) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/automations/presentation/automationDetailCapabilities.test.ts (5 tests) 3ms\n(node:43232) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/__tests__/diagnostic-presentation.test.ts (7 tests) 2ms\n(node:43237) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/flows/setup-intent.test.ts (2 tests) 2ms\n(node:43240) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/screens/hardware-setup/helpers.test.ts (2 tests) 3ms\n(node:43247) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/routes/hardwareSetupTabNavigation.pulse.test.ts (2 tests) 2ms\n(node:43253) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/automations/presentation/climateRulePresentation.test.ts (2 tests) 2ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/__tests__/i18n.test.ts > i18n > keeps Polish UI copy out of production components and helpers\nAssertionError: expected [ Array(1) ] to deeply equal []\n\n\u001b[32m- Expected\u001b[39m\n\u001b[31m+ Received\u001b[39m\n\n\u001b[32m- []\u001b[39m\n\u001b[31m+ [\u001b[39m\n\u001b[31m+   \"apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n ❯ src/__tests__/i18n.test.ts:159:23\n    157|     });\n    158| \n    159|     expect(offenders).toEqual([]);\n       |                       ^\n    160|   });\n    161| });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n\n Test Files  1 failed | 122 passed (123)\n      Tests  1 failed | 554 passed (555)\n   Start at  01:38:47\n   Duration  115.59s (transform 3.21s, setup 47.05s, collect 33.60s, tests 59.72s, environment 45.40s, prepare 9.06s)\n\n/Users/michal/agent-workspace/repos/shelly-link/work/apps/mobile:\n ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @lcl/mobile@2.0.10 test: `vitest run --passWithNoTests`\nExit status 1\n ELIFECYCLE  Test failed. See above for more details.\n ELIFECYCLE  Command failed with exit code 1.\n ELIFECYCLE  Command failed with exit code 1.\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 1007.61,
+      "stage_index": 1,
+      "stage_name": "full-quality-555-tests-and-Android-debug-confirm-modal",
+      "stage_phase": "commands",
+      "stage_timeout": 3350,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-10T23:40:43.338107+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.075,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.1,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-plug-confirm-full-check-20261011-186",
+  "idle_timeout": 1260,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 170.749,
+      "outcome": "failed",
+      "stage_index": 1,
+      "stage_name": "full-quality-555-tests-and-Android-debug-confirm-modal",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T23:37:50.968028+00:00",
+  "status": "failed",
+  "task_digest": "4af3faa755c72ba1f27707d85417daf371501c557173a613142c26da8b367b06",
+  "task_timeout": 4100,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

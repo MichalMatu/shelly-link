@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-plug-confirm-canonical50-20261011-189",
+  "task_digest": "2937a7cd7fd4025b573bbe16a2b15db6ed35063235d62ea8863ead83fcbf3df2",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-10T23:48:31.112907+00:00",
+  "attempt_id": "28f876544196fd794b84831e",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 53782,
+  "updated_at": "2026-10-10T23:48:31.602894+00:00",
+  "pid": 53782
+}

@@ -1,0 +1,61 @@
+{
+  "allow_write": false,
+  "attempt_id": "17bbfb0d515f9960c15e4bf7",
+  "command_timeout": 750,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 414,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\necho 'RELEVANT_PHONE_LARGE_E2E'\nLCL_E2E_PORT=5291 LCL_VISUAL_CONTRACT=1 pnpm exec playwright test -c apps/mobile/playwright.config.ts --grep='installed automation dashboard shows Shelly runtime on phone-large' --workers=1 --reporter=json >/tmp/shelly-ionic-saved-card-181-e2e.json 2>/tmp/shelly-ionic-saved-card-181-e2e.err || {\n echo 'E2E_FAILED'\n tail -25 /tmp/shelly-ionic-saved-card-181-e2e.err\n python3 - <<'PY'\nimport json\nfrom pathlib import Path\ns=Path('/tmp/shelly-ionic-saved-card-181-e2e.json').read_text(errors='replace')\ntry:\n j=json.loads(s[s.index('{'):]);print('STATS',j.get('stats'))\nexcept Exception as e:print('PARSE_ERROR',str(e),s[-1400:])\nPY\n exit 60\n}\npython3 - <<'PY'\nimport json\nfrom pathlib import Path\ns=Path('/tmp/shelly-ionic-saved-card-181-e2e.json').read_text(errors='replace')\nstats=json.loads(s[s.index('{'):])['stats']\nprint('PHONE_LARGE_E2E_STATS',stats)\nassert stats['expected']==1 and stats['unexpected']==0 and stats['flaky']==0 and stats['skipped']==0\nPY\necho 'NO_SNAPSHOT_UPDATES'\necho 'WORKTREE';git status --short\nuptime\n",
+      "current_rss_mb": 378.56,
+      "elapsed_seconds": 6.909,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\nSOURCE=d4485ad76fdcf9b03d39270344e6df2561b86f81\nRELEVANT_PHONE_LARGE_E2E\nPHONE_LARGE_E2E_STATS {'startTime': '2026-10-10T23:27:01.147Z', 'duration': 4653.909, 'expected': 1, 'skipped': 0, 'unexpected': 0, 'flaky': 0}\nNO_SNAPSHOT_UPDATES\nWORKTREE\n 1:27  up 2 days, 15:48, 3 users, load averages: 3.20 3.22 3.56\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 508.34,
+      "stage_index": 1,
+      "stage_name": "single-BLE-card-route-and-canonical-visual-on-phone-large",
+      "stage_phase": "commands",
+      "stage_timeout": 750,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T23:27:06.303633+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.066,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.071,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-card-ble-phone-large-visual-20261011-181",
+  "idle_timeout": 500,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 6.909,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "single-BLE-card-route-and-canonical-visual-on-phone-large",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T23:26:57.947527+00:00",
+  "status": "done",
+  "task_digest": "5a1bb4ff962da8c827e891a8705f26a9c1ec3e987da1a94e6d5b1d83f00f503f",
+  "task_timeout": 1150,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

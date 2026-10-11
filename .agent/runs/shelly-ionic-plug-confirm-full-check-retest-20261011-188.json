@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-plug-confirm-full-check-retest-20261011-188",
+  "task_digest": "92a3ebe182b5c8562ab6f51ee7a8fc8b687582e9dd7d6e2736c293b251d107c9",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:45:58.231883+00:00",
+  "attempt_id": "f21a8500a9054be7260a7a82",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 46010,
+  "updated_at": "2026-10-10T23:45:58.572382+00:00",
+  "pid": 46010
+}

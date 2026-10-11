@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-led-e2e-isolated-20261010-172",
+  "task_digest": "a8d48f93f3c2f5dc25e03f21c364afda10cf9c5b5f4625b3913a5c79f2b4f362",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T21:41:36.216976+00:00",
+  "attempt_id": "034a1d8b127b35e8b526d9d2",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 91444,
+  "updated_at": "2026-10-10T21:41:36.473433+00:00",
+  "pid": 91444
+}

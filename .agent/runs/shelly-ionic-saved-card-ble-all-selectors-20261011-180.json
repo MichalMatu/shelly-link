@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-saved-card-ble-all-selectors-20261011-180",
+  "task_digest": "30f313c86a9943aaf200811185dbc690f316382602c0026bdbc4cf2dd5fc14ea",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:26:17.382766+00:00",
+  "attempt_id": "84065bf1fe11039ccb22038b",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 18026,
+  "updated_at": "2026-10-10T23:26:17.647344+00:00",
+  "pid": 18026
+}

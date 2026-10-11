@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-20261011-thermo-worktree-state-192",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 180,
+  "task_timeout": 320,
+  "idle_timeout": 160,
+  "steps": [
+    {
+      "name": "confirm-clean-rollback-after-quality-reject",
+      "command": "printf 'SHA='; git rev-parse HEAD; printf 'STATUS='; git status --porcelain; printf 'TEMP_CSS='; if test -f apps/mobile/src/features/thermometers/components/SensorRemovalModal.css; then echo exists; else echo absent; fi; printf 'STAGED='; git diff --cached --stat",
+      "timeout": 180,
+      "output_policy": "summary"
+    }
+  ]
+}

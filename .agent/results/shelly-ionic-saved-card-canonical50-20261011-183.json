@@ -1,0 +1,61 @@
+{
+  "allow_write": false,
+  "attempt_id": "d66a1d246b7188800de54f8b",
+  "command_timeout": 2850,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 420,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\nSDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"\necho 'VISUAL_50_SINGLE_WORKER'\nLCL_E2E_PORT=5292 LCL_VISUAL_CONTRACT=1 pnpm exec playwright test -c apps/mobile/playwright.config.ts --workers=1 --reporter=json >/tmp/shelly-ionic-183-full-e2e.json 2>/tmp/shelly-ionic-183-full-e2e.err || {\n echo 'CANONICAL_E2E_FAILED'\n python3 - <<'PY'\nimport json\nfrom pathlib import Path\ns=Path('/tmp/shelly-ionic-183-full-e2e.json').read_text(errors='replace')\ntry:\n j=json.loads(s[s.index('{'):]);print('STATS',j.get('stats'))\n def walk(ss):\n  for su in ss:\n   for sp in su.get('specs',[]):\n    for t in sp.get('tests',[]):\n     if t.get('status') not in ('expected','skipped'):\n      print('FAIL',sp.get('title'),t.get('status'))\n      for r in t.get('results',[]):\n       if r.get('error'):print('ERROR',r['error'].get('message','')[:1200])\n   walk(su.get('suites',[]))\n walk(j.get('suites',[]))\nexcept Exception as e:print('PARSE_ERROR',str(e),s[-1200:])\nPY\n tail -25 /tmp/shelly-ionic-183-full-e2e.err\n exit 50\n}\npython3 - <<'PY'\nimport json\nfrom pathlib import Path\ns=Path('/tmp/shelly-ionic-183-full-e2e.json').read_text(errors='replace')\nstats=json.loads(s[s.index('{'):])['stats']\nprint('E2E_FINAL_STATS',stats)\nassert stats['expected']==50 and stats['unexpected']==0 and stats['skipped']==0 and stats['flaky']==0\nPY\necho 'CANONICAL_50_50_PASS'\necho 'WORKTREE';git status --short\nuptime\n",
+      "current_rss_mb": 231.19,
+      "elapsed_seconds": 119.697,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\nSOURCE=d4485ad76fdcf9b03d39270344e6df2561b86f81\nVISUAL_50_SINGLE_WORKER\nE2E_FINAL_STATS {'startTime': '2026-10-10T23:31:30.748Z', 'duration': 116363.83600000001, 'expected': 50, 'skipped': 0, 'unexpected': 0, 'flaky': 0}\nCANONICAL_50_50_PASS\nWORKTREE\n 1:33  up 2 days, 15:55, 3 users, load averages: 10.93 8.02 5.69\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 362.59,
+      "stage_index": 1,
+      "stage_name": "canonical-50-responsive-E2E-no-snapshot-updates",
+      "stage_phase": "commands",
+      "stage_timeout": 2850,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T23:33:27.696920+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.077,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.079,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-saved-card-canonical50-20261011-183",
+  "idle_timeout": 1250,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 119.697,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "canonical-50-responsive-E2E-no-snapshot-updates",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T23:31:26.349662+00:00",
+  "status": "done",
+  "task_digest": "a7f012aef19d59c95d77847f94a14c0b3b860bf11c033201f0cc587640cd4dae",
+  "task_timeout": 3600,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

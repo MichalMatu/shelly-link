@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-led-e2e-isolated-20261010-172",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 750,
+  "task_timeout": 1050,
+  "idle_timeout": 400,
+  "steps": [
+    {
+      "name": "recheck-known-LED-E2E-timeout-isolated",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"HEAD=$(git rev-parse HEAD)\"\nuptime\nset +e\nLCL_E2E_PORT=5296 LCL_VISUAL_CONTRACT=1 pnpm exec playwright test -c apps/mobile/playwright.config.ts --grep='PLUGS_UI LED relay-state and off modes work end to end' --workers=1 --reporter=json >/tmp/shelly-ionic-led-172-e2e.json 2>/tmp/shelly-ionic-led-172-e2e.err\ncode=$?\nset -e\npython3 - <<'PY'\nfrom pathlib import Path\nimport json\ns=Path('/tmp/shelly-ionic-led-172-e2e.json').read_text(errors='replace')\ntry:\n j=json.loads(s[s.find('{'):]);print('SCOPED_E2E_STATS',j['stats'])\nexcept Exception as err:print('JSON_ERROR',str(err),s[-1500:])\nPY\necho \"LED_E2E_EXIT=$code\"\ntail -25 /tmp/shelly-ionic-led-172-e2e.err || true\ngit status --short\ntest \"$code\" -eq 0\n",
+      "timeout": 750,
+      "output_policy": "summary"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-saved-card-canonical50-20261011-183",
+  "task_digest": "a7f012aef19d59c95d77847f94a14c0b3b860bf11c033201f0cc587640cd4dae",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:33:27.696920+00:00",
+  "attempt_id": "d66a1d246b7188800de54f8b",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 28772,
+  "updated_at": "2026-10-10T23:33:28.170154+00:00",
+  "pid": 28772
+}

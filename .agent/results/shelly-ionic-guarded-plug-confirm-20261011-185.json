@@ -1,0 +1,61 @@
+{
+  "allow_write": true,
+  "attempt_id": "5cbdc922d542f2a2aeec9006",
+  "command_timeout": 1000,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 3541,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\npython3 - <<'PY'\nfrom pathlib import Path\np=Path('apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.tsx')\ns=p.read_text()\nassert s.count(\"import { Modal } from '@lcl/ui';\")==1\ns=s.replace(\"import { Modal } from '@lcl/ui';\",\"import { IonButton } from '@ionic/react';\\nimport { Modal } from '@lcl/ui';\")\nold='''        <button\n          className=\"secondary-action secondary-action--danger\"\n          type=\"button\"\n          title={t('hardware.shelly.deleteTitle')}\n          onClick={onConfirm}\n        >\n          {t('common.delete')}\n        </button>'''\nnew='''        <IonButton\n          className=\"plug-settings-ionic-action plug-settings-ionic-action--secondary plug-settings-ionic-action--danger\"\n          fill=\"outline\"\n          type=\"button\"\n          title={t('hardware.shelly.deleteTitle')}\n          onClick={onConfirm}\n        >\n          {t('common.delete')}\n        </IonButton>'''\nassert s.count(old)==1\np.write_text(s.replace(old,new))\np=Path('apps/mobile/src/features/plugs/components/PlugSettingsSurface.css')\ns=p.read_text()\nanchor='''.plug-settings-ionic-action--secondary {\n  --background: var(--lcl-color-surface);\n  --border-color: var(--lcl-color-border);\n  --border-style: solid;\n  --border-width: var(--lcl-border-width-sm);\n  --color: var(--lcl-color-text);\n}'''\nassert s.count(anchor)==1\ns=s.replace(anchor,anchor+'''\n\n.plug-settings-ionic-action--danger {\n  --border-color: var(--lcl-color-status-danger-border);\n  --color: var(--lcl-color-status-danger-text);\n}''')\np.write_text(s)\np=Path('apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx')\nassert not p.exists()\np.write_text('''import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';\nimport { getIonicButton } from '../../../test/ionicTestEvents.js';\nimport { cleanup, fireEvent, render, screen, within } from '@testing-library/react';\nimport { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';\nimport { PlugDeleteConfirmModal } from './PlugDeleteConfirmModal.js';\n\ndescribe('PlugDeleteConfirmModal destructive action guard', () => {\n  beforeEach(() => setLocalePreference('pl'));\n  afterEach(() => cleanup());\n\n  it('does not delete on open or cancel and calls confirm exactly once on Ionic click', () => {\n    const onClose = vi.fn();\n    const onConfirm = vi.fn();\n    const { rerender } = render(\n      <I18nProvider>\n        <PlugDeleteConfirmModal deviceName=\"Salon\" onClose={onClose} onConfirm={onConfirm} />\n      </I18nProvider>\n    );\n    const dialog = screen.getByRole('dialog', { name: 'Usunąć gniazdko?' });\n    expect(dialog).toHaveTextContent('Salon');\n    expect(onConfirm).not.toHaveBeenCalled();\n    const confirm = getIonicButton(dialog, 'Usuń');\n    expect(confirm).toHaveClass('plug-settings-ionic-action--danger');\n    expect(confirm).toHaveAttribute('title');\n    fireEvent.click(within(dialog).getByRole('button', { name: 'Anuluj' }));\n    expect(onClose).toHaveBeenCalledOnce();\n    expect(onConfirm).not.toHaveBeenCalled();\n    fireEvent.click(confirm);\n    expect(onConfirm).toHaveBeenCalledOnce();\n    rerender(\n      <I18nProvider>\n        <PlugDeleteConfirmModal deviceName={null} onClose={onClose} onConfirm={onConfirm} />\n      </I18nProvider>\n    );\n    expect(screen.queryByRole('dialog')).toBeNull();\n    expect(onConfirm).toHaveBeenCalledOnce();\n  });\n});\n''')\nPY\npnpm exec prettier --write apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.tsx apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx apps/mobile/src/features/plugs/components/PlugSettingsSurface.css\npnpm --filter @lcl/mobile exec vitest run src/features/plugs/components/PlugDeleteConfirmModal.test.tsx src/__tests__/modal.test.tsx --reporter=default\npnpm --filter @lcl/mobile typecheck\ngit diff --check\ngit add apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.tsx apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx apps/mobile/src/features/plugs/components/PlugSettingsSurface.css\ngit commit -m \"refactor(ionic): migrate guarded Plug deletion confirm button\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"MIGRATION_COMMIT=$(git rev-parse HEAD)\"\ngit status --short\n",
+      "current_rss_mb": 19.77,
+      "elapsed_seconds": 33.479,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\napps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.tsx 36ms (unchanged)\napps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx 18ms\napps/mobile/src/features/plugs/components/PlugSettingsSurface.css 51ms (unchanged)\n\n RUN  v3.2.6 /Users/michal/agent-workspace/repos/shelly-link/work/apps/mobile\n\n(node:36164) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:36165) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/plugs/components/PlugDeleteConfirmModal.test.tsx (1 test) 147ms\n ✓ src/__tests__/modal.test.tsx (6 tests) 266ms\n\n Test Files  2 passed (2)\n      Tests  7 passed (7)\n   Start at  01:36:51\n   Duration  3.50s (transform 1.42s, setup 3.33s, collect 1.32s, tests 413ms, environment 1.01s, prepare 220ms)\n\n\n> @lcl/mobile@2.0.10 typecheck /Users/michal/agent-workspace/repos/shelly-link/work/apps/mobile\n> tsc -p tsconfig.json --noEmit\n\n\n> shelly-link@2.0.10 precommit /Users/michal/agent-workspace/repos/shelly-link/work\n> lint-staged && pnpm quality:ux\n\n[STARTED] Backing up original state...\n[COMPLETED] Backed up original state in git stash (c45c3fed7)\n[STARTED] Running tasks for staged files...\n[STARTED] package.json — 3 files\n[STARTED] *.{ts,tsx,js,mjs,cjs} — 2 files\n[STARTED] *.{json,md,css,yml,yaml} — 1 file\n[STARTED] prettier --write\n[STARTED] prettier --write\n[COMPLETED] prettier --write\n[COMPLETED] *.{json,md,css,yml,yaml} — 1 file\n[COMPLETED] prettier --write\n[STARTED] eslint --fix\n[COMPLETED] eslint --fix\n[COMPLETED] *.{ts,tsx,js,mjs,cjs} — 2 files\n[COMPLETED] package.json — 3 files\n[COMPLETED] Running tasks for staged files...\n[STARTED] Staging changes from tasks...\n[COMPLETED] Staging changes from tasks...\n[STARTED] Cleaning up temporary files...\n[COMPLETED] Cleaning up temporary files...\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n[agent-work b9fbb7ea4] refactor(ionic): migrate guarded Plug deletion confirm button\n 3 files changed, 56 insertions(+), 3 deletions(-)\n create mode 100644 apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx\n\n> shelly-link@2.0.10 prepush /Users/michal/agent-workspace/repos/shelly-link/work\n> pnpm quality:ux && pnpm quality:repo\n\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n\n> shelly-link@2.0.10 quality:repo /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/brand-gate.mjs && node scripts/quality/script-lifecycle-gate.mjs && node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs && pnpm quality:selftest\n\nShelly Link branding gate passed.\nExclusive script lifecycle gate passed.\nRepository quality gate passed.\nFeature boundary quality gate passed.\n\n> shelly-link@2.0.10 quality:selftest /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/gate-selftest.mjs\n\nQuality gate self-test passed (27 cases).\nTo https://github.com/MichalMatu/shelly-link.git\n   d2451279e..b9fbb7ea4  HEAD -> work/ux-evolution\nMIGRATION_COMMIT=b9fbb7ea425c85271218dffcf83726917b8d9f68\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 447.17,
+      "stage_index": 1,
+      "stage_name": "migrate-only-Plug-confirm-Ionic-button-with-guard-test",
+      "stage_phase": "commands",
+      "stage_timeout": 1000,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T23:37:21.480090+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.074,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.136,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-guarded-plug-confirm-20261011-185",
+  "idle_timeout": 520,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 33.479,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "migrate-only-Plug-confirm-Ionic-button-with-guard-test",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T23:36:46.143230+00:00",
+  "status": "done",
+  "task_digest": "b188f9e7ec05eb27247dc3b54c599ea9ce1d9ebaa5303cc1c779f7aeedbf33b8",
+  "task_timeout": 1480,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

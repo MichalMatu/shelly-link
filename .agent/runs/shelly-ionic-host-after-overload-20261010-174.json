@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-host-after-overload-20261010-174",
+  "task_digest": "42915d48b6e929ed4f322730558e69b6567ac3934a9194226ec8b5890d357851",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T21:54:39.888234+00:00",
+  "attempt_id": "6d140b97420b629480f1b65e",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 10244,
+  "updated_at": "2026-10-10T21:54:40.169607+00:00",
+  "pid": 10244
+}

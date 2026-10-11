@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-20261011-delete-safety-targeted-185",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 680,
+  "task_timeout": 1050,
+  "idle_timeout": 380,
+  "steps": [
+    {
+      "name": "verify-new-Plug-delete-and-Ionic-modal-state-before-gate",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\necho 'HOST_MEMORY_LOAD'; uptime; vm_stat | head -10\necho 'CHECK_GIT_CHANGE' ; git log -1 --oneline\necho 'FOCUSED_DELETION_AND_MODAL'\npnpm --filter @lcl/mobile exec vitest run src/features/plugs/components/PlugDeleteConfirmModal.test.tsx src/features/plugs/components/PlugRemovalBlockedModal.test.tsx src/features/thermometers/components/SensorRemovalBlockedModal.test.tsx src/__tests__/modal.test.tsx --reporter=default\necho 'TYPECHECK'\npnpm --filter @lcl/mobile typecheck\necho 'FORMATTING_AND_QUALITY'\npnpm exec prettier --check apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.tsx\npnpm quality:ux\necho 'WORKTREE_AFTER';git status --short\n",
+      "timeout": 680,
+      "output_policy": "summary"
+    }
+  ]
+}

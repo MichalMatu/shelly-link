@@ -1,0 +1,61 @@
+{
+  "allow_write": true,
+  "attempt_id": "f21a8500a9054be7260a7a82",
+  "command_timeout": 3300,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 1655,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\necho 'PNPM_CHECK'\npnpm check >/tmp/shelly-ionic-plug-confirm-188-full-check.log 2>&1 || {\n echo 'FULL_CHECK_FAILED'\n grep -E 'FAIL|Error|Test Files|Tests |budget' /tmp/shelly-ionic-plug-confirm-188-full-check.log | tail -75 || true\n tail -70 /tmp/shelly-ionic-plug-confirm-188-full-check.log\n exit 55\n}\necho 'PNPM_CHECK_PASS'\ngrep -E 'Test Files|Tests |Performance budget|Performance review|threshold exceeded|budget passed' /tmp/shelly-ionic-plug-confirm-188-full-check.log | tail -52 || true\npnpm --filter @lcl/mobile exec cap sync android\nSDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"\nprintf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties\n(cd apps/mobile/android && ./gradlew assembleDebug --quiet)\nAPK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk\ntest -s \"$APK\"\necho \"APK_SHA256=$(shasum -a 256 \"$APK\" | awk '{print $1}')\"\necho \"APK_BYTES=$(wc -c < \"$APK\" | tr -d ' ')\"\necho 'WORKTREE';git status --short\nuptime\n",
+      "current_rss_mb": 104.8,
+      "elapsed_seconds": 210.142,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\nSOURCE=bc0b1a9e806c080648d635943e2ce5bd3f17f4f6\nPNPM_CHECK\nPNPM_CHECK_PASS\n Test Files  11 passed (11)\n      Tests  157 passed (157)\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n Test Files  2 passed (2)\n      Tests  6 passed (6)\n Test Files  1 passed (1)\n      Tests  21 passed (21)\n Test Files  4 passed (4)\n      Tests  37 passed (37)\n Test Files  27 passed (27)\n      Tests  238 passed (238)\n Test Files  15 passed (15)\n      Tests  121 passed (121)\n Test Files  123 passed (123)\n      Tests  555 passed (555)\n Test Files  11 passed (11)\n      Tests  157 passed (157)\n Test Files  27 passed (27)\n      Tests  238 passed (238)\nPerformance budget: JS=2370425 B, largest=1043584 B, CSS=154517 B, chunks=20, minPoll=1000 ms\nPerformance review baseline: 7e9fdaa5f7d7c514313d2c962a2cc02bb26615b7; review JS<=1536098 B, largest<=686363 B, CSS<=204947 B, chunks<=15\nPerformance review threshold exceeded:\nPerformance budget passed.\n✔ Copying web assets from dist to android/app/src/main/assets/public in 12.59ms\n✔ Creating capacitor.config.json in android/app/src/main/assets in 994.83μs\n✔ copy android in 28.95ms\n✔ Updating Android plugins in 3.39ms\n[info] Found 2 Capacitor plugins for android:\n       @capacitor-community/bluetooth-le@7.3.2\n       @capacitor/app@7.1.2\n✔ update android in 51.05ms\n[info] Sync finished in 0.1s\nAPK_SHA256=a5283ed32fb042a7fa66e322e93cae9d3d17a0545cd1c73baf71c41f436ba5cd\nAPK_BYTES=5179520\nWORKTREE\n 1:45  up 2 days, 16:07, 3 users, load averages: 9.56 8.66 7.05\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 1133.41,
+      "stage_index": 1,
+      "stage_name": "final-all-checks-and-Android-after-localized-delete-test",
+      "stage_phase": "commands",
+      "stage_timeout": 3300,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T23:45:58.231883+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.129,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.095,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-plug-confirm-full-check-retest-20261011-188",
+  "idle_timeout": 1200,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 210.142,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "final-all-checks-and-Android-after-localized-delete-test",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T23:42:26.451332+00:00",
+  "status": "done",
+  "task_digest": "92a3ebe182b5c8562ab6f51ee7a8fc8b687582e9dd7d6e2736c293b251d107c9",
+  "task_timeout": 4200,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

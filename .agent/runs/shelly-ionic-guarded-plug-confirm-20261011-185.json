@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-guarded-plug-confirm-20261011-185",
+  "task_digest": "b188f9e7ec05eb27247dc3b54c599ea9ce1d9ebaa5303cc1c779f7aeedbf33b8",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:37:21.480090+00:00",
+  "attempt_id": "5cbdc922d542f2a2aeec9006",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 35968,
+  "updated_at": "2026-10-10T23:37:21.712216+00:00",
+  "pid": 35968
+}

@@ -1,0 +1,61 @@
+{
+  "allow_write": false,
+  "attempt_id": "da37b718a326a47289b9103e",
+  "command_timeout": 160,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 1936,
+      "command": "set -eu\necho REPOSITORY;pwd;git remote get-url origin;git branch --show-current;git rev-parse HEAD\necho HOST_LOAD;uptime\necho MEMORY;vm_stat | head -9\necho APP_TEST_PROCESSES\nps -axo pid,rss,etime,command | grep -E '[p]laywright test|[v]itest run|[g]radle.*Daemon|[n]ode.*vite' | head -25 || true\necho WORKTREE;git status --short\necho TIME_UTC;date -u +'%Y-%m-%dT%H:%M:%SZ'\n",
+      "current_rss_mb": 6.33,
+      "elapsed_seconds": 0.468,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "REPOSITORY\n/Users/michal/agent-workspace/repos/shelly-link/work\nhttps://github.com/MichalMatu/shelly-link.git\nagent-work\n1984a7b464a7ab07c28c480be04b5f9168860be9\nHOST_LOAD\n 0:12  up 2 days, 14:33, 3 users, load averages: 3.72 4.29 11.86\nMEMORY\nMach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                     3982.\nPages active:                                 115327.\nPages inactive:                               117156.\nPages speculative:                              3855.\nPages throttled:                                   0.\nPages wired down:                             110446.\nPages purgeable:                                1453.\n\"Translation faults\":                    11909275538.\nAPP_TEST_PROCESSES\n68488  17888    10:13:55 /Library/Java/JavaVirtualMachines/jdk-22.jdk/Contents/Home/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED -Xmx1536m -Dfile.encoding=UTF-8 -Duser.country=GB -Duser.language=en -Duser.variant -cp /Users/michal/.gradle/wrapper/dists/gradle-8.11.1-all/2qik7nd48slq1ooc2496ixf4i/gradle-8.11.1/lib/gradle-daemon-main-8.11.1.jar -javaagent:/Users/michal/.gradle/wrapper/dists/gradle-8.11.1-all/2qik7nd48slq1ooc2496ixf4i/gradle-8.11.1/lib/agents/gradle-instrumentation-agent-8.11.1.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.11.1\nWORKTREE\nTIME_UTC\n2026-10-10T22:12:03Z\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 6.33,
+      "stage_index": 1,
+      "stage_name": "host-load-and-checkout-readonly",
+      "stage_phase": "commands",
+      "stage_timeout": 160,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T22:12:04.392824+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.074,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.082,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-host-preflight-20261011-174",
+  "idle_timeout": 140,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 0.468,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "host-load-and-checkout-readonly",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T22:12:02.233267+00:00",
+  "status": "done",
+  "task_digest": "ce8e2c371d3fe0640d45aad1501386496497156b46d8678c38bbd7042c8c6cc0",
+  "task_timeout": 300,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

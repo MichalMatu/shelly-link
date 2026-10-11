@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-20261011-head-android-build-188",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": true,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 1800,
+  "task_timeout": 2300,
+  "idle_timeout": 850,
+  "steps": [
+    {
+      "name": "build-new-debug-APK-and-recount-native-controls",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"APP_SOURCE_HEAD=$(git rev-parse HEAD)\"\necho 'CAPACITOR_SYNC_ANDROID'\npnpm --filter @lcl/mobile exec cap sync android\nSDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"\ntest -d \"$SDK\"\nprintf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties\necho 'GRADLE_DEBUG_APK'\n(cd apps/mobile/android && ./gradlew assembleDebug --quiet)\nAPK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk\ntest -s \"$APK\"\necho \"APK_SHA256=$(shasum -a 256 \"$APK\" | awk '{print $1}')\"\necho \"APK_BYTES=$(wc -c < \"$APK\" | tr -d ' ')\"\necho 'PRODUCTION_NATIVE_CENSUS'\npython3 - <<'PY'\nfrom pathlib import Path\nimport re\nn={'button':0,'input':0,'select':0,'textarea':0};fs=set()\nfor p in Path('apps/mobile/src').rglob('*.tsx'):\n if re.search(r'\\.(test|spec)\\.tsx$',p.name):continue\n t=p.read_text()\n for tag in n:\n  count=len(re.findall(r'<'+tag+r'\\b',t))\n  n[tag]+=count\n  if count:fs.add(str(p))\nprint('NATIVE_CONTROLS',n,'FILES',len(fs),'TOTAL',sum(n.values()))\nPY\necho 'FINAL_TREE';git status --short\n",
+      "timeout": 1800,
+      "output_policy": "summary"
+    }
+  ]
+}

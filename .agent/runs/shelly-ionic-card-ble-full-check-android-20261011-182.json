@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-card-ble-full-check-android-20261011-182",
+  "task_digest": "3701d2042ae134fb44db4f8e35ab499d7de181340e3b51fc29b4702ed16993c3",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:30:49.568860+00:00",
+  "attempt_id": "725a216493e25f54fd502913",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 21730,
+  "updated_at": "2026-10-10T23:30:49.847537+00:00",
+  "pid": 21730
+}

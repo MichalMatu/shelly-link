@@ -1,0 +1,13 @@
+{
+  "id": "status-ux-detail-parity-20261007-026",
+  "action": "status",
+  "status": "completed",
+  "daemon_version": "4.20.6",
+  "updated_at": "2026-10-07T01:20:00.579737+00:00",
+  "repository_id": "shelly-link",
+  "repository": "MichalMatu/shelly-link",
+  "control_branch": "agent-control",
+  "default_branch": "main",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "result": "status_published"
+}

@@ -1,0 +1,61 @@
+{
+  "allow_write": false,
+  "attempt_id": "736eeb2ba84a3d94b5c19dac",
+  "command_timeout": 180,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 75,
+      "command": "printf 'SHA='; git rev-parse HEAD; printf 'STATUS='; git status --porcelain; printf 'TEMP_CSS='; if test -f apps/mobile/src/features/thermometers/components/SensorRemovalModal.css; then echo exists; else echo absent; fi; printf 'STAGED='; git diff --cached --stat",
+      "current_rss_mb": 3.95,
+      "elapsed_seconds": 0.153,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "SHA=9ae7e424bf7ee765220be6ae41092f60b05466f3\nSTATUS=TEMP_CSS=absent\nSTAGED=",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 3.95,
+      "stage_index": 1,
+      "stage_name": "confirm-clean-rollback-after-quality-reject",
+      "stage_phase": "commands",
+      "stage_timeout": 180,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-11T00:44:10.698389+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.115,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.081,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-20261011-thermo-worktree-state-192",
+  "idle_timeout": 160,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 0.153,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "confirm-clean-rollback-after-quality-reject",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-11T00:44:08.967058+00:00",
+  "status": "done",
+  "task_digest": "bd03663b9c6ec865c3f204e86b1b12be5af302ad3d9190c6ddc50452a8080e6d",
+  "task_timeout": 320,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

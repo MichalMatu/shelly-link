@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-current-host-style-inspect-20261011-174",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 180,
+  "task_timeout": 400,
+  "idle_timeout": 175,
+  "steps": [
+    {
+      "name": "check-host-load-and-Ionic-card-action-CSS-before-next-migration",
+      "command": "set -eu\necho HEAD;git rev-parse HEAD\necho STATUS;git status --short\necho HOST\nuptime\nvm_stat | head -12\necho HEAVIEST_PROCESSES\nps -axo pid,ppid,%cpu,rss,command | sort -k3,3nr | head -13 | cut -c 1-180\necho STYLE_TARGETS\ngrep -R -n -A18 -B3 '\\.shelly-ble-action\\|\\.plug-settings-ionic-action\\|\\.secondary-action--danger' apps/mobile/src --include='*.css' | head -170\necho DEVICE_NOT_USED\n",
+      "timeout": 180,
+      "output_policy": "summary"
+    }
+  ]
+}

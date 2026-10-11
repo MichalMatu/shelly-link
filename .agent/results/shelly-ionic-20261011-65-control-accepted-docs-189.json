@@ -1,0 +1,61 @@
+{
+  "allow_write": true,
+  "attempt_id": "6db35873da5ff9273b1581a3",
+  "command_timeout": 850,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 2853,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\npython3 - <<'PY'\nfrom pathlib import Path\nbt=chr(96)\nc=Path('docs/testing/2026-10-10-ionic-native-control-census.md')\ns=c.read_text()\nassert '**66 = 56 przycisków + 10 input**, w **31 plikach**' in s\nassert '22 zwykłe przyciski' in s\ns=s.replace('d4485ad76fdcf9b03d39270344e6df2561b86f81','bc0b1a9e806c080648d635943e2ce5bd3f17f4f6',1)\ns=s.replace('**66 = 56 przycisków + 10 input**, w **31 plikach**','**65 = 55 przycisków + 10 input**, w **30 plikach**',1)\ns=s.replace('22 zwykłe przyciski','21 zwykłych przycisków',1)\nlines=[];removed=0\nfor line in s.splitlines():\n if line.startswith('|') and 'features/plugs/components/PlugDeleteConfirmModal.tsx' in line:\n  removed+=1;continue\n lines.append(line)\nassert removed==1,removed\ns='\\n'.join(lines).rstrip()+'\\n'\ns+='\\n## Zatwierdzony checkpoint — 2026-10-11, Plug Delete IonButton\\n\\n'\ns+='Commit produktu '+bt+'bc0b1a9e806c080648d635943e2ce5bd3f17f4f6'+bt+' kończy migrację przycisku potwierdzenia usunięcia Pluga. Ochrony identyfikacji, fizycznego safe-OFF i trwałe rekordy nie zostały zmienione.\\n\\n'\ns+='65 natywnych kontrolek: 55 przycisków, 10 pól Climate, w 30 plikach. 21 zwykłych akcji pozostaje do rozpatrzenia; 34 celowe przyciski i 10 pól Climate są chronione kontraktem UX.\\n'\nc.write_text(s)\nnote='\\n## Verified latest Plug Delete Ionic checkpoint — 2026-10-11\\n\\n'\nnote+='Product HEAD '+bt+'bc0b1a9e806c080648d635943e2ce5bd3f17f4f6'+bt+': the guarded Plug deletion confirmation now uses IonButton with unchanged onConfirm and Cancel behavior; safety and i18n tests included. Focused modal unit tests **9/9 PASS**. Full '+bt+'pnpm check'+bt+' **PASS**, including **555/555** mobile tests. Canonical Darwin responsive/visual Playwright **50/50 PASS**, 0 skipped, 0 unexpected, 0 flaky, **no snapshot updates**. '+bt+'cap sync android'+bt+' and Gradle '+bt+'assembleDebug'+bt+' **PASS**, APK **5,179,520 B**, SHA-256 '+bt+'a5283ed32fb042a7fa66e322e93cae9d3d17a0545cd1c73baf71c41f436ba5cd'+bt+'. No phone or live Shelly operation performed. Main unchanged.\\n\\n'\nnote+='Native app controls: **65 = 55 native buttons + 10 frozen Climate inputs**, over 30 TSX files; 21 ordinary buttons, 34 intentionally custom. Hard JS budget passes; performance review is open (JS **2,370,425 B**, largest **1,043,584 B**, CSS **154,517 B**, 20 JS chunks). Headless emulator has not booted successfully; TalkBack/overlay/keyboard Android sign-off and intermittent native Capacitor background triggerEvent error remain open.\\n'\nfor file in ('docs/testing/2026-10-10-ionic-independent-audit.md','docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md','docs/HANDOFF_NEXT_CHAT.md'):\n p=Path(file);t=p.read_text()\n assert '## Verified latest Plug Delete Ionic checkpoint — 2026-10-11' not in t\n p.write_text(t.rstrip()+'\\n'+note)\nPY\npnpm exec prettier --write docs/testing/2026-10-10-ionic-native-control-census.md docs/testing/2026-10-10-ionic-independent-audit.md docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md docs/HANDOFF_NEXT_CHAT.md\npnpm exec prettier --check docs/testing/2026-10-10-ionic-native-control-census.md docs/testing/2026-10-10-ionic-independent-audit.md docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md docs/HANDOFF_NEXT_CHAT.md\ngit diff --check\ngit diff --stat\ngit add docs/testing/2026-10-10-ionic-native-control-census.md docs/testing/2026-10-10-ionic-independent-audit.md docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md docs/HANDOFF_NEXT_CHAT.md\ngit commit -m \"docs(ionic): record fully accepted Plug delete and 65 native controls\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"CHECKPOINT_COMMIT=$(git rev-parse HEAD)\"\ngit status --short\n",
+      "current_rss_mb": 299.97,
+      "elapsed_seconds": 13.65,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\ndocs/testing/2026-10-10-ionic-native-control-census.md 126ms (unchanged)\ndocs/testing/2026-10-10-ionic-independent-audit.md 37ms (unchanged)\ndocs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md 33ms (unchanged)\ndocs/HANDOFF_NEXT_CHAT.md 31ms (unchanged)\nChecking formatting...\nAll matched files use Prettier code style!\n docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md             |  6 ++++++\n docs/HANDOFF_NEXT_CHAT.md                              |  6 ++++++\n docs/testing/2026-10-10-ionic-independent-audit.md     |  6 ++++++\n docs/testing/2026-10-10-ionic-native-control-census.md | 11 ++++++++---\n 4 files changed, 26 insertions(+), 3 deletions(-)\n\n> shelly-link@2.0.10 precommit /Users/michal/agent-workspace/repos/shelly-link/work\n> lint-staged && pnpm quality:ux\n\n[STARTED] Backing up original state...\n[COMPLETED] Backed up original state in git stash (1e3f898d0)\n[STARTED] Running tasks for staged files...\n[STARTED] package.json — 4 files\n[STARTED] *.{ts,tsx,js,mjs,cjs} — 0 files\n[STARTED] *.{json,md,css,yml,yaml} — 4 files\n[SKIPPED] *.{ts,tsx,js,mjs,cjs} — no files\n[STARTED] prettier --write\n[COMPLETED] prettier --write\n[COMPLETED] *.{json,md,css,yml,yaml} — 4 files\n[COMPLETED] package.json — 4 files\n[COMPLETED] Running tasks for staged files...\n[STARTED] Staging changes from tasks...\n[COMPLETED] Staging changes from tasks...\n[STARTED] Cleaning up temporary files...\n[COMPLETED] Cleaning up temporary files...\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n[agent-work 9ae7e424b] docs(ionic): record fully accepted Plug delete and 65 native controls\n 4 files changed, 26 insertions(+), 3 deletions(-)\n\n> shelly-link@2.0.10 prepush /Users/michal/agent-workspace/repos/shelly-link/work\n> pnpm quality:ux && pnpm quality:repo\n\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n\n> shelly-link@2.0.10 quality:repo /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/brand-gate.mjs && node scripts/quality/script-lifecycle-gate.mjs && node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs && pnpm quality:selftest\n\nShelly Link branding gate passed.\nExclusive script lifecycle gate passed.\nRepository quality gate passed.\nFeature boundary quality gate passed.\n\n> shelly-link@2.0.10 quality:selftest /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/gate-selftest.mjs\n\nQuality gate self-test passed (27 cases).\nTo https://github.com/MichalMatu/shelly-link.git\n   bc0b1a9e8..9ae7e424b  HEAD -> work/ux-evolution\nCHECKPOINT_COMMIT=9ae7e424bf7ee765220be6ae41092f60b05466f3\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 506.95,
+      "stage_index": 1,
+      "stage_name": "persist-exact-65-control-source-checkpoint",
+      "stage_phase": "commands",
+      "stage_timeout": 850,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-11T00:40:51.418744+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.072,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.081,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-20261011-65-control-accepted-docs-189",
+  "idle_timeout": 500,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 13.65,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "persist-exact-65-control-source-checkpoint",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-11T00:40:36.262739+00:00",
+  "status": "done",
+  "task_digest": "a99baa272e24aa43a508073b8a07c316a94f4eb96a19eb6bc7127aac365b110a",
+  "task_timeout": 1240,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

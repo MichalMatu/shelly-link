@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-host-preflight-20261011-174",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 160,
+  "task_timeout": 300,
+  "idle_timeout": 140,
+  "steps": [
+    {
+      "name": "host-load-and-checkout-readonly",
+      "command": "set -eu\necho REPOSITORY;pwd;git remote get-url origin;git branch --show-current;git rev-parse HEAD\necho HOST_LOAD;uptime\necho MEMORY;vm_stat | head -9\necho APP_TEST_PROCESSES\nps -axo pid,rss,etime,command | grep -E '[p]laywright test|[v]itest run|[g]radle.*Daemon|[n]ode.*vite' | head -25 || true\necho WORKTREE;git status --short\necho TIME_UTC;date -u +'%Y-%m-%dT%H:%M:%SZ'\n",
+      "timeout": 160,
+      "output_policy": "summary"
+    }
+  ]
+}

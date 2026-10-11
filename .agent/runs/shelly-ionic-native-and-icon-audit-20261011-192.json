@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-native-and-icon-audit-20261011-192",
+  "task_digest": "19f96ef27cca6517f75c591f228851c851141073344f3005fbbc19297b708f47",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:59:50.696409+00:00",
+  "attempt_id": "49b50cf82727141f2134b0af",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 67857,
+  "updated_at": "2026-10-10T23:59:50.954246+00:00",
+  "pid": 67857
+}

@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-native-and-icon-audit-20261011-192",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 250,
+  "task_timeout": 450,
+  "idle_timeout": 200,
+  "steps": [
+    {
+      "name": "read-only-native-count-and-icon-references",
+      "command": "set -eu\necho \"SOURCE=$(git rev-parse HEAD)\"\ngit status --short\npython3 - <<'PY'\nfrom pathlib import Path\nimport re,collections\nstats=collections.Counter()\nfor p in Path('apps/mobile/src').rglob('*.tsx'):\n if p.name.endswith(('.test.tsx','.spec.tsx')):continue\n s=p.read_text()\n for name in ['button','input','select','textarea']:\n  stats[name]+=len(re.findall(r'<'+name+r'(?=[\\s/>])',s))\nprint('NATIVE_MARKUP',dict(stats))\nPY\necho 'BUNDLE_MANIFEST'\ngrep -R -n 'ion-icon' apps/mobile/src --include='*.ts' --include='*.tsx' | head -50 || true\necho 'COMPACT_HOST_LOAD'\nuptime\n",
+      "timeout": 250,
+      "output_policy": "summary"
+    }
+  ]
+}

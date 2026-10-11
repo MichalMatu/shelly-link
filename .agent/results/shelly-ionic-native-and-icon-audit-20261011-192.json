@@ -1,0 +1,61 @@
+{
+  "allow_write": false,
+  "attempt_id": "49b50cf82727141f2134b0af",
+  "command_timeout": 250,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 554,
+      "command": "set -eu\necho \"SOURCE=$(git rev-parse HEAD)\"\ngit status --short\npython3 - <<'PY'\nfrom pathlib import Path\nimport re,collections\nstats=collections.Counter()\nfor p in Path('apps/mobile/src').rglob('*.tsx'):\n if p.name.endswith(('.test.tsx','.spec.tsx')):continue\n s=p.read_text()\n for name in ['button','input','select','textarea']:\n  stats[name]+=len(re.findall(r'<'+name+r'(?=[\\s/>])',s))\nprint('NATIVE_MARKUP',dict(stats))\nPY\necho 'BUNDLE_MANIFEST'\ngrep -R -n 'ion-icon' apps/mobile/src --include='*.ts' --include='*.tsx' | head -50 || true\necho 'COMPACT_HOST_LOAD'\nuptime\n",
+      "current_rss_mb": 8.83,
+      "elapsed_seconds": 0.465,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "SOURCE=bc0b1a9e806c080648d635943e2ce5bd3f17f4f6\nNATIVE_MARKUP {'button': 55, 'input': 10, 'select': 0, 'textarea': 0}\nBUNDLE_MANIFEST\napps/mobile/src/features/plugs/components/PlugDetailTabs.test.tsx:70:      'data-automation-icon',\napps/mobile/src/features/plugs/components/PlugDetailTabs.tsx:94:            data-automation-icon={tab.id === 'automation' ? automationIcon : undefined}\napps/mobile/src/__tests__/automation-detail.test.tsx:653:      'data-automation-icon',\nCOMPACT_HOST_LOAD\n 1:59  up 2 days, 16:21, 3 users, load averages: 3.78 3.63 4.71\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 8.83,
+      "stage_index": 1,
+      "stage_name": "read-only-native-count-and-icon-references",
+      "stage_phase": "commands",
+      "stage_timeout": 250,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T23:59:50.696409+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.074,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.074,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-native-and-icon-audit-20261011-192",
+  "idle_timeout": 200,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 0.465,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "read-only-native-count-and-icon-references",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T23:59:48.668289+00:00",
+  "status": "done",
+  "task_digest": "19f96ef27cca6517f75c591f228851c851141073344f3005fbbc19297b708f47",
+  "task_timeout": 450,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

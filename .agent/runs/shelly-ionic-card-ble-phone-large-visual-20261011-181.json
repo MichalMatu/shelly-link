@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-card-ble-phone-large-visual-20261011-181",
+  "task_digest": "5a1bb4ff962da8c827e891a8705f26a9c1ec3e987da1a94e6d5b1d83f00f503f",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:27:06.303633+00:00",
+  "attempt_id": "17bbfb0d515f9960c15e4bf7",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 20744,
+  "updated_at": "2026-10-10T23:27:06.529897+00:00",
+  "pid": 20744
+}

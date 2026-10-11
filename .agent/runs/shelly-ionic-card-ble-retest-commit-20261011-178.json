@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-card-ble-retest-commit-20261011-178",
+  "task_digest": "48c892c3f33bcef4da12420df2b72bf3bc45f78829a8eb30122b6db9be1855c5",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-10T23:22:56.264625+00:00",
+  "attempt_id": "67ccf119259af0dd5f6e1c68",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 13504,
+  "updated_at": "2026-10-10T23:22:56.550418+00:00",
+  "pid": 13504
+}

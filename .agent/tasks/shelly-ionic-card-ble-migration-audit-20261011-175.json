@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-card-ble-migration-audit-20261011-175",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 200,
+  "task_timeout": 390,
+  "idle_timeout": 155,
+  "steps": [
+    {
+      "name": "locate-saved-Shelly-BLE-card-regressions-before-Ionic-conversion",
+      "command": "set -eu\necho \"SOURCE=$(git rev-parse HEAD)\"\necho 'SAVED_SHELLY_BLE_TEST_REFERENCES'\ngrep -n -C 8 'scanBleViaShellyTitle\\|Skanuj Bluetooth\\|Skanuj BLE\\|scan BLE\\|scanBleViaShelly' apps/mobile/src/__tests__/hardware-setup.test.tsx | tail -225 || true\necho 'CSS_RELEVANT_BASE'\nsed -n '2720,2754p' apps/mobile/src/theme/theme.css\necho 'PERFORMANCE_SCRIPT'\ncat apps/mobile/package.json | grep -E '\"(test|check|e2e|build|dev)\"' | head -18\necho 'CURRENT_SYSTEM_LOAD'\nuptime\n",
+      "timeout": 200,
+      "output_policy": "summary"
+    }
+  ]
+}

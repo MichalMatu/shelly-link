@@ -1,0 +1,11 @@
+{
+  "event": "recovered_interrupted_attempt",
+  "status": "failed",
+  "failure_reason": "interrupted_previous_attempt",
+  "attempt_id": "c07990e529294eb2aa6278dc",
+  "task_digest": "c38c3f3487c358a242d9a017837089258e1217de596be666e7c54d76b3281ac7",
+  "updated_at": "2026-10-10T21:53:23.553817+00:00",
+  "task_id": "shelly-ionic-settings-scan-check-android-20261010-173",
+  "daemon_version": "4.20.6",
+  "pid": 8956
+}

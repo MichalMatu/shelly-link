@@ -1,0 +1,11 @@
+{
+  "attempt_id": "c07990e529294eb2aa6278dc",
+  "daemon_version": "4.20.6",
+  "error": "Previous daemon instance ended while this task was claimed. Automatic replay was blocked.",
+  "failure_reason": "interrupted_previous_attempt",
+  "finished_at": "2026-10-10T21:53:20.349472+00:00",
+  "id": "shelly-ionic-settings-scan-check-android-20261010-173",
+  "started_at": "2026-10-10T21:42:21.781663+00:00",
+  "status": "failed",
+  "task_digest": "c38c3f3487c358a242d9a017837089258e1217de596be666e7c54d76b3281ac7"
+}

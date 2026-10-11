@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-guarded-plug-i18n-test-20261011-187",
+  "task_digest": "6b0aa201f649e3666f75a34d3a5f84a966d5bb0f8826df5ebdf766e238bfa1e9",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:41:58.970899+00:00",
+  "attempt_id": "c1d958dbc4449b492b843954",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 44277,
+  "updated_at": "2026-10-10T23:41:59.222725+00:00",
+  "pid": 44277
+}

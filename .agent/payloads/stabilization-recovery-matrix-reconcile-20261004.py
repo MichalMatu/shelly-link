@@ -1,0 +1,26 @@
+from pathlib import Path
+
+handoff=Path('docs/HANDOFF_NEXT_CHAT.md')
+text=handoff.read_text()
+old='Status: **2026-10-04 — PR #85 soak/liveness observability is merged. Controlled real-device `Shelly.Reboot` recovery is now qualified: boot-safe OFF was recorded in History, the same Climate runtime/source restarted without rewrite, and AUTO recovered only after fresh BLE input. Physical mains power-cycle and loss/recovery matrix work remain.**'
+new='Status: **2026-10-04 — Stage 9 soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and controlled real-device `Shelly.Reboot` recovery are qualified. Physical mains power-cycle plus Wi-Fi/BLE loss/recovery remain before the long-soak/final-hardware closeout.**'
+if old not in text:
+    raise SystemExit('handoff status anchor missing')
+text=text.replace(old,new)
+old_next='''The application is near feature-complete. Two Stage 9 slices are now qualified: soak/liveness observability, and a deliberate real-device software reboot. The configured Plug recorded boot-safe OFF at uptime 4 s, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim. Default order is now:\n\n1. physical mains power-cycle plus Wi-Fi/BLE loss/recovery and the AUTO/MANUAL + automation-fault + hard-safety interaction matrix;\n2. a materially longer soak and the final real-hardware matrix;\n3. V1 feature freeze and release qualification.\n\nDetailed reboot evidence: `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.'''
+new_next='''The application is near feature-complete. Three Stage 9 slices are now qualified: soak/liveness observability, the deterministic AUTO/MANUAL + automation-fault + hard-safety interaction matrix, and a deliberate real-device software reboot. The configured Plug recorded boot-safe OFF at uptime 4 s, restarted the same byte-identical managed Climate source, retained empty schedules and recovered AUTO only after fresh BLE input. This is not a physical mains power-cycle claim. Default order is now:\n\n1. physical mains power-cycle plus Wi-Fi/BLE loss/recovery;\n2. a materially longer soak and the final real-hardware matrix;\n3. V1 feature freeze and release qualification.\n\nDetailed recovery evidence: `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md` and `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.'''
+if old_next not in text:
+    raise SystemExit('handoff next-work anchor missing')
+text=text.replace(old_next,new_next)
+handoff.write_text(text)
+
+roadmap=Path('docs/ROADMAP.md')
+text=roadmap.read_text()
+reboot='The 2026-10-04 controlled software-reboot slice is also qualified on the configured Plug S Gen3 / firmware 1.7.5. `Shelly.Reboot` was capability-advertised and sent exactly once after identity verification. Device uptime reset from about 208053 s; History recorded a boot-safe record at uptime 4 s with requested/final OFF, reason `b` and automation fault `st`; the same 8847 B managed source / SHA-256 `eaa12322ffe9d8777df08706264b039294ecc515df9795f63da49ecb0f8a53c6` returned enabled/running; schedules stayed empty; fresh BLE later cleared `st` and normal AUTO output resumed. This closes deliberate software reboot recovery only. Physical mains power-cycle, Wi-Fi/BLE loss/recovery, the full interaction/fault/safety matrix, long soak and final hardware matrix remain. Detailed evidence is in `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.'
+if reboot not in text:
+    raise SystemExit('roadmap reboot anchor missing')
+reboot_updated='The 2026-10-04 controlled software-reboot slice is also qualified on the configured Plug S Gen3 / firmware 1.7.5. `Shelly.Reboot` was capability-advertised and sent exactly once after identity verification. Device uptime reset from about 208053 s; History recorded a boot-safe record at uptime 4 s with requested/final OFF, reason `b` and automation fault `st`; the same 8847 B managed source / SHA-256 `eaa12322ffe9d8777df08706264b039294ecc515df9795f63da49ecb0f8a53c6` returned enabled/running; schedules stayed empty; fresh BLE later cleared `st` and normal AUTO output resumed. This closes deliberate software reboot recovery only. Physical mains power-cycle, Wi-Fi/BLE loss/recovery, long soak and final hardware matrix remain. Detailed evidence is in `docs/testing/reboot-recovery-acceptance-2026-10-04.md`.'
+text=text.replace(reboot,reboot_updated)
+paragraph='The 2026-10-04 deterministic recovery-interaction slice qualifies the full existing AUTO/MANUAL + automation-fault + hard-safety precedence without changing production runtime semantics. Two generated-runtime cross-axis cases close the previously uncovered intersections: MANUAL + automation fault + hard safety through safety reset, and AUTO + automation fault + hard safety through reset and fresh-input recovery. Hard safety remains highest priority, safety reset stays OFF, MANUAL preserves an independent automation fault while allowing later explicit manual control, and AUTO remains `st`/OFF until fresh usable input arrives. Detailed evidence is in `docs/testing/runtime-recovery-interaction-matrix-acceptance-2026-10-04.md`.'
+text=text.replace(reboot_updated,reboot_updated+'\n\n'+paragraph)
+roadmap.write_text(text)

@@ -1,0 +1,61 @@
+{
+  "allow_write": false,
+  "attempt_id": "6d140b97420b629480f1b65e",
+  "command_timeout": 240,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 6769,
+      "command": "set -eu\necho 'HOST_UPTIME_AND_LOAD'\nuptime\necho 'TEST_TASK_LOG_TAIL'\nLOG=/tmp/shelly-ionic-BLE-173-check.log\nif test -f \"$LOG\";then\n echo \"LOG_BYTES=$(wc -c < \"$LOG\" | tr -d ' ')\"\n tail -85 \"$LOG\"\nelse echo NO_LOG;fi\necho 'LEFTOVER_TEST_PROCESSES'\nps -axo pid,rss,command | grep -E '[v]itest|[p]laywright|[g]radle|[t]sc -p|[r]ollup|[v]ite build' | head -35 || true\necho 'WORKTREE'\ngit rev-parse HEAD\ngit status --short\n",
+      "current_rss_mb": 3.19,
+      "elapsed_seconds": 0.471,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "HOST_UPTIME_AND_LOAD\n23:54  up 2 days, 14:16, 3 users, load averages: 16.55 49.76 33.69\nTEST_TASK_LOG_TAIL\nLOG_BYTES=86436\n-------------------|---------|----------|---------|---------|-------------------\n\n> shelly-link@2.0.10 check:build /Users/michal/agent-workspace/repos/shelly-link/work\n> pnpm build && pnpm quality:performance\n\n\n> shelly-link@2.0.10 build /Users/michal/agent-workspace/repos/shelly-link/work\n> pnpm -r build\n\nScope: 10 of 11 workspace projects\npackages/automation-core build$ tsc -p tsconfig.build.json\npackages/design-tokens build$ node build/build-tokens.mjs && tsc -p tsconfig.build.json\npackages/device-profiles build$ tsc -p tsconfig.build.json\npackages/diagnostics build$ tsc -p tsconfig.build.json\npackages/diagnostics build: Done\npackages/device-profiles build: Done\npackages/automation-core build: Done\npackages/design-tokens build: Done\napps/landing build$ tsc -p tsconfig.build.json --noEmit && vite build\npackages/ble-core build$ tsc -p tsconfig.build.json\npackages/script-generator build$ tsc -p tsconfig.build.json\npackages/shelly-client build$ tsc -p tsconfig.build.json\npackages/ble-core build: Done\npackages/ui build$ tsc -p tsconfig.build.json\napps/landing build: vite v7.3.6 building client environment for production...\napps/landing build: transforming...\npackages/script-generator build: Done\npackages/shelly-client build: Done\napps/landing build: ✓ 31 modules transformed.\napps/landing build: rendering chunks...\napps/landing build: computing gzip size...\napps/landing build: dist/index.html                   1.14 kB │ gzip:  0.54 kB\napps/landing build: dist/assets/index-C8jWSUaJ.css   23.77 kB │ gzip:  4.85 kB\napps/landing build: dist/assets/index-DCGn5PVg.js   224.83 kB │ gzip: 71.07 kB\napps/landing build: ✓ built in 15.11s\napps/landing build: Done\npackages/ui build: Done\napps/mobile build$ tsc -p tsconfig.build.json --noEmit && vite build\napps/mobile build: vite v7.3.6 building client environment for production...\napps/mobile build: transforming...\napps/mobile build: ✓ 7424 modules transformed.\napps/mobile build: rendering chunks...\napps/mobile build: computing gzip size...\napps/mobile build: dist/index.html                                   1.77 kB │ gzip:   0.57 kB\napps/mobile build: dist/assets/vendor-ionic-react-DgBR_I0J.css      13.54 kB │ gzip:   3.35 kB\napps/mobile build: dist/assets/lcl-ui-DzgiLS8H.css                  28.51 kB │ gzip:   4.49 kB\napps/mobile build: dist/assets/index-DQGRe7eM.css                  112.19 kB │ gzip:  13.74 kB\napps/mobile build: dist/assets/_commonjsHelpers-Cpj98o6Y.js          0.24 kB │ gzip:   0.18 kB\napps/mobile build: dist/assets/p-D7bSXQD3-Co0-c4L9.js                0.46 kB │ gzip:   0.32 kB\napps/mobile build: dist/assets/p-Sh0ICmPV-C-Q_5Grf.js                0.65 kB │ gzip:   0.45 kB\napps/mobile build: dist/assets/p-DIE4pXMl-BlYR6Qol.js                1.00 kB │ gzip:   0.54 kB\napps/mobile build: dist/assets/preload-helper-BXl3LOEh.js            1.11 kB │ gzip:   0.65 kB\napps/mobile build: dist/assets/p-C4t5ymfq-0npJO5dh.js                1.60 kB │ gzip:   0.81 kB\napps/mobile build: dist/assets/IonicSettingsControl-BsvCi-vZ.js      1.78 kB │ gzip:   0.78 kB\napps/mobile build: dist/assets/p-D5Ubpm7D-BwmsrDQC.js                4.84 kB │ gzip:   2.15 kB\napps/mobile build: dist/assets/vendor-capacitor-Dz-8_eBV.js          8.64 kB │ gzip:   3.49 kB\napps/mobile build: dist/assets/HardwareSetupScreen-Bfr3gJ5h.js      10.22 kB │ gzip:   3.36 kB\napps/mobile build: dist/assets/p-C1aScSTo-B0M0TXv0.js               10.36 kB │ gzip:   3.01 kB\napps/mobile build: dist/assets/lcl-ui-CgLjSxDR.js                   10.92 kB │ gzip:   3.73 kB\napps/mobile build: dist/assets/vendor-ionic-react-Cvl016J6.js       26.95 kB │ gzip:   7.02 kB\napps/mobile build: dist/assets/vendor-query-CgeEGI5-.js             39.07 kB │ gzip:  11.60 kB\napps/mobile build: dist/assets/vendor-state-DyGr1iR_.js             55.94 kB │ gzip:  12.98 kB\napps/mobile build: dist/assets/lcl-domain-CZ4x0xGM.js              102.52 kB │ gzip:  30.34 kB\napps/mobile build: dist/assets/vendor-react-6D8IgoIk.js            192.47 kB │ gzip:  60.30 kB\napps/mobile build: dist/assets/vendor-misc-BaoMMMQ_.js             297.98 kB │ gzip: 100.98 kB\napps/mobile build: dist/assets/index-CVH_ap5t.js                   559.97 kB │ gzip: 151.22 kB\napps/mobile build: dist/assets/ion-icon-CUxuT1sd.js              1,043.58 kB │ gzip: 214.04 kB\napps/mobile build: (!) Some chunks are larger than 500 kB after minification. Consider:\napps/mobile build: - Using dynamic import() to code-split the application\napps/mobile build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\napps/mobile build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\napps/mobile build: ✓ built in 17.70s\napps/mobile build: Done\n\n> shelly-link@2.0.10 quality:performance /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/performance-budget.mjs\n\nPerformance budget: JS=2370284 B, largest=1043584 B, CSS=154245 B, chunks=20, minPoll=1000 ms\nPerformance review baseline: 7e9fdaa5f7d7c514313d2c962a2cc02bb26615b7; review JS<=1536098 B, largest<=686363 B, CSS<=204947 B, chunks<=15\nPerformance review threshold exceeded:\n- total JS 2370284 exceeds review threshold 1536098\n- largest JS 1043584 exceeds review threshold 686363\n- JS file count 20 exceeds review threshold 15\nHard limits remain green; review intentional growth before changing the recorded baseline.\nPerformance budget passed.\nLEFTOVER_TEST_PROCESSES\n68488  22208 /Library/Java/JavaVirtualMachines/jdk-22.jdk/Contents/Home/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED -Xmx1536m -Dfile.encoding=UTF-8 -Duser.country=GB -Duser.language=en -Duser.variant -cp /Users/michal/.gradle/wrapper/dists/gradle-8.11.1-all/2qik7nd48slq1ooc2496ixf4i/gradle-8.11.1/lib/gradle-daemon-main-8.11.1.jar -javaagent:/Users/michal/.gradle/wrapper/dists/gradle-8.11.1-all/2qik7nd48slq1ooc2496ixf4i/gradle-8.11.1/lib/agents/gradle-instrumentation-agent-8.11.1.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.11.1\nWORKTREE\n1a6021e8a246667005dadbe4d72e335fbaee5b4d\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 3.19,
+      "stage_index": 1,
+      "stage_name": "inspect-recovered-host-load-and-interrupted-check-log",
+      "stage_phase": "commands",
+      "stage_timeout": 240,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T21:54:39.888234+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.08,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.096,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-host-after-overload-20261010-174",
+  "idle_timeout": 200,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 0.471,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "inspect-recovered-host-load-and-interrupted-check-log",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T21:54:37.767493+00:00",
+  "status": "done",
+  "task_digest": "42915d48b6e929ed4f322730558e69b6567ac3934a9194226ec8b5890d357851",
+  "task_timeout": 400,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

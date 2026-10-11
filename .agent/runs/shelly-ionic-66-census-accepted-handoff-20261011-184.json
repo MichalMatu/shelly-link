@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-66-census-accepted-handoff-20261011-184",
+  "task_digest": "22d3bf5487824f5bb9dc9a9909be71201bccfee207a42fcf4bc36f69a9fc26ef",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:35:04.215135+00:00",
+  "attempt_id": "0ac5368160905768ace215a2",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 33096,
+  "updated_at": "2026-10-10T23:35:04.549449+00:00",
+  "pid": 33096
+}

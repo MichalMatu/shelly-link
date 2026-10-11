@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-20261011-head-full-check-186",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 2800,
+  "task_timeout": 3600,
+  "idle_timeout": 1200,
+  "steps": [
+    {
+      "name": "full-pnpm-check-on-latest-Plug-delete-commit",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE_HEAD=$(git rev-parse HEAD)\"\necho 'HOST_LOAD';uptime\necho 'PNPM_CHECK_START'\npnpm check >/tmp/shelly-ionic-20261011-186-check.log 2>&1 || {\n echo PNPM_CHECK_FAILED\n grep -E 'FAIL|Error|Test Files|Tests |budget' /tmp/shelly-ionic-20261011-186-check.log | tail -90 || true\n tail -95 /tmp/shelly-ionic-20261011-186-check.log\n exit 42\n}\necho PNPM_CHECK_PASSED\ngrep -E 'Test Files|Tests |Performance budget|Performance review|threshold exceeded|budget passed' /tmp/shelly-ionic-20261011-186-check.log | tail -55 || true\necho 'FINAL_TREE';git status --short\necho 'HOST_LOAD_AFTER';uptime\n",
+      "timeout": 2800,
+      "output_policy": "summary"
+    }
+  ]
+}

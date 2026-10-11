@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-led-timeout-isolated-20261011-190",
+  "task_digest": "5fc257180dfa4eef8ff2a53f1535288ebbeb28eab4de9761e4ffced197bf45ac",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-10T23:58:48.125483+00:00",
+  "attempt_id": "e033e627327e23d0ce976a9a",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 66384,
+  "updated_at": "2026-10-10T23:58:48.372410+00:00",
+  "pid": 66384
+}

@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-plug-confirm-full-check-20261011-186",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": true,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 3350,
+  "task_timeout": 4100,
+  "idle_timeout": 1260,
+  "steps": [
+    {
+      "name": "full-quality-555-tests-and-Android-debug-confirm-modal",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\necho 'FULL_PNPM_CHECK'\npnpm check >/tmp/shelly-ionic-plug-confirm-186-check.log 2>&1 || {\n echo 'CHECK_FAILED'\n grep -E 'FAIL|Error|Test Files|Tests |budget' /tmp/shelly-ionic-plug-confirm-186-check.log | tail -72 || true\n tail -80 /tmp/shelly-ionic-plug-confirm-186-check.log\n exit 54\n}\necho 'PNPM_CHECK_PASS'\ngrep -E 'Test Files|Tests |Performance budget|Performance review|threshold exceeded|budget passed' /tmp/shelly-ionic-plug-confirm-186-check.log | tail -54 || true\necho 'CAPACITOR_SYNC_AND_ANDROID_ASSEMBLE'\npnpm --filter @lcl/mobile exec cap sync android\nSDK=\"${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}\"\nprintf 'sdk.dir=%s\\n' \"$SDK\" > apps/mobile/android/local.properties\n(cd apps/mobile/android && ./gradlew assembleDebug --quiet)\nAPK=apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk\ntest -s \"$APK\"\necho \"APK_SHA256=$(shasum -a 256 \"$APK\" | awk '{print $1}')\"\necho \"APK_BYTES=$(wc -c < \"$APK\" | tr -d ' ')\"\necho 'WORKTREE';git status --short\nuptime\n",
+      "timeout": 3350,
+      "output_policy": "summary"
+    }
+  ]
+}

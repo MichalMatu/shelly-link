@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-20261011-65-control-accepted-docs-189",
+  "task_digest": "a99baa272e24aa43a508073b8a07c316a94f4eb96a19eb6bc7127aac365b110a",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-11T00:40:51.418744+00:00",
+  "attempt_id": "6db35873da5ff9273b1581a3",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 13858,
+  "updated_at": "2026-10-11T00:40:51.665888+00:00",
+  "pid": 13858
+}

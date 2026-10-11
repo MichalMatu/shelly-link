@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-20261011-head-full-check-186",
+  "task_digest": "416fc463acf0bb9c8fa180313a83b88727313514a4412270c0c851bbf8320a9f",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-11T00:36:18.648070+00:00",
+  "attempt_id": "edc2de0280ff764e5f20dff8",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 99764,
+  "updated_at": "2026-10-11T00:36:19.145132+00:00",
+  "pid": 99764
+}

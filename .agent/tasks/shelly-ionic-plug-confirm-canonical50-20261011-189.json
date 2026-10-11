@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-plug-confirm-canonical50-20261011-189",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 2700,
+  "task_timeout": 3400,
+  "idle_timeout": 1150,
+  "steps": [
+    {
+      "name": "full-50-canonical-E2E-after-guarded-Plug-delete-modal",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\necho 'CANONICAL_50_VISUAL_E2E'\nLCL_E2E_PORT=5293 LCL_VISUAL_CONTRACT=1 pnpm exec playwright test -c apps/mobile/playwright.config.ts --workers=1 --reporter=json >/tmp/shelly-ionic-plug-confirm-189-e2e.json 2>/tmp/shelly-ionic-plug-confirm-189-e2e.err || {\n echo 'E2E_FAILED'\n python3 - <<'PY'\nimport json\nfrom pathlib import Path\ns=Path('/tmp/shelly-ionic-plug-confirm-189-e2e.json').read_text(errors='replace')\ntry:\n j=json.loads(s[s.index('{'):]);print('STATS',j.get('stats'))\n def walk(ss):\n  for suite in ss:\n   for sp in suite.get('specs',[]):\n    for t in sp.get('tests',[]):\n     if t.get('status') not in ('expected','skipped'):\n      print('FAILED',sp.get('title'),t.get('status'))\n      for r in t.get('results',[]):\n       if r.get('error'):print('ERROR',r['error'].get('message','')[:1550])\n   walk(suite.get('suites',[]))\n walk(j.get('suites',[]))\nexcept Exception as e:print('RESULT_PARSE_FAILED',str(e),s[-1600:])\nPY\n tail -20 /tmp/shelly-ionic-plug-confirm-189-e2e.err\n exit 54\n}\npython3 - <<'PY'\nfrom pathlib import Path\nimport json\ns=Path('/tmp/shelly-ionic-plug-confirm-189-e2e.json').read_text(errors='replace')\nstats=json.loads(s[s.index('{'):])['stats']\nprint('VISUAL_E2E_STATS',stats)\nassert stats['expected']==50 and stats['unexpected']==0 and stats['skipped']==0 and stats['flaky']==0\nPY\necho 'E2E_50_50_PASS_NO_SNAPSHOT_UPDATES'\necho WORKTREE;git status --short\nuptime\n",
+      "timeout": 2700,
+      "output_policy": "summary"
+    }
+  ]
+}

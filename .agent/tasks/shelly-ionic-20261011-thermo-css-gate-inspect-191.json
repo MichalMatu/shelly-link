@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-20261011-thermo-css-gate-inspect-191",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 250,
+  "task_timeout": 400,
+  "idle_timeout": 210,
+  "steps": [
+    {
+      "name": "inspect-rejected-Ionic-modal-CSS-and-project-gate",
+      "command": "git status --short; grep -n -C 3 'ThermometerSettingsPage.css' scripts/quality/ux-gate.mjs; grep -n -C 2 'CSS must be included' scripts/quality/ux-gate.mjs; git diff --stat",
+      "timeout": 250,
+      "output_policy": "summary"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-led-timeout-isolated-20261011-190",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 780,
+  "task_timeout": 1050,
+  "idle_timeout": 440,
+  "steps": [
+    {
+      "name": "check-unrelated-LED-timeout-and-thermometer-CSS-dependencies",
+      "command": "set -eu\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\necho \"SENSOR_CONFIRM_USAGES\"\ngrep -R -n 'SensorRemovalConfirmModal' apps/mobile/src --include='*.tsx' | head -50\necho \"SENSOR_CSS_IMPORTS\"\ngrep -R -n 'SensorSetupPage.css' apps/mobile/src --include='*.tsx' | head -20\necho 'LED_ISOLATED_CANONICAL_E2E'\nset +e\nLCL_E2E_PORT=5297 LCL_VISUAL_CONTRACT=1 pnpm exec playwright test -c apps/mobile/playwright.config.ts --grep='PLUGS_UI LED relay-state and off modes work end to end' --workers=1 --reporter=json >/tmp/shelly-ionic-190-isolated-led-e2e.json 2>/tmp/shelly-ionic-190-isolated-led.err\nrc=$?\nset -e\npython3 - <<'PY'\nimport json,pathlib\ns=pathlib.Path('/tmp/shelly-ionic-190-isolated-led-e2e.json').read_text(errors='replace')\ntry:\n j=json.loads(s[s.find('{'):]);print('STATS',j['stats'])\n for suite in j.get('suites',[]):\n  for spec in suite.get('specs',[]):\n   for t in spec.get('tests',[]):\n    if t.get('status') not in ('expected','skipped'):\n     print('FAIL',spec['title'],t['status'],str(t.get('results',[]))[:1200])\nexcept Exception as e:print('ERROR_PARSING',str(e),s[-1200:])\nPY\necho \"EXIT=$rc\"\nuptime\ngit status --short\ntest \"$rc\" -eq 0\n",
+      "timeout": 780,
+      "output_policy": "summary"
+    }
+  ]
+}

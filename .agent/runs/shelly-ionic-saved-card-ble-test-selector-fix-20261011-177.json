@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-saved-card-ble-test-selector-fix-20261011-177",
+  "task_digest": "83c7a2b8af90794a0bc3148c784608385fbac9355d3635507929e8efb2da214f",
+  "status": "failed",
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-10T23:21:27.765290+00:00",
+  "attempt_id": "8c3c7d93305e919f4de79472",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 12400,
+  "updated_at": "2026-10-10T23:21:28.332786+00:00",
+  "pid": 12400
+}

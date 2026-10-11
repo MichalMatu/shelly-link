@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-card-ble-retest-commit-20261011-178",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": true,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 1000,
+  "task_timeout": 1400,
+  "idle_timeout": 520,
+  "steps": [
+    {
+      "name": "verify-all-58-BLE-setup-tests-then-commit-card-Ionic",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\necho 'WORKTREE_CANDIDATE';git status --short\npnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --reporter=dot >/tmp/shelly-ionic-card-ble-178-focused.log 2>&1 || {\n  echo 'FOCUSED_TEST_FAILED'\n  grep -E 'FAIL|Error|×|Test Files|Tests ' /tmp/shelly-ionic-card-ble-178-focused.log | tail -65 || true\n  tail -45 /tmp/shelly-ionic-card-ble-178-focused.log\n  exit 33\n}\ngrep -E 'Test Files|Tests ' /tmp/shelly-ionic-card-ble-178-focused.log | tail -5\npnpm --filter @lcl/mobile typecheck\ngit diff --check\ngit add apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx\ngit commit -m \"refactor(ionic): saved Shelly BLE card scan as compact Ionic action\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"MIGRATION_COMMIT=$(git rev-parse HEAD)\"\ngit status --short\n",
+      "timeout": 1000,
+      "output_policy": "summary"
+    }
+  ]
+}

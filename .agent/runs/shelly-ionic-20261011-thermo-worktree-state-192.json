@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-20261011-thermo-worktree-state-192",
+  "task_digest": "bd03663b9c6ec865c3f204e86b1b12be5af302ad3d9190c6ddc50452a8080e6d",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-11T00:44:10.698389+00:00",
+  "attempt_id": "736eeb2ba84a3d94b5c19dac",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 19349,
+  "updated_at": "2026-10-11T00:44:10.924211+00:00",
+  "pid": 19349
+}

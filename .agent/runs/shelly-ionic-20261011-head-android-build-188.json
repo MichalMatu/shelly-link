@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-20261011-head-android-build-188",
+  "task_digest": "18815a1ecbac38093a4b02124d6b7dd8233247fca75dbc26ac52743e321924be",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-11T00:39:30.630126+00:00",
+  "attempt_id": "ce91e2e09b1f1891edfdc82a",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 12197,
+  "updated_at": "2026-10-11T00:39:30.896288+00:00",
+  "pid": 12197
+}

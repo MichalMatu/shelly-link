@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-guarded-plug-i18n-test-20261011-187",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": true,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 900,
+  "task_timeout": 1300,
+  "idle_timeout": 500,
+  "steps": [
+    {
+      "name": "fix-Polish-literal-in-confirmation-test-and-run-i18n-gate",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\npython3 - <<'PY'\nfrom pathlib import Path\np=Path('apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx')\ns=p.read_text()\nfixes={\n \"import { I18nProvider, setLocalePreference }\":\"import { I18nProvider, setLocalePreference, t }\",\n \"name: 'Usunąć gniazdko?'\":\"name: t('hardware.shelly.deleteConfirmTitle')\",\n \"getIonicButton(dialog, 'Usuń')\":\"getIonicButton(dialog, t('common.delete'))\",\n \"name: 'Anuluj'\":\"name: t('common.cancel')\"\n}\nfor old,new in fixes.items():\n assert s.count(old)==1,(old,s.count(old))\n s=s.replace(old,new)\np.write_text(s)\nPY\npnpm exec prettier --write apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx\npnpm --filter @lcl/mobile exec vitest run src/features/plugs/components/PlugDeleteConfirmModal.test.tsx src/__tests__/i18n.test.ts src/__tests__/modal.test.tsx --reporter=default\npnpm --filter @lcl/mobile typecheck\ngit diff --check\ngit add apps/mobile/src/features/plugs/components/PlugDeleteConfirmModal.test.tsx\ngit commit -m \"test(i18n): assert guarded Plug deletion through translation keys\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"TEST_FIX_COMMIT=$(git rev-parse HEAD)\"\ngit status --short\n",
+      "timeout": 900,
+      "output_policy": "summary"
+    }
+  ]
+}

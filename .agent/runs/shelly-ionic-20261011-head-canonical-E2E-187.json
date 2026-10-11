@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-20261011-head-canonical-E2E-187",
+  "task_digest": "f9e8ac044266ea57cc804a8a11d1bff7593caa7063c9902868b1b95d8c2710d1",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-11T00:38:43.140162+00:00",
+  "attempt_id": "27d8f5c03343562ea7906b8e",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 8998,
+  "updated_at": "2026-10-11T00:38:43.380520+00:00",
+  "pid": 8998
+}

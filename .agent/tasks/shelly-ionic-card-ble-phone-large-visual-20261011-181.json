@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-card-ble-phone-large-visual-20261011-181",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 750,
+  "task_timeout": 1150,
+  "idle_timeout": 500,
+  "steps": [
+    {
+      "name": "single-BLE-card-route-and-canonical-visual-on-phone-large",
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho \"SOURCE=$(git rev-parse HEAD)\"\necho 'RELEVANT_PHONE_LARGE_E2E'\nLCL_E2E_PORT=5291 LCL_VISUAL_CONTRACT=1 pnpm exec playwright test -c apps/mobile/playwright.config.ts --grep='installed automation dashboard shows Shelly runtime on phone-large' --workers=1 --reporter=json >/tmp/shelly-ionic-saved-card-181-e2e.json 2>/tmp/shelly-ionic-saved-card-181-e2e.err || {\n echo 'E2E_FAILED'\n tail -25 /tmp/shelly-ionic-saved-card-181-e2e.err\n python3 - <<'PY'\nimport json\nfrom pathlib import Path\ns=Path('/tmp/shelly-ionic-saved-card-181-e2e.json').read_text(errors='replace')\ntry:\n j=json.loads(s[s.index('{'):]);print('STATS',j.get('stats'))\nexcept Exception as e:print('PARSE_ERROR',str(e),s[-1400:])\nPY\n exit 60\n}\npython3 - <<'PY'\nimport json\nfrom pathlib import Path\ns=Path('/tmp/shelly-ionic-saved-card-181-e2e.json').read_text(errors='replace')\nstats=json.loads(s[s.index('{'):])['stats']\nprint('PHONE_LARGE_E2E_STATS',stats)\nassert stats['expected']==1 and stats['unexpected']==0 and stats['flaky']==0 and stats['skipped']==0\nPY\necho 'NO_SNAPSHOT_UPDATES'\necho 'WORKTREE';git status --short\nuptime\n",
+      "timeout": 750,
+      "output_policy": "summary"
+    }
+  ]
+}

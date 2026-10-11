@@ -1,0 +1,13 @@
+{
+  "event": "task_finished",
+  "task_id": "shelly-ionic-20261011-delete-safety-targeted-185",
+  "task_digest": "943c568ef2f8eefb0dc4e5cb58abafa65a12fc9049ab03bf82cbd06e85e671e3",
+  "status": "done",
+  "failure_reason": null,
+  "finished_at": "2026-10-11T00:31:02.658590+00:00",
+  "attempt_id": "8e01286a7494f2018c7caf06",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 98391,
+  "updated_at": "2026-10-11T00:31:02.924649+00:00",
+  "pid": 98391
+}

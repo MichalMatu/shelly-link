@@ -1,0 +1,61 @@
+{
+  "allow_write": false,
+  "attempt_id": "797fa52c87228848cc7d7e02",
+  "command_timeout": 1100,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 3102,
+      "command": "set -eu\ntest \"$(git rev-parse HEAD)\" = \"1984a7b464a7ab07c28c480be04b5f9168860be9\"\ntest -z \"$(git status --porcelain)\"\necho TARGET_PRODUCT_SHA;git rev-parse HEAD\necho PRECHECK_LOAD;uptime\necho CHECK_STATIC\npnpm check:static > /tmp/shelly-ionic-175-static.log 2>&1 || { echo STATIC_FAILED;tail -100 /tmp/shelly-ionic-175-static.log;exit 72; }\necho CHECK_STATIC_PASS\ntail -24 /tmp/shelly-ionic-175-static.log\necho FOCUSED_BLE_SETTINGS\npnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --reporter=default > /tmp/shelly-ionic-175-hardware.log 2>&1 || { echo BLE_FOCUSED_FAILED;tail -85 /tmp/shelly-ionic-175-hardware.log;exit 73; }\necho BLE_FOCUSED_PASS\ntail -21 /tmp/shelly-ionic-175-hardware.log\necho POSTCHECK_LOAD;uptime\necho WORKTREE;git status --short\n",
+      "current_rss_mb": 444.19,
+      "elapsed_seconds": 66.906,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "TARGET_PRODUCT_SHA\n1984a7b464a7ab07c28c480be04b5f9168860be9\nPRECHECK_LOAD\n 0:12  up 2 days, 14:34, 3 users, load averages: 3.18 4.05 11.38\nCHECK_STATIC\nCHECK_STATIC_PASS\n> shelly-link@2.0.10 typecheck /Users/michal/agent-workspace/repos/shelly-link/work\n> pnpm -r typecheck\n\nScope: 10 of 11 workspace projects\npackages/automation-core typecheck$ tsc -p tsconfig.json --noEmit\npackages/design-tokens typecheck$ tsc -p tsconfig.json --noEmit\npackages/diagnostics typecheck$ tsc -p tsconfig.json --noEmit\npackages/device-profiles typecheck$ tsc -p tsconfig.json --noEmit\npackages/design-tokens typecheck: Done\npackages/diagnostics typecheck: Done\npackages/device-profiles typecheck: Done\npackages/automation-core typecheck: Done\napps/landing typecheck$ tsc -p tsconfig.json --noEmit\npackages/ble-core typecheck$ tsc -p tsconfig.json --noEmit\npackages/script-generator typecheck$ tsc -p tsconfig.json --noEmit\npackages/shelly-client typecheck$ tsc -p tsconfig.json --noEmit\npackages/ble-core typecheck: Done\npackages/ui typecheck$ tsc -p tsconfig.json --noEmit\napps/landing typecheck: Done\npackages/shelly-client typecheck: Done\npackages/script-generator typecheck: Done\npackages/ui typecheck: Done\napps/mobile typecheck$ tsc -p tsconfig.json --noEmit\napps/mobile typecheck: Done\nFOCUSED_BLE_SETTINGS\nBLE_FOCUSED_PASS\n   ✓ HardwareSetupScreen > blocks rule install when Shelly status does not expose BLE  539ms\n   ✓ HardwareSetupScreen > adds Shelly and Xiaomi devices, then enables rule send  305ms\n   ✓ HardwareSetupScreen > requires the real hardware safe relay test after script upload before ready state  3915ms\n   ✓ HardwareSetupScreen > removes a stale BLE discovery script before saving the rule  2266ms\n   ✓ HardwareSetupScreen > loads a multi-sensor Shelly script into the rule form from the selected plug  366ms\n   ✓ HardwareSetupScreen > does not replay rule success toasts after returning to the rule page  3917ms\n   ✓ HardwareSetupScreen > restarts saved thermometer live scan after an unexpected scanner end  1269ms\n   ✓ HardwareSetupScreen > switches between humidity rule modes and copies the generated script  445ms\n   ✓ HardwareSetupScreen > recognizes a thermometer restored from automation during Shelly-side BLE scan  1834ms\n   ✓ HardwareSetupScreen > removes a stale BLE discovery script before starting a new Shelly BLE scan  1935ms\n   ✓ HardwareSetupScreen > cleans up Shelly BLE discovery when the user switches tabs mid-scan  1949ms\n   ✓ HardwareSetupScreen > cleans up Shelly BLE discovery on pagehide  1920ms\n   ✓ HardwareSetupScreen > recovers Shelly BLE polling after one transient refresh failure  1808ms\n   ✓ HardwareSetupScreen > keeps BLE scan refresh errors out of the visible UI  1696ms\n   ✓ HardwareSetupScreen > does not restart automation when the BLE scanner cannot be stopped  1721ms\n\n Test Files  1 passed (1)\n      Tests  58 passed (58)\n   Start at  00:13:19\n   Duration  37.68s (transform 1.28s, setup 748ms, collect 1.73s, tests 34.66s, environment 312ms, prepare 50ms)\n\nPOSTCHECK_LOAD\n 0:13  up 2 days, 14:35, 3 users, load averages: 3.74 4.10 10.86\nWORKTREE\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 930.02,
+      "stage_index": 1,
+      "stage_name": "staged-static-gates-and-targeted-hardware-regressions",
+      "stage_phase": "commands",
+      "stage_timeout": 1100,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T22:13:58.332396+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.063,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.078,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-static-acceptance-20261011-175",
+  "idle_timeout": 440,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 66.906,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "staged-static-gates-and-targeted-hardware-regressions",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T22:12:49.873719+00:00",
+  "status": "done",
+  "task_digest": "6e7a14dca16a54cd0af2527db2d088913f07713b8abf8d30d27aed9e9b057c04",
+  "task_timeout": 1450,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

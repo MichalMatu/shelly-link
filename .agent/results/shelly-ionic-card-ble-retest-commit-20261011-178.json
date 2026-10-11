@@ -1,0 +1,62 @@
+{
+  "allow_write": true,
+  "attempt_id": "67ccf119259af0dd5f6e1c68",
+  "command_timeout": 1000,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 738,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\necho 'WORKTREE_CANDIDATE';git status --short\npnpm --filter @lcl/mobile exec vitest run src/__tests__/hardware-setup.test.tsx --reporter=dot >/tmp/shelly-ionic-card-ble-178-focused.log 2>&1 || {\n  echo 'FOCUSED_TEST_FAILED'\n  grep -E 'FAIL|Error|×|Test Files|Tests ' /tmp/shelly-ionic-card-ble-178-focused.log | tail -65 || true\n  tail -45 /tmp/shelly-ionic-card-ble-178-focused.log\n  exit 33\n}\ngrep -E 'Test Files|Tests ' /tmp/shelly-ionic-card-ble-178-focused.log | tail -5\npnpm --filter @lcl/mobile typecheck\ngit diff --check\ngit add apps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx apps/mobile/src/theme/theme.css apps/mobile/src/__tests__/hardware-setup.test.tsx\ngit commit -m \"refactor(ionic): saved Shelly BLE card scan as compact Ionic action\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"MIGRATION_COMMIT=$(git rev-parse HEAD)\"\ngit status --short\n",
+      "current_rss_mb": 95.94,
+      "elapsed_seconds": 48.401,
+      "exit_code": 1,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\nWORKTREE_CANDIDATE\n Test Files  1 passed (1)\n      Tests  58 passed (58)\n\n> @lcl/mobile@2.0.10 typecheck /Users/michal/agent-workspace/repos/shelly-link/work/apps/mobile\n> tsc -p tsconfig.json --noEmit\n\n\n> shelly-link@2.0.10 precommit /Users/michal/agent-workspace/repos/shelly-link/work\n> lint-staged && pnpm quality:ux\n\n→ lint-staged could not find any staged files.\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\nOn branch agent-work\nYour branch is up to date with 'origin/work/ux-evolution'.\n\nnothing to commit, working tree clean\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 781.75,
+      "stage_index": 1,
+      "stage_name": "verify-all-58-BLE-setup-tests-then-commit-card-Ionic",
+      "stage_phase": "commands",
+      "stage_timeout": 1000,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "failure_reason": "command_failed",
+  "finished_at": "2026-10-10T23:22:56.264625+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.073,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.072,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-card-ble-retest-commit-20261011-178",
+  "idle_timeout": 520,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 48.401,
+      "outcome": "failed",
+      "stage_index": 1,
+      "stage_name": "verify-all-58-BLE-setup-tests-then-commit-card-Ionic",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T23:22:06.289109+00:00",
+  "status": "failed",
+  "task_digest": "48c892c3f33bcef4da12420df2b72bf3bc45f78829a8eb30122b6db9be1855c5",
+  "task_timeout": 1400,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}

@@ -1,0 +1,61 @@
+{
+  "allow_write": true,
+  "attempt_id": "5c0bbe5e3bab7b9e3babd7f8",
+  "command_timeout": 1000,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 3014,
+      "command": "set -eu\ngit fetch origin work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest \"$(git rev-parse HEAD)\" = 1a6021e8a246667005dadbe4d72e335fbaee5b4d\ntest -z \"$(git status --porcelain)\"\npython3 - <<'PY'\nfrom pathlib import Path\nimport re\ncounts={'button':0,'input':0,'select':0,'textarea':0}\nfiles=set()\nfor path in Path('apps/mobile/src').rglob('*.tsx'):\n if re.search(r'\\.(test|spec)\\.tsx$',path.name): continue\n source=path.read_text()\n for tag in counts:\n  n=len(re.findall(r'<'+tag+r'(?=[\\s/>])',source))\n  counts[tag]+=n\n  if n: files.add(path)\nprint('PRODUCTION_NATIVE_CONTROLS',counts,'FILES',len(files))\nassert counts=={'button':57,'input':10,'select':0,'textarea':0}\nassert len(files)==31\nc=Path('docs/testing/2026-10-10-ionic-native-control-census.md')\ns=c.read_text()\nassert s.count('**68 = 58 przycisków + 10 input**')==1\nassert s.count('24 zwykłych przycisków')==2\ns=s.replace('595ce2a3d67c02bda1c66f08f02896a09072be42','1a6021e8a246667005dadbe4d72e335fbaee5b4d',1)\ns=s.replace('**68 = 58 przycisków + 10 input**','**67 = 57 przycisków + 10 input**',1)\ns=s.replace('24 zwykłych przycisków','23 zwykłych przycisków')\ns=s.replace('niezaliczonych do 74','niezaliczonych do 67')\nlines=[]\nfor line in s.splitlines():\n if line.startswith('|') and 'screens/hardware-setup/pages/ShellySettingsContent.tsx' in line:\n  cols=line.split('|')\n  assert len(cols)>=6 and cols[2].strip()=='2'\n  cols[2]='      1 '\n  cols[3]=' 1 zwykła '\n  cols[4]=' Skan BLE w ustawieniach jest IonButton z aria-label; usuwanie ma przycisk natywny '\n  line='|'.join(cols)\n lines.append(line)\ns='\\n'.join(lines).rstrip()+'\\n'\ns=s.replace('Current inventory is 58 native buttons plus 10 protected Climate inputs.', 'Historical checkpoint: 58 native buttons plus 10 protected Climate inputs.')\ns += '\\n## Shelly BLE settings action — 2026-10-10 (latest count)\\n\\n'\ns += 'Commit 1a6021e8 migrated only the settings-detail BLE scan action to Ionic, with explicit aria-label. A different same-labeled saved-device-card scan remains native. Both focused integration scenarios passed 2/2, alongside TypeScript and quality gates. Current count: 67 native JSX controls (57 buttons + 10 frozen Climate inputs), 23 ordinary pending actions, 34 intentional custom buttons, in 31 files.\\n'\nc.write_text(s)\nnote = \"\"\"\n## Current BLE settings acceptance checkpoint — 2026-10-10\n\n- Product commit: 1a6021e8a246667005dadbe4d72e335fbaee5b4d. Only the Shelly settings BLE scan action migrated to IonButton with explicit aria-label and unchanged callback. A separate same-labeled saved-device-card action intentionally remains native. Both relevant integration tests passed 2/2; TypeScript and pre-commit/pre-push quality gates passed.\n- Current production JSX control count: 67 = 57 native buttons + 10 protected Climate inputs across 31 files; 23 ordinary actions and 34 intentional custom buttons.\n- Canonical visual/responsive E2E: 49/50 on this product commit, with one unrelated 30-second LED mode timeout. The exact LED case passed 1/1 in isolation without code or snapshot updates. Clean 50/50 sign-off remains open.\n- Full pnpm check task shelly-ionic-settings-scan-check-android-20261010-173 was interrupted by severe host overload (load peaked over 150) when the Local Agent worker instance ended. The recovered result is failed / interrupted_previous_attempt; no automatic replay occurred. The preserved log reached and passed the hard performance budget (JS 2,370,284 B; largest JS 1,043,584 B; CSS 154,245 B; 20 JS files), but performance review thresholds still fail. There is no confirmed successful pnpm check shell exit, and no new Android APK was assembled for this head.\n- Local Agent supervisor automatically recovered to idle without a manual restart. A read-only follow-up confirmed no leftover Vitest or Playwright processes; an existing Gradle daemon remained. Repository task cancellation control has been restored to status. Avoid another high-load full test until host pressure is resolved.\n- Physical Samsung S22+ unavailable. Earlier medium_phone emulator attempt failed before boot completion. No phone or physical relay was touched. Actual TalkBack, keyboard, overlays, intermittent background Capacitor triggerEvent and JS bundle optimization remain open.\n\"\"\"\nfor path in ('docs/testing/2026-10-10-ionic-independent-audit.md','docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md','docs/HANDOFF_NEXT_CHAT.md'):\n p=Path(path)\n body=p.read_text()\n assert '## Current BLE settings acceptance checkpoint — 2026-10-10' not in body\n p.write_text(body.rstrip()+'\\n'+note)\nPY\npnpm exec prettier --write docs/testing/2026-10-10-ionic-native-control-census.md docs/testing/2026-10-10-ionic-independent-audit.md docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md docs/HANDOFF_NEXT_CHAT.md\npnpm exec prettier --check docs/testing/2026-10-10-ionic-native-control-census.md docs/testing/2026-10-10-ionic-independent-audit.md docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md docs/HANDOFF_NEXT_CHAT.md\ngit diff --check\ngit diff --stat\ngit add docs/testing/2026-10-10-ionic-native-control-census.md docs/testing/2026-10-10-ionic-independent-audit.md docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md docs/HANDOFF_NEXT_CHAT.md\ngit commit -m \"docs(ionic): record 67 native controls and interrupted BLE acceptance\"\ngit push origin HEAD:refs/heads/work/ux-evolution\necho \"DOCS_HEAD=$(git rev-parse HEAD)\"\ngit status --short\necho 'HOST_LOAD'\nuptime\n",
+      "current_rss_mb": 21.14,
+      "elapsed_seconds": 13.107,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "From https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\nPRODUCTION_NATIVE_CONTROLS {'button': 57, 'input': 10, 'select': 0, 'textarea': 0} FILES 31\ndocs/testing/2026-10-10-ionic-native-control-census.md 44ms\ndocs/testing/2026-10-10-ionic-independent-audit.md 33ms (unchanged)\ndocs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md 28ms (unchanged)\ndocs/HANDOFF_NEXT_CHAT.md 25ms (unchanged)\nChecking formatting...\nAll matched files use Prettier code style!\n docs/CHECKPOINT_2026-10-08_UX_EVOLUTION.md             |  9 +++++++++\n docs/HANDOFF_NEXT_CHAT.md                              |  9 +++++++++\n docs/testing/2026-10-10-ionic-independent-audit.md     |  9 +++++++++\n docs/testing/2026-10-10-ionic-native-control-census.md | 16 ++++++++++------\n 4 files changed, 37 insertions(+), 6 deletions(-)\n\n> shelly-link@2.0.10 precommit /Users/michal/agent-workspace/repos/shelly-link/work\n> lint-staged && pnpm quality:ux\n\n[STARTED] Backing up original state...\n[COMPLETED] Backed up original state in git stash (b7e85d082)\n[STARTED] Running tasks for staged files...\n[STARTED] package.json — 4 files\n[STARTED] *.{ts,tsx,js,mjs,cjs} — 0 files\n[STARTED] *.{json,md,css,yml,yaml} — 4 files\n[SKIPPED] *.{ts,tsx,js,mjs,cjs} — no files\n[STARTED] prettier --write\n[COMPLETED] prettier --write\n[COMPLETED] *.{json,md,css,yml,yaml} — 4 files\n[COMPLETED] package.json — 4 files\n[COMPLETED] Running tasks for staged files...\n[STARTED] Staging changes from tasks...\n[COMPLETED] Staging changes from tasks...\n[STARTED] Cleaning up temporary files...\n[COMPLETED] Cleaning up temporary files...\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n[agent-work 1984a7b46] docs(ionic): record 67 native controls and interrupted BLE acceptance\n 4 files changed, 37 insertions(+), 6 deletions(-)\n\n> shelly-link@2.0.10 prepush /Users/michal/agent-workspace/repos/shelly-link/work\n> pnpm quality:ux && pnpm quality:repo\n\n\n> shelly-link@2.0.10 quality:ux /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/ux-gate.mjs\n\nUX quality gate passed.\n\n> shelly-link@2.0.10 quality:repo /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/brand-gate.mjs && node scripts/quality/script-lifecycle-gate.mjs && node scripts/quality/repository-gate.mjs && node scripts/quality/feature-boundary-gate.mjs && pnpm quality:selftest\n\nShelly Link branding gate passed.\nExclusive script lifecycle gate passed.\nRepository quality gate passed.\nFeature boundary quality gate passed.\n\n> shelly-link@2.0.10 quality:selftest /Users/michal/agent-workspace/repos/shelly-link/work\n> node scripts/quality/gate-selftest.mjs\n\nQuality gate self-test passed (27 cases).\nTo https://github.com/MichalMatu/shelly-link.git\n   1a6021e8a..1984a7b46  HEAD -> work/ux-evolution\nDOCS_HEAD=1984a7b464a7ab07c28c480be04b5f9168860be9\nHOST_LOAD\n23:57  up 2 days, 14:19, 3 users, load averages: 3.98 27.29 27.42\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 446.67,
+      "stage_index": 1,
+      "stage_name": "verify-67-native-controls-and-document-interrupted-acceptance",
+      "stage_phase": "commands",
+      "stage_timeout": 1000,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-10T21:57:58.912632+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.064,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.093,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-BLE-overload-documentation-20261010-175",
+  "idle_timeout": 550,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 13.107,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "verify-67-native-controls-and-document-interrupted-acceptance",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-10T21:57:44.324395+00:00",
+  "status": "done",
+  "task_digest": "39ecf509ecec236478e7c921e3d2700247361e6d44427158a2680a737ad537d2",
+  "task_timeout": 1400,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}
