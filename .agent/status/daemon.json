@@ -1,9 +1,9 @@
 {
   "version": 1,
   "daemon_version": "4.20.6",
-  "state": "idle",
-  "pid": 2983,
-  "updated_at": "2026-10-11T03:26:33.731275+00:00",
+  "state": "running",
+  "pid": 8347,
+  "updated_at": "2026-10-11T03:30:27.022424+00:00",
   "self_revision": "f9f73e97a061d5ba590021ddae14b45f705cb7ae",
   "poll_seconds": 15,
   "self_update_seconds": 60,
@@ -14,7 +14,7 @@
   "task_timeout_default": 1800,
   "task_timeout_max": 21600,
   "memory_limit_mb_default": 4096,
-  "current_task_id": null,
+  "current_task_id": "shelly-ionic-20261011-clean-handoff-prettier-188",
   "current_attempt_id": null,
   "current_task_digest": null,
   "repository_id": "shelly-link",
@@ -23,7 +23,8 @@
   "default_branch": "main",
   "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
   "execution_model": "multi_repository_worker",
-  "worker_pid": 2983,
+  "worker_pid": 8347,
   "supervisor_pid": 60792,
+  "active_resources": [],
   "execution_variant": "parallel"
 }
