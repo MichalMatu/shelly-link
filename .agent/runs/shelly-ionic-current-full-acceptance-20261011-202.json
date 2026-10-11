@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-current-full-acceptance-20261011-202",
+  "task_digest": "9548ed433023a7ce013adac89c32bc0228ef35fb6202d673253a4fa31f66158a",
+  "idle_timeout": 1400,
+  "task_timeout": 4400,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T03:02:01.857161+00:00",
+  "attempt_id": "8107f389dc1ecc326cca7f2f",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 73591,
+  "updated_at": "2026-10-11T03:02:01.857251+00:00",
+  "pid": 73591
+}
