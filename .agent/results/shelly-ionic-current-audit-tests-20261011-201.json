@@ -1,0 +1,61 @@
+{
+  "allow_write": false,
+  "attempt_id": "45e704826f08ca457a34883e",
+  "command_timeout": 840,
+  "commands": [
+    {
+      "background_process_leak": false,
+      "captured_output_chars": 4453,
+      "command": "set -eu\necho 'BASELINE'\ngit fetch origin work/ux-evolution\ngit rev-parse HEAD origin/work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho 'CENSUS_REAL'\npython3 - <<'PY'\nfrom pathlib import Path\nimport re, collections\nby_path={}\nfor p in Path('apps/mobile/src').rglob('*.tsx'):\n if p.name.endswith('.test.tsx') or p.name.endswith('.spec.tsx'):continue\n s=p.read_text()\n tags=list(re.finditer(r'<(button|input|select|textarea)(?=[\\s/>])',s))\n if not tags:continue\n by_path[str(p)]=[(m.group(1),s.count('\\n',0,m.start())+1) for m in tags]\nprint('count',sum(len(v) for v in by_path.values()),'files',len(by_path),'tags',dict(collections.Counter(t for v in by_path.values() for t,l in v)))\nfor p,v in sorted(by_path.items()):\n print(p,', '.join(f'{tag}:{ln}' for tag,ln in v))\nPY\necho 'TARGETED_NEW_CONFIRMATION_TESTS'\npnpm --filter @lcl/mobile exec vitest run src/features/thermometers/components/SensorRemovalBlockedModal.test.tsx src/features/plugs/components/PlugDeleteConfirmModal.test.tsx src/__tests__/modal.test.tsx --reporter=default\necho 'TYPECHECK'\npnpm --filter @lcl/mobile typecheck\necho 'ICON_BUNDLE_REFERENCES'\ngrep -R -nE 'IonIcon|ionicons/icons|import .*ionicons' apps/mobile/src --include='*.tsx' --include='*.ts' | head -75 || true\necho 'QUALITY_HARD_BUDGET_CONFIG'\ngrep -R -nE 'maxJs|chunk.*count|1536098|686363' scripts/performance scripts/quality 2>/dev/null | head -45 || true\necho 'HOST'\nuptime\ngit status --short\n",
+      "current_rss_mb": 419.45,
+      "elapsed_seconds": 11.957,
+      "exit_code": 0,
+      "idle_timed_out": false,
+      "memory_limit_mb": 4096,
+      "memory_limited": false,
+      "output": "BASELINE\nFrom https://github.com/MichalMatu/shelly-link\n * branch                work/ux-evolution -> FETCH_HEAD\nb439478ba9a8ba8c3c65b4d928d188318631c915\nb439478ba9a8ba8c3c65b4d928d188318631c915\nCENSUS_REAL\ncount 64 files 29 tags {'button': 54, 'input': 10}\napps/mobile/src/app/DevCommandPalette.tsx button:171, button:196\napps/mobile/src/app/StandalonePulseInstallationDetail.tsx button:141, button:224, button:239\napps/mobile/src/components/AppBottomNavigation.tsx button:27, button:40, button:53\napps/mobile/src/components/AppPageBack.tsx button:15\napps/mobile/src/components/EditablePlugName.tsx button:57\napps/mobile/src/components/RefreshIconButton.tsx button:16\napps/mobile/src/features/automations/components/ClimateInstallationDetailSections.tsx button:26, button:150\napps/mobile/src/features/automations/components/ClimateRuleAdvancedSettings.tsx input:46, input:79, input:129, input:164, button:191\napps/mobile/src/features/automations/components/ClimateRuleDeviceSelectors.tsx input:154\napps/mobile/src/features/automations/components/ClimateRuleEditor.tsx input:171, input:188, input:222, input:243, button:291, button:301, button:323\napps/mobile/src/features/automations/components/PulseCycleEditor.tsx input:95\napps/mobile/src/features/plugs/components/PlugAddSpeedDial.tsx button:50, button:62, button:74\napps/mobile/src/features/plugs/components/PlugAutomationModeControl.tsx button:26, button:35\napps/mobile/src/features/plugs/components/PlugDashboardCardShell.tsx button:114\napps/mobile/src/features/plugs/components/PlugDetailTabs.tsx button:89\napps/mobile/src/features/plugs/components/PlugLedColorEditor.tsx button:130, button:141, button:153\napps/mobile/src/features/plugs/components/PlugRelayControls.tsx button:29, button:40\napps/mobile/src/features/plugs/screens/BlePlugDetailScreen.tsx button:119\napps/mobile/src/features/plugs/screens/WifiPlugDetailScreen.tsx button:114\napps/mobile/src/features/thermometers/components/SavedSensorCard.tsx button:124, button:138, button:150, button:161\napps/mobile/src/screens/InstallationDetailScreen.tsx button:303, button:383, button:398\napps/mobile/src/screens/SetupIntentScreen.tsx button:42, button:55\napps/mobile/src/screens/TimeInstallationDetail.tsx button:169, button:243, button:258\napps/mobile/src/screens/hardware-setup/pages/RuleSetupPage.tsx button:176, button:210\napps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx button:336\napps/mobile/src/screens/hardware-setup/pages/ShellySettingsContent.tsx button:138\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPage.tsx button:192\napps/mobile/src/screens/hardware-setup/pages/ShellySetupPresentation.tsx button:218, button:230, button:239\napps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.tsx button:164, button:212, button:225\nTARGETED_NEW_CONFIRMATION_TESTS\n\n RUN  v3.2.6 /Users/michal/agent-workspace/repos/shelly-link/work/apps/mobile\n\n(node:72526) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:72527) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/thermometers/components/SensorRemovalBlockedModal.test.tsx (2 tests) 62ms\n ✓ src/__tests__/modal.test.tsx (6 tests) 171ms\n(node:72560) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n ✓ src/features/plugs/components/PlugDeleteConfirmModal.test.tsx (1 test) 52ms\n\n Test Files  3 passed (3)\n      Tests  9 passed (9)\n   Start at  05:01:13\n   Duration  2.29s (transform 502ms, setup 1.69s, collect 438ms, tests 285ms, environment 936ms, prepare 163ms)\n\nTYPECHECK\n\n> @lcl/mobile@2.0.10 typecheck /Users/michal/agent-workspace/repos/shelly-link/work/apps/mobile\n> tsc -p tsconfig.json --noEmit\n\nICON_BUNDLE_REFERENCES\nQUALITY_HARD_BUDGET_CONFIG\nscripts/quality/performance-budget.mjs:128:if (jsFiles.length > hardLimit.maxJsFiles) {\nscripts/quality/performance-budget.mjs:130:    `JS file count ${jsFiles.length} exceeds hard limit ${hardLimit.maxJsFiles}`\nscripts/quality/performance-budgets.json:21:      \"maxJsFiles\": 32\nscripts/quality/gate-selftest.mjs:294:          maxJsFiles: 4\nHOST\n 5:01  up 2 days, 19:22, 3 users, load averages: 3.22 4.92 4.89\n",
+      "output_policy": "summary",
+      "output_truncated": false,
+      "peak_rss_mb": 600.28,
+      "stage_index": 1,
+      "stage_name": "verify-current-confirmation-and-map-next-controls",
+      "stage_phase": "commands",
+      "stage_timeout": 840,
+      "stage_total": 1,
+      "timed_out": false
+    }
+  ],
+  "daemon_version": "4.20.6",
+  "edits": {},
+  "finished_at": "2026-10-11T03:01:23.455097+00:00",
+  "git_diff": {
+    "elapsed_seconds": 0.103,
+    "exit_code": 0,
+    "output": ""
+  },
+  "git_status": {
+    "elapsed_seconds": 0.083,
+    "exit_code": 0,
+    "output": ""
+  },
+  "id": "shelly-ionic-current-audit-tests-20261011-201",
+  "idle_timeout": 430,
+  "memory_limit_mb": 4096,
+  "mode": "commands",
+  "stages": [
+    {
+      "elapsed_seconds": 11.957,
+      "outcome": "passed",
+      "stage_index": 1,
+      "stage_name": "verify-current-confirmation-and-map-next-controls",
+      "stage_phase": "commands",
+      "stage_total": 1
+    }
+  ],
+  "started_at": "2026-10-11T03:01:09.837481+00:00",
+  "status": "done",
+  "task_digest": "90727bc279c96aa973b3119b5fdb77886d68bc74eaa81cf4107a90b8075d4933",
+  "task_timeout": 1300,
+  "verification": [],
+  "work_branch": "work/ux-evolution"
+}
