@@ -1,8 +1,8 @@
 # Native HTML control census — Ionic React, 2026-10-10
 
-Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `d4485ad76fdcf9b03d39270344e6df2561b86f81` (`work/ux-evolution`). Testy TSX nie są liczone. Znaczniki natywne to `<button>`, `<input>`, `<select>`, `<textarea>`; jeden element JSX w pętli jest liczony raz, nie per urządzenie. **66 = 56 przycisków + 10 input**, w **31 plikach**.
+Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `bc0b1a9e806c080648d635943e2ce5bd3f17f4f6` (`work/ux-evolution`). Testy TSX nie są liczone. Znaczniki natywne to `<button>`, `<input>`, `<select>`, `<textarea>`; jeden element JSX w pętli jest liczony raz, nie per urządzenie. **65 = 55 przycisków + 10 input**, w **30 plikach**.
 
-**Wynik klasyfikacji:** 22 zwykłe przyciski do migracji (z czego 8 na zamrożonych powierzchniach Climate), 34 celowe przyciski z własnymi interakcjami, 10 input w zamrożonym Climate. "Zwykła" to zadanie otwarte, nie automatyczny nakaz zamiany 1:1. "Celowa" oznacza pozostawienie do czasu, aż pełny odpowiednik zachowa wizualną geometrię, ARIA i gesty; wymaga odrębnych testów dostępności.
+**Wynik klasyfikacji:** 21 zwykłych przycisków do migracji (z czego 8 na zamrożonych powierzchniach Climate), 34 celowe przyciski z własnymi interakcjami, 10 input w zamrożonym Climate. "Zwykła" to zadanie otwarte, nie automatyczny nakaz zamiany 1:1. "Celowa" oznacza pozostawienie do czasu, aż pełny odpowiednik zachowa wizualną geometrię, ARIA i gesty; wymaga odrębnych testów dostępności.
 
 | Ścieżka pod `apps/mobile/src/`                                          | Liczba | Klasa                        | Uzasadnienie / dalsza praca                                                                                |
 | ----------------------------------------------------------------------- | -----: | ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -20,7 +20,6 @@ Zakres: `apps/mobile/src` produkcyjne TSX na kodzie `d4485ad76fdcf9b03d39270344e
 | `features/plugs/components/PlugAddSpeedDial.tsx`                        |      3 | 3 celowe                     | Geometria i gesty dedykowanego speed dial Wi-Fi/Bluetooth                                                  |
 | `features/plugs/components/PlugAutomationModeControl.tsx`               |      2 | 2 celowe                     | AUTO/MANUAL: sprzężenie wizualne ze stanem bezpieczeństwa                                                  |
 | `features/plugs/components/PlugDashboardCardShell.tsx`                  |      1 | 1 celowa                     | Ikonowe otwarcie szczegółów, zachować ochronę przed klikami w IonInput                                     |
-| `features/plugs/components/PlugDeleteConfirmModal.tsx`                  |      1 | 1 zwykła                     | Potwierdzenie zapomnienia Pluga, wymaga bezpiecznej obsługi focus w Modal                                  |
 | `features/plugs/components/PlugDetailTabs.tsx`                          |      1 | 1 celowa                     | Dedykowane zakładki szczegółów i aria-current                                                              |
 | `features/plugs/components/PlugLedColorEditor.tsx`                      |      3 | 3 celowe                     | Próbki kolorów pozostają własnymi przyciskami; Apply jest teraz IonButton                                  |
 | `features/plugs/components/PlugRelayControls.tsx`                       |      2 | 2 celowe                     | Fizyczne ON/OFF; nie zmieniać semantyki ani runtime                                                        |
@@ -66,3 +65,9 @@ Commit 1a6021e8 migrated only the settings-detail BLE scan action to Ionic, with
 ## Saved Shelly BLE card — accepted 2026-10-11
 
 Commit d4485ad76fdcf9b03d39270344e6df2561b86f81 migrated the compact saved-card BLE scan button to IonButton, retaining callback, busy-disabled semantics and card styling. The 58 hardware setup tests passed, as did a canonical phone-large BLE E2E with screenshot 04-plug-ble-discovery. Entire 50-case visual E2E passed without snapshot changes. Full pnpm check passed 554/554 mobile tests, Capacitor sync and Android debug assembly passed. Total remaining 66 native JSX controls (56 button, 10 frozen Climate inputs), with 22 ordinary actions and 34 intentional custom controls. No phone or physical Shelly device was contacted.
+
+## Zatwierdzony checkpoint — 2026-10-11, Plug Delete IonButton
+
+Commit produktu `bc0b1a9e806c080648d635943e2ce5bd3f17f4f6` kończy migrację przycisku potwierdzenia usunięcia Pluga. Ochrony identyfikacji, fizycznego safe-OFF i trwałe rekordy nie zostały zmienione.
+
+65 natywnych kontrolek: 55 przycisków, 10 pól Climate, w 30 plikach. 21 zwykłych akcji pozostaje do rozpatrzenia; 34 celowe przyciski i 10 pól Climate są chronione kontraktem UX.
