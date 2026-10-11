@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-current-audit-tests-20261011-201",
+  "task_digest": "90727bc279c96aa973b3119b5fdb77886d68bc74eaa81cf4107a90b8075d4933",
+  "idle_timeout": 430,
+  "task_timeout": 1300,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T03:01:09.837421+00:00",
+  "attempt_id": "45e704826f08ca457a34883e",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 72321,
+  "updated_at": "2026-10-11T03:01:09.837533+00:00",
+  "pid": 72321
+}
