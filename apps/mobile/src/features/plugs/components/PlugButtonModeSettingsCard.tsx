@@ -1,5 +1,6 @@
+import { IonButton, IonRadio, IonRadioGroup } from '@ionic/react';
 import type { ShellyPlugsUiButtonInputMode } from '@lcl/shelly-client';
-import { DiagnosticRow, SelectField } from '@lcl/ui';
+import { DiagnosticRow } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceButtonModeCopy } from '../../../app/locales/deviceButtonMode.js';
@@ -104,19 +105,25 @@ export const PlugButtonModeSettingsCard = ({
 
       <div className="field">
         <span>{copy.currentMode}</span>
-        <SelectField<ShellyPlugsUiButtonInputMode>
-          ariaLabel={copy.currentMode}
+        <IonRadioGroup
+          aria-label={copy.currentMode}
+          className="plug-settings-button-modes"
           value={draft}
-          disabled={locked}
-          options={[
-            { value: 'momentary', label: copy.momentary },
-            { value: 'detached', label: copy.detached }
-          ]}
-          onChange={(value) => {
-            setFeedback(null);
-            setDraft(value);
+          onIonChange={(event) => {
+            const value = event.detail.value;
+            if (value === 'momentary' || value === 'detached') {
+              setFeedback(null);
+              setDraft(value);
+            }
           }}
-        />
+        >
+          <IonRadio value="momentary" labelPlacement="end" justify="start">
+            {copy.momentary}
+          </IonRadio>
+          <IonRadio value="detached" labelPlacement="end" justify="start">
+            {copy.detached}
+          </IonRadio>
+        </IonRadioGroup>
       </div>
 
       <p className="plug-settings-feedback">
@@ -124,14 +131,14 @@ export const PlugButtonModeSettingsCard = ({
       </p>
 
       <div className="plug-settings-actions">
-        <button
-          className="primary-action"
+        <IonButton
+          className="plug-settings-ionic-action"
           type="button"
           disabled={locked || !hasChanges || updateMutation.isPending}
           onClick={save}
         >
           {updateMutation.isPending ? copy.saving : copy.save}
-        </button>
+        </IonButton>
       </div>
 
       {feedback && (

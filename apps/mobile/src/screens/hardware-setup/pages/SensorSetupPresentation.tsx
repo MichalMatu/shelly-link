@@ -1,4 +1,4 @@
-import { SelectField } from '@lcl/ui';
+import { IonInput, IonSelect, IonSelectOption } from '@ionic/react';
 import { useId } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { SensorSetupFlow } from '../pageContracts.js';
@@ -32,32 +32,43 @@ export const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps
     <>
       <div className="field">
         <span>{t('hardware.sensor.profileLabel')}</span>
-        <SelectField
-          ariaLabel={t('hardware.sensor.profileLabel')}
+        <IonSelect
+          aria-label={t('hardware.sensor.profileLabel')}
+          className="sensor-profile-select"
+          fill="outline"
+          interface="alert"
           value={flow.sensorProfileInput}
-          options={[
-            {
-              value: 'xiaomi_lywsd03mmc_bthome_v2',
-              label: sensorProfileLabels.xiaomi_lywsd03mmc_bthome_v2
-            },
-            { value: 'tp357_custom_v1', label: sensorProfileLabels.tp357_custom_v1 }
-          ]}
-          onChange={(value) =>
-            flow.setSensorProfileInput(value as typeof flow.sensorProfileInput)
-          }
-        />
+          onIonChange={(event) => {
+            const value = event.detail.value;
+            if (value === 'xiaomi_lywsd03mmc_bthome_v2' || value === 'tp357_custom_v1') {
+              flow.setSensorProfileInput(value);
+            }
+          }}
+        >
+          <IonSelectOption value="xiaomi_lywsd03mmc_bthome_v2">
+            {sensorProfileLabels.xiaomi_lywsd03mmc_bthome_v2}
+          </IonSelectOption>
+          <IonSelectOption value="tp357_custom_v1">
+            {sensorProfileLabels.tp357_custom_v1}
+          </IonSelectOption>
+        </IonSelect>
       </div>
 
       <div className={nameError ? 'field field--invalid' : 'field'}>
-        <label htmlFor={nameInputId}>{t('hardware.sensor.nameLabel')}</label>
-        <input
+        <span>{t('hardware.sensor.nameLabel')}</span>
+        <IonInput
           id={nameInputId}
+          aria-label={t('hardware.sensor.nameLabel')}
           aria-describedby={nameError ? nameErrorId : undefined}
-          aria-invalid={nameError ? true : undefined}
+          aria-invalid={nameError ? 'true' : undefined}
+          className="sensor-add-input"
+          fill="outline"
           type="text"
           placeholder={t('hardware.sensor.namePlaceholder')}
           value={flow.sensorNameInput}
-          onChange={(event) => flow.setSensorNameInput(event.currentTarget.value)}
+          onIonInput={(event) =>
+            flow.setSensorNameInput(String(event.detail.value ?? ''))
+          }
         />
         {nameError && (
           <span className="field__error" id={nameErrorId}>
@@ -66,16 +77,19 @@ export const SensorAddForm = ({ flow, showValidationErrors }: SensorAddFormProps
         )}
       </div>
       <div className={macError ? 'field field--invalid' : 'field'}>
-        <label htmlFor={macInputId}>{t('hardware.sensor.macLabel')}</label>
-        <input
+        <span>{t('hardware.sensor.macLabel')}</span>
+        <IonInput
           id={macInputId}
+          aria-label={t('hardware.sensor.macLabel')}
           aria-describedby={macError ? macErrorId : undefined}
-          aria-invalid={macError ? true : undefined}
+          aria-invalid={macError ? 'true' : undefined}
+          className="sensor-add-input"
+          fill="outline"
           type="text"
-          inputMode="text"
+          inputmode="text"
           placeholder="AA:BB:CC:DD:EE:FF"
           value={flow.sensorMacInput}
-          onChange={(event) => flow.setSensorMacInput(event.currentTarget.value)}
+          onIonInput={(event) => flow.setSensorMacInput(String(event.detail.value ?? ''))}
         />
         {macError && (
           <span className="field__error" id={macErrorId}>

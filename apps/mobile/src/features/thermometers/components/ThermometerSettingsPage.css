@@ -46,7 +46,15 @@
   line-height: var(--lcl-line-height-compact);
 }
 
-.thermometer-settings__name-field input {
+.thermometer-settings__input {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-end: var(--lcl-spacing-md);
+  --padding-start: var(--lcl-spacing-md);
+
+  color: var(--lcl-color-text);
   min-width: 0;
   width: 100%;
 }
@@ -81,10 +89,21 @@
 }
 
 .thermometer-settings__action {
-  align-items: center;
-  display: flex;
-  gap: var(--lcl-spacing-sm);
-  justify-content: center;
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --box-shadow: none;
+  --color: var(--lcl-color-text);
+  --padding-end: var(--lcl-spacing-lg);
+  --padding-start: var(--lcl-spacing-lg);
+
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
   width: 100%;
 }
 
@@ -94,14 +113,8 @@
 }
 
 .thermometer-settings__action--danger {
-  border-color: var(--lcl-color-status-danger-border);
-  color: var(--lcl-color-status-danger-text);
-}
-
-.thermometer-settings__action--danger:hover,
-.thermometer-settings__action--danger:focus-visible {
-  border-color: var(--lcl-color-status-danger-border);
-  color: var(--lcl-color-status-danger-text);
+  --border-color: var(--lcl-color-status-danger-border);
+  --color: var(--lcl-color-status-danger-text);
 }
 
 @media (min-width: 44rem) {
@@ -112,4 +125,15 @@
   .thermometer-settings__actions {
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   }
+}
+
+.sensor-removal-danger-action {
+  --border-color: var(--lcl-color-status-danger-border);
+  --border-radius: var(--lcl-radius-md);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --box-shadow: none;
+  --color: var(--lcl-color-status-danger-text);
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
 }

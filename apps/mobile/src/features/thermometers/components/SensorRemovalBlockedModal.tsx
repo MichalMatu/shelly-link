@@ -1,5 +1,7 @@
+import { IonButton } from '@ionic/react';
 import { Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
+import './ThermometerSettingsPage.css';
 
 type SensorRemovalUsage = { id: string; name: string };
 
@@ -25,13 +27,9 @@ export const SensorRemovalBlockedModal = ({
       title={t('hardware.sensor.deleteBlockedTitle')}
       actions={
         usage && onOpenAutomation ? (
-          <button
-            className="primary-action"
-            type="button"
-            onClick={() => onOpenAutomation(usage.id)}
-          >
+          <IonButton type="button" onClick={() => onOpenAutomation(usage.id)}>
             {t('common.openAutomation')}
-          </button>
+          </IonButton>
         ) : undefined
       }
       onClose={onClose}
@@ -64,14 +62,15 @@ export const SensorRemovalConfirmModal = ({
       open={deviceName !== null}
       title={t('hardware.sensor.deleteConfirmTitle')}
       actions={
-        <button
-          className="secondary-action secondary-action--danger"
+        <IonButton
+          className="sensor-removal-danger-action"
+          fill="outline"
           type="button"
           title={t('hardware.sensor.deleteTitle')}
           onClick={onConfirm}
         >
           {t('common.delete')}
-        </button>
+        </IonButton>
       }
       onClose={onClose}
     >

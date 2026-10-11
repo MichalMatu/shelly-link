@@ -124,7 +124,14 @@
   display: grid;
 }
 
-.time-schedule-actions .primary-action {
+.time-schedule-ionic-action {
+  --background: var(--lcl-color-accent);
+  --color: var(--lcl-color-accent-contrast);
+  --border-radius: var(--lcl-radius-md);
+
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
   width: 100%;
 }
 

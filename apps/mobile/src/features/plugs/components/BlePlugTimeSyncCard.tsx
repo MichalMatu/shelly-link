@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import type { ShellyClockStatus } from '@lcl/shelly-client';
 import { DiagnosticRow } from '@lcl/ui';
 import { useState } from 'react';
@@ -46,14 +47,14 @@ export const BlePlugTimeSyncCard = ({ plug, clock }: BlePlugTimeSyncCardProps) =
       </div>
 
       <div className="plug-settings-actions">
-        <button
-          className="primary-action"
+        <IonButton
+          className="plug-settings-ionic-action"
           type="button"
           disabled={syncMutation.isPending}
           onClick={sync}
         >
           {syncMutation.isPending ? copy.syncing : copy.sync}
-        </button>
+        </IonButton>
       </div>
 
       {feedback && (

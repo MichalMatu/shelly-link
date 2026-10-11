@@ -1,6 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import {
+  getIonicButton,
+  isIonicDisabled,
+  queryIonicButton
+} from '../../../test/ionicTestEvents.js';
 import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
 import {
   PlugBluetoothAddPanel,
@@ -60,7 +65,8 @@ describe('PlugBluetoothAddPanel', () => {
     const props = renderPanel({ candidates: [candidate] });
 
     expect(screen.queryByRole('button', { name: `Info: ${candidate.name}` })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: `Add: ${candidate.name}` }));
+    expect(queryIonicButton(document, `Info: ${candidate.name}`)).toBeNull();
+    fireEvent.click(getIonicButton(document, `Add: ${candidate.name}`));
 
     expect(props.onAdd).toHaveBeenCalledWith(candidate);
   });
@@ -84,8 +90,8 @@ describe('PlugBluetoothAddPanel', () => {
     });
 
     expect(
-      screen.getByRole('button', { name: `Added: ${verifiedCandidate.physicalId}` })
-    ).toBeDisabled();
+      isIonicDisabled(getIonicButton(document, `Added: ${verifiedCandidate.physicalId}`))
+    ).toBe(true);
   });
 
   it('keeps Add available when preview failed after successful identity verification', () => {
@@ -95,8 +101,8 @@ describe('PlugBluetoothAddPanel', () => {
     });
 
     expect(
-      screen.getByRole('button', { name: `Add: ${verifiedCandidate.physicalId}` })
-    ).toBeEnabled();
+      isIonicDisabled(getIonicButton(document, `Add: ${verifiedCandidate.physicalId}`))
+    ).toBe(false);
     expect(screen.getAllByText('—')).toHaveLength(4);
   });
 });

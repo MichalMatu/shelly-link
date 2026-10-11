@@ -13,9 +13,115 @@
   --app-glass-blur: calc(var(--lcl-spacing-lg) + var(--lcl-spacing-sm));
   --ion-font-family: var(--lcl-font-family);
   --ion-background-color: var(--lcl-color-background);
+  --ion-background-color-rgb: var(--lcl-color-background-rgb);
   --ion-text-color: var(--lcl-color-text);
+  --ion-text-color-rgb: var(--lcl-color-text-rgb);
   --ion-color-primary: var(--lcl-color-accent);
+  --ion-color-primary-rgb: var(--lcl-color-accent-rgb);
   --ion-color-primary-contrast: var(--lcl-color-accent-contrast);
+  --ion-color-primary-contrast-rgb: var(--lcl-color-accent-contrast-rgb);
+  --ion-color-primary-shade: var(--lcl-color-accent-strong);
+  --ion-color-primary-tint: color-mix(in srgb, var(--lcl-color-accent) 90%, white);
+  --ion-color-step-50: color-mix(
+    in srgb,
+    var(--lcl-color-text) 5%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-100: color-mix(
+    in srgb,
+    var(--lcl-color-text) 10%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-150: color-mix(
+    in srgb,
+    var(--lcl-color-text) 15%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-200: color-mix(
+    in srgb,
+    var(--lcl-color-text) 20%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-250: color-mix(
+    in srgb,
+    var(--lcl-color-text) 25%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-300: color-mix(
+    in srgb,
+    var(--lcl-color-text) 30%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-350: color-mix(
+    in srgb,
+    var(--lcl-color-text) 35%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-400: color-mix(
+    in srgb,
+    var(--lcl-color-text) 40%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-450: color-mix(
+    in srgb,
+    var(--lcl-color-text) 45%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-500: color-mix(
+    in srgb,
+    var(--lcl-color-text) 50%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-550: color-mix(
+    in srgb,
+    var(--lcl-color-text) 55%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-600: color-mix(
+    in srgb,
+    var(--lcl-color-text) 60%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-650: color-mix(
+    in srgb,
+    var(--lcl-color-text) 65%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-700: color-mix(
+    in srgb,
+    var(--lcl-color-text) 70%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-750: color-mix(
+    in srgb,
+    var(--lcl-color-text) 75%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-800: color-mix(
+    in srgb,
+    var(--lcl-color-text) 80%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-850: color-mix(
+    in srgb,
+    var(--lcl-color-text) 85%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-900: color-mix(
+    in srgb,
+    var(--lcl-color-text) 90%,
+    var(--lcl-color-background)
+  );
+  --ion-color-step-950: color-mix(
+    in srgb,
+    var(--lcl-color-text) 95%,
+    var(--lcl-color-background)
+  );
+  --app-ionic-accent-foreground: color-mix(
+    in srgb,
+    var(--lcl-color-accent) 80%,
+    var(--lcl-color-text)
+  );
 }
 
 html:root,
@@ -622,36 +728,28 @@ select {
   margin: 0;
 }
 
-.app-settings__choice-grid {
-  display: grid;
-  gap: var(--lcl-spacing-sm);
-  grid-template-columns: repeat(auto-fit, minmax(6.75rem, 1fr));
-}
+.app-settings__language-select {
+  --background: var(--lcl-color-surface-muted);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-end: var(--lcl-spacing-md);
+  --padding-start: var(--lcl-spacing-md);
 
-.app-settings__choice-grid--appearance {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.app-settings__choice {
-  align-items: center;
-  background: var(--lcl-color-surface-muted);
-  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
-  border-radius: var(--lcl-radius-md);
   color: var(--lcl-color-text);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: var(--lcl-font-size-lg);
-  font-weight: var(--lcl-font-weight-bold);
-  justify-content: center;
-  min-height: var(--lcl-size-compact-control-min-height);
-  padding: 0 var(--lcl-spacing-md);
+  font-weight: var(--lcl-font-weight-semibold);
 }
 
-.app-settings__choice--active {
-  background: var(--lcl-color-accent);
-  border-color: var(--lcl-color-accent);
-  color: var(--lcl-color-accent-contrast);
+.app-settings__appearance-segment ion-segment-button {
+  --color: var(--lcl-color-text-muted);
+  --color-checked: var(--app-ionic-accent-foreground);
+  --indicator-color: var(--app-ionic-accent-foreground);
+}
+
+ion-alert.app-settings__language-alert {
+  --background: var(--lcl-color-surface);
+  --ion-color-primary: var(--app-ionic-accent-foreground);
+  color: var(--lcl-color-text);
 }
 
 .app-settings__diagnostics {
@@ -923,8 +1021,37 @@ select {
   padding-top: var(--lcl-spacing-md);
 }
 
-.settings-action-stack .secondary-action {
-  width: 100%;
+.app-settings__secondary-action {
+  --background: var(--lcl-color-surface-muted);
+  --background-activated: color-mix(
+    in srgb,
+    var(--lcl-color-text) 8%,
+    var(--lcl-color-surface-muted)
+  );
+  --background-focused: color-mix(
+    in srgb,
+    var(--lcl-color-text) 6%,
+    var(--lcl-color-surface-muted)
+  );
+  --background-hover: color-mix(
+    in srgb,
+    var(--lcl-color-text) 4%,
+    var(--lcl-color-surface-muted)
+  );
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --box-shadow: none;
+  --color: var(--lcl-color-text);
+  --padding-end: var(--lcl-spacing-lg);
+  --padding-start: var(--lcl-spacing-lg);
+
+  font-size: var(--lcl-font-size-lg);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
 }
 
 .setup-top-nav {
@@ -2496,6 +2623,11 @@ select {
 }
 
 .sensor-card-name-input {
+  --background: var(--lcl-color-surface-muted);
+  --color: var(--lcl-color-text);
+  --padding-start: var(--lcl-spacing-sm);
+  --padding-end: var(--lcl-spacing-sm);
+
   min-height: var(--lcl-size-compact-control-min-height);
   min-width: 0;
   width: 100%;
@@ -2522,6 +2654,11 @@ select {
 }
 
 .plug-name-editor__input {
+  --background: var(--lcl-color-surface-muted);
+  --color: var(--lcl-color-text);
+  --padding-start: var(--lcl-spacing-sm);
+  --padding-end: var(--lcl-spacing-sm);
+
   background: var(--lcl-color-surface-muted);
   border: var(--lcl-border-width-sm) solid var(--lcl-color-accent);
   border-radius: var(--lcl-radius-sm);
@@ -2560,6 +2697,11 @@ select {
 }
 
 .shelly-card-name-input {
+  --background: var(--lcl-color-surface-muted);
+  --color: var(--lcl-color-text);
+  --padding-start: var(--lcl-spacing-sm);
+  --padding-end: var(--lcl-spacing-sm);
+
   min-height: var(--lcl-size-compact-control-min-height);
   min-width: 0;
   width: 100%;
@@ -2584,25 +2726,32 @@ select {
 
 /* Shelly runtime controls aligned with the dashboard controls. */
 .shelly-ble-action {
-  align-items: center;
+  --background: transparent;
+  --background-hover: transparent;
+  --background-activated: transparent;
+  --box-shadow: none;
+  --color: var(--lcl-color-accent);
+  --padding-bottom: 0;
+  --padding-end: 0;
+  --padding-start: 0;
+  --padding-top: 0;
+
   align-self: start;
-  background: transparent;
-  border: 0;
-  color: var(--lcl-color-accent);
-  cursor: pointer;
-  display: inline-flex;
   font-size: var(--lcl-font-size-sm);
   font-weight: var(--lcl-font-weight-bold);
-  gap: var(--lcl-spacing-xs);
-  justify-content: flex-start;
+  margin: 0;
   min-height: var(--lcl-size-compact-control-min-height);
-  padding: 0;
-  text-align: left;
+  text-transform: none;
   width: fit-content;
 }
 
-.shelly-ble-action:disabled {
-  cursor: not-allowed;
+.shelly-ble-action::part(native) {
+  gap: var(--lcl-spacing-xs);
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.shelly-ble-action[disabled] {
   opacity: var(--lcl-opacity-disabled);
 }
 

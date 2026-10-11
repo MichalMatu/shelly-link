@@ -346,8 +346,9 @@ for (const viewport of viewports) {
 
     await page.getByRole('button', { name: 'Ustawienia gniazdka' }).click();
     await expect(page.getByRole('heading', { name: 'LED gniazdka' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Tryb LED' })).toContainText(
-      'Sygnalizuj ON/OFF'
+    await expect(page.locator('ion-select.plug-settings-ionic-select')).toHaveAttribute(
+      'value',
+      'switch'
     );
     await expect(page.getByText(/nie udostępnia ustawień PLUGS_UI/i)).toHaveCount(0);
     await expectNoHorizontalOverflow(page);

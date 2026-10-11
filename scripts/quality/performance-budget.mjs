@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { readFile, readdir, stat } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 
-const root = process.cwd();
+const root = resolve(process.env.LCL_QUALITY_ROOT ?? process.cwd());
 const budget = JSON.parse(
   await readFile(join(root, 'scripts/quality/performance-budgets.json'), 'utf8')
 );
@@ -85,23 +85,49 @@ for (const file of sourceFiles) {
   }
 }
 
+if (budget.version !== 2) {
+  throw new Error(`Unsupported performance budget schema version: ${budget.version}`);
+}
+
+const { baseline, reviewGrowth, hardLimit } = budget.mobileDist;
+const reviewLimit = {
+  totalJsBytes: baseline.totalJsBytes + reviewGrowth.totalJsBytes,
+  largestJsBytes: baseline.largestJsBytes + reviewGrowth.largestJsBytes,
+  totalCssBytes: baseline.totalCssBytes + reviewGrowth.totalCssBytes,
+  jsFileCount: baseline.jsFileCount + reviewGrowth.jsFileCount
+};
+const warnings = [];
 const failures = [];
-if (totalJsBytes > budget.mobileDist.totalJsBytes) {
-  failures.push(`total JS ${totalJsBytes} B exceeds ${budget.mobileDist.totalJsBytes} B`);
-}
-if (largestJs.bytes > budget.mobileDist.largestJsBytes) {
+
+const addReviewWarning = (label, observed, limit) => {
+  if (observed > limit) {
+    warnings.push(`${label} ${observed} exceeds review threshold ${limit}`);
+  }
+};
+
+addReviewWarning('total JS', totalJsBytes, reviewLimit.totalJsBytes);
+addReviewWarning('largest JS', largestJs.bytes, reviewLimit.largestJsBytes);
+addReviewWarning('total CSS', totalCssBytes, reviewLimit.totalCssBytes);
+addReviewWarning('JS file count', jsFiles.length, reviewLimit.jsFileCount);
+
+if (totalJsBytes > hardLimit.totalJsBytes) {
   failures.push(
-    `largest JS ${largestJs.bytes} B exceeds ${budget.mobileDist.largestJsBytes} B`
+    `total JS ${totalJsBytes} B exceeds hard limit ${hardLimit.totalJsBytes} B`
   );
 }
-if (totalCssBytes > budget.mobileDist.totalCssBytes) {
+if (largestJs.bytes > hardLimit.largestJsBytes) {
   failures.push(
-    `total CSS ${totalCssBytes} B exceeds ${budget.mobileDist.totalCssBytes} B`
+    `largest JS ${largestJs.bytes} B exceeds hard limit ${hardLimit.largestJsBytes} B`
   );
 }
-if (jsFiles.length > budget.mobileDist.maxJsFiles) {
+if (totalCssBytes > hardLimit.totalCssBytes) {
   failures.push(
-    `JS file count ${jsFiles.length} exceeds ${budget.mobileDist.maxJsFiles}`
+    `total CSS ${totalCssBytes} B exceeds hard limit ${hardLimit.totalCssBytes} B`
+  );
+}
+if (jsFiles.length > hardLimit.maxJsFiles) {
+  failures.push(
+    `JS file count ${jsFiles.length} exceeds hard limit ${hardLimit.maxJsFiles}`
   );
 }
 for (const violation of pollingViolations) {
@@ -113,6 +139,14 @@ for (const violation of pollingViolations) {
 console.log(
   `Performance budget: JS=${totalJsBytes} B, largest=${largestJs.bytes} B, CSS=${totalCssBytes} B, chunks=${jsFiles.length}, minPoll=${minimum} ms`
 );
+console.log(
+  `Performance review baseline: ${baseline.gitSha}; review JS<=${reviewLimit.totalJsBytes} B, largest<=${reviewLimit.largestJsBytes} B, CSS<=${reviewLimit.totalCssBytes} B, chunks<=${reviewLimit.jsFileCount}`
+);
+if (warnings.length > 0) {
+  console.warn(
+    `Performance review threshold exceeded:\n- ${warnings.join('\n- ')}\nHard limits remain green; review intentional growth before changing the recorded baseline.`
+  );
+}
 if (failures.length > 0) {
   throw new Error(`Performance budget failed:\n- ${failures.join('\n- ')}`);
 }

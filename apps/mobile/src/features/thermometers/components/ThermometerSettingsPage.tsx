@@ -1,3 +1,4 @@
+import { IonButton, IonInput } from '@ionic/react';
 import type { Measurement } from '@lcl/ble-core';
 import { IconClock, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -38,14 +39,17 @@ export const ThermometerSettingsPage = ({
           <strong>{device.name}</strong>
         </header>
 
-        <label className="thermometer-settings__name-field">
+        <div className="thermometer-settings__name-field">
           <span>{t('hardware.sensor.nameLabel')}</span>
-          <input
+          <IonInput
+            aria-label={t('hardware.sensor.nameLabel')}
+            className="thermometer-settings__input"
+            fill="outline"
             type="text"
             value={device.name}
-            onChange={(event) => onNameChange(event.currentTarget.value)}
+            onIonInput={(event) => onNameChange(String(event.detail.value ?? ''))}
           />
-        </label>
+        </div>
 
         <dl className="thermometer-settings__identity-list">
           <div>
@@ -82,8 +86,9 @@ export const ThermometerSettingsPage = ({
         </header>
         <div className="thermometer-settings__actions">
           {device.profileId === 'xiaomi_lywsd03mmc_bthome_v2' && (
-            <button
-              className="secondary-action thermometer-settings__action"
+            <IonButton
+              className="thermometer-settings__action"
+              fill="outline"
               type="button"
               disabled={pvvxTimePending}
               aria-busy={pvvxTimePending || undefined}
@@ -91,16 +96,17 @@ export const ThermometerSettingsPage = ({
             >
               <IconClock aria-hidden="true" />
               <span>{t('hardware.sensor.pvvxSetTime')}</span>
-            </button>
+            </IonButton>
           )}
-          <button
-            className="secondary-action thermometer-settings__action thermometer-settings__action--danger"
+          <IonButton
+            className="thermometer-settings__action thermometer-settings__action--danger"
+            fill="outline"
             type="button"
             onClick={onRemove}
           >
             <IconTrash aria-hidden="true" />
             <span>{t('hardware.sensor.deleteTitle')}</span>
-          </button>
+          </IonButton>
         </div>
       </section>
     </div>

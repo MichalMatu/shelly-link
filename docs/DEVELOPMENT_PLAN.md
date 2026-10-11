@@ -136,7 +136,18 @@ Keep the current UI as the stable Classic/Technical interface.
 
 Develop a more visual Grow UI against the same core, stores, flows and device/automation contracts. Do not fork transport, persistence or automation logic for the new frontend.
 
-Before changing UI frameworks, properly evaluate the existing React + Capacitor + Ionic stack. The current app uses little of Ionic's component library, so first determine how far a deliberate Ionic-based design system can go.
+Before a stronger visual redesign, deliberately increase use of the existing Ionic React component layer on low-risk standard controls. The intended layering is:
+
+```text
+@lcl/design-tokens -> visual values and themes
+Ionic React        -> standard interaction behavior
+@lcl/ui            -> genuinely shared product-agnostic roles/adapters
+mobile features    -> Shelly Link product composition
+```
+
+Do this incrementally rather than converting every custom component. Prefer Ionic where it removes custom focus, keyboard, picker, toggle, range, modal or button behavior. Keep product-specific cards, telemetry, History, runtime controls and other meaningful Shelly Link composition custom unless a framework component clearly fits the same role.
+
+Stabilize this control layer before the larger Grow UI redesign so the visual redesign is not implemented twice. Frozen Climate renders remain protected throughout infrastructure migration.
 
 The Grow UI should be designed against the Core 2 device/output model so it naturally handles both single-output Plugs and multi-output devices.
 

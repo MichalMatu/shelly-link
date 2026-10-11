@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { DiagnosticRow, FeedbackPanel, ScriptPreview } from '@lcl/ui';
 
 export type AutomationScriptDiagnosticRow = {
@@ -69,9 +70,9 @@ export const AutomationScriptDetailSection = ({
     )}
     {error && (
       <FeedbackPanel tone="danger" title={errorTitle}>
-        <button className="secondary-action" type="button" onClick={onRetry}>
+        <IonButton fill="outline" size="small" type="button" onClick={onRetry}>
           {retryLabel}
-        </button>
+        </IonButton>
       </FeedbackPanel>
     )}
     {source !== undefined && (

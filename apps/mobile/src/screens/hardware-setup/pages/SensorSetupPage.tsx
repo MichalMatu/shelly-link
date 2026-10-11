@@ -1,5 +1,5 @@
 import type { SensorSetupFlow } from '../pageContracts.js';
-import { SegmentedControl } from '@lcl/ui';
+import { IonButton, IonInput } from '@ionic/react';
 import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
 import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
@@ -10,11 +10,14 @@ import { useSensorSetupFeedback } from './useSensorSetupFeedback.js';
 import {
   formatSensorMetric,
   SavedSensorList,
+  SensorAddModeSegment,
+  type SensorAddMode,
   SensorRemovalBlockedModal,
   SensorRemovalConfirmModal,
   sensorProfileDisplayLabels
 } from '../../../features/thermometers/index.js';
 import { SensorAddForm } from './SensorSetupPresentation.js';
+import './SensorSetupPage.css';
 
 type SensorDraftDevice = SensorSetupFlow['sensorDevices'][number];
 type SensorRemovalUsage = ReturnType<SensorSetupFlow['sensorRemovalUsage']>[number];
@@ -22,7 +25,6 @@ type SensorDialogState =
   | { kind: 'none' }
   | { kind: 'remove'; device: SensorDraftDevice }
   | { kind: 'blocked'; device: SensorDraftDevice; usage: SensorRemovalUsage };
-type SensorAddMode = 'manual' | 'phone-scan';
 
 type SensorSetupPageProps = HardwarePageProps<SensorSetupFlow> & {
   primaryAddAction?: SensorAddMode;
@@ -187,19 +189,20 @@ export const SensorSetupPage = ({
                 <div className="device-discovery-card__primary">
                   <label className="device-discovery-card__name ble-candidate-name">
                     <span>{t('hardware.sensor.nameLabel')}</span>
-                    <input
-                      className="device-discovery-card__name-input"
+                    <IonInput
+                      className="sensor-add-input device-discovery-card__name-input"
                       aria-label={`${t('hardware.sensor.nameLabel')}: ${candidate.runtimeAddress}`}
+                      fill="outline"
                       type="text"
                       value={displayName}
                       disabled={isSavedSensor}
-                      onChange={(event) =>
-                        setScannedSensorName(candidate, event.currentTarget.value)
+                      onIonInput={(event) =>
+                        setScannedSensorName(candidate, String(event.detail.value ?? ''))
                       }
                     />
                   </label>
-                  <button
-                    className="primary-action device-discovery-card__action ble-candidate-action"
+                  <IonButton
+                    className="sensor-add-primary-action device-discovery-card__action ble-candidate-action"
                     type="button"
                     disabled={isSavedSensor || displayName.trim().length === 0}
                     title={
@@ -210,7 +213,7 @@ export const SensorSetupPage = ({
                     onClick={() => saveScannedSensor(candidate)}
                   >
                     {isSavedSensor ? t('hardware.sensor.saved') : t('common.add')}
-                  </button>
+                  </IonButton>
                 </div>
                 <div className="device-discovery-card__meta ble-candidate-main">
                   <strong className="device-discovery-card__identity">
@@ -258,8 +261,9 @@ export const SensorSetupPage = ({
         </div>
       )}
       <div className="action-row device-add-page__actions device-add-page__scan-control">
-        <button
-          className="secondary-action device-scan-action"
+        <IonButton
+          className="sensor-add-secondary-action device-scan-action"
+          fill="outline"
           type="button"
           aria-busy={isPhoneBleScanPending || undefined}
           title={
@@ -277,7 +281,7 @@ export const SensorSetupPage = ({
               ? t('hardware.shelly.scanStop')
               : t('hardware.shelly.scanBleAgain')}
           </span>
-        </button>
+        </IonButton>
       </div>
     </section>
   );
@@ -288,21 +292,7 @@ export const SensorSetupPage = ({
         className="device-add-page sensor-add-page"
         aria-label={t('hardware.sensor.add')}
       >
-        <SegmentedControl
-          ariaLabel={t('hardware.sensor.add')}
-          className="shelly-add-tabs"
-          itemClassName="shelly-add-tabs__tab"
-          value={addMode}
-          options={[
-            {
-              value: 'phone-scan',
-              label: t('hardware.sensor.scanBle'),
-              title: t('hardware.sensor.scanPhoneTitle')
-            },
-            { value: 'manual', label: t('hardware.shelly.addManual') }
-          ]}
-          onChange={selectAddMode}
-        />
+        <SensorAddModeSegment value={addMode} onChange={selectAddMode} />
         {addMode === 'phone-scan' ? (
           scanContent
         ) : (
@@ -313,9 +303,13 @@ export const SensorSetupPage = ({
           >
             <SensorAddForm flow={flow} showValidationErrors={didSubmitSensorAdd} />
             <div className="action-row device-add-page__actions">
-              <button className="primary-action" type="button" onClick={addSensor}>
+              <IonButton
+                className="sensor-add-primary-action"
+                type="button"
+                onClick={addSensor}
+              >
                 {t('common.add')}
-              </button>
+              </IonButton>
             </div>
           </section>
         )}

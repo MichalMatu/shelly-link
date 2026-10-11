@@ -1,3 +1,4 @@
+import { IonButton, IonInput } from '@ionic/react';
 import type { ShellyClockStatus, ShellyComponentState } from '@lcl/shelly-client';
 import { IconBluetooth, IconSettings, IconPencil, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
@@ -197,17 +198,17 @@ export const SavedShellyDeviceCard = ({
     >
       <div className="shelly-card-header">
         {isEditingName ? (
-          <input
-            autoFocus
+          <IonInput
+            autofocus
             className="shelly-card-name-input"
             aria-label={t('hardware.shelly.deviceNameLabel')}
             type="text"
             value={device.name}
-            onBlur={() => setIsEditingName(false)}
-            onChange={(event) => onNameChange(device, event.currentTarget.value)}
+            onIonBlur={() => setIsEditingName(false)}
+            onIonInput={(event) => onNameChange(device, String(event.detail.value ?? ''))}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === 'Escape') {
-                event.currentTarget.blur();
+                setIsEditingName(false);
               }
             }}
           />
@@ -258,16 +259,19 @@ export const SavedShellyDeviceCard = ({
       </div>
 
       {onBleScan && (
-        <button
+        <IonButton
           className="shelly-ble-action"
+          fill="clear"
+          size="small"
           type="button"
           disabled={isControlBusy}
+          aria-label={t('hardware.shelly.scanBleViaShellyTitle')}
           title={t('hardware.shelly.scanBleViaShellyTitle')}
           onClick={() => onBleScan(device)}
         >
           <IconBluetooth className="icon-action__svg" aria-hidden="true" />
           <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
-        </button>
+        </IonButton>
       )}
     </article>
   );

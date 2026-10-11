@@ -151,9 +151,17 @@ export const deriveClimateRuleState = ({
       script: generateShellyThermostatScript(config)
     };
   } catch (error) {
+    const localizedErrors = [
+      t('hardware.flow.noSelectedSensor'),
+      t('hardware.flow.advancedOptionsInvalid'),
+      t('hardware.flow.configInvalid')
+    ];
     configState = {
       ok: false,
-      error: error instanceof Error ? error.message : t('hardware.flow.configInvalid')
+      error:
+        error instanceof Error && localizedErrors.includes(error.message)
+          ? error.message
+          : t('hardware.flow.configInvalid')
     };
   }
 

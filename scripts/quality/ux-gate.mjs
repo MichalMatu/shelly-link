@@ -16,7 +16,7 @@ const frozenClimateVisuals = Object.freeze({
   'apps/mobile/e2e/responsive.spec.ts-snapshots/03-climate-ble-darwin.png':
     '7911cb81e7bde04c0f28bd5c315667da6970b89d',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/05-climate-device-darwin.png':
-    'fd97d72020f6f3ebef335f85675f1f8c7a7f5ce2',
+    '0b3dbef7be10adad7a8b4cd06f0f250678844f6f',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/06-climate-script-darwin.png':
     '161b2c1dba0d419d3181c764d4192c441cbd36c7',
   'apps/mobile/e2e/responsive.spec.ts-snapshots/07-climate-info-darwin.png':
@@ -29,12 +29,15 @@ const cssPaths = [
   'apps/mobile/src/screens/AutomationDashboardScreen.css',
   'apps/mobile/src/features/automation-dashboard/components/AutomationDashboardBody.css',
   'apps/mobile/src/screens/hardware-setup/pages/TimeScheduleSetupPage.css',
+  'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.css',
   'apps/mobile/src/components/AppBottomNavigation.css',
   'apps/mobile/src/features/automations/components/ClimateHistorySection.css',
   'apps/mobile/src/features/automations/components/ClimateHistoryChart.css',
   'apps/mobile/src/features/automations/components/AutomationDetailLayout.css',
+  'apps/mobile/src/features/automations/components/PulseCycleEditor.css',
   'apps/mobile/src/features/thermometers/components/ThermometerSettingsPage.css',
   'apps/mobile/src/features/plugs/components/PlugDetailTabs.css',
+  'apps/mobile/src/features/plugs/components/PlugAddPage.css',
   'apps/mobile/src/features/plugs/components/PlugAddSpeedDial.css',
   'apps/mobile/src/features/plugs/components/PlugSettingsSurface.css',
   'packages/ui/src/primitives/ColorSwatch.css',
@@ -911,10 +914,10 @@ const checkDisclosureContract = async () => {
 const checkSegmentedControlContract = async () => {
   const componentPath = 'packages/ui/src/primitives/SegmentedControl.tsx';
   const uiIndexPath = 'packages/ui/src/index.ts';
-  const componentUsagePaths = [
-    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
-    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
-  ];
+  const ionicSensorAddPath =
+    'apps/mobile/src/features/thermometers/components/SensorAddModeSegment.tsx';
+  const ionicAddPlugPath =
+    'apps/mobile/src/features/plugs/components/PlugAddModeSegment.tsx';
   const setupNavigationPath =
     'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx';
   const geometryUsageContracts = [
@@ -924,10 +927,13 @@ const checkSegmentedControlContract = async () => {
     ]
   ];
 
-  const [componentSource, uiIndexSource] = await Promise.all([
-    readRepoFile(componentPath),
-    readRepoFile(uiIndexPath)
-  ]);
+  const [componentSource, uiIndexSource, ionicSensorAddSource, ionicAddPlugSource] =
+    await Promise.all([
+      readRepoFile(componentPath),
+      readRepoFile(uiIndexPath),
+      readRepoFile(ionicSensorAddPath),
+      readRepoFile(ionicAddPlugPath)
+    ]);
   if (
     !componentSource.includes('export const SegmentedControl') ||
     !componentSource.includes('lcl-segmented-control') ||
@@ -937,27 +943,39 @@ const checkSegmentedControlContract = async () => {
   ) {
     addFailure(
       componentPath,
-      'shared SegmentedControl must own add-device tablist structure and lcl-segmented-control geometry'
+      'shared SegmentedControl must own remaining shared tablist structure and lcl-segmented-control geometry'
     );
   }
   if (!uiIndexSource.includes("export * from './primitives/SegmentedControl.js';")) {
     addFailure(uiIndexPath, 'shared SegmentedControl must be exported from @lcl/ui');
   }
 
-  for (const path of componentUsagePaths) {
-    const source = await readRepoFile(path);
-    if (
-      !source.includes('<SegmentedControl') ||
-      !source.includes('className="shelly-add-tabs"') ||
-      !source.includes('itemClassName="shelly-add-tabs__tab"') ||
-      source.includes('shelly-add-tabs lcl-segmented-control') ||
-      source.includes('shelly-add-tabs__tab lcl-segmented-control__item')
-    ) {
-      addFailure(
-        path,
-        'add-device segmented tabs must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup'
-      );
-    }
+  if (
+    !ionicSensorAddSource.includes('<IonSegment') ||
+    !ionicSensorAddSource.includes('<IonSegmentButton') ||
+    !ionicSensorAddSource.includes('className="sensor-add-mode-segment"') ||
+    !ionicSensorAddSource.includes('selectOnFocus={false}') ||
+    !ionicSensorAddSource.includes('swipeGesture={false}') ||
+    ionicSensorAddSource.includes('<SegmentedControl')
+  ) {
+    addFailure(
+      ionicSensorAddPath,
+      'Add Thermometer mode selection must use the controlled Ionic segment without focus/swipe side effects'
+    );
+  }
+
+  if (
+    !ionicAddPlugSource.includes('<IonSegment') ||
+    !ionicAddPlugSource.includes('<IonSegmentButton') ||
+    !ionicAddPlugSource.includes('className="plug-add-mode-segment"') ||
+    !ionicAddPlugSource.includes('selectOnFocus={false}') ||
+    !ionicAddPlugSource.includes('swipeGesture={false}') ||
+    ionicAddPlugSource.includes('<SegmentedControl')
+  ) {
+    addFailure(
+      ionicAddPlugPath,
+      'Add Plug mode selection must use the controlled Ionic segment without focus/swipe side effects'
+    );
   }
 
   const setupNavigationSource = await readRepoFile(setupNavigationPath);
@@ -1044,6 +1062,44 @@ const checkStandalonePulseControlPlacement = async () => {
   }
 };
 
+const checkRuntimeReasonPresentation = async () => {
+  const formatterPath = 'apps/mobile/src/app/runtimeReasonPresentation.ts';
+  const formatter = await readRepoFile(formatterPath);
+  if (
+    !formatter.includes('hardware.diagnosticsReason.') ||
+    !formatter.includes('dashboard.health.unknown')
+  ) {
+    addFailure(formatterPath, 'device reason codes must never leak as raw UI copy');
+  }
+
+  for (const path of [
+    'apps/mobile/src/features/automations/components/PulseOperationalStatusSummary.tsx',
+    'apps/mobile/src/features/automations/components/StandalonePulseDashboardStatus.tsx'
+  ]) {
+    const source = await readRepoFile(path);
+    if (
+      !source.includes('formatRuntimeReason(') ||
+      /reasons\[value\]\s*\?\?\s*value/.test(source)
+    ) {
+      addFailure(path, 'runtime status must use the shared localized reason presenter');
+    }
+  }
+
+  const tsxPaths = (await listRepoFiles('apps/mobile/src')).filter(
+    (path) => path.endsWith('.tsx') && !path.includes('.test.')
+  );
+  for (const path of tsxPaths) {
+    if (path.includes('/devConsole') || path.includes('/DevCommandPalette')) continue;
+    const source = await readRepoFile(path);
+    if (
+      /error\s+instanceof\s+Error\s*\?\s*error\.message/.test(source) ||
+      /\$\{fallback\}\s+\$\{detail\}/.test(source)
+    ) {
+      addFailure(path, 'never place raw transport exceptions in a user-facing component');
+    }
+  }
+};
+
 const checkPackageRuntimeCopy = async () => {
   const blockedCopyPattern =
     /(['"`])(?:(?!\1).)*(?:[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]|Kopiuj|Temperatura|Wilgotność|Bateria|brak|zgodne|blokada|Skan BLE|zabrakło pamięci)(?:(?!\1).)*\1/;
@@ -1064,6 +1120,8 @@ const checkPackageRuntimeCopy = async () => {
 const focusedCheck = process.env.LCL_UX_GATE_FOCUS;
 if (focusedCheck === 'segmented-control') {
   await checkSegmentedControlContract();
+} else if (focusedCheck === 'runtime-reason') {
+  await checkRuntimeReasonPresentation();
 } else if (focusedCheck) {
   console.error(`Unknown LCL_UX_GATE_FOCUS: ${focusedCheck}`);
   process.exit(2);
@@ -1089,6 +1147,7 @@ if (focusedCheck === 'segmented-control') {
   await checkDisclosureContract();
   await checkSegmentedControlContract();
   await checkStandalonePulseControlPlacement();
+  await checkRuntimeReasonPresentation();
   await checkPackageRuntimeCopy();
 }
 

@@ -22,6 +22,7 @@ import {
 } from '../flows/installations/store.js';
 import { resetHardwareSetupDraftStore } from '../flows/hardware-setup/setupDraftStore.js';
 import { AutomationDashboardScreen } from '../screens/AutomationDashboardScreen.js';
+import { fireIonInput, getIonicButton, getIonicInput } from '../test/ionicTestEvents.js';
 import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 
 vi.mock('../flows/hardware-setup/useHardwareSetupFlow.js', () => ({
@@ -379,9 +380,11 @@ describe('AutomationDashboardScreen', () => {
     const plugCard = card as HTMLElement;
     expect(within(plugCard).queryByText('Brak automatyzacji')).toBeNull();
     fireEvent.click(within(plugCard).getByRole('button', { name: 'Nazwa gniazdka' }));
-    const nameInput = within(plugCard).getByRole('textbox', { name: 'Nazwa gniazdka' });
-    fireEvent.change(nameInput, { target: { value: 'Nawilżacz salon' } });
-    fireEvent.blur(nameInput);
+    const nameInput = getIonicInput(plugCard, 'Nazwa gniazdka');
+    fireEvent.click(nameInput);
+    expect(onOpenPlugSettings).not.toHaveBeenCalled();
+    fireIonInput(nameInput, 'Nawilżacz salon');
+    fireEvent(nameInput, new CustomEvent('ionBlur', { bubbles: true }));
     expect(within(plugCard).getByText('Nawilżacz salon')).toBeVisible();
     expect(useSavedPlugStore.getState().plugs[0]?.name).toBe('Nawilżacz salon');
     expect(await within(plugCard).findByText('0.0 W')).toBeVisible();
@@ -420,7 +423,7 @@ describe('AutomationDashboardScreen', () => {
       })
     ).toBe(true);
 
-    fireEvent.click(within(plugCard).getByRole('button', { name: 'Dodaj automatykę' }));
+    fireEvent.click(getIonicButton(plugCard, 'Dodaj automatykę'));
     expect(onAddAutomation).toHaveBeenCalledWith('shellyplugsg3-dashboard-30');
     expect(onOpenPlugSettings).not.toHaveBeenCalled();
   });
@@ -508,9 +511,9 @@ describe('AutomationDashboardScreen', () => {
 
     const card = screen.getByText('Salon').closest('article') as HTMLElement;
     fireEvent.click(within(card).getByRole('button', { name: 'Nazwa gniazdka' }));
-    const input = within(card).getByRole('textbox', { name: 'Nazwa gniazdka' });
-    fireEvent.change(input, { target: { value: 'Nawilżacz growbox' } });
-    fireEvent.blur(input);
+    const input = getIonicInput(card, 'Nazwa gniazdka');
+    fireIonInput(input, 'Nawilżacz growbox');
+    fireEvent(input, new CustomEvent('ionBlur', { bubbles: true }));
 
     expect(within(card).getByText('Nawilżacz growbox')).toBeVisible();
     expect(useSavedPlugStore.getState().plugs[0]?.name).toBe('Nawilżacz growbox');

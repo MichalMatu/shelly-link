@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { IconDotsVertical, IconPlug } from '@tabler/icons-react';
 import type { Key, ReactNode } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -55,7 +56,9 @@ const formatEnergy = (value: number | null | undefined): string => {
 
 const isInteractiveTarget = (target: EventTarget | null): boolean =>
   target instanceof Element &&
-  target.closest('button, a, input, textarea, select, [contenteditable="true"]') !== null;
+  target.closest(
+    'button, a, input, textarea, select, ion-button, ion-input, ion-textarea, ion-select, ion-toggle, ion-checkbox, ion-segment, ion-range, ion-radio, ion-searchbar, [role="button"], [contenteditable="true"]'
+  ) !== null;
 
 export const PlugDashboardCardShell = ({
   name,
@@ -146,14 +149,15 @@ export const PlugDashboardCardShell = ({
       )}
 
       {automationAction && (
-        <button
-          className="primary-action plug-card__automation-action"
+        <IonButton
+          className="plug-card__automation-action"
+          expand="block"
           type="button"
           disabled={automationAction.disabled}
           onClick={automationAction.onClick}
         >
           {t('dashboard.addAutomation')}
-        </button>
+        </IonButton>
       )}
 
       {footer}

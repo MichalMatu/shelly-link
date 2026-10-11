@@ -83,6 +83,8 @@ const mockShellyRpc = async (
   let manualRequestOn = false;
   let automationFault: string | null = null;
   let buttonMode: 'momentary' | 'detached' = options.buttonMode ?? 'momentary';
+  let bleScannerPreparationPaused = false;
+  const resumeBleScannerRequests: Array<() => void> = [];
 
   const handleRpc = async (route: Route) => {
     const requestUrl = new URL(route.request().url());
@@ -141,6 +143,11 @@ const mockShellyRpc = async (
         offset?: number;
       };
     };
+    if (requestBody.method === 'Script.List' && bleScannerPreparationPaused) {
+      await new Promise<void>((resolve) => {
+        resumeBleScannerRequests.push(resolve);
+      });
+    }
     let result: unknown = {};
     switch (requestBody.method) {
       case 'Shelly.GetDeviceInfo':
@@ -342,6 +349,15 @@ const mockShellyRpc = async (
 
   await page.route('**/__lcl_shelly_proxy?**', handleRpc);
   await page.route('http://192.168.0.20/rpc', handleRpc);
+  return {
+    holdBleScannerPreparation() {
+      bleScannerPreparationPaused = true;
+    },
+    resumeBleScannerPreparation() {
+      bleScannerPreparationPaused = false;
+      resumeBleScannerRequests.splice(0).forEach((resume) => resume());
+    }
+  };
 };
 
 const mockTimeShellyRpc = async (page: Page) => {
@@ -684,7 +700,7 @@ for (const viewport of viewports) {
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await seedInstalledAutomation(page);
-    await mockShellyRpc(page, { buttonMode: 'detached' });
+    const shellyRpc = await mockShellyRpc(page, { buttonMode: 'detached' });
     await page.goto('/');
 
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -797,7 +813,7 @@ for (const viewport of viewports) {
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '05-climate-device');
     }
-    await expect(page.getByRole('button', { name: 'Tryb LED' })).toBeVisible();
+    await expect(page.locator('ion-select.plug-settings-ionic-select')).toBeVisible();
     await expect(page.getByText('ON', { exact: true })).toBeVisible();
     await expect(page.getByText('OFF', { exact: true })).toBeVisible();
     await expect(page.locator('input[type="color"]')).toHaveCount(0);
@@ -805,8 +821,8 @@ for (const viewport of viewports) {
     const offStateBox = await requiredBox(page.locator('fieldset.plug-led-state').nth(1));
     expect(offStateBox.y).toBeGreaterThan(onStateBox.y + onStateBox.height);
     const [nightStartBox, nightEndBox] = await Promise.all([
-      requiredBox(page.getByLabel('Początek')),
-      requiredBox(page.getByLabel('Koniec'))
+      requiredBox(page.locator('.plug-night-mode ion-input.plug-time-input').nth(0)),
+      requiredBox(page.locator('.plug-night-mode ion-input.plug-time-input').nth(1))
     ]);
     expect(Math.abs(nightStartBox.y - nightEndBox.y)).toBeLessThanOrEqual(2);
     await expect(
@@ -855,6 +871,9 @@ for (const viewport of viewports) {
     await expectNoLegacyInlineFeedback(page);
     if (viewport.name === 'phone-large') {
       await page.getByRole('button', { name: 'Bluetooth' }).click();
+      // Keep the loading screenshot stable; the fake RPC intentionally does not
+      // implement BLE scanner installation and its eventual error is tested below.
+      shellyRpc.holdBleScannerPreparation();
       await page
         .getByRole('button', { name: 'Skanuj termometry BLE przez to gniazdko' })
         .click();
@@ -862,6 +881,10 @@ for (const viewport of viewports) {
         page.getByRole('heading', { name: 'Skanuj termometry BLE' })
       ).toBeVisible();
       await expectVisualScreen(page, '04-plug-ble-discovery');
+      shellyRpc.resumeBleScannerPreparation();
+      await expect(
+        page.getByText('Nie udało się uruchomić skanera BLE.', { exact: true })
+      ).toBeVisible();
     }
     expect(consoleProblems).toEqual([]);
   });
@@ -952,17 +975,25 @@ for (const viewport of viewports) {
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
-    await page.getByRole('button', { name: 'Wyjście w aktywnym przedziale' }).click();
-    await page.getByRole('option', { name: 'Pulse ON/OFF', exact: true }).click();
-    await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
-    await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
-    await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
+    await page
+      .locator('ion-segment.pulse-cycle-ionic-segment ion-segment-button[value="pulse"]')
+      .click();
+    await expect(
+      page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(0)
+    ).toBeVisible();
+    await expect(
+      page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(1)
+    ).toBeVisible();
+    await expect(
+      page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(2)
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '25-time-pulse-setup');
     }
-    await page.getByRole('button', { name: 'Wyjście w aktywnym przedziale' }).click();
-    await page.getByRole('option', { name: 'Stałe ON', exact: true }).click();
+    await page
+      .locator('ion-segment.pulse-cycle-ionic-segment ion-segment-button[value="steady"]')
+      .click();
 
     await page.getByRole('button', { name: 'Zapisz harmonogram w Shelly' }).click();
     await expect(page.getByRole('main', { name: 'Gniazdka' })).toBeVisible();
@@ -1204,7 +1235,10 @@ for (const viewport of viewports) {
       page.getByRole('heading', { name: 'Ustawienia termometru' })
     ).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Tożsamość' })).toBeVisible();
-    await expect(page.getByLabel('Nazwa termometru')).toHaveValue('Przedpokój');
+    await expect(page.locator('ion-input.thermometer-settings__input')).toHaveJSProperty(
+      'value',
+      'Przedpokój'
+    );
     await expect(page.getByText('A4:C1:38:4F:24:CD')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Odczyty na żywo' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Akcje urządzenia' })).toBeVisible();
@@ -1220,6 +1254,10 @@ for (const viewport of viewports) {
     await expect(page.getByRole('main', { name: 'Termometry' })).toBeVisible();
     await page.getByRole('button', { name: 'Ustawienia', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Ustawienia' })).toBeVisible();
+    await expect(page.locator('ion-select.app-settings__language-select')).toBeVisible();
+    await expect(
+      page.locator('ion-segment.app-settings__appearance-segment')
+    ).toBeVisible();
     const settingsDiagnostics = page.locator('.app-settings__diagnostics');
     expect(await settingsDiagnostics.getAttribute('open')).toBeNull();
     await expect(settingsDiagnostics.locator('.lcl-disclosure__body')).toBeHidden();
@@ -1228,6 +1266,9 @@ for (const viewport of viewports) {
     }
     await settingsDiagnostics.locator('summary').click();
     await expect(settingsDiagnostics.locator('.lcl-disclosure__body')).toBeVisible();
+    await expect(
+      settingsDiagnostics.locator('ion-button.app-settings__secondary-action')
+    ).toBeVisible();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '18-settings-diagnostics-open');
     }
@@ -1245,7 +1286,7 @@ for (const viewport of viewports) {
     const scanRangeDisclosure = page.locator('.shelly-network-scan__range-disclosure');
     await expect(scanRangeDisclosure.getByText('Zakres skanowania')).toBeVisible();
     await expect(scanRangeDisclosure).not.toHaveAttribute('open', '');
-    await expect(page.getByLabel('Od', { exact: true })).toBeHidden();
+    await expect(scanRangeDisclosure.locator('ion-input').first()).toBeHidden();
     if (viewport.name === 'phone-large') {
       await expectVisualScreen(page, '15-add-plug');
     }
@@ -1360,9 +1401,12 @@ for (const viewport of viewports) {
     await expect(page.getByText(/harmonogram/i)).toHaveCount(0);
     await expect(page.getByLabel('Czas ON (s)')).toBeVisible();
     await expect(page.getByLabel('Czas OFF (s)')).toBeVisible();
-    await expect(page.getByLabel('Opóźnienie startu (s)')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Faza startowa' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Wykonanie' })).toBeVisible();
+    await expect(
+      page.locator('section[aria-label="Pulse"] ion-input.pulse-cycle-ionic-input').nth(2)
+    ).toBeVisible();
+    await expect(pulseSetup.locator('ion-select.pulse-cycle-ionic-select')).toHaveCount(
+      2
+    );
     await expect(page.getByRole('navigation', { name: 'Menu konfiguracji' })).toHaveCount(
       0
     );

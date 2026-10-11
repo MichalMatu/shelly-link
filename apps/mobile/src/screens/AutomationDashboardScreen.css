@@ -354,6 +354,19 @@
   }
 }
 
-.dashboard-shell .plug-card__automation-action {
+.dashboard-shell ion-button.plug-card__automation-action {
+  --background: var(--lcl-color-accent);
+  --background-hover: var(--lcl-color-accent-strong);
+  --border-radius: var(--lcl-radius-md);
+  --box-shadow: none;
+  --color: var(--lcl-color-accent-contrast);
+  --padding-start: var(--lcl-spacing-lg);
+  --padding-end: var(--lcl-spacing-lg);
+
+  font-size: var(--lcl-font-size-lg);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
   width: 100%;
 }

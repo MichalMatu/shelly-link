@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { DiagnosticRow } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import { firmwareUpdateCopy } from '../../../app/locales/firmwareUpdate.js';
@@ -8,11 +9,6 @@ import './PlugSettingsSurface.css';
 export type PlugFirmwareUpdateCardProps = {
   currentFirmware: string | undefined;
   target?: PlugFirmwareUpdateTarget | undefined;
-};
-
-const detailError = (fallback: string, error: unknown): string => {
-  const detail = error instanceof Error ? error.message.trim() : '';
-  return detail ? `${fallback} ${detail}` : fallback;
 };
 
 export const PlugFirmwareUpdateCard = ({
@@ -68,21 +64,21 @@ export const PlugFirmwareUpdateCard = ({
       )}
       {target && query.isError && (
         <p className="plug-settings-feedback plug-settings-feedback--warning">
-          {detailError(copy.checkFailed, query.error)}
+          {copy.checkFailed}
         </p>
       )}
 
       {canUpdate && updatePhase !== 'complete' && (
         <div className="plug-settings-actions">
-          <button
-            className="primary-action"
+          <IonButton
+            className="plug-settings-ionic-action"
             type="button"
             disabled={updateMutation.isPending}
             aria-busy={updateMutation.isPending || undefined}
             onClick={() => updateMutation.mutate()}
           >
             {updateMutation.isPending ? pendingCopy : copy.update}
-          </button>
+          </IonButton>
         </div>
       )}
 
@@ -101,7 +97,7 @@ export const PlugFirmwareUpdateCard = ({
           role="status"
           className="plug-settings-feedback plug-settings-feedback--warning"
         >
-          {detailError(copy.updateFailed, updateMutation.error)}
+          {copy.updateFailed}
         </p>
       )}
     </section>

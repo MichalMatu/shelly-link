@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { Modal } from '@lcl/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { devCommandPaletteOpenEvent } from './devConsole.js';
@@ -34,7 +35,9 @@ const commandSequence = '/help';
 
 const isEditableTarget = (target: EventTarget | null): boolean =>
   target instanceof HTMLElement &&
-  (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName));
+  target.closest(
+    'input, select, textarea, ion-input, ion-textarea, ion-select, ion-searchbar, [contenteditable="true"]'
+  ) !== null;
 
 const readSnapshot = (): DevCommandSnapshot => ({
   localePreference: getLocalePreference(),
@@ -142,9 +145,9 @@ export const DevCommandPalette = () => {
   return (
     <Modal
       actions={
-        <button className="secondary-action" type="button" onClick={resetAll}>
+        <IonButton fill="outline" type="button" onClick={resetAll}>
           Reset all
-        </button>
+        </IonButton>
       }
       closeLabel="Close"
       description="Type /help again or run lclDev.menu() to reopen this menu."
@@ -222,13 +225,9 @@ export const DevCommandPalette = () => {
             <p>No runtime issues captured.</p>
           )}
           <div className="dev-command-palette__choice-grid">
-            <button
-              className="dev-command-palette__choice"
-              type="button"
-              onClick={clearErrors}
-            >
+            <IonButton expand="block" fill="outline" type="button" onClick={clearErrors}>
               Clear errors
-            </button>
+            </IonButton>
           </div>
         </section>
       </div>

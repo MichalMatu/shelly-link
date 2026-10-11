@@ -10,16 +10,13 @@ import {
   getDiagnosticEvents
 } from '../platform/diagnosticJournal.js';
 import { Disclosure, DiagnosticRow, type DiagnosticRowProps } from '@lcl/ui';
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import {
   getLocalePreference,
   localePreferenceChangeEvent,
-  localePreferences,
   setLocalePreference,
   useTranslation,
-  type Locale,
-  type LocalePreference,
-  type TranslationKey
+  type LocalePreference
 } from './i18n.js';
 import {
   clearRuntimeIssues,
@@ -31,7 +28,6 @@ import {
   getThemeMode,
   setThemeMode,
   themeModeChangeEvent,
-  themeModes,
   type ThemeMode
 } from './themeMode.js';
 
@@ -41,21 +37,17 @@ export type SupportDiagnosticRow = {
   tone?: DiagnosticRowProps['tone'];
 };
 
-const localeLabelKeys: Record<Locale, TranslationKey> = {
-  pl: 'settings.language.pl',
-  en: 'settings.language.en',
-  de: 'settings.language.de',
-  es: 'settings.language.es',
-  fr: 'settings.language.fr',
-  it: 'settings.language.it',
-  'pt-BR': 'settings.language.ptBr'
-};
+const IonicSettingsControl = lazy(async () => {
+  const module = await import('./IonicSettingsControl.js');
+  return { default: module.IonicSettingsControl };
+});
 
-const themeModeLabelKeys: Record<ThemeMode, TranslationKey> = {
-  system: 'settings.appearance.system',
-  light: 'settings.appearance.light',
-  dark: 'settings.appearance.dark'
-};
+const IonicSettingsAction = lazy(async () => {
+  const module = await import('./IonicSettingsControl.js');
+  return { default: module.IonicSettingsAction };
+});
+
+const SettingsControlFallback = () => null;
 
 const formatIssue = (kind: string, message: string): string => `${kind}: ${message}`;
 
@@ -169,48 +161,26 @@ export const AppSettingsScreen = () => {
           <div className="app-settings__section-header">
             <h2>{t('settings.language.title')}</h2>
           </div>
-          <div className="app-settings__choice-grid">
-            {localePreferences.map((preference) => (
-              <button
-                key={preference}
-                className={
-                  localePreference === preference
-                    ? 'app-settings__choice app-settings__choice--active'
-                    : 'app-settings__choice'
-                }
-                type="button"
-                aria-pressed={localePreference === preference}
-                onClick={() => chooseLocale(preference)}
-              >
-                {preference === 'system'
-                  ? t('settings.system')
-                  : t(localeLabelKeys[preference])}
-              </button>
-            ))}
-          </div>
+          <Suspense fallback={<SettingsControlFallback />}>
+            <IonicSettingsControl
+              kind="language"
+              value={localePreference}
+              onChange={chooseLocale}
+            />
+          </Suspense>
         </section>
 
         <section className="app-settings__section">
           <div className="app-settings__section-header">
             <h2>{t('settings.appearance.title')}</h2>
           </div>
-          <div className="app-settings__choice-grid app-settings__choice-grid--appearance">
-            {themeModes.map((mode) => (
-              <button
-                key={mode}
-                className={
-                  themeMode === mode
-                    ? 'app-settings__choice app-settings__choice--active'
-                    : 'app-settings__choice'
-                }
-                type="button"
-                aria-pressed={themeMode === mode}
-                onClick={() => chooseTheme(mode)}
-              >
-                {t(themeModeLabelKeys[mode])}
-              </button>
-            ))}
-          </div>
+          <Suspense fallback={<SettingsControlFallback />}>
+            <IonicSettingsControl
+              kind="appearance"
+              value={themeMode}
+              onChange={chooseTheme}
+            />
+          </Suspense>
         </section>
 
         <Disclosure
@@ -243,17 +213,19 @@ export const AppSettingsScreen = () => {
             )}
 
             <div className="settings-action-stack">
-              <button className="secondary-action" type="button" onClick={copyReport}>
-                {t('settings.support.copyReport')}
-              </button>
+              <Suspense fallback={<SettingsControlFallback />}>
+                <IonicSettingsAction
+                  label={t('settings.support.copyReport')}
+                  onClick={copyReport}
+                />
+              </Suspense>
               {runtimeIssues.length > 0 && (
-                <button
-                  className="secondary-action"
-                  type="button"
-                  onClick={clearDiagnostics}
-                >
-                  {t('settings.support.clearDiagnostics')}
-                </button>
+                <Suspense fallback={<SettingsControlFallback />}>
+                  <IonicSettingsAction
+                    label={t('settings.support.clearDiagnostics')}
+                    onClick={clearDiagnostics}
+                  />
+                </Suspense>
               )}
             </div>
             {copyState === 'done' && (

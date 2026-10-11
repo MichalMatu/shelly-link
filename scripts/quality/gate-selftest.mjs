@@ -15,6 +15,7 @@ const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
 const repositoryGate = join(repositoryRoot, 'scripts/quality/repository-gate.mjs');
 const featureGate = join(repositoryRoot, 'scripts/quality/feature-boundary-gate.mjs');
 const uxGate = join(repositoryRoot, 'scripts/quality/ux-gate.mjs');
+const performanceGate = join(repositoryRoot, 'scripts/quality/performance-budget.mjs');
 const failures = [];
 let passed = 0;
 
@@ -33,7 +34,14 @@ const runGate = (gatePath, fixtureRoot, extraEnv = {}) =>
     encoding: 'utf8'
   });
 
-const executeCase = async ({ name, gatePath, setup, expectedFailure, env = {} }) => {
+const executeCase = async ({
+  name,
+  gatePath,
+  setup,
+  expectedFailure,
+  expectedOutput,
+  env = {}
+}) => {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'lcl-quality-'));
   try {
     await setup(fixtureRoot);
@@ -53,6 +61,13 @@ const executeCase = async ({ name, gatePath, setup, expectedFailure, env = {} })
       }
     } else if (result.status !== 0) {
       failures.push(`${name}: gate unexpectedly failed\n${output}`);
+      return;
+    }
+
+    if (expectedOutput && !output.includes(expectedOutput)) {
+      failures.push(
+        `${name}: gate output missing ${JSON.stringify(expectedOutput)}\n${output}`
+      );
       return;
     }
 
@@ -212,16 +227,16 @@ const setupUxSegmentedControlFixture = async (root) => {
     'packages/ui/src/index.ts',
     "export * from './primitives/SegmentedControl.js';\n"
   );
-  for (const relativePath of [
-    'apps/mobile/src/features/plugs/components/PlugAddPage.tsx',
-    'apps/mobile/src/screens/hardware-setup/pages/SensorSetupPage.tsx'
-  ]) {
-    await writeFixture(
-      root,
-      relativePath,
-      'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
-    );
-  }
+  await writeFixture(
+    root,
+    'apps/mobile/src/features/thermometers/components/SensorAddModeSegment.tsx',
+    'export const Fixture = () => <IonSegment className="sensor-add-mode-segment" selectOnFocus={false} swipeGesture={false}><IonSegmentButton /></IonSegment>;\n'
+  );
+  await writeFixture(
+    root,
+    'apps/mobile/src/features/plugs/components/PlugAddModeSegment.tsx',
+    'export const Fixture = () => <IonSegment className="plug-add-mode-segment" selectOnFocus={false} swipeGesture={false}><IonSegmentButton /></IonSegment>;\n'
+  );
   await writeFixture(
     root,
     'apps/mobile/src/screens/hardware-setup/HardwareSetupScreen.tsx',
@@ -233,6 +248,77 @@ const setupUxSegmentedControlFixture = async (root) => {
     'export const Fixture = () => <div className="plug-detail-tabs lcl-segmented-control"><button className="lcl-segmented-control__item" /></div>;\n'
   );
 };
+
+const setupUxReasonPresentationFixture = async (root) => {
+  await writeFixture(
+    root,
+    'apps/mobile/src/app/runtimeReasonPresentation.ts',
+    "const keys = 'hardware.diagnosticsReason.'; const unknown = 'dashboard.health.unknown';\n"
+  );
+  for (const path of [
+    'apps/mobile/src/features/automations/components/PulseOperationalStatusSummary.tsx',
+    'apps/mobile/src/features/automations/components/StandalonePulseDashboardStatus.tsx'
+  ]) {
+    await writeFixture(
+      root,
+      path,
+      'export const status = formatRuntimeReason(code, t);\n'
+    );
+  }
+};
+
+const setupPerformanceFixture = async (root, { jsBytes }) => {
+  await writeFixture(
+    root,
+    'scripts/quality/performance-budgets.json',
+    json({
+      version: 2,
+      mobileDist: {
+        baseline: {
+          gitSha: 'fixture-baseline',
+          totalJsBytes: 100,
+          largestJsBytes: 100,
+          totalCssBytes: 10,
+          jsFileCount: 1
+        },
+        reviewGrowth: {
+          totalJsBytes: 20,
+          largestJsBytes: 20,
+          totalCssBytes: 20,
+          jsFileCount: 1
+        },
+        hardLimit: {
+          totalJsBytes: 200,
+          largestJsBytes: 200,
+          totalCssBytes: 100,
+          maxJsFiles: 4
+        }
+      },
+      source: { minPollingIntervalMs: 1000 }
+    })
+  );
+  await writeFixture(root, 'apps/mobile/dist/assets/app.js', 'x'.repeat(jsBytes));
+  await writeFixture(root, 'apps/mobile/dist/assets/app.css', 'x'.repeat(10));
+  await writeFixture(
+    root,
+    'apps/mobile/src/fixture.ts',
+    'export const fixture = true;\n'
+  );
+};
+
+await executeCase({
+  name: 'performance/review threshold stays advisory',
+  gatePath: performanceGate,
+  setup: (root) => setupPerformanceFixture(root, { jsBytes: 150 }),
+  expectedOutput: 'Performance review threshold exceeded:'
+});
+
+await executeCase({
+  name: 'performance/hard ceiling fails closed',
+  gatePath: performanceGate,
+  setup: (root) => setupPerformanceFixture(root, { jsBytes: 201 }),
+  expectedFailure: 'total JS 201 B exceeds hard limit 200 B'
+});
 
 await executeCase({
   name: 'ux/setup navigation uses shared segmented control',
@@ -255,6 +341,75 @@ await executeCase({
   expectedFailure:
     'setup segmented navigation must reuse @lcl/ui SegmentedControl instead of rebuilding tablist markup',
   env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
+});
+
+await executeCase({
+  name: 'ux/Add Thermometer requires controlled Ionic segment',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxSegmentedControlFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/features/thermometers/components/SensorAddModeSegment.tsx',
+      'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
+    );
+  },
+  expectedFailure:
+    'Add Thermometer mode selection must use the controlled Ionic segment without focus/swipe side effects',
+  env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
+});
+
+await executeCase({
+  name: 'ux/Add Plug requires controlled Ionic segment',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxSegmentedControlFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/features/plugs/components/PlugAddModeSegment.tsx',
+      'export const Fixture = () => <SegmentedControl className="shelly-add-tabs" itemClassName="shelly-add-tabs__tab" />;\n'
+    );
+  },
+  expectedFailure:
+    'Add Plug mode selection must use the controlled Ionic segment without focus/swipe side effects',
+  env: { LCL_UX_GATE_FOCUS: 'segmented-control' }
+});
+
+await executeCase({
+  name: 'ux/runtime reasons use localized presentation',
+  gatePath: uxGate,
+  setup: setupUxReasonPresentationFixture,
+  env: { LCL_UX_GATE_FOCUS: 'runtime-reason' }
+});
+
+await executeCase({
+  name: 'ux/runtime codes must not fall back to raw wire values',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxReasonPresentationFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/features/automations/components/PulseOperationalStatusSummary.tsx',
+      'export const status = reasons[value] ?? value;\n'
+    );
+  },
+  expectedFailure: 'runtime status must use the shared localized reason presenter',
+  env: { LCL_UX_GATE_FOCUS: 'runtime-reason' }
+});
+
+await executeCase({
+  name: 'ux/transport errors must never be dumped into user screens',
+  gatePath: uxGate,
+  setup: async (root) => {
+    await setupUxReasonPresentationFixture(root);
+    await writeFixture(
+      root,
+      'apps/mobile/src/features/plugs/components/FaultCard.tsx',
+      "export const errorText = error instanceof Error ? error.message : 'fallback';\n"
+    );
+  },
+  expectedFailure: 'never place raw transport exceptions in a user-facing component',
+  env: { LCL_UX_GATE_FOCUS: 'runtime-reason' }
 });
 
 await executeCase({

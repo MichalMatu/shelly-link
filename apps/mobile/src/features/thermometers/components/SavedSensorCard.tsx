@@ -1,3 +1,4 @@
+import { IonInput } from '@ionic/react';
 import type { Measurement } from '@lcl/ble-core';
 import {
   IconClock,
@@ -89,17 +90,17 @@ export const SavedSensorCard = ({
           />
         </span>
         {isEditing ? (
-          <input
-            autoFocus
+          <IonInput
+            autofocus
             className="sensor-card-name-input"
             aria-label={t('hardware.sensor.nameLabel')}
             type="text"
             value={device.name}
-            onBlur={onEditEnd}
-            onChange={(event) => onNameChange(event.currentTarget.value)}
+            onIonBlur={onEditEnd}
+            onIonInput={(event) => onNameChange(String(event.detail.value ?? ''))}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === 'Escape') {
-                event.currentTarget.blur();
+                onEditEnd();
               }
             }}
           />

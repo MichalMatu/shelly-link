@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import type { HistoryRecord } from '@lcl/automation-core';
 import { FeedbackPanel } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
@@ -45,9 +46,9 @@ export const AutomationHistorySection = ({
   if (error) {
     return (
       <FeedbackPanel tone="danger" title={copy.failed}>
-        <button className="secondary-action" type="button" onClick={onRetry}>
+        <IonButton fill="outline" size="small" type="button" onClick={onRetry}>
           {copy.retry}
-        </button>
+        </IonButton>
       </FeedbackPanel>
     );
   }

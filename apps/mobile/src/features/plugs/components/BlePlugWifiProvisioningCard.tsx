@@ -1,5 +1,5 @@
-import { SelectField } from '@lcl/ui';
-import { useId, useState } from 'react';
+import { IonButton, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
+import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceWifiCopy } from '../../../app/locales/deviceWifi.js';
 import {
@@ -14,11 +14,8 @@ export type BlePlugWifiProvisioningCardProps = {
   plug: SavedPlugWithBleLocator;
 };
 
-const errorMessage = (error: unknown, fallback: string, unsupported: string): string => {
-  if (error instanceof BlePlugWifiProvisioningUnsupportedError) return unsupported;
-  const detail = error instanceof Error ? error.message.trim() : '';
-  return detail ? `${fallback} ${detail}` : fallback;
-};
+const errorMessage = (error: unknown, fallback: string, unsupported: string): string =>
+  error instanceof BlePlugWifiProvisioningUnsupportedError ? unsupported : fallback;
 
 export const BlePlugWifiProvisioningCard = ({
   plug
@@ -30,7 +27,6 @@ export const BlePlugWifiProvisioningCard = ({
   const [selectedSsid, setSelectedSsid] = useState('');
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
-  const passwordId = useId();
 
   const selected = networks.find((network) => network.ssid === selectedSsid);
   const secured = selected ? selected.auth !== 0 : false;
@@ -78,65 +74,74 @@ export const BlePlugWifiProvisioningCard = ({
       </div>
 
       <div className="plug-settings-actions">
-        <button
-          className="secondary-action"
+        <IonButton
+          className="plug-settings-ionic-action plug-settings-ionic-action--secondary"
+          fill="outline"
           type="button"
           disabled={busy}
           aria-busy={scanMutation.isPending || undefined}
           onClick={scan}
         >
           {scanMutation.isPending ? copy.scanning : copy.scan}
-        </button>
+        </IonButton>
       </div>
 
       {networks.length > 0 && (
         <div className="plug-settings-fields">
           <div className="field">
             <span>{copy.network}</span>
-            <SelectField
-              ariaLabel={copy.network}
-              value={selectedSsid}
+            <IonSelect
+              aria-label={copy.network}
+              className="plug-settings-ionic-select"
+              fill="outline"
+              interface="alert"
               placeholder={copy.selectNetwork}
+              value={selectedSsid}
               disabled={busy}
-              options={networks.map((network) => ({
-                value: network.ssid,
-                label: network.ssid,
-                meta: `${network.rssi === undefined ? '—' : `${network.rssi} dBm`} · ${
-                  network.auth === 0 ? copy.open : copy.secured
-                }`
-              }))}
-              onChange={(value) => {
+              onIonChange={(event) => {
+                const value = event.detail.value;
+                if (typeof value !== 'string') return;
                 setSelectedSsid(value);
                 setPassword('');
                 setFeedback(null);
               }}
-            />
+            >
+              {networks.map((network) => (
+                <IonSelectOption key={network.ssid} value={network.ssid}>
+                  {network.ssid} ·{' '}
+                  {network.rssi === undefined ? '—' : `${network.rssi} dBm`} ·{' '}
+                  {network.auth === 0 ? copy.open : copy.secured}
+                </IonSelectOption>
+              ))}
+            </IonSelect>
           </div>
 
           {selected && secured && (
-            <label className="field" htmlFor={passwordId}>
-              {copy.password}
-              <input
-                id={passwordId}
+            <div className="field">
+              <span>{copy.password}</span>
+              <IonInput
+                aria-label={copy.password}
+                className="plug-settings-ionic-input"
+                fill="outline"
                 type="password"
-                autoComplete="off"
+                autocomplete="off"
                 value={password}
                 disabled={busy}
-                onChange={(event) => setPassword(event.currentTarget.value)}
+                onIonInput={(event) => setPassword(String(event.detail.value ?? ''))}
               />
-            </label>
+            </div>
           )}
 
           <div className="plug-settings-actions">
-            <button
-              className="primary-action"
+            <IonButton
+              className="plug-settings-ionic-action"
               type="button"
               disabled={!selected || (secured && password.length === 0) || busy}
               aria-busy={connectMutation.isPending || undefined}
               onClick={connect}
             >
               {connectMutation.isPending ? copy.connecting : copy.connect}
-            </button>
+            </IonButton>
           </div>
         </div>
       )}

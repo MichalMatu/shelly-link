@@ -77,13 +77,6 @@
   min-height: var(--lcl-size-control-min-height);
 }
 
-.plug-settings-check-row input[type='checkbox'] {
-  accent-color: var(--lcl-color-accent);
-  flex: 0 0 auto;
-  height: var(--lcl-size-control-icon-size);
-  width: var(--lcl-size-control-icon-size);
-}
-
 .plug-color-editor {
   min-width: 0;
 }
@@ -180,12 +173,17 @@
 }
 
 .plug-color-picker__range {
-  accent-color: var(--lcl-color-accent);
+  --bar-background: var(--lcl-color-border);
+  --bar-background-active: var(--lcl-color-accent);
+  --knob-background: var(--lcl-color-accent);
+  --pin-background: var(--lcl-color-accent);
+
   width: 100%;
 }
 
 .plug-color-picker__range--hue {
-  background: linear-gradient(
+  --bar-background-active: transparent;
+  --bar-background: linear-gradient(
     90deg,
     var(--lcl-color-spectrum-red),
     var(--lcl-color-spectrum-yellow),
@@ -195,7 +193,6 @@
     var(--lcl-color-spectrum-magenta),
     var(--lcl-color-spectrum-red)
   );
-  border-radius: var(--lcl-radius-round);
 }
 
 .plug-night-mode__times {
@@ -233,4 +230,93 @@
   .plug-color-presets {
     grid-template-columns: repeat(8, minmax(0, 1fr));
   }
+}
+
+.plug-settings-ionic-action {
+  --background: var(--lcl-color-accent);
+  --border-radius: var(--lcl-radius-md);
+  --box-shadow: none;
+  --color: var(--lcl-color-accent-contrast);
+  --padding-end: var(--lcl-spacing-lg);
+  --padding-start: var(--lcl-spacing-lg);
+
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+}
+
+.plug-settings-ionic-action--secondary {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --color: var(--lcl-color-text);
+}
+
+.plug-settings-ionic-action--danger {
+  --border-color: var(--lcl-color-status-danger-border);
+  --color: var(--lcl-color-status-danger-text);
+}
+
+.plug-settings-ionic-select {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-end: var(--lcl-spacing-md);
+  --padding-start: var(--lcl-spacing-md);
+
+  color: var(--lcl-color-text);
+  font-weight: var(--lcl-font-weight-semibold);
+}
+
+.plug-settings-ionic-input {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-end: var(--lcl-spacing-md);
+  --padding-start: var(--lcl-spacing-md);
+
+  color: var(--lcl-color-text);
+}
+
+.plug-settings-ionic-toggle {
+  --handle-background: var(--lcl-color-surface);
+  --handle-background-checked: var(--lcl-color-accent-contrast);
+  --track-background: var(--lcl-color-border);
+  --track-background-checked: var(--lcl-color-accent);
+}
+
+.plug-settings-button-modes {
+  display: grid;
+  gap: var(--lcl-spacing-sm);
+}
+
+.plug-settings-button-modes ion-radio {
+  --color: var(--lcl-color-text-muted);
+  --color-checked: var(--lcl-color-accent);
+  --inner-padding-end: var(--lcl-spacing-sm);
+
+  background: var(--lcl-color-surface);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  color: var(--lcl-color-text);
+  font-size: var(--lcl-font-size-sm);
+  min-height: var(--lcl-size-control-min-height);
+  padding: var(--lcl-spacing-sm) var(--lcl-spacing-md);
+}
+
+.plug-settings-button-modes ion-radio.radio-checked {
+  border-color: var(--lcl-color-accent);
+}
+
+.plug-settings-section .field-unit-control > ion-input.plug-settings-ionic-input {
+  --padding-end: calc(var(--lcl-spacing-xl) + var(--lcl-spacing-lg));
+}
+
+.plug-settings-section .field-unit-control__unit {
+  z-index: var(--lcl-z-index-content);
 }

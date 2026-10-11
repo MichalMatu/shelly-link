@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { FeedbackPanel, Modal } from '@lcl/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -12,9 +13,6 @@ type StandalonePulseSetupPageProps = {
   selectedShelly: StandalonePulseShelly | null | undefined;
   onInstalled?(): void;
 };
-
-const errorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 export const StandalonePulseSetupPage = ({
   selectedShelly,
@@ -56,8 +54,9 @@ export const StandalonePulseSetupPage = ({
       />
 
       <div className="time-schedule-actions">
-        <button
-          className="primary-action"
+        <IonButton
+          className="pulse-cycle-submit-action"
+          expand="block"
           type="button"
           disabled={
             !selectedShelly ||
@@ -67,7 +66,7 @@ export const StandalonePulseSetupPage = ({
           onClick={() => void install()}
         >
           {pulseFlow.installMutation.isPending ? copy.installing : copy.install}
-        </button>
+        </IonButton>
       </div>
 
       <Modal
@@ -81,7 +80,7 @@ export const StandalonePulseSetupPage = ({
       >
         {pulseFlow.installMutation.isError && (
           <FeedbackPanel tone="danger" title={t('common.operationFailed')}>
-            {errorMessage(pulseFlow.installMutation.error)}
+            {t('common.operationFailed')}
           </FeedbackPanel>
         )}
       </Modal>

@@ -1,0 +1,45 @@
+/* Ionic owns interaction; LCL tokens retain the accepted Time/Pulse visual language. */
+.pulse-cycle-ionic-input,
+.pulse-cycle-ionic-select {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-start: var(--lcl-spacing-md);
+  --padding-end: var(--lcl-spacing-md);
+
+  color: var(--lcl-color-text);
+  min-width: 0;
+  width: 100%;
+}
+
+.pulse-cycle-ionic-segment {
+  --background: var(--lcl-color-surface-muted);
+  background: var(--lcl-color-surface-muted);
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  min-height: var(--lcl-size-control-min-height);
+}
+
+.pulse-cycle-ionic-segment ion-segment-button {
+  --color: var(--lcl-color-text-muted);
+  --color-checked: var(--lcl-color-text);
+  --indicator-color: var(--lcl-color-surface);
+  min-width: 0;
+  text-transform: none;
+}
+
+.field--invalid .pulse-cycle-ionic-input {
+  --border-color: var(--lcl-color-status-danger-text);
+}
+
+.pulse-cycle-submit-action {
+  --background: var(--lcl-color-accent);
+  --color: var(--lcl-color-accent-contrast);
+  --border-radius: var(--lcl-radius-md);
+
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+  width: 100%;
+}

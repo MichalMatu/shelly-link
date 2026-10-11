@@ -1,6 +1,11 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import {
+  fireIonInput,
+  getIonicButton,
+  getIonicInput
+} from '../../../test/ionicTestEvents.js';
 import { PlugAddPage, type PlugAddPageProps } from './PlugAddPage.js';
 
 const createProps = (): PlugAddPageProps => ({
@@ -42,17 +47,47 @@ const renderPage = (props: PlugAddPageProps) =>
 
 describe('PlugAddPage', () => {
   beforeEach(() => setLocalePreference('en'));
-  afterEach(() => setLocalePreference('system'));
+  afterEach(() => {
+    cleanup();
+    setLocalePreference('system');
+  });
 
-  it('owns scan/manual tab state and stops an active scan before leaving it', () => {
+  it('owns scan/manual tab state and stops an active scan only when leaving scan', () => {
     const props = createProps();
     props.scan.active = true;
-    renderPage(props);
+    const { container } = renderPage(props);
+    const segment = container.querySelector('ion-segment');
+    if (!segment) throw new Error('Add Plug segment missing');
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Add manually' }));
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'unsupported' }
+      })
+    );
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'scan' }
+      })
+    );
+
+    expect(props.scan.onStop).not.toHaveBeenCalled();
+    expect(screen.queryByLabelText('Plug name')).toBeNull();
+
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'manual' }
+      })
+    );
 
     expect(props.scan.onStop).toHaveBeenCalledTimes(1);
-    expect(screen.getByLabelText('Plug name')).toHaveValue('Grow plug');
+    expect(getIonicInput(document, 'Plug name')).toHaveAttribute('value', 'Grow plug');
+    expect(screen.queryByText('Scan range')).toBeNull();
   });
 
   it('keeps the technical scan range behind a compact disclosure', () => {
@@ -68,11 +103,10 @@ describe('PlugAddPage', () => {
     fireEvent.click(summary);
 
     expect(disclosure).toHaveAttribute('open');
-    expect(screen.getByLabelText('From')).toHaveValue('192.168.0.1');
-    expect(screen.getByLabelText('To')).toHaveValue('192.168.0.99');
-    fireEvent.change(screen.getByLabelText('From'), {
-      target: { value: '192.168.1.1' }
-    });
+    const fromInput = getIonicInput(document, 'From');
+    expect(fromInput).toHaveAttribute('value', '192.168.0.1');
+    expect(getIonicInput(document, 'To')).toHaveAttribute('value', '192.168.0.99');
+    fireIonInput(fromInput, '192.168.1.1');
     expect(props.scan.onStartInputChange).toHaveBeenCalledWith('192.168.1.1');
   });
 
@@ -82,8 +116,16 @@ describe('PlugAddPage', () => {
     props.manual.nameError = 'Enter a device name.';
     renderPage(props);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Add manually' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    const segment = document.querySelector('ion-segment');
+    if (!segment) throw new Error('Add Plug segment missing');
+    fireEvent(
+      segment,
+      new CustomEvent('ionChange', {
+        bubbles: true,
+        detail: { value: 'manual' }
+      })
+    );
+    fireEvent.click(getIonicButton(document, 'Add'));
 
     expect(screen.getByText('Enter a device name.')).toBeInTheDocument();
     expect(props.manual.onSubmit).not.toHaveBeenCalled();
@@ -102,9 +144,9 @@ describe('PlugAddPage', () => {
     ];
     renderPage(props);
 
-    const name = screen.getByLabelText('Plug name: http://192.168.0.31/');
-    fireEvent.change(name, { target: { value: 'Tent plug' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Add: http://192.168.0.31/' }));
+    const name = getIonicInput(document, 'Plug name: http://192.168.0.31/');
+    fireIonInput(name, 'Tent plug');
+    fireEvent.click(getIonicButton(document, 'Add: http://192.168.0.31/'));
 
     expect(props.scan.onAddResult).toHaveBeenCalledWith(
       'http://192.168.0.31/',

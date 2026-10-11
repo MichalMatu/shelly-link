@@ -1,4 +1,5 @@
 import { useTranslation } from '../../../app/i18n.js';
+import { formatRuntimeReason } from '../../../app/runtimeReasonPresentation.js';
 import { pulseOperationalStatusCopy } from '../../../app/locales/pulseOperationalStatus.js';
 import {
   pulseOperationalRemainingMs,
@@ -16,12 +17,6 @@ const remainingLabel = (status: PulseOperationalStatus): string => {
   return seconds < 60 ? `${seconds} s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 };
 
-const reasonLabel = (
-  value: string | null,
-  reasons: Readonly<Record<string, string>>,
-  empty: string
-): string => (value ? (reasons[value] ?? value) : empty);
-
 export type PulseOperationalStatusSummaryProps = {
   status: PulseOperationalStatus | null | undefined;
   compact?: boolean;
@@ -31,7 +26,7 @@ export const PulseOperationalStatusSummary = ({
   status,
   compact = false
 }: PulseOperationalStatusSummaryProps) => {
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
   const labels = pulseOperationalStatusCopy[locale];
   const state = status?.availability ?? 'unavailable';
   const available = status?.availability !== 'unavailable';
@@ -43,7 +38,10 @@ export const PulseOperationalStatusSummary = ({
       finalOutput={available && status ? relayLabel(status.finalOutputOn) : '—'}
       reason={
         available && status
-          ? reasonLabel(status.lastReason, labels.reasons, labels.none)
+          ? formatRuntimeReason(status.lastReason, t, {
+              pulseReasons: labels.reasons,
+              empty: labels.none
+            })
           : '—'
       }
       leadingRows={[
@@ -86,7 +84,10 @@ export const PulseOperationalStatusSummary = ({
           label: labels.automationFault,
           value:
             available && status
-              ? reasonLabel(status.automationFault, labels.reasons, labels.none)
+              ? formatRuntimeReason(status.automationFault, t, {
+                  pulseReasons: labels.reasons,
+                  empty: labels.none
+                })
               : '—'
         },
         {
@@ -97,7 +98,10 @@ export const PulseOperationalStatusSummary = ({
               ? status.hardSafety === null
                 ? '—'
                 : status.hardSafety
-                  ? reasonLabel(status.hardSafetyReason, labels.reasons, labels.active)
+                  ? formatRuntimeReason(status.hardSafetyReason, t, {
+                      pulseReasons: labels.reasons,
+                      empty: labels.active
+                    })
                   : labels.clear
               : '—'
         }

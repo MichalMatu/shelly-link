@@ -39,8 +39,28 @@ const flatten = (node, path = []) =>
     return [[nextPath.join('-'), String(value)]];
   });
 
+const hexRgbTriplet = (value) => {
+  const match = /^#([0-9a-f]{6})$/i.exec(value);
+  if (!match) {
+    return null;
+  }
+
+  const hex = match[1];
+  return [0, 2, 4]
+    .map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16))
+    .join(', ');
+};
+
 const cssVariableLines = (tokenGroup) =>
-  flatten(tokenGroup).map(([name, value]) => `  --lcl-${name}: ${value};`);
+  flatten(tokenGroup).flatMap(([name, value]) => {
+    const variableName = String(name);
+    const lines = [`  --lcl-${variableName}: ${value};`];
+    const rgb = variableName.startsWith('color-') ? hexRgbTriplet(value) : null;
+    if (rgb) {
+      lines.push(`  --lcl-${variableName}-rgb: ${rgb};`);
+    }
+    return lines;
+  });
 
 const lightVariableLines = cssVariableLines(baseTokens);
 const darkVariableLines = cssVariableLines(theme?.dark ?? {});

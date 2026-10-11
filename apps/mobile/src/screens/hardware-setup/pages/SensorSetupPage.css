@@ -1,0 +1,70 @@
+.sensor-add-mode-segment {
+  --background: var(--lcl-color-surface);
+  --indicator-color: var(--lcl-color-accent);
+
+  border: var(--lcl-border-width-sm) solid var(--lcl-color-border);
+  border-radius: var(--lcl-radius-md);
+  padding: var(--lcl-spacing-xs);
+}
+
+.sensor-add-mode-segment ion-segment-button {
+  --color: var(--lcl-color-text-muted);
+  --color-checked: var(--lcl-color-accent-contrast);
+  --indicator-color: var(--lcl-color-accent);
+  --indicator-box-shadow: none;
+
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-semibold);
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+}
+
+.sensor-profile-select {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-end: var(--lcl-spacing-md);
+  --padding-start: var(--lcl-spacing-md);
+
+  color: var(--lcl-color-text);
+  font-weight: var(--lcl-font-weight-semibold);
+}
+
+.sensor-add-primary-action,
+.sensor-add-secondary-action {
+  --border-radius: var(--lcl-radius-md);
+  --box-shadow: none;
+  --padding-end: var(--lcl-spacing-lg);
+  --padding-start: var(--lcl-spacing-lg);
+
+  font-size: var(--lcl-font-size-md);
+  font-weight: var(--lcl-font-weight-bold);
+  margin: 0;
+  min-height: var(--lcl-size-control-min-height);
+  text-transform: none;
+}
+
+.sensor-add-primary-action {
+  --background: var(--lcl-color-accent);
+  --color: var(--lcl-color-accent-contrast);
+}
+
+.sensor-add-secondary-action {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-style: solid;
+  --border-width: var(--lcl-border-width-sm);
+  --color: var(--lcl-color-text);
+}
+
+.sensor-add-input {
+  --background: var(--lcl-color-surface);
+  --border-color: var(--lcl-color-border);
+  --border-radius: var(--lcl-radius-md);
+  --highlight-color-focused: var(--app-ionic-accent-foreground);
+  --padding-end: var(--lcl-spacing-md);
+  --padding-start: var(--lcl-spacing-md);
+
+  color: var(--lcl-color-text);
+}

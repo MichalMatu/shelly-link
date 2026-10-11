@@ -16,6 +16,7 @@ import {
   useInstalledAutomationStore
 } from '../flows/installations/store.js';
 import { InstallationDetailScreen } from '../screens/InstallationDetailScreen.js';
+import { getIonicButton } from '../test/ionicTestEvents.js';
 import { renderWithAppToastHost } from '../test/renderWithAppToastHost.js';
 import { resetSavedPlugStore, useSavedPlugStore } from '../features/plugs/index.js';
 
@@ -647,7 +648,7 @@ describe('InstallationDetailScreen', () => {
 
     expect(await screen.findByRole('button', { name: 'Włącz o: 08:00' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Wyłącz o: 20:00' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Zapisz zmiany' })).toBeVisible();
+    expect(getIonicButton(document, 'Zapisz zmiany')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Automatyka' })).toHaveAttribute(
       'data-automation-icon',
       'clock'

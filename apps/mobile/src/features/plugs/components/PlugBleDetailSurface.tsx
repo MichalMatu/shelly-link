@@ -1,7 +1,9 @@
+import { IonButton } from '@ionic/react';
 import { DiagnosticRow } from '@lcl/ui';
 import { IconBluetooth } from '@tabler/icons-react';
 import { useTranslation } from '../../../app/i18n.js';
 import type { PlugInformation } from '../data/plugInformation.js';
+import './PlugSettingsSurface.css';
 
 export type PlugBleDetailSurfaceProps = {
   information: PlugInformation | undefined;
@@ -49,15 +51,16 @@ export const PlugBleDetailSurface = ({
       )}
       {onScan && (
         <div className="plug-settings-actions">
-          <button
-            className="secondary-action"
+          <IonButton
+            className="plug-settings-ionic-action plug-settings-ionic-action--secondary"
+            fill="outline"
             type="button"
             title={t('hardware.shelly.scanBleViaShellyTitle')}
             onClick={onScan}
           >
             <IconBluetooth className="icon-action__svg" aria-hidden="true" />
             <span>{t('hardware.shelly.scanBleViaShellyTitle')}</span>
-          </button>
+          </IonButton>
         </div>
       )}
     </section>

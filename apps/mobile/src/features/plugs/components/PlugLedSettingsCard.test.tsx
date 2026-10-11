@@ -3,6 +3,17 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { deviceLedCopy } from '../../../app/locales/deviceLed.js';
+import {
+  fireIonInput,
+  fireIonToggleChange,
+  getIonicButton,
+  getIonicInput,
+  getIonicToggle,
+  ionicValue,
+  isIonicChecked,
+  isIonicDisabled,
+  queryIonicButton
+} from '../../../test/ionicTestEvents.js';
 import { PlugLedSettingsCard } from './PlugLedSettingsCard.js';
 
 const copy = deviceLedCopy.pl;
@@ -99,21 +110,20 @@ describe('PlugLedSettingsCard', () => {
     );
 
     renderCard();
-    const nightToggle = await screen.findByRole('checkbox', {
-      name: copy.nightModeEnabled
-    });
-    const nightBrightness = screen.getByLabelText(copy.nightBrightness);
-    expect(nightToggle).not.toBeChecked();
-    expect(nightBrightness).toBeDisabled();
-    expect(screen.getByRole('button', { name: copy.save })).toBeDisabled();
+    const nightToggle = await waitFor(() =>
+      getIonicToggle(document, copy.nightModeEnabled)
+    );
+    const nightBrightness = getIonicInput(document, copy.nightBrightness);
+    expect(isIonicChecked(nightToggle)).toBe(false);
+    expect(isIonicDisabled(nightBrightness)).toBe(true);
+    expect(isIonicDisabled(getIonicButton(document, copy.save))).toBe(true);
 
-    fireEvent.click(nightToggle);
-    expect(nightBrightness).toBeEnabled();
-    fireEvent.change(nightBrightness, { target: { value: '7' } });
-    fireEvent.change(screen.getByLabelText(copy.nightStart), {
-      target: { value: '23:30' }
-    });
-    fireEvent.click(screen.getByRole('button', { name: copy.save }));
+    fireIonToggleChange(nightToggle, true);
+    await waitFor(() => expect(isIonicChecked(nightToggle)).toBe(true));
+    await waitFor(() => expect(isIonicDisabled(nightBrightness)).toBe(false));
+    fireIonInput(nightBrightness, '7');
+    fireIonInput(getIonicInput(document, copy.nightStart), '23:30');
+    fireEvent.click(getIonicButton(document, copy.save));
 
     expect(await screen.findByText(copy.saved)).toBeVisible();
     expect(setParams).toEqual([
@@ -189,10 +199,15 @@ describe('PlugLedSettingsCard', () => {
     expect(
       screen.getByRole('dialog', { name: `OFF · ${copy.customColorTitle}` })
     ).toBeVisible();
-    fireEvent.change(screen.getByLabelText(`OFF ${copy.hue}`), {
-      target: { value: '240' }
-    });
-    fireEvent.click(screen.getByRole('button', { name: copy.applyColor }));
+    const hueRange = Array.from(rendered.container.querySelectorAll('ion-range')).find(
+      (range) => range.getAttribute('aria-label') === `OFF ${copy.hue}`
+    );
+    expect(hueRange).not.toBeNull();
+    fireEvent(
+      hueRange!,
+      new CustomEvent('ionInput', { bubbles: true, detail: { value: 240 } })
+    );
+    fireEvent.click(getIonicButton(document, copy.applyColor));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(
       screen.getByRole('button', { name: `OFF ${copy.customColor}` })
@@ -236,16 +251,16 @@ describe('PlugLedSettingsCard', () => {
     );
 
     const { queryClient } = renderCard();
-    const brightness = await screen.findByLabelText(copy.powerBrightness);
-    fireEvent.change(brightness, { target: { value: '55' } });
-    expect(brightness).toHaveValue(55);
+    const brightness = await waitFor(() => getIonicInput(document, copy.powerBrightness));
+    fireIonInput(brightness, '55');
+    expect(ionicValue(brightness)).toBe(55);
 
     await queryClient.refetchQueries({
       queryKey: ['plug-led-settings', target.deviceId, target.baseUrl],
       exact: true
     });
     await waitFor(() =>
-      expect(screen.getByLabelText(copy.powerBrightness)).toHaveValue(55)
+      expect(ionicValue(getIonicInput(document, copy.powerBrightness))).toBe(55)
     );
   });
 
@@ -271,9 +286,7 @@ describe('PlugLedSettingsCard', () => {
 
     renderCard();
     expect(await screen.findByText(copy.unsupported)).toBeVisible();
-    await waitFor(() =>
-      expect(screen.queryByRole('button', { name: copy.save })).toBeNull()
-    );
+    await waitFor(() => expect(queryIonicButton(document, copy.save)).toBeNull());
   });
 
   it('rejects a reused endpoint when the physical Shelly id does not match', async () => {

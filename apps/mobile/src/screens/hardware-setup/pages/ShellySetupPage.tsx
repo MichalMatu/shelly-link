@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import type { ShellySetupFlow } from '../pageContracts.js';
 import { InfoLabel } from '@lcl/ui';
 import { AppToastViewport, useToastQueue } from '../../../components/AppToastViewport.js';
@@ -73,10 +74,8 @@ export const ShellySetupPage = ({
     try {
       countIpv4RangeScanAddresses(flow.shellyScanStartInput, flow.shellyScanEndInput);
       return null;
-    } catch (error) {
-      return error instanceof Error
-        ? error.message
-        : t('hardware.shelly.scanRangeFailed');
+    } catch {
+      return t('hardware.shelly.scanRangeFailed');
     }
   })();
   const isBleDiscoveryBusy =
@@ -271,8 +270,9 @@ export const ShellySetupPage = ({
           />
           {flow.bleDiscoverySession && flow.bleDiscoverySnapshot?.running === false && (
             <div className="action-row">
-              <button
-                className="secondary-action"
+              <IonButton
+                className="plug-ble-restart-action"
+                fill="outline"
                 type="button"
                 aria-busy={flow.restartBleDiscoveryMutation.isPending}
                 disabled={isBleDiscoveryBusy}
@@ -280,7 +280,7 @@ export const ShellySetupPage = ({
                 onClick={flow.restartBleDiscovery}
               >
                 {t('hardware.shelly.scanBleAgain')}
-              </button>
+              </IonButton>
             </div>
           )}
         </div>

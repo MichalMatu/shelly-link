@@ -36,19 +36,6 @@ type ThermometerSettingsRouteProps = {
   onOpenAutomation?: (installationId: string) => void;
 };
 
-const errorMessage = (error: unknown) => {
-  if (error instanceof Error) return error.message;
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    typeof error.message === 'string'
-  ) {
-    return error.message;
-  }
-  return String(error ?? '');
-};
-
 export const ThermometerSettingsRoute = ({
   device,
   samples,
@@ -89,11 +76,7 @@ export const ThermometerSettingsRoute = ({
 
   useEffect(() => {
     if (!pvvxFeedback.isError) return;
-    pushToast(
-      'warning',
-      t('hardware.sensor.pvvxFailedTitle'),
-      errorMessage(pvvxFeedback.error)
-    );
+    pushToast('warning', t('hardware.sensor.pvvxFailedTitle'));
     pvvxFeedback.reset();
   }, [pvvxFeedback, pushToast, t]);
 

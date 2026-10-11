@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { FeedbackPanel } from '@lcl/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -84,14 +85,15 @@ export const StandalonePulseConfigurationSection = ({
       />
 
       <div className="plug-settings-actions">
-        <button
-          className="primary-action"
+        <IonButton
+          className="pulse-cycle-submit-action"
+          expand="block"
           type="button"
           disabled={mutation.isPending || !validation.ok || !changed}
           onClick={() => mutation.mutate()}
         >
           {mutation.isPending ? managementLabels.saveBusy : managementLabels.saveAction}
-        </button>
+        </IonButton>
       </div>
     </AutomationDetailSection>
   );

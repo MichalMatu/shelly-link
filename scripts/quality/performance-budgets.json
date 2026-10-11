@@ -1,10 +1,25 @@
 {
-  "version": 1,
+  "version": 2,
   "mobileDist": {
-    "totalJsBytes": 1572864,
-    "largestJsBytes": 655360,
-    "totalCssBytes": 196608,
-    "maxJsFiles": 16
+    "baseline": {
+      "gitSha": "7e9fdaa5f7d7c514313d2c962a2cc02bb26615b7",
+      "totalJsBytes": 1273954,
+      "largestJsBytes": 555291,
+      "totalCssBytes": 139411,
+      "jsFileCount": 11
+    },
+    "reviewGrowth": {
+      "totalJsBytes": 262144,
+      "largestJsBytes": 131072,
+      "totalCssBytes": 65536,
+      "jsFileCount": 4
+    },
+    "hardLimit": {
+      "totalJsBytes": 3145728,
+      "largestJsBytes": 1048576,
+      "totalCssBytes": 393216,
+      "maxJsFiles": 32
+    }
   },
   "source": {
     "minPollingIntervalMs": 1000

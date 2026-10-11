@@ -1,4 +1,6 @@
+import { IonButton } from '@ionic/react';
 import { useTranslation } from '../../../app/i18n.js';
+import './PlugAddPage.css';
 import type {
   PlugBleAdvertisement,
   VerifiedPlugBleCandidate
@@ -67,8 +69,8 @@ export const PlugBluetoothAddPanel = ({
                     <strong className="device-discovery-card__identity">
                       {candidate.name}
                     </strong>
-                    <button
-                      className="primary-action device-discovery-card__action shelly-scan-result__add"
+                    <IonButton
+                      className="plug-add-primary-action device-discovery-card__action shelly-scan-result__add"
                       type="button"
                       aria-busy={inspecting || undefined}
                       disabled={inspecting || saved}
@@ -84,7 +86,7 @@ export const PlugBluetoothAddPanel = ({
                         : inspecting
                           ? t('hardware.shelly.checking')
                           : t('common.add')}
-                    </button>
+                    </IonButton>
                   </div>
                   <div className="device-discovery-card__meta shelly-scan-result__meta">
                     <span>{verified?.physicalId ?? candidate.deviceId}</span>
@@ -125,8 +127,9 @@ export const PlugBluetoothAddPanel = ({
           </div>
         )}
         <div className="action-row shelly-network-scan__actions device-add-page__scan-control">
-          <button
-            className="secondary-action device-scan-action"
+          <IonButton
+            className="plug-add-secondary-action device-scan-action"
+            fill="outline"
             type="button"
             aria-busy={scanning || undefined}
             onClick={scanning ? onStop : onStart}
@@ -139,7 +142,7 @@ export const PlugBluetoothAddPanel = ({
                 ? t('hardware.shelly.scanStop')
                 : t('hardware.shelly.scanBleAgain')}
             </span>
-          </button>
+          </IonButton>
         </div>
       </div>
     </section>

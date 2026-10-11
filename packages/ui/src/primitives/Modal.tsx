@@ -24,7 +24,7 @@ export interface ModalProps {
   onClose(): void;
 }
 
-const focusableSelector = [
+const nativeFocusableSelector = [
   'a[href]',
   'button:not([disabled])',
   'input:not([disabled])',
@@ -33,13 +33,48 @@ const focusableSelector = [
   '[tabindex]:not([tabindex="-1"])'
 ].join(',');
 
+const ionicFocusableSelector = [
+  'ion-button',
+  'ion-input',
+  'ion-select',
+  'ion-textarea',
+  'ion-toggle',
+  'ion-checkbox',
+  'ion-radio',
+  'ion-range',
+  'ion-segment-button'
+].join(',');
+
+const focusableSelector = nativeFocusableSelector + ',' + ionicFocusableSelector;
+
+const isEnabled = (element: HTMLElement): boolean =>
+  !element.hasAttribute('disabled') &&
+  !(element as HTMLElement & { disabled?: boolean }).disabled &&
+  element.getAttribute('aria-disabled') !== 'true' &&
+  !element.closest('[hidden], [aria-hidden="true"]');
+
+const focusTarget = (element: HTMLElement): HTMLElement | null => {
+  if (!isEnabled(element)) return null;
+  if (element.tabIndex >= 0) return element;
+  if (!element.tagName.startsWith('ION-')) return null;
+
+  // Ionic may put the tabbable control in Shadow DOM while the host
+  // stays tabIndex=-1 (IonButton, IonSelect and IonRange in Chromium).
+  return (
+    Array.from(
+      element.shadowRoot?.querySelectorAll<HTMLElement>(nativeFocusableSelector) ?? []
+    ).find((target) => target.tabIndex >= 0 && isEnabled(target)) ?? null
+  );
+};
+
 const focusableElements = (container: HTMLElement): HTMLElement[] =>
   Array.from(container.querySelectorAll<HTMLElement>(focusableSelector)).filter(
-    (element) =>
-      element.tabIndex >= 0 &&
-      !element.hasAttribute('hidden') &&
-      element.getAttribute('aria-hidden') !== 'true'
+    (element) => focusTarget(element) !== null
   );
+
+const focusElement = (element: HTMLElement): void => {
+  (focusTarget(element) ?? element).focus();
+};
 
 export const Modal = ({
   open,
@@ -108,19 +143,19 @@ export const Modal = ({
 
       if (!modal.contains(activeElement)) {
         event.preventDefault();
-        firstElement.focus();
+        focusElement(firstElement);
         return;
       }
 
       if (event.shiftKey && activeElement === firstElement) {
         event.preventDefault();
-        lastElement.focus();
+        focusElement(lastElement);
         return;
       }
 
       if (!event.shiftKey && activeElement === lastElement) {
         event.preventDefault();
-        firstElement.focus();
+        focusElement(firstElement);
       }
     };
 
@@ -131,7 +166,7 @@ export const Modal = ({
         return;
       }
       if (initialFocus === 'first-control') {
-        (focusableElements(modal)[0] ?? modal).focus();
+        focusElement(focusableElements(modal)[0] ?? modal);
         return;
       }
       modal.focus();
@@ -159,6 +194,7 @@ export const Modal = ({
       onClick={canDismiss ? onClose : undefined}
     >
       <section
+        aria-busy={busy || undefined}
         aria-describedby={description ? descriptionId : undefined}
         aria-modal="true"
         aria-labelledby={titleId}

@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { getIonicButton } from '../test/ionicTestEvents.js';
 import { DevCommandPalette } from '../app/DevCommandPalette.js';
 import { installDevConsole } from '../app/devConsole.js';
 import {
@@ -90,6 +91,7 @@ describe('dev console', () => {
     }
 
     const dialog = await screen.findByRole('dialog', { name: 'Developer menu' });
+    expect(dialog.querySelectorAll('ion-button')).toHaveLength(2);
     expect(within(dialog).getByRole('button', { name: 'de' })).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'dark' })).toBeInTheDocument();
 
@@ -105,14 +107,14 @@ describe('dev console', () => {
 
     expect(await within(dialog).findByText(/manual note/)).toBeInTheDocument();
     act(() => {
-      fireEvent.click(within(dialog).getByRole('button', { name: 'Clear errors' }));
+      fireEvent.click(getIonicButton(dialog, 'Clear errors'));
     });
     expect(
       await within(dialog).findByText('No runtime issues captured.')
     ).toBeInTheDocument();
 
     act(() => {
-      fireEvent.click(within(dialog).getByRole('button', { name: 'Reset all' }));
+      fireEvent.click(getIonicButton(dialog, 'Reset all'));
     });
     expect(document.documentElement.getAttribute('data-lcl-theme')).toBeNull();
     expect(window.lclDev?.state().runtimeErrors).toBe(0);

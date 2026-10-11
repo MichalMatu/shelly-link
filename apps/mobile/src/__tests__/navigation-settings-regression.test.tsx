@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../app/App.js';
 import { setLocalePreference } from '../app/i18n.js';
 import { setThemeMode } from '../app/themeMode.js';
+import { getIonicButton } from '../test/ionicTestEvents.js';
 import { createInstalledAutomation } from '../flows/installations/model.js';
 import {
   resetInstalledAutomationStore,
@@ -172,7 +173,7 @@ describe('navigation and settings regression coverage', () => {
         'To gniazdko nie ma automatyzacji, dlatego nie ma jeszcze danych automatyki do wyświetlenia.'
       )
     ).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Dodaj automatykę' })).toBeVisible();
+    expect(getIonicButton(document, 'Dodaj automatykę')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Ustawienia gniazdka' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Bluetooth' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Informacje' })).toBeEnabled();
@@ -182,9 +183,7 @@ describe('navigation and settings regression coverage', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Bluetooth' }));
-    const scanBle = screen.getByRole('button', {
-      name: 'Skanuj termometry BLE przez to gniazdko'
-    });
+    const scanBle = getIonicButton(document, 'Skanuj termometry BLE przez to gniazdko');
     expect(scanBle).toBeVisible();
 
     fireEvent.click(scanBle);
@@ -211,7 +210,7 @@ describe('navigation and settings regression coverage', () => {
     ).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Automatyka' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Dodaj automatykę' }));
+    fireEvent.click(getIonicButton(document, 'Dodaj automatykę'));
     expect(screen.getByRole('heading', { name: 'Co chcesz zrobić?' })).toBeVisible();
     expect(document.querySelector('.app-page-back-row .setup-context__back')).toBeNull();
   });

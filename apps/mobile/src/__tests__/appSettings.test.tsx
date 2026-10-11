@@ -1,4 +1,12 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within
+} from '@testing-library/react';
 import { AppSettingsScreen } from '../app/AppSettingsScreen.js';
 import { I18nProvider, getLocalePreference, setLocalePreference } from '../app/i18n.js';
 import { clearRuntimeIssues, reportRuntimeIssue } from '../app/runtimeDiagnostics.js';
@@ -55,22 +63,49 @@ describe('app settings screen', () => {
     fireEvent.click(diagnostics.querySelector('summary')!);
     expect(within(settings).getByText(/client saw a blank screen/)).toBeInTheDocument();
 
+    const languageSelect = await waitFor(() => {
+      const element = settings.querySelector('ion-select');
+      if (!element) throw new Error('language select missing');
+      return element;
+    });
+    expect(languageSelect).toHaveAttribute('fill', 'outline');
+    expect(languageSelect).toHaveAttribute('interface', 'alert');
     act(() => {
-      fireEvent.click(within(settings).getByRole('button', { name: 'Deutsch' }));
+      fireEvent(
+        languageSelect,
+        new CustomEvent('ionChange', {
+          bubbles: true,
+          detail: { value: 'de' }
+        })
+      );
     });
     expect(getLocalePreference()).toBe('de');
     expect(document.documentElement.lang).toBe('de');
 
+    const appearanceSegment = settings.querySelector('ion-segment');
+    if (!appearanceSegment) throw new Error('appearance segment missing');
     act(() => {
-      fireEvent.click(within(settings).getByRole('button', { name: 'Dunkel' }));
+      fireEvent(
+        appearanceSegment,
+        new CustomEvent('ionChange', {
+          bubbles: true,
+          detail: { value: 'dark' }
+        })
+      );
     });
     expect(getThemeMode()).toBe('dark');
     expect(document.documentElement.getAttribute('data-lcl-theme')).toBe('dark');
 
-    await act(async () => {
-      fireEvent.click(
-        within(settings).getByRole('button', { name: 'Support-Bericht kopieren' })
+    const ionicAction = (label: string) => {
+      const action = Array.from(settings.querySelectorAll('ion-button')).find(
+        (element) => element.textContent?.trim() === label
       );
+      if (!action) throw new Error(`settings Ionic action missing: ${label}`);
+      return action;
+    };
+
+    await act(async () => {
+      fireEvent.click(ionicAction('Support-Bericht kopieren'));
     });
 
     expect(writeText).toHaveBeenCalledWith(
@@ -80,5 +115,10 @@ describe('app settings screen', () => {
     expect(writeText).toHaveBeenCalledWith(
       expect.stringContaining('manual: client saw a blank screen')
     );
+
+    act(() => {
+      fireEvent.click(ionicAction('Diagnose löschen'));
+    });
+    expect(within(settings).queryByText(/client saw a blank screen/)).toBeNull();
   });
 });

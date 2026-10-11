@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 
@@ -25,9 +26,13 @@ export const PlugRemovalBlockedModal = ({
       title={t('hardware.shelly.deleteBlockedTitle')}
       actions={
         onOpenAutomation ? (
-          <button className="primary-action" type="button" onClick={onOpenAutomation}>
+          <IonButton
+            className="plug-settings-ionic-action"
+            type="button"
+            onClick={onOpenAutomation}
+          >
             {t('common.openAutomation')}
-          </button>
+          </IonButton>
         ) : undefined
       }
       onClose={onClose}

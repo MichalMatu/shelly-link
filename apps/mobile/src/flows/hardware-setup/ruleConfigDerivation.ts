@@ -26,9 +26,11 @@ export const deriveShellyInputState = ({
   let baseUrl = '';
   try {
     baseUrl = normalizeShellyUrl(shellyUrlInput);
-  } catch (error) {
+  } catch {
     fieldErrors.url =
-      error instanceof Error ? error.message : t('hardware.validation.shellyIpFormat');
+      shellyUrlInput.trim().length === 0
+        ? t('hardware.validation.shellyIpRequired')
+        : t('hardware.validation.shellyIpInvalid');
   }
 
   return fieldErrors.name || fieldErrors.url
@@ -57,9 +59,8 @@ export const deriveSensorInputState = ({
   } else {
     try {
       runtimeAddress = normalizeRuntimeAddress(sensorMacInput);
-    } catch (error) {
-      fieldErrors.mac =
-        error instanceof Error ? error.message : t('hardware.validation.sensorMacFormat');
+    } catch {
+      fieldErrors.mac = t('hardware.validation.sensorMacFormat');
     }
   }
 

@@ -1,3 +1,4 @@
+import { IonApp, setupIonicReact } from '@ionic/react';
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -10,6 +11,8 @@ import { createRoot } from 'react-dom/client';
 import { App } from './app/App.js';
 import { installRuntimeDiagnostics } from './app/runtimeDiagnostics.js';
 import { applyThemeMode } from './app/themeMode.js';
+
+setupIonicReact();
 
 const root = document.getElementById('root');
 
@@ -26,4 +29,8 @@ if (import.meta.env.DEV) {
   });
 }
 
-createRoot(root).render(<App />);
+createRoot(root).render(
+  <IonApp>
+    <App />
+  </IonApp>
+);

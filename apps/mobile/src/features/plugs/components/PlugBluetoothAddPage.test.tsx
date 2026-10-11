@@ -1,6 +1,7 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import { getIonicButton, isIonicDisabled } from '../../../test/ionicTestEvents.js';
 import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import type { VerifiedPlugBleCandidate } from '../data/plugBleOnboarding.js';
 import { PlugBluetoothAddPage } from './PlugBluetoothAddPage.js';
@@ -81,7 +82,7 @@ describe('PlugBluetoothAddPage', () => {
     flowState.verifyCandidate.mockResolvedValue(null);
     renderPage();
 
-    fireEvent.click(screen.getByRole('button', { name: `Add: ${candidate.name}` }));
+    fireEvent.click(getIonicButton(document, `Add: ${candidate.name}`));
 
     await waitFor(() =>
       expect(flowState.verifyCandidate).toHaveBeenCalledWith(candidate)
@@ -93,7 +94,7 @@ describe('PlugBluetoothAddPage', () => {
     flowState.verifyCandidate.mockResolvedValue(verified);
     renderPage();
 
-    fireEvent.click(screen.getByRole('button', { name: `Add: ${candidate.name}` }));
+    fireEvent.click(getIonicButton(document, `Add: ${candidate.name}`));
 
     await waitFor(() =>
       expect(savedState.saveBleCandidate).toHaveBeenCalledWith(verified)
@@ -106,7 +107,7 @@ describe('PlugBluetoothAddPage', () => {
     renderPage();
 
     expect(
-      screen.getByRole('button', { name: `Added: ${verified.physicalId}` })
-    ).toBeDisabled();
+      isIonicDisabled(getIonicButton(document, `Added: ${verified.physicalId}`))
+    ).toBe(true);
   });
 });

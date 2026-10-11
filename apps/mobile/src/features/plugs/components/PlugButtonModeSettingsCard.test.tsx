@@ -3,6 +3,12 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
 import { deviceButtonModeCopy } from '../../../app/locales/deviceButtonMode.js';
+import {
+  fireIonChange,
+  getIonicButton,
+  isIonicDisabled,
+  queryIonicButton
+} from '../../../test/ionicTestEvents.js';
 import { PlugButtonModeSettingsCard } from './PlugButtonModeSettingsCard.js';
 
 const copy = deviceButtonModeCopy.pl;
@@ -96,15 +102,18 @@ describe('PlugButtonModeSettingsCard', () => {
     );
 
     renderCard();
-    const modeSelect = await screen.findByRole('button', { name: copy.currentMode });
-    const save = screen.getByRole('button', { name: copy.save });
-    expect(modeSelect).toHaveTextContent(copy.momentary);
-    expect(save).toBeDisabled();
+    const modeGroup = await waitFor(() => {
+      const group = document.querySelector('ion-radio-group');
+      if (!group) throw new Error('Button mode group not mounted');
+      return group;
+    });
+    const save = getIonicButton(document, copy.save);
+    expect(modeGroup.value).toBe('momentary');
+    expect(isIonicDisabled(save)).toBe(true);
 
-    fireEvent.click(modeSelect);
-    fireEvent.click(screen.getByRole('option', { name: copy.detached }));
-    expect(modeSelect).toHaveTextContent(copy.detached);
-    expect(save).toBeEnabled();
+    fireIonChange(modeGroup, 'detached');
+    expect(modeGroup.value).toBe('detached');
+    await waitFor(() => expect(isIonicDisabled(save)).toBe(false));
     fireEvent.click(save);
 
     expect(await screen.findByText(copy.saved)).toBeVisible();
@@ -116,7 +125,7 @@ describe('PlugButtonModeSettingsCard', () => {
       }
     ]);
     expect(JSON.stringify(setConfigs)).not.toContain('"leds"');
-    expect(save).toBeDisabled();
+    await waitFor(() => expect(isIonicDisabled(save)).toBe(true));
   });
 
   it('keeps button mode read-only while a managed climate automation owns the Plug', async () => {
@@ -144,8 +153,8 @@ describe('PlugButtonModeSettingsCard', () => {
     expect(screen.getByText(copy.currentMode)).toBeVisible();
     expect(screen.getByText(copy.detached)).toBeVisible();
     expect(screen.getByText(copy.managedHint)).toBeVisible();
-    expect(screen.queryByRole('button', { name: copy.currentMode })).toBeNull();
-    expect(screen.queryByRole('button', { name: copy.save })).toBeNull();
+    expect(document.querySelector('ion-radio-group')).toBeNull();
+    expect(queryIonicButton(document, copy.save)).toBeNull();
   });
 
   it('does not overwrite a dirty button-mode draft when the device query refetches', async () => {
@@ -170,16 +179,19 @@ describe('PlugButtonModeSettingsCard', () => {
     );
 
     const { queryClient } = renderCard();
-    const modeSelect = await screen.findByRole('button', { name: copy.currentMode });
-    fireEvent.click(modeSelect);
-    fireEvent.click(screen.getByRole('option', { name: copy.detached }));
-    expect(modeSelect).toHaveTextContent(copy.detached);
+    const modeGroup = await waitFor(() => {
+      const group = document.querySelector('ion-radio-group');
+      if (!group) throw new Error('Button mode group not mounted');
+      return group;
+    });
+    fireIonChange(modeGroup, 'detached');
+    expect(modeGroup.value).toBe('detached');
 
     await queryClient.refetchQueries({
       queryKey: ['plug-button-mode-settings', target.deviceId, target.baseUrl],
       exact: true
     });
-    await waitFor(() => expect(modeSelect).toHaveTextContent(copy.detached));
+    await waitFor(() => expect(modeGroup.value).toBe('detached'));
   });
 
   it('renders missing control capability as unsupported without mutating anything', async () => {
@@ -211,6 +223,6 @@ describe('PlugButtonModeSettingsCard', () => {
       'Shelly.ListMethods',
       'PLUGS_UI.GetConfig'
     ]);
-    expect(screen.queryByRole('button', { name: copy.save })).toBeNull();
+    expect(queryIonicButton(document, copy.save)).toBeNull();
   });
 });

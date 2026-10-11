@@ -1,3 +1,4 @@
+import { IonButton, IonToggle } from '@ionic/react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceCloudCopy } from '../../../app/locales/deviceCloud.js';
@@ -78,18 +79,18 @@ export const PlugCloudSettingsCard = ({ target }: PlugCloudSettingsCardProps) =>
         <p>{copy.description}</p>
       </div>
 
-      <label className="plug-settings-check-row">
+      <div className="plug-settings-check-row">
         <span>{copy.enable}</span>
-        <input
+        <IonToggle
           aria-label={copy.enable}
+          className="plug-settings-ionic-toggle"
           checked={draft}
-          type="checkbox"
-          onChange={(event) => {
+          onIonChange={(event) => {
             setFeedback(null);
-            setDraft(event.currentTarget.checked);
+            setDraft(event.detail.checked);
           }}
         />
-      </label>
+      </div>
 
       <p className="plug-settings-feedback">
         {draft ? copy.enabledHint : copy.disabledHint}
@@ -99,14 +100,14 @@ export const PlugCloudSettingsCard = ({ target }: PlugCloudSettingsCardProps) =>
       </p>
 
       <div className="plug-settings-actions">
-        <button
-          className="primary-action"
+        <IonButton
+          className="plug-settings-ionic-action"
           type="button"
           disabled={!hasChanges || updateMutation.isPending}
           onClick={save}
         >
           {updateMutation.isPending ? copy.saving : copy.save}
-        </button>
+        </IonButton>
       </div>
 
       {feedback && (

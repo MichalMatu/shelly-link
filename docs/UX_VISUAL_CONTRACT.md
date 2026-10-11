@@ -20,6 +20,10 @@ Protected states include the Plugs dashboard Climate card and Climate Automation
 
 Do not refresh Climate snapshots as part of unrelated work. Changing the frozen design requires an explicit product-design decision.
 
+The **2026-10-10 user-approved Ionic control exception** updates only standard device form controls in the `05-climate-device` baseline (Ionic select/input/toggle rendering and visible brightness units); the Climate dashboard structure, Automation, BLE, Script, Info, tab ordering and runtime actions remain frozen. The same review accepts `17-plain-plug-settings` and `28-thermometer-settings` with Ionic form geometry and the directly visible two-choice Plug physical-button mode. The review also includes `20-climate-button-mode-managed` (Ionic controls adjacent to the unchanged Climate-owned read-only button state) and `15-add-plug` (controlled Ionic segment and restored full-width scan action). All five visual deltas were examined against actual macOS renders before their baselines were accepted; `04-plug-ble-discovery` and every other snapshot remain unchanged unless separately reviewed.
+
+The **2026-10-10 Time/Pulse Ionic follow-up** replaces standard inputs, selectors, output-behavior selection and primary actions in Time and standalone Pulse without changing shared runtime ownership or Climate's legacy geometry. Five separately reviewed responsive baselines are accepted: `09-time-setup`, `11-time-detail`, `25-time-pulse-setup`, `26-standalone-pulse-setup`, and `29-standalone-pulse-detail`. The `11-time-detail` review found only a small Ionic save-button render variation (778 differing screenshot pixels, confined to the action area); the layout and Climate golden renders remain unchanged. `IonApp` provides the Ionic root/overlay context but must not change persistent navigation geometry.
+
 History/Datalogger is the explicit product-design exception approved for the current v1 slice: Climate Detail intentionally expands the shared tab chrome from five to six items by adding **History**. The existing Automation, BLE, Device, Script and Info composition remains frozen; only the tab chrome delta and the History surface receive refreshed/reviewed baselines.
 
 The accepted History surface is a vertically stacked set of five compact metric panels: **Temperature, Humidity, Output, Power and Current**. Each panel owns its own Y scale and current-value/range presentation; unlike units are never normalized onto one shared visual axis. Temperature, humidity, power and current use calm independent domains with meaningful minimum spans so tiny sensor noise does not fill the card. Power and current remain zero-aware. Continuous series use `monotoneX` smoothing, a restrained area tint, subtle metric-colored glow and a latest-value point. Output is deliberately different: a crisp square step track with horizontal/vertical transitions only, no curve smoothing and no filled polygon.
@@ -38,7 +42,7 @@ History cards use the existing design-token system for dark/light surfaces, bord
 
 Current shared patterns include:
 
-- `SegmentedControl` for setup and add-device segmented navigation;
+- `SegmentedControl` for remaining shared setup/sensor segmented navigation; Add Plug mode selection uses Ionic `IonSegment`;
 - shared Plug dashboard shell and Plug controls;
 - shared Plug detail tabs and Plug Device/Info surfaces;
 - shared `Disclosure` behavior;
@@ -71,9 +75,19 @@ BLE-only Plug Detail exposes only the Device and Info capabilities; unsupported 
 
 Dashboard cards prioritize identity, live readings and compact telemetry. Rename, PVVX time sync, delete and technical identity belong in nested Thermometer settings, not as a cluster of permanent dashboard actions. The nested page groups Identity, Live readings and Device actions; its canonical state is `28-thermometer-settings`.
 
+### Settings
+
+Language is a compact single-value selector implemented with Ionic `IonSelect`; Appearance uses Ionic `IonSegment` for the three theme modes. Both controls keep the existing preference owners and remain inside the established `app-settings__section` surface role; Diagnostics remains the shared Disclosure pattern.
+
+Ionic controls do not own Shelly Link colors. Their background/text/primary variables, RGB companions and intermediate color-step scale are derived from LCL design tokens for both light and dark themes. Settings-specific selected/focus states may use a scoped contrast-corrected accent, but must not introduce a parallel raw color palette.
+
+The heavier Settings Ionic controls may be lazy-loaded behind the Settings presentation boundary. Async loading must not change preference ownership, navigation behavior or the accepted screen geometry. Framework migration is not permission to restyle frozen Climate surfaces.
+
 ### Add Plug
 
-The normal flow stays simple. Technical scan range is available through the compact `Zakres skanowania` disclosure and remains visible in its collapsed summary.
+The normal flow stays simple. Scan/manual mode selection uses a controlled Ionic `IonSegment` while the Plug feature retains ownership of scan lifecycle and page composition. Focus alone and swipe gestures must not switch modes because leaving an active scan has a real stop side effect.
+
+Technical scan range is available through the compact `Zakres skanowania` disclosure and remains visible in its collapsed summary.
 
 ### Pulse setup/editor
 

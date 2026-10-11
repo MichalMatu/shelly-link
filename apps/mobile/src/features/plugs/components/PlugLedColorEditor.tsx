@@ -1,3 +1,4 @@
+import { IonButton, IonRange } from '@ionic/react';
 import { ColorSwatch, Modal } from '@lcl/ui';
 import { useState } from 'react';
 import { plugLedHexToRgb, plugLedRgbToHex } from '../data/plugLedColor.js';
@@ -163,8 +164,8 @@ export const PlugLedColorEditor = ({
 
       <Modal
         actions={
-          <button
-            className="primary-action"
+          <IonButton
+            className="plug-settings-ionic-action"
             type="button"
             onClick={() => {
               onChange(pickerRgb);
@@ -172,7 +173,7 @@ export const PlugLedColorEditor = ({
             }}
           >
             {applyLabel}
-          </button>
+          </IonButton>
         }
         closeLabel={cancelLabel}
         open={pickerOpen}
@@ -187,46 +188,54 @@ export const PlugLedColorEditor = ({
             <span>
               {hueLabel} <strong>{pickerHsl.hue}°</strong>
             </span>
-            <input
+            <IonRange
               aria-label={`${ariaPrefix} ${hueLabel}`}
               className="plug-color-picker__range plug-color-picker__range--hue"
-              max="360"
-              min="0"
-              type="range"
+              max={360}
+              min={0}
+              step={1}
               value={pickerHsl.hue}
-              onChange={(event) => updatePicker('hue', Number(event.currentTarget.value))}
+              onIonInput={(event) => {
+                if (typeof event.detail.value === 'number') {
+                  updatePicker('hue', event.detail.value);
+                }
+              }}
             />
           </label>
           <label className="plug-color-picker__field">
             <span>
               {saturationLabel} <strong>{pickerHsl.saturation}%</strong>
             </span>
-            <input
+            <IonRange
               aria-label={`${ariaPrefix} ${saturationLabel}`}
               className="plug-color-picker__range"
-              max="100"
-              min="0"
-              type="range"
+              max={100}
+              min={0}
+              step={1}
               value={pickerHsl.saturation}
-              onChange={(event) =>
-                updatePicker('saturation', Number(event.currentTarget.value))
-              }
+              onIonInput={(event) => {
+                if (typeof event.detail.value === 'number') {
+                  updatePicker('saturation', event.detail.value);
+                }
+              }}
             />
           </label>
           <label className="plug-color-picker__field">
             <span>
               {lightnessLabel} <strong>{pickerHsl.lightness}%</strong>
             </span>
-            <input
+            <IonRange
               aria-label={`${ariaPrefix} ${lightnessLabel}`}
               className="plug-color-picker__range"
-              max="100"
-              min="0"
-              type="range"
+              max={100}
+              min={0}
+              step={1}
               value={pickerHsl.lightness}
-              onChange={(event) =>
-                updatePicker('lightness', Number(event.currentTarget.value))
-              }
+              onIonInput={(event) => {
+                if (typeof event.detail.value === 'number') {
+                  updatePicker('lightness', event.detail.value);
+                }
+              }}
             />
           </label>
         </div>

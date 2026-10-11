@@ -1,5 +1,5 @@
+import { IonButton, IonInput, IonSelect, IonSelectOption, IonToggle } from '@ionic/react';
 import type { ShellyPlugsUiLedMode } from '@lcl/shelly-client';
-import { SelectField } from '@lcl/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
 import { deviceLedCopy } from '../../../app/locales/deviceLed.js';
@@ -121,30 +121,41 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
 
       <div className="field">
         <span>{copy.currentMode}</span>
-        <SelectField<ShellyPlugsUiLedMode>
-          ariaLabel={copy.currentMode}
+        <IonSelect
+          aria-label={copy.currentMode}
+          className="plug-settings-ionic-select"
+          fill="outline"
+          interface="alert"
           value={draft.mode}
-          options={[
-            { value: 'power', label: copy.power },
-            { value: 'switch', label: copy.switch },
-            { value: 'off', label: copy.off }
-          ]}
-          onChange={setMode}
-        />
+          onIonChange={(event) => {
+            const value = event.detail.value;
+            if (value === 'power' || value === 'switch' || value === 'off') {
+              setMode(value);
+            }
+          }}
+        >
+          <IonSelectOption value="power">{copy.power}</IonSelectOption>
+          <IonSelectOption value="switch">{copy.switch}</IonSelectOption>
+          <IonSelectOption value="off">{copy.off}</IonSelectOption>
+        </IonSelect>
       </div>
 
       {capabilities.powerBrightness && draft.mode === 'power' && (
         <label className="field">
           <span>{copy.powerBrightness}</span>
           <span className="field-unit-control">
-            <input
+            <IonInput
               aria-label={copy.powerBrightness}
-              inputMode="numeric"
+              className="plug-settings-ionic-input"
+              fill="outline"
+              inputmode="numeric"
               max="100"
               min="0"
               type="number"
               value={draft.powerBrightness}
-              onChange={(event) => setPercent('powerBrightness', event.target.value)}
+              onIonInput={(event) =>
+                setPercent('powerBrightness', String(event.detail.value ?? ''))
+              }
             />
             <span className="field-unit-control__unit" aria-hidden="true">
               %
@@ -187,17 +198,19 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
                 <label className="field">
                   <span>{copy.brightness}</span>
                   <span className="field-unit-control">
-                    <input
+                    <IonInput
                       aria-label={`${stateLabel} ${copy.brightness}`}
-                      inputMode="numeric"
+                      className="plug-settings-ionic-input"
+                      fill="outline"
+                      inputmode="numeric"
                       max="100"
                       min="0"
                       type="number"
                       value={brightness}
-                      onChange={(event) =>
+                      onIonInput={(event) =>
                         setPercent(
                           isOn ? 'switchOnBrightness' : 'switchOffBrightness',
-                          event.target.value
+                          String(event.detail.value ?? '')
                         )
                       }
                     />
@@ -215,27 +228,31 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
       {capabilities.nightMode && (
         <fieldset className="plug-night-mode">
           <legend>{copy.nightMode}</legend>
-          <label className="plug-settings-check-row">
+          <div className="plug-settings-check-row">
             <span>{copy.nightModeEnabled}</span>
-            <input
+            <IonToggle
               aria-label={copy.nightModeEnabled}
+              className="plug-settings-ionic-toggle"
               checked={draft.nightModeEnabled}
-              type="checkbox"
-              onChange={(event) => setNightModeEnabled(event.currentTarget.checked)}
+              onIonChange={(event) => setNightModeEnabled(event.detail.checked)}
             />
-          </label>
+          </div>
           <label className="field">
             <span>{copy.nightBrightness}</span>
             <span className="field-unit-control">
-              <input
+              <IonInput
                 aria-label={copy.nightBrightness}
+                className="plug-settings-ionic-input"
                 disabled={!draft.nightModeEnabled}
-                inputMode="numeric"
+                fill="outline"
+                inputmode="numeric"
                 max="100"
                 min="0"
                 type="number"
                 value={draft.nightBrightness}
-                onChange={(event) => setPercent('nightBrightness', event.target.value)}
+                onIonInput={(event) =>
+                  setPercent('nightBrightness', String(event.detail.value ?? ''))
+                }
               />
               <span className="field-unit-control__unit" aria-hidden="true">
                 %
@@ -245,26 +262,30 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
           <div className="time-schedule-grid plug-night-mode__times">
             <label className="field">
               <span>{copy.nightStart}</span>
-              <input
-                className="plug-time-input"
+              <IonInput
+                className="plug-settings-ionic-input plug-time-input"
                 aria-label={copy.nightStart}
                 disabled={!draft.nightModeEnabled}
+                fill="outline"
                 type="time"
                 value={draft.nightStart}
-                onChange={(event) =>
-                  setNightTime('nightStart', event.currentTarget.value)
+                onIonInput={(event) =>
+                  setNightTime('nightStart', String(event.detail.value ?? ''))
                 }
               />
             </label>
             <label className="field">
               <span>{copy.nightEnd}</span>
-              <input
-                className="plug-time-input"
+              <IonInput
+                className="plug-settings-ionic-input plug-time-input"
                 aria-label={copy.nightEnd}
                 disabled={!draft.nightModeEnabled}
+                fill="outline"
                 type="time"
                 value={draft.nightEnd}
-                onChange={(event) => setNightTime('nightEnd', event.currentTarget.value)}
+                onIonInput={(event) =>
+                  setNightTime('nightEnd', String(event.detail.value ?? ''))
+                }
               />
             </label>
           </div>
@@ -277,14 +298,14 @@ export const PlugLedSettingsCard = ({ target }: PlugLedSettingsCardProps) => {
         </p>
       )}
 
-      <button
-        className="primary-action plug-settings-save"
+      <IonButton
+        className="plug-settings-ionic-action plug-settings-save"
         type="button"
         disabled={!patch || updateMutation.isPending}
         onClick={save}
       >
         {updateMutation.isPending ? copy.saving : copy.save}
-      </button>
+      </IonButton>
     </section>
   );
 };

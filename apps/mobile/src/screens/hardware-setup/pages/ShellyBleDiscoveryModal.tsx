@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { Modal } from '@lcl/ui';
 import { useTranslation } from '../../../app/i18n.js';
 import type { BleDiscoveryCandidate } from '../../../flows/hardware-setup/schemas.js';
@@ -46,16 +47,16 @@ export const ShellyBleDiscoveryModal = ({
       }}
       actions={
         shouldShowRestart ? (
-          <button
-            className="secondary-action"
+          <IonButton
+            className="plug-ble-restart-action"
+            fill="outline"
             type="button"
-            aria-busy={flow.restartBleDiscoveryMutation.isPending}
             disabled={busy}
             title={t('hardware.shelly.scanBleAgainTitle')}
             onClick={onRestart}
           >
             {t('hardware.shelly.scanBleAgain')}
-          </button>
+          </IonButton>
         ) : null
       }
       onClose={onClose}

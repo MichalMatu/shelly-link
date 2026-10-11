@@ -1,3 +1,4 @@
+import { IonButton } from '@ionic/react';
 import { IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from '../../../app/i18n.js';
@@ -72,9 +73,14 @@ export const WifiPlugDetailScreen = ({
               {t('detail.noAutomationDescription')}
             </p>
             <div className="plug-settings-actions">
-              <button className="primary-action" type="button" onClick={onAddAutomation}>
+              <IonButton
+                className="plug-settings-ionic-action"
+                expand="block"
+                type="button"
+                onClick={onAddAutomation}
+              >
                 {t('dashboard.addAutomation')}
-              </button>
+              </IonButton>
             </div>
           </section>
         )}

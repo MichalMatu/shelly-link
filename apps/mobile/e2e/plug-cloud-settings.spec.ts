@@ -168,8 +168,8 @@ for (const viewport of viewports) {
     await openPlugSettings(page);
 
     await expect(
-      page.getByRole('checkbox', { name: 'Włącz Shelly Cloud' })
-    ).not.toBeChecked();
+      page.locator('ion-toggle[aria-label="Włącz Shelly Cloud"]')
+    ).toHaveAttribute('aria-checked', 'false');
     await expect(
       page.getByText(
         'Shelly Cloud jest wyłączona. Shelly Link nadal działa w sieci lokalnej.'
@@ -186,7 +186,7 @@ test('Shelly Cloud setting writes only the Cloud enable flag', async ({ page }) 
   const mock = await mockShelly(page);
   await openPlugSettings(page);
 
-  await page.getByRole('checkbox', { name: 'Włącz Shelly Cloud' }).click();
+  await page.locator('ion-toggle[aria-label="Włącz Shelly Cloud"]').click();
   await page.getByRole('button', { name: 'Zapisz ustawienie chmury' }).click();
 
   await expect(page.getByText('Ustawienie chmury zapisane.')).toBeVisible();

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider, setLocalePreference } from '../../../app/i18n.js';
+import { getIonicButton, isIonicDisabled } from '../../../test/ionicTestEvents.js';
 import type { SavedPlugWithBleLocator } from '../data/savedPlug.js';
 import { BleOnlyPlugCard } from './BleOnlyPlugCard.js';
 
@@ -68,7 +69,7 @@ describe('BleOnlyPlugCard', () => {
     expect(screen.getByText('230 V')).toBeVisible();
     expect(screen.getByText('42 Wh')).toBeVisible();
     expect(screen.getByText('12:34')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Add automation' })).toBeDisabled();
+    expect(isIonicDisabled(getIonicButton(document, 'Add automation'))).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: 'ON' }));
     expect(runtime.turnRelayOn).toHaveBeenCalledOnce();
