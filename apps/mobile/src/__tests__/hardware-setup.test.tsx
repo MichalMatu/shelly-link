@@ -2009,9 +2009,9 @@ describe('HardwareSetupScreen', () => {
       })
     );
     fireEvent.click(
-      within(await screen.findByRole('dialog', { name: 'Usunąć termometr?' })).getByRole(
-        'button',
-        { name: 'Usuń' }
+      getIonicButton(
+        await screen.findByRole('dialog', { name: 'Usunąć termometr?' }),
+        'Usuń'
       )
     );
 
