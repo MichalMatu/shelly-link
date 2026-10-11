@@ -1,0 +1,14 @@
+{
+  "event": "task_started",
+  "task_id": "shelly-ionic-20261011-clean-handoff-prettier-188",
+  "task_digest": "ae10660a3a60d75e227a840d052985f17c9642df75cee8e172d2005e334625bd",
+  "idle_timeout": 370,
+  "task_timeout": 900,
+  "memory_limit_mb": 4096,
+  "started_at": "2026-10-11T03:30:30.140893+00:00",
+  "attempt_id": "82fe6f952942f3d419dd1b2e",
+  "daemon_version": "4.20.6",
+  "daemon_pid": 8347,
+  "updated_at": "2026-10-11T03:30:30.140993+00:00",
+  "pid": 8347
+}
