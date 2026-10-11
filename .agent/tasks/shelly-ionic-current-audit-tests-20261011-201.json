@@ -1,0 +1,19 @@
+{
+  "id": "shelly-ionic-current-audit-tests-20261011-201",
+  "agent_binding": "e75c77cb-7589-4452-94b2-decc97ff85a1",
+  "mode": "commands",
+  "allow_write": false,
+  "work_branch": "work/ux-evolution",
+  "resources": [],
+  "command_timeout": 840,
+  "task_timeout": 1300,
+  "idle_timeout": 430,
+  "steps": [
+    {
+      "name": "verify-current-confirmation-and-map-next-controls",
+      "command": "set -eu\necho 'BASELINE'\ngit fetch origin work/ux-evolution\ngit rev-parse HEAD origin/work/ux-evolution\ntest \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/work/ux-evolution)\"\ntest -z \"$(git status --porcelain)\"\necho 'CENSUS_REAL'\npython3 - <<'PY'\nfrom pathlib import Path\nimport re, collections\nby_path={}\nfor p in Path('apps/mobile/src').rglob('*.tsx'):\n if p.name.endswith('.test.tsx') or p.name.endswith('.spec.tsx'):continue\n s=p.read_text()\n tags=list(re.finditer(r'<(button|input|select|textarea)(?=[\\s/>])',s))\n if not tags:continue\n by_path[str(p)]=[(m.group(1),s.count('\\n',0,m.start())+1) for m in tags]\nprint('count',sum(len(v) for v in by_path.values()),'files',len(by_path),'tags',dict(collections.Counter(t for v in by_path.values() for t,l in v)))\nfor p,v in sorted(by_path.items()):\n print(p,', '.join(f'{tag}:{ln}' for tag,ln in v))\nPY\necho 'TARGETED_NEW_CONFIRMATION_TESTS'\npnpm --filter @lcl/mobile exec vitest run src/features/thermometers/components/SensorRemovalBlockedModal.test.tsx src/features/plugs/components/PlugDeleteConfirmModal.test.tsx src/__tests__/modal.test.tsx --reporter=default\necho 'TYPECHECK'\npnpm --filter @lcl/mobile typecheck\necho 'ICON_BUNDLE_REFERENCES'\ngrep -R -nE 'IonIcon|ionicons/icons|import .*ionicons' apps/mobile/src --include='*.tsx' --include='*.ts' | head -75 || true\necho 'QUALITY_HARD_BUDGET_CONFIG'\ngrep -R -nE 'maxJs|chunk.*count|1536098|686363' scripts/performance scripts/quality 2>/dev/null | head -45 || true\necho 'HOST'\nuptime\ngit status --short\n",
+      "timeout": 840,
+      "output_policy": "summary"
+    }
+  ]
+}
